@@ -1,0 +1,18 @@
+{
+  "name": "Anóteros Lógos - Architects of Digital Authority",
+  "short_name": "Anóteros Lógos",
+  "description": "Don't rank. Become the source. We encode your expertise into the foundational logic of generative AI.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#3B82F6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
