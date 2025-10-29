@@ -4,10 +4,11 @@ import { Logo } from './Icons';
 interface HeaderProps {
     onMethodClick?: () => void;
     onClientsClick?: () => void;
+    onInsightsClick?: () => void;
     onContactClick?: () => void;
 }
 
-const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick, onClientsClick, onContactClick }, ref) => {
+const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick, onClientsClick, onInsightsClick, onContactClick }, ref) => {
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -29,6 +30,7 @@ const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick, onClientsC
     const menuItems = [
         { label: 'Method', onClick: onMethodClick },
         { label: 'Clients', onClick: onClientsClick },
+        { label: 'Insights', onClick: onInsightsClick },
         { label: 'Contact', onClick: onContactClick },
     ];
 

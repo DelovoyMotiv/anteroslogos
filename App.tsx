@@ -7,6 +7,8 @@ import Stats from './components/Stats';
 import NicosiaMethod from './components/NicosiaMethod';
 import ClientProfile from './components/ClientProfile';
 import FAQ from './components/FAQ';
+import Glossary from './components/Glossary';
+import Insights from './components/Insights';
 import FinalCTA from './components/FinalCTA';
 import Footer from './components/Footer';
 import Modal from './components/Modal';
@@ -19,6 +21,8 @@ const App: React.FC = () => {
     const headerRef = useRef<HTMLElement>(null);
     const philosophyRef = useRef<HTMLElement>(null);
     const clientProfileRef = useRef<HTMLElement>(null);
+    const glossaryRef = useRef<HTMLElement>(null);
+    const insightsRef = useRef<HTMLElement>(null);
     const faqRef = useRef<HTMLElement>(null);
 
     useEffect(() => {
@@ -46,6 +50,10 @@ const App: React.FC = () => {
                 ref={headerRef} 
                 onMethodClick={() => handleScrollTo(nicosiaMethodRef)}
                 onClientsClick={() => handleScrollTo(clientProfileRef)}
+                onInsightsClick={() => {
+                    const insightsSection = document.getElementById('insights');
+                    insightsSection?.scrollIntoView({ behavior: 'smooth' });
+                }}
                 onContactClick={handleOpenModal}
             />
             <main>
@@ -55,6 +63,8 @@ const App: React.FC = () => {
                 <Stats />
                 <NicosiaMethod ref={nicosiaMethodRef} />
                 <ClientProfile ref={clientProfileRef} />
+                <Insights />
+                <Glossary />
                 <FAQ ref={faqRef} onCTAClick={handleOpenModal} />
                 <FinalCTA onCTAClick={handleOpenModal} />
             </main>
