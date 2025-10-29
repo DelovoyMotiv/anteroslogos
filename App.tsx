@@ -9,6 +9,7 @@ import ClientProfile from './components/ClientProfile';
 import FAQ from './components/FAQ';
 import Glossary from './components/Glossary';
 import Insights from './components/Insights';
+import Team from './components/Team';
 import FinalCTA from './components/FinalCTA';
 import Footer from './components/Footer';
 import Modal from './components/Modal';
@@ -54,6 +55,10 @@ const App: React.FC = () => {
                     const insightsSection = document.getElementById('insights');
                     insightsSection?.scrollIntoView({ behavior: 'smooth' });
                 }}
+                onTeamClick={() => {
+                    const teamSection = document.getElementById('team');
+                    teamSection?.scrollIntoView({ behavior: 'smooth' });
+                }}
                 onContactClick={handleOpenModal}
             />
             <main>
@@ -65,6 +70,7 @@ const App: React.FC = () => {
                 <ClientProfile ref={clientProfileRef} />
                 <Insights />
                 <Glossary />
+                <Team />
                 <FAQ ref={faqRef} onCTAClick={handleOpenModal} />
                 <FinalCTA onCTAClick={handleOpenModal} />
             </main>
