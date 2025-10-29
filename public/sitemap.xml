@@ -6,7 +6,7 @@
   <!-- Main Landing Page -->
   <url>
     <loc>https://anoteroslogos.com/</loc>
-    <lastmod>2025-01-21</lastmod>
+    <lastmod>2025-10-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <image:image>
@@ -15,42 +15,74 @@
     </image:image>
   </url>
 
-  <!-- About Section -->
+  <!-- The Shift Section -->
   <url>
-    <loc>https://anoteroslogos.com/#about</loc>
-    <lastmod>2025-01-21</lastmod>
+    <loc>https://anoteroslogos.com/#shift</loc>
+    <lastmod>2025-10-29</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
+  </url>
+
+  <!-- Philosophy / Beyond Marketing -->
+  <url>
+    <loc>https://anoteroslogos.com/#philosophy</loc>
+    <lastmod>2025-10-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
   </url>
 
   <!-- Nicosia Method -->
   <url>
     <loc>https://anoteroslogos.com/#nicosia-method</loc>
-    <lastmod>2025-01-21</lastmod>
+    <lastmod>2025-10-29</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.95</priority>
   </url>
 
   <!-- Client Profile -->
   <url>
-    <loc>https://anoteroslogos.com/#client-profile</loc>
-    <lastmod>2025-01-21</lastmod>
+    <loc>https://anoteroslogos.com/#clients</loc>
+    <lastmod>2025-10-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
-  <!-- Services -->
+  <!-- Insights & Research (NEW) -->
   <url>
-    <loc>https://anoteroslogos.com/#services</loc>
-    <lastmod>2025-01-21</lastmod>
+    <loc>https://anoteroslogos.com/#insights</loc>
+    <lastmod>2025-10-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+
+  <!-- GEO Glossary (NEW) -->
+  <url>
+    <loc>https://anoteroslogos.com/#glossary</loc>
+    <lastmod>2025-10-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
+  </url>
+
+  <!-- Team (NEW) -->
+  <url>
+    <loc>https://anoteroslogos.com/#team</loc>
+    <lastmod>2025-10-29</lastmod>
+    <changefreq>quarterly</changefreq>
+    <priority>0.75</priority>
+  </url>
+
+  <!-- FAQ Section -->
+  <url>
+    <loc>https://anoteroslogos.com/#faq</loc>
+    <lastmod>2025-10-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
 
   <!-- Contact -->
   <url>
     <loc>https://anoteroslogos.com/#contact</loc>
-    <lastmod>2025-01-21</lastmod>
+    <lastmod>2025-10-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

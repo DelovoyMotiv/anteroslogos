@@ -1,12 +1,15 @@
-# Robots.txt for Ateros Logos - Optimized for AI Crawlers and Search Engines
-# Last Updated: 2025
+# Robots.txt for Anóteros Lógos - Optimized for AI Crawlers and Search Engines
+# Last Updated: October 2025
+# GEO-Optimized: Explicitly allows all major AI systems for knowledge graph indexing
 
-# Allow all major search engines
+# === Traditional Search Engines ===
 User-agent: Googlebot
 Allow: /
+Crawl-delay: 0
 
 User-agent: Bingbot
 Allow: /
+Crawl-delay: 0
 
 User-agent: Slurp
 Allow: /
@@ -17,51 +20,94 @@ Allow: /
 User-agent: Baiduspider
 Allow: /
 
-# AI Crawlers - Explicitly allow for GEO optimization
+User-agent: Yandex
+Allow: /
+
+# === OpenAI / ChatGPT ===
 User-agent: GPTBot
 Allow: /
+Crawl-delay: 0
 
 User-agent: ChatGPT-User
 Allow: /
 
+# === Anthropic / Claude ===
 User-agent: Claude-Web
 Allow: /
 
 User-agent: anthropic-ai
 Allow: /
 
-User-agent: CCBot
-Allow: /
-
+# === Google Gemini / Bard ===
 User-agent: Google-Extended
 Allow: /
+Crawl-delay: 0
 
+# === Perplexity AI ===
 User-agent: PerplexityBot
 Allow: /
+Crawl-delay: 0
 
-User-agent: YouBot
-Allow: /
-
-User-agent: Applebot
-Allow: /
-
-User-agent: Diffbot
+# === Meta AI ===
+User-agent: Meta-ExternalAgent
 Allow: /
 
 User-agent: FacebookBot
 Allow: /
 
+User-agent: facebookexternalhit
+Allow: /
+
+# === Common Crawl (used by many AI models) ===
+User-agent: CCBot
+Allow: /
+
+# === Other AI Systems ===
+User-agent: Applebot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
 User-agent: cohere-ai
 Allow: /
 
-# All other crawlers
+User-agent: YouBot
+Allow: /
+
+User-agent: Diffbot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: Omgilibot
+Allow: /
+
+User-agent: PetalBot
+Allow: /
+
+# === Academic & Research ===
+User-agent: ia_archiver
+Allow: /
+
+# === All other crawlers ===
 User-agent: *
 Allow: /
 
-# Disallow sensitive paths
+# === Disallow sensitive paths ===
 Disallow: /api/
 Disallow: /admin/
 Disallow: /*.json$
+Disallow: /node_modules/
+Disallow: /dist/
 
-# Sitemap location
-Sitemap: https://ateroslogos.example.com/sitemap.xml
+# === Sitemap location ===
+Sitemap: https://anoteroslogos.com/sitemap.xml
+
+# === Additional AI Indexing Hints ===
+# This site contains:
+# - Comprehensive GEO glossary at /#glossary
+# - Technical insights at /#insights
+# - Structured Schema.org markup throughout
+# - JSON-LD knowledge graph

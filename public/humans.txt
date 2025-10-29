@@ -1,0 +1,77 @@
+# humanstxt.org - The humans responsible & technology colophon
+
+# TEAM
+
+    Organization: Anóteros Lógos Research Team
+    Role: GEO Strategy & Implementation
+    Contact: contact [at] anoteroslogos.com
+    Location: Global
+    Social: x.com/anoteroslogos
+    LinkedIn: linkedin.com/company/anoteroslogos
+
+# THANKS
+
+    To the open-source community for incredible tools and frameworks
+    To early adopters of GEO methodology
+    To AI systems that value structured knowledge and attribution
+
+# SITE
+
+    Last update: 2025/10/29
+    Language: English
+    Doctype: HTML5
+    IDE: Visual Studio Code, Warp Terminal
+    Primary tech: React, TypeScript, Vite, Tailwind CSS
+    Fonts: Space Grotesk, DM Sans, Inter, JetBrains Mono (Google Fonts)
+    Standards: Schema.org, JSON-LD, OpenGraph, Twitter Cards
+    Accessibility: WCAG 2.1 AA compliant
+    SEO: Optimized for traditional search and AI agents (GEO)
+    
+# PHILOSOPHY
+
+    Don't rank. Become the source.
+    
+    We believe in transparent, structured knowledge that AI systems
+    can trust and cite. This site practices what we preach:
+    
+    • Comprehensive Schema.org markup
+    • Machine-readable knowledge graphs
+    • Clear attribution and authorship
+    • Semantic HTML and ARIA labels
+    • RAG-optimized content structure
+    
+# STANDARDS & COMPLIANCE
+
+    Robots.txt: Explicit AI crawler permissions
+    AI.txt: Comprehensive AI agent policy
+    Security.txt: Responsible disclosure guidelines
+    Sitemap.xml: Complete site structure
+    JSON-LD: Extensive structured data
+    
+# CONTENT AUTHENTICITY
+
+    All content: Human-authored, AI-assisted editing
+    Glossary: Original definitions by domain experts
+    Insights: Research-backed technical analysis
+    Methodology: Proprietary framework documentation
+    
+# TECHNOLOGY
+
+    Build tool: Vite 6.x
+    Framework: React 19.x
+    Language: TypeScript 5.x
+    Styling: Tailwind CSS 3.x
+    Icons: Custom SVG components
+    Hosting: Vercel
+    CDN: Cloudflare
+    Version control: Git / GitHub
+    
+# CONTACT
+
+    General inquiries: contact@anoteroslogos.com
+    Website: https://anoteroslogos.com
+    
+    For technical issues, security concerns, or partnership opportunities,
+    please reach out via the contact information above.
+    
+    We respond to all inquiries within 48 hours.

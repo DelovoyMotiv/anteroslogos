@@ -1,0 +1,29 @@
+# Security.txt - Security Policy
+# Site: Anóteros Lógos (anoteroslogos.com)
+# Format: https://securitytxt.org/
+# Last Updated: 2025-10-29
+
+Contact: mailto:contact@anoteroslogos.com
+Contact: https://anoteroslogos.com/#contact
+Expires: 2026-10-29T00:00:00.000Z
+Preferred-Languages: en
+Canonical: https://anoteroslogos.com/.well-known/security.txt
+
+# Policy
+Policy: https://anoteroslogos.com/security-policy
+
+# Acknowledgments
+Acknowledgments: https://anoteroslogos.com/security-acknowledgments
+
+# Hiring
+Hiring: https://anoteroslogos.com/#contact
+
+# Encryption
+# PGP: [Public key to be added when available]
+
+# Additional Information
+# We take security seriously and welcome responsible disclosure of any
+# security vulnerabilities. Please report security issues to the contact
+# email above. We commit to responding within 48 hours.
+
+# For non-security inquiries, please use our general contact form.
