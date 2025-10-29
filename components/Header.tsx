@@ -30,6 +30,7 @@ const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick, onClientsC
 
     const menuItems = [
         { label: 'Method', onClick: onMethodClick },
+        { label: 'Clients', onClick: onClientsClick },
         { label: 'Insights', onClick: onInsightsClick },
         { label: 'Team', onClick: onTeamClick },
     ];

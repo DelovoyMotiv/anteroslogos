@@ -46,7 +46,7 @@ const Footer: React.FC<FooterProps> = ({ onPhilosophyClick, onMethodClick, onCli
         { title: 'Resources', links: [
             { label: 'Insights', onClick: () => document.getElementById('insights')?.scrollIntoView({ behavior: 'smooth' }) },
             { label: 'Glossary', onClick: () => document.getElementById('glossary')?.scrollIntoView({ behavior: 'smooth' }) },
-            { label: 'Case Studies', onClick: onContactClick, badge: 'Soon' },
+            { label: 'Team', onClick: () => document.getElementById('team')?.scrollIntoView({ behavior: 'smooth' }) },
             { label: 'FAQ', onClick: onFAQClick },
         ]},
         { title: 'Connect', links: [
