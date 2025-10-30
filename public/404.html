@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Lost in the Digital Void | Anóteros Lógos</title>
+    <meta name="description" content="The page you seek does not exist. All is vanity, all paths lead nowhere. But there is still hope - return to meaning.">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #121212;
+            color: #E0E0E0;
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .background-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            animation: pulse 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+        
+        .orb-1 {
+            top: 25%;
+            left: 25%;
+            width: 384px;
+            height: 384px;
+            background: rgba(239, 68, 68, 0.2);
+        }
+        
+        .orb-2 {
+            bottom: 25%;
+            right: 25%;
+            width: 384px;
+            height: 384px;
+            background: rgba(59, 130, 246, 0.2);
+            animation-delay: 1s;
+        }
+        
+        .grid-pattern {
+            position: absolute;
+            inset: 0;
+            opacity: 0.05;
+            background-image: 
+                linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+        }
+        
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1024px;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            opacity: 0.5;
+        }
+        
+        .logo {
+            width: 48px;
+            height: 48px;
+        }
+        
+        .logo-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+        }
+        
+        .error-code {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(8rem, 20vw, 16rem);
+            font-weight: 700;
+            line-height: 1;
+            background: linear-gradient(to bottom right, #f87171, #ef4444, #dc2626);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(to bottom right, #fff, #E0E0E0, rgba(224, 224, 224, 0.7));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            color: rgba(224, 224, 224, 0.8);
+            font-style: italic;
+            margin-bottom: 3rem;
+        }
+        
+        .message-box {
+            background: linear-gradient(to bottom right, rgba(55, 65, 81, 0.2), rgba(55, 65, 81, 0.05));
+            border: 1px solid rgba(55, 65, 81, 0.3);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 0 auto 3rem;
+            max-width: 48rem;
+            backdrop-filter: blur(8px);
+        }
+        
+        .message-box p {
+            color: rgba(224, 224, 224, 0.9);
+            line-height: 1.7;
+            margin-bottom: 1rem;
+        }
+        
+        .message-box p:last-child {
+            color: rgba(224, 224, 224, 0.7);
+            font-size: 0.95rem;
+            margin-bottom: 0;
+        }
+        
+        .quote {
+            color: rgba(59, 130, 246, 0.8);
+            font-style: italic;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            margin: 3rem 0;
+            min-height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            max-width: 48rem;
+            margin: 0 auto 3rem;
+        }
+        
+        .stat-card {
+            background: rgba(55, 65, 81, 0.1);
+            border: 1px solid rgba(55, 65, 81, 0.2);
+            border-radius: 0.75rem;
+            padding: 1.5rem 1rem;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: rgba(224, 224, 224, 0.5);
+        }
+        
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background: #3B82F6;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-secondary {
+            background: rgba(55, 65, 81, 0.2);
+            color: #E0E0E0;
+            border: 1px solid rgba(55, 65, 81, 0.3);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(55, 65, 81, 0.3);
+            border-color: rgba(59, 130, 246, 0.5);
+        }
+        
+        .links {
+            color: rgba(224, 224, 224, 0.6);
+            font-size: 0.875rem;
+            margin-bottom: 4rem;
+        }
+        
+        .links p {
+            margin-bottom: 0.75rem;
+        }
+        
+        .links a {
+            color: rgba(224, 224, 224, 0.6);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .links a:hover {
+            color: #3B82F6;
+        }
+        
+        .separator {
+            color: rgba(224, 224, 224, 0.3);
+            margin: 0 0.5rem;
+        }
+        
+        .footer {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(55, 65, 81, 0.2);
+        }
+        
+        .footer p {
+            color: rgba(224, 224, 224, 0.4);
+            font-size: 0.75rem;
+            font-style: italic;
+            font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer p:last-child {
+            color: rgba(224, 224, 224, 0.3);
+            margin-bottom: 0;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+        
+        @media (max-width: 640px) {
+            .buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .links > div {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .separator {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-orb orb-1"></div>
+    <div class="background-orb orb-2"></div>
+    <div class="grid-pattern"></div>
+    
+    <div class="container">
+        <div class="logo-section">
+            <svg class="logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16 4L28 12V20L16 28L4 20V12L16 4Z" stroke="#3B82F6" stroke-width="2" fill="none"/>
+                <circle cx="16" cy="16" r="4" fill="#3B82F6"/>
+            </svg>
+            <span class="logo-text">Anóteros Lógos</span>
+        </div>
+        
+        <div class="error-code">404</div>
+        
+        <h1>Lost in the Digital Void</h1>
+        <p class="subtitle">...where all paths converge into nothingness</p>
+        
+        <div class="message-box">
+            <p>
+                Alas, dear traveler, you have stumbled upon the void — that eternal emptiness where URLs go to contemplate their existence. 
+                The page you seek is but a phantom, a digital mirage in the desert of broken links.
+            </p>
+            <p>
+                We are all condemned to wander through life making errors, clicking wrong links, seeking pages that do not exist. 
+                Such is the human condition. Such is the digital condition. Such is... everything.
+            </p>
+        </div>
+        
+        <div class="quote" id="quote">
+            "We are all just URLs in the vast sitemap of existence."
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" style="color: #f87171;" id="seconds">0</div>
+                <div class="stat-label">Seconds Lost</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" style="color: #3B82F6;">∞</div>
+                <div class="stat-label">Broken Links</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" style="color: #fbbf24;">404</div>
+                <div class="stat-label">Meaning</div>
+            </div>
+        </div>
+        
+        <div class="buttons">
+            <a href="/" class="btn btn-primary">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Return to Meaning
+            </a>
+            <button onclick="history.back()" class="btn btn-secondary">
+                Retrace Your Steps
+            </button>
+        </div>
+        
+        <div class="links">
+            <p>Perhaps you were looking for:</p>
+            <div>
+                <a href="/#nicosia-method">The Nicosia Method</a>
+                <span class="separator">•</span>
+                <a href="/#insights">Insights</a>
+                <span class="separator">•</span>
+                <a href="/#glossary">GEO Glossary</a>
+                <span class="separator">•</span>
+                <a href="/#team">Team</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>"To err is human; to 404 is digital; to return home is wisdom."</p>
+            <p>— Philosophical musings of a lost URL</p>
+        </div>
+    </div>
+    
+    <script>
+        // Counter for seconds lost
+        let seconds = 0;
+        setInterval(() => {
+            seconds++;
+            document.getElementById('seconds').textContent = seconds;
+        }, 1000);
+        
+        // Rotating quotes
+        const quotes = [
+            "We are all just URLs in the vast sitemap of existence.",
+            "The page you seek mirrors the meaning we all chase.",
+            "In the end, aren't we all just 404s looking for home?",
+            "Even digital paths lead nowhere sometimes.",
+            "This error is but a reflection of life's beautiful chaos."
+        ];
+        
+        let quoteIndex = 0;
+        setInterval(() => {
+            quoteIndex = (quoteIndex + 1) % quotes.length;
+            const quoteEl = document.getElementById('quote');
+            quoteEl.style.opacity = '0';
+            setTimeout(() => {
+                quoteEl.textContent = '"' + quotes[quoteIndex] + '"';
+                quoteEl.style.opacity = '1';
+            }, 500);
+        }, 4000);
+        
+        // Smooth transition for quote
+        document.getElementById('quote').style.transition = 'opacity 0.5s';
+    </script>
+</body>
+</html>

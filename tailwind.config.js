@@ -28,6 +28,7 @@ export default {
         'glitch': 'glitch 1.5s linear infinite',
         'reveal-text': 'reveal-text 1s cubic-bezier(0.77, 0, 0.175, 1) forwards',
         'scroll-indicator': 'scroll-indicator 2.2s ease-out infinite',
+        'float': 'float 10s ease-in-out infinite',
       },
       keyframes: {
         'gradient-pan': {
@@ -67,6 +68,12 @@ export default {
           '0%': { transform: 'translateY(-8px)', opacity: '0' },
           '50%': { transform: 'translateY(0px)', opacity: '1' },
           '100%': { transform: 'translateY(8px)', opacity: '0' },
+        },
+        'float': {
+          '0%, 100%': { transform: 'translate(0, 0)', opacity: '0.3' },
+          '25%': { transform: 'translate(10px, -10px)', opacity: '0.5' },
+          '50%': { transform: 'translate(-10px, -20px)', opacity: '0.8' },
+          '75%': { transform: 'translate(-15px, 10px)', opacity: '0.5' },
         }
       }
     }
