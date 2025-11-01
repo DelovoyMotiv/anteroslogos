@@ -1,5 +1,5 @@
 # Robots.txt for Anóteros Lógos - Optimized for AI Crawlers and Search Engines
-# Last Updated: October 2025
+# Last Updated: November 2025
 # GEO-Optimized: Explicitly allows all major AI systems for knowledge graph indexing
 
 # === Traditional Search Engines ===
@@ -107,7 +107,10 @@ Sitemap: https://anoteroslogos.com/sitemap.xml
 
 # === Additional AI Indexing Hints ===
 # This site contains:
-# - Comprehensive GEO glossary at /#glossary
-# - Technical insights at /#insights
+# - Comprehensive GEO Knowledge Base at /knowledge-base (21 detailed terms)
+# - Technical insights and research at /#insights
+# - Privacy Policy at /privacy-policy
+# - Cookie Policy at /cookie-policy
 # - Structured Schema.org markup throughout
-# - JSON-LD knowledge graph
+# - JSON-LD knowledge graph on all pages
+# - FAQPage markup for enhanced discoverability
