@@ -133,16 +133,18 @@ const KnowledgeBasePage: React.FC = () => {
 
                         <div className="max-w-2xl mx-auto">
                             <div className="relative">
+                                <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                                    <svg className="w-5 h-5 text-brand-text/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
                                 <input
                                     type="text"
                                     placeholder="Search knowledge base..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full bg-brand-secondary/20 border border-brand-secondary/40 focus:border-brand-accent rounded-xl px-6 py-4 pl-12 text-base focus:outline-none transition-colors placeholder:text-brand-text/40"
+                                    className="w-full bg-brand-secondary/20 border border-brand-secondary/40 focus:border-brand-accent rounded-xl px-6 py-4 pl-14 text-base focus:outline-none transition-colors placeholder:text-brand-text/40"
                                 />
-                                <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-brand-text/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
                             </div>
                         </div>
                     </div>
@@ -199,19 +201,19 @@ const KnowledgeBasePage: React.FC = () => {
                                     <div className="p-6 md:p-8">
                                         <div className="flex items-start justify-between gap-4 mb-4">
                                             <div className="flex-1">
-                                                <div className="flex items-center gap-3 mb-3">
+                                                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mb-3">
                                                     <h2 
-                                                        className="font-display text-2xl md:text-3xl font-bold text-white group-hover:text-brand-accent transition-colors duration-300"
+                                                        className="font-display text-xl md:text-2xl lg:text-3xl font-bold text-white group-hover:text-brand-accent transition-colors duration-300"
                                                         itemProp="name"
                                                     >
                                                         {term.term}
                                                     </h2>
-                                                    <span className="text-xs px-2 py-1 rounded-full bg-brand-accent/10 text-brand-accent border border-brand-accent/30">
+                                                    <span className="text-xs px-2 py-1 rounded-full bg-brand-accent/10 text-brand-accent border border-brand-accent/30 w-fit">
                                                         {categories.find(c => c.id === term.category)?.name}
                                                     </span>
                                                 </div>
                                                 <p 
-                                                    className="text-brand-text/80 leading-relaxed text-lg mb-4"
+                                                    className="text-brand-text/80 leading-relaxed text-base md:text-lg"
                                                     itemProp="description"
                                                 >
                                                     {term.definition}

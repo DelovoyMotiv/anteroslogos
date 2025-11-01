@@ -328,5 +328,73 @@ export const knowledgeTerms: KnowledgeTerm[] = [
             "Build brand mentions across the web",
             "Establish thought leadership in your domain"
         ]
+    },
+    {
+        id: "context-window",
+        term: "Context Window",
+        definition: "The maximum amount of text an AI model can process at one time, including both input and output.",
+        detailedExplanation: "Context windows define how much information an AI system can consider when generating responses. For GEO, understanding context windows helps optimize content length and structure. When RAG systems retrieve your content, it must fit within the model's context window alongside the query and other retrieved passages. Modern models have expanding context windows, with some supporting hundreds of thousands of tokens. However, effective GEO still requires concise, focused content that delivers maximum value within reasonable token counts.",
+        category: "ai-systems",
+        relatedTerms: ["rag", "token-optimization", "content-chunking"],
+        technicalDetails: "Context windows are measured in tokens, where one token approximately equals 4 characters in English. GPT-4 supports 8K-32K tokens, Claude supports up to 200K tokens, and newer models continue expanding. Retrieved content competes with queries and system prompts for context space. Chunking strategies break long documents into context-appropriate segments for retrieval.",
+        bestPractices: [
+            "Structure content in logical, self-contained sections",
+            "Place key information early in content",
+            "Use clear hierarchical organization",
+            "Avoid unnecessary verbosity",
+            "Create comprehensive but focused content pieces"
+        ]
+    },
+    {
+        id: "prompt-engineering",
+        term: "Prompt Engineering",
+        definition: "The practice of crafting effective instructions and queries to elicit desired responses from AI systems.",
+        detailedExplanation: "While typically associated with AI usage, prompt engineering insights inform GEO strategy. Understanding how users query AI systems helps optimize content to match those query patterns. Effective GEO content anticipates the types of prompts users might give and structures information to be easily retrieved and cited in response. This involves analyzing common query patterns, question formats, and information-seeking behaviors in AI interfaces.",
+        category: "strategy",
+        relatedTerms: ["query-optimization", "user-intent", "information-retrieval"],
+        examples: [
+            "Structuring FAQs to match how users ask AI systems questions",
+            "Creating content that answers both broad and specific queries",
+            "Organizing information in formats that AI can easily extract and present"
+        ],
+        bestPractices: [
+            "Research common questions in your domain",
+            "Structure content to answer implicit follow-up questions",
+            "Use clear, declarative statements",
+            "Provide context that helps AI understand relevance",
+            "Include both high-level summaries and detailed explanations"
+        ]
+    },
+    {
+        id: "citation-velocity",
+        term: "Citation Velocity",
+        definition: "The rate at which a source is cited by AI systems over time, indicating growing or declining authority.",
+        detailedExplanation: "Citation velocity tracks how frequently AI systems reference your content across queries and platforms. Increasing citation velocity indicates growing recognition as an authoritative source. This metric helps evaluate GEO effectiveness and identify trending topics where your brand gains traction. Monitoring citation velocity across different AI platforms provides strategic insights for content development and optimization priorities.",
+        category: "metrics",
+        relatedTerms: ["ai-citations", "authority-signals", "geo-metrics"],
+        bestPractices: [
+            "Track citations across multiple AI platforms",
+            "Monitor both quantity and context of citations",
+            "Identify topics with growing citation patterns",
+            "Analyze competitor citation trends",
+            "Adjust content strategy based on citation data"
+        ],
+        technicalDetails: "Citation velocity measurement requires systematic querying of AI platforms with domain-relevant prompts, tracking source attributions over time. Tools and methodologies for citation tracking continue evolving as AI platforms mature. Velocity analysis considers citation frequency, context quality, and prominence within responses."
+    },
+    {
+        id: "semantic-distance",
+        term: "Semantic Distance",
+        definition: "The measure of conceptual similarity between two pieces of content in vector space.",
+        detailedExplanation: "Semantic distance determines how closely related content appears to AI systems using vector embeddings. Smaller semantic distances indicate higher relevance. For GEO, understanding semantic distance helps optimize content to align with target queries and related concepts. Content with minimal semantic distance to common queries in your domain receives preference in retrieval systems. This concept underlies how RAG systems select sources and why topical relevance matters more than keyword matching.",
+        category: "ai-systems",
+        relatedTerms: ["vector-search", "embeddings", "semantic-similarity"],
+        technicalDetails: "Semantic distance is typically calculated using cosine similarity or Euclidean distance between vector embeddings. Embeddings are generated by neural models that encode semantic meaning into high-dimensional vectors. Distance metrics determine retrieval ranking in RAG systems. Reducing semantic distance between your content and target queries improves retrieval probability.",
+        bestPractices: [
+            "Use terminology natural to your domain",
+            "Include related concepts and context",
+            "Answer implicit questions within content",
+            "Maintain topical focus throughout content",
+            "Use varied expressions of core concepts"
+        ]
     }
 ];
