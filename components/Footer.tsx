@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Logo } from './Icons';
 
 interface FooterProps {
@@ -180,24 +181,18 @@ const Footer: React.FC<FooterProps> = ({ onPhilosophyClick, onMethodClick, onCli
                     </div>
                     
                     <div className="flex items-center gap-6">
-                        <button 
-                            onClick={() => {
-                                const privacySection = document.getElementById('privacy-policy');
-                                privacySection?.scrollIntoView({ behavior: 'smooth' });
-                            }}
+                        <Link 
+                            to="/privacy-policy"
                             className="hover:text-brand-accent transition-colors duration-300"
                         >
                             Privacy Policy
-                        </button>
-                        <button 
-                            onClick={() => {
-                                const cookieSection = document.getElementById('cookie-policy');
-                                cookieSection?.scrollIntoView({ behavior: 'smooth' });
-                            }}
+                        </Link>
+                        <Link 
+                            to="/cookie-policy"
                             className="hover:text-brand-accent transition-colors duration-300"
                         >
                             Cookie Policy
-                        </button>
+                        </Link>
                         <p className="font-mono italic text-xs">
                             The Nicosia Method™
                         </p>

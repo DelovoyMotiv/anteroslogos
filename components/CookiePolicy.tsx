@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import AnimatedSection from './AnimatedSection';
 
 const CookiePolicy: React.FC = () => {
@@ -294,7 +295,7 @@ const CookiePolicy: React.FC = () => {
                         <div className="bg-brand-accent/10 border border-brand-accent/30 rounded-2xl p-8 text-center">
                             <p className="text-brand-text/80 leading-relaxed mb-4">
                                 For more information about how we handle your personal data, please review our{' '}
-                                <a href="#privacy-policy" className="text-brand-accent hover:underline font-semibold">Privacy Policy</a>.
+                                <Link to="/privacy-policy" className="text-brand-accent hover:underline font-semibold">Privacy Policy</Link>.
                             </p>
                         </div>
                     </AnimatedSection>

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const CookieConsent: React.FC = () => {
+    const navigate = useNavigate();
     const [isVisible, setIsVisible] = useState(false);
     const [showPreferences, setShowPreferences] = useState(false);
 
@@ -80,9 +82,8 @@ const CookieConsent: React.FC = () => {
                                         By clicking "Accept All", you consent to the use of all cookies as described in our{' '}
                                         <button 
                                             onClick={() => {
-                                                const privacySection = document.getElementById('privacy-policy');
-                                                privacySection?.scrollIntoView({ behavior: 'smooth' });
                                                 setIsVisible(false);
+                                                navigate('/privacy-policy');
                                             }}
                                             className="text-brand-accent hover:underline"
                                         >
@@ -91,9 +92,8 @@ const CookieConsent: React.FC = () => {
                                         {' '}and{' '}
                                         <button 
                                             onClick={() => {
-                                                const cookieSection = document.getElementById('cookie-policy');
-                                                cookieSection?.scrollIntoView({ behavior: 'smooth' });
                                                 setIsVisible(false);
+                                                navigate('/cookie-policy');
                                             }}
                                             className="text-brand-accent hover:underline"
                                         >

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import AnimatedSection from './AnimatedSection';
 
 const PrivacyPolicy: React.FC = () => {
@@ -77,7 +78,7 @@ const PrivacyPolicy: React.FC = () => {
                                         1.3 Cookies and Tracking Technologies
                                     </h3>
                                     <p className="leading-relaxed">
-                                        We use cookies and similar tracking technologies to enhance your experience and analyze website traffic. For detailed information, please review our <a href="#cookie-policy" className="text-brand-accent hover:underline">Cookie Policy</a>.
+                                        We use cookies and similar tracking technologies to enhance your experience and analyze website traffic. For detailed information, please review our <Link to="/cookie-policy" className="text-brand-accent hover:underline">Cookie Policy</Link>.
                                     </p>
                                 </div>
                             </div>
