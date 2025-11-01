@@ -14,6 +14,9 @@ import FinalCTA from './components/FinalCTA';
 import Footer from './components/Footer';
 import Modal from './components/Modal';
 import DigitalBackground from './components/DigitalBackground';
+import CookieConsent from './components/CookieConsent';
+import PrivacyPolicy from './components/PrivacyPolicy';
+import CookiePolicy from './components/CookiePolicy';
 
 const App: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -73,6 +76,8 @@ const App: React.FC = () => {
                 <Team />
                 <FAQ ref={faqRef} onCTAClick={handleOpenModal} />
                 <FinalCTA onCTAClick={handleOpenModal} />
+                <PrivacyPolicy />
+                <CookiePolicy />
             </main>
             <Footer 
                 onPhilosophyClick={() => handleScrollTo(philosophyRef)}
@@ -82,6 +87,7 @@ const App: React.FC = () => {
                 onContactClick={handleOpenModal}
             />
             <Modal isOpen={isModalOpen} onClose={handleCloseModal} />
+            <CookieConsent />
         </div>
     );
 };

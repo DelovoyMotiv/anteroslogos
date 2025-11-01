@@ -180,11 +180,23 @@ const Footer: React.FC<FooterProps> = ({ onPhilosophyClick, onMethodClick, onCli
                     </div>
                     
                     <div className="flex items-center gap-6">
-                        <button className="hover:text-brand-accent transition-colors duration-300">
+                        <button 
+                            onClick={() => {
+                                const privacySection = document.getElementById('privacy-policy');
+                                privacySection?.scrollIntoView({ behavior: 'smooth' });
+                            }}
+                            className="hover:text-brand-accent transition-colors duration-300"
+                        >
                             Privacy Policy
                         </button>
-                        <button className="hover:text-brand-accent transition-colors duration-300">
-                            Terms of Service
+                        <button 
+                            onClick={() => {
+                                const cookieSection = document.getElementById('cookie-policy');
+                                cookieSection?.scrollIntoView({ behavior: 'smooth' });
+                            }}
+                            className="hover:text-brand-accent transition-colors duration-300"
+                        >
+                            Cookie Policy
                         </button>
                         <p className="font-mono italic text-xs">
                             The Nicosia Method™
