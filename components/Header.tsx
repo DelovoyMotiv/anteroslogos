@@ -1,4 +1,5 @@
 import React, { useState, useEffect, forwardRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Logo } from './Icons';
 
 interface HeaderProps {
@@ -10,8 +11,11 @@ interface HeaderProps {
 }
 
 const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick, onClientsClick, onInsightsClick, onTeamClick, onContactClick }, ref) => {
+    const navigate = useNavigate();
+    const location = useLocation();
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const isHomePage = location.pathname === '/';
 
     const scrollToTop = () => {
         window.scrollTo({
@@ -29,10 +33,11 @@ const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick, onClientsC
     }, []);
 
     const menuItems = [
-        { label: 'Method', onClick: onMethodClick },
-        { label: 'Clients', onClick: onClientsClick },
-        { label: 'Insights', onClick: onInsightsClick },
-        { label: 'Team', onClick: onTeamClick },
+        { label: 'Method', onClick: onMethodClick, isScroll: true },
+        { label: 'Clients', onClick: onClientsClick, isScroll: true },
+        { label: 'Insights', onClick: onInsightsClick, isScroll: true },
+        { label: 'Team', onClick: onTeamClick, isScroll: true },
+        { label: 'Knowledge Base', onClick: () => navigate('/knowledge-base'), isScroll: false },
     ];
 
     return (
@@ -51,8 +56,14 @@ const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick, onClientsC
                     {menuItems.map((item) => (
                         <button
                             key={item.label}
-                            onClick={item.onClick}
-                            className="text-brand-text/80 hover:text-white transition-colors duration-300 text-sm font-medium relative group py-2"
+                            onClick={() => {
+                                if (!item.isScroll || !isHomePage) {
+                                    item.onClick?.();
+                                } else {
+                                    item.onClick?.();
+                                }
+                            }}
+                            className="text-brand-text/80 hover:text-white transition-colors duration-300 text-sm font-medium relative group py-2 whitespace-nowrap"
                         >
                             {item.label}
                             <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-brand-accent transition-all duration-300 group-hover:w-full"></span>
