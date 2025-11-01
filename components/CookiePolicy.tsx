@@ -5,7 +5,7 @@ const CookiePolicy: React.FC = () => {
     return (
         <section id="cookie-policy" className="relative z-10 py-20 md:py-32 bg-gradient-to-b from-brand-secondary/20 to-brand-bg">
             <div className="max-w-4xl mx-auto px-6">
-                <AnimatedSection animation="fade-up">
+                <AnimatedSection>
                     <div className="text-center mb-16">
                         <h1 className="font-display text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-brand-text to-brand-text/60 bg-clip-text text-transparent">
                             Cookie Policy
@@ -17,7 +17,7 @@ const CookiePolicy: React.FC = () => {
                 </AnimatedSection>
 
                 <div className="space-y-12 text-brand-text/80">
-                    <AnimatedSection animation="fade-up">
+                    <AnimatedSection>
                         <div className="bg-brand-secondary/30 border border-brand-text/10 rounded-2xl p-8">
                             <h2 className="font-display text-2xl font-semibold mb-4 text-brand-text">
                                 What Are Cookies?
@@ -31,7 +31,7 @@ const CookiePolicy: React.FC = () => {
                         </div>
                     </AnimatedSection>
 
-                    <AnimatedSection animation="fade-up">
+                    <AnimatedSection>
                         <div>
                             <h2 className="font-display text-2xl font-semibold mb-4 text-brand-text">
                                 Types of Cookies We Use
@@ -190,7 +190,7 @@ const CookiePolicy: React.FC = () => {
                         </div>
                     </AnimatedSection>
 
-                    <AnimatedSection animation="fade-up">
+                    <AnimatedSection>
                         <div>
                             <h2 className="font-display text-2xl font-semibold mb-4 text-brand-text">
                                 How to Manage Cookies
@@ -244,7 +244,7 @@ const CookiePolicy: React.FC = () => {
                         </div>
                     </AnimatedSection>
 
-                    <AnimatedSection animation="fade-up">
+                    <AnimatedSection>
                         <div>
                             <h2 className="font-display text-2xl font-semibold mb-4 text-brand-text">
                                 Third-Party Cookies
@@ -263,7 +263,7 @@ const CookiePolicy: React.FC = () => {
                         </div>
                     </AnimatedSection>
 
-                    <AnimatedSection animation="fade-up">
+                    <AnimatedSection>
                         <div>
                             <h2 className="font-display text-2xl font-semibold mb-4 text-brand-text">
                                 Updates to This Cookie Policy
@@ -274,7 +274,7 @@ const CookiePolicy: React.FC = () => {
                         </div>
                     </AnimatedSection>
 
-                    <AnimatedSection animation="fade-up">
+                    <AnimatedSection>
                         <div>
                             <h2 className="font-display text-2xl font-semibold mb-4 text-brand-text">
                                 Contact Us
@@ -290,7 +290,7 @@ const CookiePolicy: React.FC = () => {
                         </div>
                     </AnimatedSection>
 
-                    <AnimatedSection animation="fade-up">
+                    <AnimatedSection>
                         <div className="bg-brand-accent/10 border border-brand-accent/30 rounded-2xl p-8 text-center">
                             <p className="text-brand-text/80 leading-relaxed mb-4">
                                 For more information about how we handle your personal data, please review our{' '}

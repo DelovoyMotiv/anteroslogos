@@ -5,7 +5,7 @@ const PrivacyPolicy: React.FC = () => {
     return (
         <section id="privacy-policy" className="relative z-10 py-20 md:py-32 bg-gradient-to-b from-brand-bg to-brand-secondary/20">
             <div className="max-w-4xl mx-auto px-6">
-                <AnimatedSection animation="fade-up">
+                <AnimatedSection>
                     <div className="text-center mb-16">
                         <h1 className="font-display text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-brand-text to-brand-text/60 bg-clip-text text-transparent">
                             Privacy Policy
@@ -17,7 +17,7 @@ const PrivacyPolicy: React.FC = () => {
                 </AnimatedSection>
 
                 <div className="space-y-12 text-brand-text/80">
-                    <AnimatedSection animation="fade-up">
+                    <AnimatedSection>
                         <div className="bg-brand-secondary/30 border border-brand-text/10 rounded-2xl p-8">
                             <h2 className="font-display text-2xl font-semibold mb-4 text-brand-text">
                                 Introduction
@@ -31,7 +31,7 @@ const PrivacyPolicy: React.FC = () => {
                         </div>
                     </AnimatedSection>
 
-                    <AnimatedSection animation="fade-up">
+                    <AnimatedSection>
                         <div>
                             <h2 className="font-display text-2xl font-semibold mb-4 text-brand-text">
                                 1. Information We Collect
@@ -84,7 +84,7 @@ const PrivacyPolicy: React.FC = () => {
                         </div>
                     </AnimatedSection>
 
-                    <AnimatedSection animation="fade-up">
+                    <AnimatedSection>
                         <div>
                             <h2 className="font-display text-2xl font-semibold mb-4 text-brand-text">
                                 2. How We Use Your Information
@@ -104,7 +104,7 @@ const PrivacyPolicy: React.FC = () => {
                         </div>
                     </AnimatedSection>
 
-                    <AnimatedSection animation="fade-up">
+                    <AnimatedSection>
                         <div>
                             <h2 className="font-display text-2xl font-semibold mb-4 text-brand-text">
                                 3. Legal Basis for Processing (GDPR)
@@ -121,7 +121,7 @@ const PrivacyPolicy: React.FC = () => {
                         </div>
                     </AnimatedSection>
 
-                    <AnimatedSection animation="fade-up">
+                    <AnimatedSection>
                         <div>
                             <h2 className="font-display text-2xl font-semibold mb-4 text-brand-text">
                                 4. How We Share Your Information
@@ -141,7 +141,7 @@ const PrivacyPolicy: React.FC = () => {
                         </div>
                     </AnimatedSection>
 
-                    <AnimatedSection animation="fade-up">
+                    <AnimatedSection>
                         <div>
                             <h2 className="font-display text-2xl font-semibold mb-4 text-brand-text">
                                 5. International Data Transfers
@@ -157,7 +157,7 @@ const PrivacyPolicy: React.FC = () => {
                         </div>
                     </AnimatedSection>
 
-                    <AnimatedSection animation="fade-up">
+                    <AnimatedSection>
                         <div>
                             <h2 className="font-display text-2xl font-semibold mb-4 text-brand-text">
                                 6. Data Retention
@@ -168,7 +168,7 @@ const PrivacyPolicy: React.FC = () => {
                         </div>
                     </AnimatedSection>
 
-                    <AnimatedSection animation="fade-up">
+                    <AnimatedSection>
                         <div>
                             <h2 className="font-display text-2xl font-semibold mb-4 text-brand-text">
                                 7. Your Rights and Choices
@@ -191,7 +191,7 @@ const PrivacyPolicy: React.FC = () => {
                         </div>
                     </AnimatedSection>
 
-                    <AnimatedSection animation="fade-up">
+                    <AnimatedSection>
                         <div>
                             <h2 className="font-display text-2xl font-semibold mb-4 text-brand-text">
                                 8. Security Measures
@@ -202,7 +202,7 @@ const PrivacyPolicy: React.FC = () => {
                         </div>
                     </AnimatedSection>
 
-                    <AnimatedSection animation="fade-up">
+                    <AnimatedSection>
                         <div>
                             <h2 className="font-display text-2xl font-semibold mb-4 text-brand-text">
                                 9. Children's Privacy
@@ -213,7 +213,7 @@ const PrivacyPolicy: React.FC = () => {
                         </div>
                     </AnimatedSection>
 
-                    <AnimatedSection animation="fade-up">
+                    <AnimatedSection>
                         <div>
                             <h2 className="font-display text-2xl font-semibold mb-4 text-brand-text">
                                 10. Changes to This Privacy Policy
@@ -224,7 +224,7 @@ const PrivacyPolicy: React.FC = () => {
                         </div>
                     </AnimatedSection>
 
-                    <AnimatedSection animation="fade-up">
+                    <AnimatedSection>
                         <div>
                             <h2 className="font-display text-2xl font-semibold mb-4 text-brand-text">
                                 11. Contact Us
@@ -243,7 +243,7 @@ const PrivacyPolicy: React.FC = () => {
                         </div>
                     </AnimatedSection>
 
-                    <AnimatedSection animation="fade-up">
+                    <AnimatedSection>
                         <div className="bg-brand-accent/10 border border-brand-accent/30 rounded-2xl p-8 text-center">
                             <p className="text-brand-text/80 leading-relaxed">
                                 Thank you for trusting Anóteros Lógos with your information. We are committed to transparency, security, and respecting your privacy rights.
