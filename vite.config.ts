@@ -23,16 +23,23 @@ export default defineConfig(({ mode }) => {
         target: 'esnext',
         minify: 'terser',
         cssMinify: true,
+        chunkSizeWarningLimit: 100, // 100KB warning threshold
         rollupOptions: {
           output: {
             manualChunks: {
               'react-vendor': ['react', 'react-dom'],
+              'router': ['react-router-dom'],
+              'knowledge-base': ['./data/geoKnowledgeBase'],
             },
           },
         },
         terserOptions: {
           compress: {
             drop_console: mode === 'production',
+            passes: 2, // Additional optimization pass
+          },
+          mangle: {
+            safari10: true, // Safari 10/11 bug fix
           },
         },
       },

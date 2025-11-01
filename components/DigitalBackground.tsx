@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 
 interface Particle {
   x: number;
@@ -12,6 +12,8 @@ interface Particle {
 const DigitalBackground: React.FC = () => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const scrollY = useRef(0);
+    const rafId = useRef<number | null>(null);
+    const [isVisible, setIsVisible] = useState(false);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -22,7 +24,8 @@ const DigitalBackground: React.FC = () => {
 
         let animationFrameId: number;
         let particles: Particle[] = [];
-        const particleCount = window.innerWidth > 768 ? 50 : 25;
+        // Reduced particle count for better performance
+        const particleCount = window.innerWidth > 768 ? 30 : 15;
 
         const resizeCanvas = () => {
             canvas.width = window.innerWidth;
@@ -40,42 +43,78 @@ const DigitalBackground: React.FC = () => {
             }
         };
         
+        // Throttled scroll handler using RAF
         const handleScroll = () => {
-            scrollY.current = window.scrollY;
+            if (!rafId.current) {
+                rafId.current = requestAnimationFrame(() => {
+                    scrollY.current = window.scrollY;
+                    rafId.current = null;
+                });
+            }
         };
         window.addEventListener('scroll', handleScroll, { passive: true });
+        
+        // Only animate when canvas is in viewport
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                setIsVisible(entry.isIntersecting);
+            },
+            { threshold: 0 }
+        );
+        observer.observe(canvas);
         
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
 
-        const animate = () => {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            particles.forEach(p => {
-                p.x += p.vx;
-                p.y += p.vy + (scrollY.current * 0.00005); // Parallax effect
-
-                if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
-                if (p.y > canvas.height) {
-                    p.y = 0;
-                    p.x = Math.random() * canvas.width;
-                }
+        // Throttle animation to 30fps for better performance
+        let lastFrameTime = 0;
+        const targetFps = 30;
+        const frameInterval = 1000 / targetFps;
+        
+        const animate = (currentTime: number) => {
+            // Only animate when visible
+            if (!isVisible) {
+                animationFrameId = requestAnimationFrame(animate);
+                return;
+            }
+            
+            const deltaTime = currentTime - lastFrameTime;
+            
+            if (deltaTime >= frameInterval) {
+                lastFrameTime = currentTime - (deltaTime % frameInterval);
                 
-                ctx.fillStyle = `rgba(59, 130, 246, ${p.opacity})`;
-                ctx.fillRect(p.x, p.y, p.size, p.size);
-            });
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy + (scrollY.current * 0.00005); // Parallax effect
+
+                    if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                    if (p.y > canvas.height) {
+                        p.y = 0;
+                        p.x = Math.random() * canvas.width;
+                    }
+                    
+                    ctx.fillStyle = `rgba(59, 130, 246, ${p.opacity})`;
+                    ctx.fillRect(p.x, p.y, p.size, p.size);
+                });
+            }
 
             animationFrameId = requestAnimationFrame(animate);
         };
 
-        animate();
+        animationFrameId = requestAnimationFrame(animate);
 
         return () => {
             cancelAnimationFrame(animationFrameId);
             window.removeEventListener('resize', resizeCanvas);
             window.removeEventListener('scroll', handleScroll);
+            observer.disconnect();
+            if (rafId.current) {
+                cancelAnimationFrame(rafId.current);
+            }
         };
-    }, []);
+    }, [isVisible]);
 
     return <canvas ref={canvasRef} className="fixed top-0 left-0 w-full h-full z-0" />;
 };
