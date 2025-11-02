@@ -87,6 +87,14 @@
     <priority>0.95</priority>
   </url>
 
+  <!-- GEO vs SEO Comparison -->
+  <url>
+    <loc>https://anoteroslogos.com/geo-vs-seo</loc>
+    <lastmod>2025-11-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
   <!-- Privacy Policy -->
   <url>
     <loc>https://anoteroslogos.com/privacy-policy</loc>
