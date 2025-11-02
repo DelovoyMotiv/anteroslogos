@@ -29,25 +29,15 @@ export default function Blog() {
         onTeamClick={() => navigate('/')} 
         onContactClick={() => navigate('/')}
       />
-      <div className="pt-32 sm:pt-36 pb-16">
+      <div className="pt-24 sm:pt-28 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
-          <div className="text-center mb-16">
-            <h1 className="text-5xl font-bold text-brand-text mb-6">
-              GEO Insights & Strategies
-            </h1>
-            <p className="text-xl text-brand-text/70 max-w-3xl mx-auto">
-              Expert perspectives on Generative Engine Optimization, AI authority, and the future of digital presence
-            </p>
-          </div>
-
           {/* Category Filter */}
-          <div className="flex flex-wrap justify-center gap-3 mb-12">
+          <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-8 sm:mb-12">
             {categories.map(category => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-6 py-2 rounded-full font-medium transition-colors ${
+                className={`px-4 sm:px-6 py-1.5 sm:py-2 text-sm sm:text-base rounded-full font-medium transition-colors ${
                   selectedCategory === category
                     ? 'bg-brand-accent text-white'
                     : 'bg-brand-secondary/30 text-brand-text/70 hover:bg-brand-secondary/50'
@@ -61,8 +51,8 @@ export default function Blog() {
           {/* Featured Posts */}
           {selectedCategory === 'all' && featuredPosts.length > 0 && (
             <div className="mb-16">
-              <h2 className="text-3xl font-bold text-brand-text mb-8">Featured Articles</h2>
-              <div className="grid md:grid-cols-2 gap-8">
+              <h2 className="text-2xl sm:text-3xl font-bold text-brand-text mb-6 sm:mb-8">Featured Articles</h2>
+              <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                 {featuredPosts.map(post => (
                   <Link
                     key={post.slug}
@@ -78,21 +68,21 @@ export default function Blog() {
                         />
                       </div>
                     )}
-                    <div className="p-6">
+                    <div className="p-4 sm:p-6">
                       <div className="flex items-center gap-2 text-brand-accent text-sm mb-3">
                         <Tag className="w-4 h-4" />
                         <span>{post.category}</span>
                       </div>
-                      <h3 className="text-2xl font-bold text-brand-text mb-3 group-hover:text-brand-accent transition-colors">
+                      <h3 className="text-xl sm:text-2xl font-bold text-brand-text mb-3 group-hover:text-brand-accent transition-colors">
                         {post.title}
                       </h3>
                       <p className="text-brand-text/70 mb-4">{post.excerpt}</p>
-                      <div className="flex items-center justify-between text-sm text-brand-text/60">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between gap-2 sm:gap-0 text-xs sm:text-sm text-brand-text/60">
                         <div className="flex items-center gap-2">
                           <User className="w-4 h-4" />
                           <span>{post.author.name}</span>
                         </div>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3 sm:gap-4">
                           <div className="flex items-center gap-1">
                             <Calendar className="w-4 h-4" />
                             <span>{new Date(post.publishedDate).toLocaleDateString()}</span>
@@ -112,7 +102,7 @@ export default function Blog() {
 
           {/* All Posts */}
           <div>
-            <h2 className="text-3xl font-bold text-brand-text mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-brand-text mb-6 sm:mb-8">
               {selectedCategory === 'all' ? 'All Articles' : selectedCategory}
             </h2>
             <div className="grid gap-6">
@@ -120,9 +110,9 @@ export default function Blog() {
                 <Link
                   key={post.slug}
                   to={`/blog/${post.slug}`}
-                  className="group bg-brand-secondary/20 rounded-xl p-6 border border-brand-accent/10 hover:border-brand-accent/30 hover:bg-brand-secondary/30 transition-all"
+                  className="group bg-brand-secondary/20 rounded-xl p-4 sm:p-6 border border-brand-accent/10 hover:border-brand-accent/30 hover:bg-brand-secondary/30 transition-all"
                 >
-                  <div className="flex flex-col md:flex-row gap-6">
+                  <div className="flex flex-col md:flex-row gap-4 sm:gap-6">
                     {post.image && (
                       <div className="md:w-64 aspect-video md:aspect-square bg-brand-secondary/50 rounded-lg overflow-hidden flex-shrink-0">
                         <img 
@@ -137,12 +127,12 @@ export default function Blog() {
                         <Tag className="w-4 h-4" />
                         <span>{post.category}</span>
                       </div>
-                      <h3 className="text-2xl font-bold text-brand-text mb-2 group-hover:text-brand-accent transition-colors flex items-center gap-2">
+                      <h3 className="text-xl sm:text-2xl font-bold text-brand-text mb-2 group-hover:text-brand-accent transition-colors flex items-center gap-2">
                         {post.title}
-                        <ArrowRight className="w-5 h-5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </h3>
                       <p className="text-brand-text/70 mb-4">{post.excerpt}</p>
-                      <div className="flex items-center gap-6 text-sm text-brand-text/60">
+                      <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm text-brand-text/60">
                         <div className="flex items-center gap-2">
                           <User className="w-4 h-4" />
                           <span>{post.author.name}</span>
