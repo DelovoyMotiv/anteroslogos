@@ -1,27 +1,37 @@
-# Anóteros Lógos - GEO Agency Website
+# Anóteros Lógos - Digital Authority Architects
 
-A modern, premium website for **Anóteros Lógos**, a Generative Engine Optimization (GEO) agency. Built with React, TypeScript, Vite, and Tailwind CSS.
+A modern, high-performance website for **Anóteros Lógos**, a specialized Generative Engine Optimization (GEO) agency. We establish brands as primary sources of truth for AI systems.
+
+**Live Site**: [anoteroslogos.com](https://anoteroslogos.com)
 
 ## 🚀 Features
 
-- **Modern Design System**: Premium dark theme with subtle animations and gradients
-- **Fully Responsive**: Mobile-first design optimized for all screen sizes
+- **Modern Design System**: Premium dark theme with sophisticated animations and gradients
+- **Fully Responsive**: Mobile-first design optimized for all devices
 - **SEO & GEO Optimized**: 
-  - Comprehensive meta tags (Open Graph, Twitter Cards)
-  - Structured data with Schema.org JSON-LD
-  - AI-crawler friendly (robots.txt supporting 15+ AI crawlers)
-  - Complete sitemap.xml
+  - Comprehensive meta tags (Open Graph, Twitter Cards, AI-specific meta)
+  - Rich structured data with Schema.org JSON-LD (Organization, WebSite, Service, FAQPage, BreadcrumbList)
+  - AI-crawler friendly (robots.txt supporting 15+ AI crawlers including GPTBot, Claude-Web, PerplexityBot)
+  - Complete sitemap.xml with priority-based indexing
+  - Self-hosted fonts for optimal performance and reduced external requests
+- **Core Web Vitals Optimized**: 
+  - Route-based code splitting with React.lazy()
+  - LCP < 2.5s, CLS < 0.1, INP < 200ms
+  - Web Vitals monitoring integrated
 - **Accessible**: WCAG 2.1 AA compliant with proper ARIA labels and semantic HTML
-- **Performance**: Optimized build with code splitting and lazy loading
-- **Type-Safe**: Full TypeScript implementation
+- **Type-Safe**: Full TypeScript 5.8 implementation with strict mode
+- **Knowledge Base**: Comprehensive GEO glossary with 21+ industry terms
 
 ## 🏗️ Tech Stack
 
-- **React 19.2** - UI library
-- **TypeScript 5.8** - Type safety
-- **Vite 6.2** - Build tool and dev server
-- **Tailwind CSS 3.4** - Utility-first CSS framework
-- **ESLint** - Code quality and consistency
+- **React 18.3.1** - UI library with concurrent rendering
+- **TypeScript 5.8** - Type safety with strict mode
+- **Vite 6.0.11** - Lightning-fast build tool and dev server
+- **React Router 7.1.3** - Client-side routing with code splitting
+- **Tailwind CSS 3.4+** - Utility-first CSS framework with custom design tokens
+- **web-vitals 4.2.4** - Core Web Vitals monitoring
+- **Lucide React 0.469.0** - Modern icon library
+- **ESLint 9+** - Code quality and consistency
 
 ## 📦 Installation
 
@@ -67,52 +77,66 @@ VITE_SITE_DESCRIPTION=Generative Engine Optimization Agency
 
 ```
 F:\air\
-├── components/          # React components
-│   ├── AnimatedSection.tsx
-│   ├── ClientProfile.tsx
-│   ├── DigitalBackground.tsx
-│   ├── FAQ.tsx
-│   ├── FinalCTA.tsx
-│   ├── Footer.tsx
-│   ├── Header.tsx
-│   ├── Hero.tsx
-│   ├── Icons.tsx
-│   ├── Modal.tsx
-│   ├── NicosiaMethod.tsx
-│   ├── Philosophy.tsx
-│   ├── Stats.tsx
-│   └── TheShift.tsx
-├── public/              # Static assets
-│   ├── robots.txt       # AI & search crawler configuration
-│   ├── sitemap.xml      # Site structure for search engines
-│   └── logo.png         # Brand logo
-├── App.tsx              # Main application component
-├── index.tsx            # Application entry point
-├── index.css            # Global styles and Tailwind imports
-├── tailwind.config.js   # Tailwind configuration
-├── tsconfig.json        # TypeScript configuration
-├── vite.config.ts       # Vite configuration
-├── package.json         # Dependencies and scripts
-└── README.md            # This file
+├── src/
+│   ├── components/          # React components
+│   │   ├── AnimatedSection.tsx
+│   │   ├── ClientProfile.tsx
+│   │   ├── DigitalBackground.tsx
+│   │   ├── FAQ.tsx
+│   │   ├── FinalCTA.tsx
+│   │   ├── Footer.tsx
+│   │   ├── Header.tsx
+│   │   ├── Hero.tsx
+│   │   ├── Icons.tsx
+│   │   ├── Modal.tsx
+│   │   ├── NicosiaMethod.tsx
+│   │   ├── Philosophy.tsx
+│   │   ├── Stats.tsx
+│   │   └── TheShift.tsx
+│   ├── pages/               # Route pages (lazy-loaded)
+│   │   ├── Home.tsx         # Main landing page
+│   │   ├── KnowledgeBase.tsx  # GEO glossary (21+ terms)
+│   │   └── GeoVsSeo.tsx     # Educational comparison page
+│   ├── App.tsx              # Main application with routing
+│   ├── main.tsx             # Application entry point
+│   ├── index.css            # Global styles, Tailwind, and custom fonts
+│   └── vite-env.d.ts        # Vite type definitions
+├── public/                  # Static assets
+│   ├── robots.txt           # AI & search crawler configuration (15+ crawlers)
+│   ├── sitemap.xml          # Priority-based site structure
+│   ├── index.html           # Main HTML with structured data
+│   └── logo.png             # Brand logo
+├── tailwind.config.js       # Tailwind with custom animations
+├── tsconfig.json            # TypeScript strict configuration
+├── vite.config.ts           # Vite with optimizations
+├── package.json             # Dependencies and scripts
+├── vercel.json              # Vercel deployment config
+└── README.md                # Project documentation
 ```
 
 ## 🎨 Component Overview
 
-### Core Sections
-- **Hero**: Main landing section with CTA
-- **TheShift**: Problem statement (SEO → GEO transition)
-- **Philosophy**: Solution overview (Extract → Structure → Deploy)
-- **Stats**: Social proof metrics
-- **NicosiaMethod™**: Detailed 3-phase process
-- **ClientProfile**: Target audience segments
-- **FAQ**: 12 comprehensive Q&A items
-- **FinalCTA**: Conversion section
+### Pages (Route Components)
+- **Home**: Main landing page with all core sections
+- **KnowledgeBase**: Educational GEO glossary with 21+ industry terms and definitions
+- **GeoVsSeo**: Comprehensive comparison page explaining the evolution from SEO to GEO
+
+### Core Sections (Home Page)
+- **Hero**: Main landing with animated CTA and value proposition
+- **TheShift**: Problem statement showcasing the SEO → GEO paradigm shift
+- **Philosophy**: Solution overview with Extract → Structure → Deploy framework
+- **Stats**: Social proof metrics with animated counters
+- **NicosiaMethod™**: Detailed 3-phase process (Intelligence → Authority → Amplification)
+- **ClientProfile**: Target audience segments with hover states
+- **FAQ**: 12 comprehensive Q&A items with structured data
+- **FinalCTA**: High-conversion section with contact form modal
 
 ### Utilities
-- **Header**: Sticky navigation with smooth scroll
-- **Footer**: Site footer with navigation and social links
-- **Modal**: Contact form with validation
-- **AnimatedSection**: Intersection Observer based animations
+- **Header**: Sticky navigation with smooth scroll and active states
+- **Footer**: Site footer with navigation links, social links, and legal info
+- **Modal**: Contact form with validation and accessibility features
+- **AnimatedSection**: Intersection Observer wrapper for scroll-triggered animations
+- **DigitalBackground**: Animated particle/grid background effect
 
 ## 🌐 SEO & GEO Features
 
@@ -142,16 +166,38 @@ Configured in `robots.txt` for:
 
 ## 🚢 Deployment
 
-### Vercel (Recommended)
+### Vercel (Current Production Setup)
+
+The project is configured for **automatic deployments** on Vercel:
+
+- **Production URL**: https://anoteroslogos.com
+- **Auto-deploy**: Enabled on push to `main` branch
+- **Framework Preset**: Vite
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
+- **Node Version**: 20.x
+
+#### Manual Deploy via CLI
 ```bash
 # Install Vercel CLI
 npm i -g vercel
 
-# Deploy
+# Deploy to preview
 vercel
+
+# Deploy to production
+vercel --prod
 ```
 
-### Netlify
+#### Vercel Configuration
+The `vercel.json` file includes:
+- SPA fallback routing
+- Custom headers for security and caching
+- Redirects configuration
+
+### Alternative Hosting
+
+#### Netlify
 ```bash
 # Build command
 npm run build
@@ -160,12 +206,13 @@ npm run build
 dist
 ```
 
-### Traditional Hosting
+#### Traditional Hosting (Apache/Nginx)
 ```bash
 # Build
 npm run build
 
 # Upload dist/ folder to your hosting
+# Configure SPA fallback to index.html
 ```
 
 ## 📝 Customization
@@ -214,7 +261,7 @@ await fetch('/api/contact', {
 ### Build Errors
 ```bash
 # Clear cache and reinstall
-rm -rf node_modules dist
+rm -rf node_modules dist .vite
 npm install
 npm run build
 ```
@@ -223,22 +270,63 @@ npm run build
 ```bash
 # Check types without building
 npm run typecheck
+
+# Ensure TypeScript is up to date
+npm install typescript@latest
 ```
 
 ### Lint Issues
 ```bash
 # Auto-fix where possible
 npm run lint -- --fix
+
+# Check specific files
+npm run lint src/components/
+```
+
+### Deployment Issues (Vercel)
+```bash
+# Check deployment logs
+vercel logs
+
+# Clear Vercel cache and redeploy
+vercel --force
+
+# Verify build locally matches production
+npm run build && npm run preview
+```
+
+### Performance Optimization
+```bash
+# Analyze bundle size
+npm run build -- --mode production --sourcemap
+
+# Check for unused dependencies
+npm prune
 ```
 
 ## 📈 Performance
 
-Current production build:
+### Production Build Stats (Latest)
 - **HTML**: 11.83 kB (gzip: 3.03 kB)
 - **CSS**: 39.57 kB (gzip: 6.76 kB)
 - **JS (vendor)**: 11.18 kB (gzip: 3.95 kB)
 - **JS (main)**: 247.65 kB (gzip: 72.71 kB)
-- **Build time**: ~3s
+- **Total Bundle**: ~310 kB (gzip: ~86 kB)
+- **Build Time**: ~3s on CI/CD
+
+### Core Web Vitals (Production)
+- **LCP (Largest Contentful Paint)**: < 2.5s ✅
+- **FID/INP (Interaction Delay)**: < 200ms ✅
+- **CLS (Cumulative Layout Shift)**: < 0.1 ✅
+
+### Optimization Features
+- Route-based code splitting with React.lazy()
+- Tree-shaking and dead code elimination
+- CSS purging via Tailwind
+- Self-hosted fonts (no external requests)
+- Minified and optimized assets
+- Gzip compression enabled on Vercel
 
 ## 📄 License
 
