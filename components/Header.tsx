@@ -37,6 +37,7 @@ const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick, onClientsC
         { label: 'Clients', onClick: onClientsClick, isScroll: true },
         { label: 'Insights', onClick: onInsightsClick, isScroll: true },
         { label: 'Team', onClick: onTeamClick, isScroll: true },
+        { label: 'Blog', onClick: () => navigate('/blog'), isScroll: false },
         { label: 'Knowledge Base', onClick: () => navigate('/knowledge-base'), isScroll: false },
     ];
 
