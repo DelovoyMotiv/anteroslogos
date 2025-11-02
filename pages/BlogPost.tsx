@@ -56,7 +56,7 @@ export default function BlogPost() {
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-brand-bg flex items-center justify-center pt-20 sm:pt-24">
+      <div className="min-h-screen bg-brand-bg flex items-center justify-center pt-16 sm:pt-20">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-brand-text mb-4">Article Not Found</h1>
           <Link to="/blog" className="text-brand-accent hover:underline">
@@ -76,7 +76,7 @@ export default function BlogPost() {
         onTeamClick={() => navigate('/')} 
         onContactClick={() => navigate('/')}
       />
-      <div className="pt-20 sm:pt-24 pb-16">
+      <div className="pt-16 sm:pt-20 pb-16">
         <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Back Link */}
           <Link 
