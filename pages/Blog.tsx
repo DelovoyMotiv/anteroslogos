@@ -29,7 +29,7 @@ export default function Blog() {
         onTeamClick={() => navigate('/')} 
         onContactClick={() => navigate('/')}
       />
-      <div className="pt-16 sm:pt-20 pb-16">
+      <div className="pt-24 sm:pt-28 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="text-center mb-16">
