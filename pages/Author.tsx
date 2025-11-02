@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
 import { MOSTAFA_ELBERMAWY, generatePersonSchema, injectSchema } from '../utils/schemas';
 import { BookOpen, Award, Linkedin, Twitter, Github, Mail, ExternalLink } from 'lucide-react';
 
@@ -76,6 +75,9 @@ export default function Author() {
 
   useEffect(() => {
     if (author) {
+      // Set page title
+      document.title = `${author.name} - Author | Anóteros Lógos`;
+      
       // Inject Person schema for E-E-A-T
       const personSchema = generatePersonSchema({
         name: author.name,
@@ -102,28 +104,7 @@ export default function Author() {
   }
 
   return (
-    <>
-      <Helmet>
-        <title>{author.name} - Author | Anóteros Lógos</title>
-        <meta name="description" content={author.bio} />
-        <meta name="author" content={author.name} />
-        <link rel="canonical" href={`https://anoteroslogos.com/author/${author.slug}`} />
-        
-        {/* Open Graph */}
-        <meta property="og:type" content="profile" />
-        <meta property="og:title" content={`${author.name} - ${author.jobTitle}`} />
-        <meta property="og:description" content={author.bio} />
-        <meta property="og:url" content={`https://anoteroslogos.com/author/${author.slug}`} />
-        <meta property="og:image" content={`https://anoteroslogos.com${author.image}`} />
-        
-        {/* Twitter */}
-        <meta name="twitter:card" content="summary" />
-        <meta name="twitter:title" content={`${author.name} - ${author.jobTitle}`} />
-        <meta name="twitter:description" content={author.bio} />
-        <meta name="twitter:image" content={`https://anoteroslogos.com${author.image}`} />
-      </Helmet>
-
-      <div className="min-h-screen bg-brand-bg pt-24 pb-16">
+    <div className="min-h-screen bg-brand-bg pt-24 pb-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Author Header */}
           <div className="bg-brand-secondary/30 rounded-2xl p-8 mb-12 border border-brand-accent/10">
@@ -272,6 +253,5 @@ export default function Author() {
           </div>
         </div>
       </div>
-    </>
   );
 }

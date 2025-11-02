@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
 import { Calendar, Clock, User, ArrowRight, Tag } from 'lucide-react';
 
 export interface BlogPost {
@@ -97,6 +96,9 @@ export default function Blog() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   useEffect(() => {
+    // Set page title and meta
+    document.title = 'Blog - GEO Insights & Strategies | Anóteros Lógos';
+    
     // In production, fetch from API or load markdown files
     setPosts(BLOG_POSTS);
   }, []);
@@ -108,21 +110,7 @@ export default function Blog() {
   const featuredPosts = posts.filter(p => p.featured);
 
   return (
-    <>
-      <Helmet>
-        <title>Blog - GEO Insights & Strategies | Anóteros Lógos</title>
-        <meta 
-          name="description" 
-          content="Expert insights on Generative Engine Optimization, AI-first marketing, and digital authority building. Learn how to become the source." 
-        />
-        <link rel="canonical" href="https://anoteroslogos.com/blog" />
-        
-        <meta property="og:type" content="website" />
-        <meta property="og:title" content="Blog - GEO Insights & Strategies" />
-        <meta property="og:url" content="https://anoteroslogos.com/blog" />
-      </Helmet>
-
-      <div className="min-h-screen bg-brand-bg pt-24 pb-16">
+    <div className="min-h-screen bg-brand-bg pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="text-center mb-16">
@@ -269,6 +257,5 @@ export default function Blog() {
           </div>
         </div>
       </div>
-    </>
   );
 }

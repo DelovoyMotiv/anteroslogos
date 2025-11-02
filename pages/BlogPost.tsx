@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
 import { Calendar, Clock, User, ArrowLeft, Tag, Share2 } from 'lucide-react';
 import { generateBlogPostingSchema, injectSchema, MOSTAFA_ELBERMAWY } from '../utils/schemas';
 import type { BlogPost } from './Blog';
@@ -178,6 +177,9 @@ export default function BlogPost() {
       setPost(foundPost);
       setContent(BLOG_CONTENT[slug!] || '');
       
+      // Set page title
+      document.title = `${foundPost.title} | Anóteros Lógos Blog`;
+      
       // Inject Article schema
       const articleSchema = generateBlogPostingSchema({
         headline: foundPost.title,
@@ -213,34 +215,7 @@ export default function BlogPost() {
   }
 
   return (
-    <>
-      <Helmet>
-        <title>{post.title} | Anóteros Lógos Blog</title>
-        <meta name="description" content={post.excerpt} />
-        <meta name="author" content={post.author.name} />
-        <link rel="canonical" href={`https://anoteroslogos.com/blog/${post.slug}`} />
-        
-        {/* Open Graph */}
-        <meta property="og:type" content="article" />
-        <meta property="og:title" content={post.title} />
-        <meta property="og:description" content={post.excerpt} />
-        <meta property="og:url" content={`https://anoteroslogos.com/blog/${post.slug}`} />
-        {post.image && <meta property="og:image" content={`https://anoteroslogos.com${post.image}`} />}
-        <meta property="article:published_time" content={post.publishedDate} />
-        <meta property="article:modified_time" content={post.modifiedDate} />
-        <meta property="article:author" content={post.author.name} />
-        {post.tags.map(tag => (
-          <meta key={tag} property="article:tag" content={tag} />
-        ))}
-        
-        {/* Twitter */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={post.title} />
-        <meta name="twitter:description" content={post.excerpt} />
-        {post.image && <meta name="twitter:image" content={`https://anoteroslogos.com${post.image}`} />}
-      </Helmet>
-
-      <div className="min-h-screen bg-brand-bg pt-24 pb-16">
+    <div className="min-h-screen bg-brand-bg pt-24 pb-16">
         <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Back Link */}
           <Link 
@@ -351,6 +326,5 @@ export default function BlogPost() {
           </div>
         </article>
       </div>
-    </>
   );
 }
