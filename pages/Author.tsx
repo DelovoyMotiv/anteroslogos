@@ -1,6 +1,9 @@
 import { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { MOSTAFA_ELBERMAWY, generatePersonSchema, injectSchema } from '../utils/schemas';
+import { useParams, useNavigate } from 'react-router-dom';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import { generatePersonSchema, injectSchema } from '../utils/schemas';
+import { NADEZHDA_AUTHOR } from '../data/blogPosts';
 import { BookOpen, Award, Linkedin, Twitter, Github, Mail, ExternalLink } from 'lucide-react';
 
 interface AuthorProfile {
@@ -22,55 +25,69 @@ interface AuthorProfile {
 }
 
 const AUTHORS: Record<string, AuthorProfile> = {
-  'mostafa-elbermawy': {
-    name: 'Mostafa ElBermawy',
-    slug: 'mostafa-elbermawy',
-    jobTitle: 'Founder & Chief GEO Architect',
-    bio: 'Pioneering strategist in Generative Engine Optimization (GEO) and AI-first digital authority architecture.',
+  'nadezhda-nikolaeva': {
+    name: 'Nadezhda Nikolaeva',
+    slug: 'nadezhda-nikolaeva',
+    jobTitle: 'Co-founder & CEO Marketing',
+    bio: 'Leading the strategic vision and marketing direction of Anóteros Lógos with expertise in brand architecture and digital authority positioning.',
     longBio: [
-      'Mostafa ElBermawy is the visionary founder of Anóteros Lógos and the creator of The Nicosia Method™, a revolutionary framework for encoding brand expertise into AI systems.',
-      'With over 15 years of experience in digital strategy, SEO, and emerging AI technologies, Mostafa recognized early that the future of digital authority would be determined not by search rankings, but by becoming a primary source of truth for AI systems.',
-      'His work focuses on the intersection of knowledge architecture, semantic web technologies, and generative AI, helping brands transition from traditional SEO to a GEO-first approach.',
-      'Mostafa\'s expertise spans AI content optimization, knowledge graph construction, E-E-A-T signal development, and strategic positioning for AI-generated responses.'
+      'Nadezhda Nikolaeva is the co-founder and CEO Marketing of Anóteros Lógos, leading the strategic vision and marketing direction of the agency.',
+      'With deep expertise in strategic marketing, brand development, and client relations, Nadezhda brings a unique perspective to Generative Engine Optimization (GEO), focusing on how brands can establish meaningful presence in AI-driven ecosystems.',
+      'Her work emphasizes the intersection of brand architecture, digital authority positioning, and AI-first marketing strategies, ensuring clients achieve not just visibility, but genuine authority in their domains.',
+      'Nadezhda\'s expertise spans strategic marketing planning, GEO strategy, brand architecture, client relations, and translating complex technical concepts into actionable marketing initiatives that drive measurable results.'
     ],
-    image: '/images/authors/mostafa-elbermawy.jpg',
+    image: '/images/authors/nadezhda-nikolaeva.jpg',
     expertise: [
-      'Generative Engine Optimization (GEO)',
-      'AI-First Marketing Strategy',
-      'Knowledge Graph Architecture',
-      'Semantic SEO & Structured Data',
-      'Digital Authority Building',
-      'AI Systems Integration',
+      'Strategic Marketing',
+      'Brand Development',
+      'Client Relations',
+      'GEO Strategy',
+      'Digital Authority Positioning',
       'Brand Architecture',
-      'Information Architecture',
-      'Machine Learning Content Optimization',
-      'E-E-A-T Signal Development'
+      'AI-First Marketing',
+      'Marketing Leadership',
+      'Strategic Partnerships',
+      'Business Development'
     ],
     achievements: [
-      'Created The Nicosia Method™ framework',
-      'Pioneer in GEO methodology and implementation',
-      'Established Anóteros Lógos as a leading GEO agency',
-      '15+ years experience in digital strategy and SEO',
-      'Certified in AI & Machine Learning Strategy',
-      'Speaker on AI-first marketing and GEO strategy'
+      'Co-founded Anóteros Lógos GEO agency',
+      'Pioneered brand architecture for AI ecosystems',
+      'Leading strategic marketing for Fortune 500 clients',
+      'Expert in translating GEO into business value',
+      'Speaker on brand authority in the AI era',
+      'Established Anóteros Lógos as a thought leader in GEO'
     ],
     publications: [
-      'The Nicosia Method: Architecting Digital Authority in the Age of AI',
-      'GEO vs SEO: Understanding the Paradigm Shift',
-      'Building E-E-A-T Signals for AI Systems',
-      'Knowledge Graph Optimization for Generative Engines'
+      'Introduction to Generative Engine Optimization',
+      'The Nicosia Method™: A Deep Dive',
+      'Building E-E-A-T Signals That AI Systems Trust',
+      'Knowledge Graphs: The Foundation of AI Authority'
     ],
     social: {
-      twitter: 'https://twitter.com/MostafaElBermawy',
-      linkedin: 'https://linkedin.com/in/mostafa-elbermawy',
-      github: 'https://github.com/mostafa-elbermawy',
-      email: 'mostafa@anoteroslogos.com'
+      linkedin: 'https://linkedin.com/in/nadezhda-nikolaeva',
+      email: 'nadezhda@anoteroslogos.com'
+    }
+  },
+  // Alias for backward compatibility
+  'mostafa-elbermawy': {
+    name: 'Nadezhda Nikolaeva',
+    slug: 'nadezhda-nikolaeva',
+    jobTitle: 'Co-founder & CEO Marketing',
+    bio: 'Leading the strategic vision and marketing direction of Anóteros Lógos.',
+    longBio: ['Redirecting to Nadezhda Nikolaeva profile...'],
+    image: '/images/authors/nadezhda-nikolaeva.jpg',
+    expertise: ['Strategic Marketing', 'GEO Strategy'],
+    achievements: [],
+    publications: [],
+    social: {
+      email: 'nadezhda@anoteroslogos.com'
     }
   }
 };
 
 export default function Author() {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const author = slug ? AUTHORS[slug] : null;
 
   useEffect(() => {
@@ -104,7 +121,15 @@ export default function Author() {
   }
 
   return (
-    <div className="min-h-screen bg-brand-bg pt-24 pb-16">
+    <div className="min-h-screen bg-brand-bg">
+      <Header 
+        onMethodClick={() => navigate('/')} 
+        onClientsClick={() => navigate('/')} 
+        onInsightsClick={() => navigate('/')} 
+        onTeamClick={() => navigate('/')} 
+        onContactClick={() => navigate('/')}
+      />
+      <div className="pt-24 pb-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Author Header */}
           <div className="bg-brand-secondary/30 rounded-2xl p-8 mb-12 border border-brand-accent/10">
@@ -253,5 +278,13 @@ export default function Author() {
           </div>
         </div>
       </div>
+      <Footer 
+        onPhilosophyClick={() => navigate('/')}
+        onMethodClick={() => navigate('/')}
+        onClientsClick={() => navigate('/')}
+        onFAQClick={() => navigate('/')}
+        onContactClick={() => navigate('/')}
+      />
+    </div>
   );
 }

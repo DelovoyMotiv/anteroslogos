@@ -37,13 +37,16 @@ export interface BlogCategory {
   count: number;
 }
 
-// Default author
-export const MOSTAFA_AUTHOR: BlogAuthor = {
-  name: 'Mostafa ElBermawy',
-  slug: 'mostafa-elbermawy',
-  image: '/images/authors/mostafa-elbermawy.jpg',
-  bio: 'Founder & Chief GEO Architect at Anóteros Lógos. Creator of The Nicosia Method™.'
+// Default author - Nadezhda Nikolaeva
+export const NADEZHDA_AUTHOR: BlogAuthor = {
+  name: 'Nadezhda Nikolaeva',
+  slug: 'nadezhda-nikolaeva',
+  image: '/images/authors/nadezhda-nikolaeva.jpg',
+  bio: 'Co-founder & CEO Marketing at Anóteros Lógos. Leading strategic vision and marketing direction with expertise in brand architecture and digital authority positioning.'
 };
+
+// Alias for backward compatibility
+export const MOSTAFA_AUTHOR = NADEZHDA_AUTHOR;
 
 // Blog Posts Database
 export const BLOG_POSTS: BlogPost[] = [
@@ -113,7 +116,7 @@ GEO isn't a replacement for SEO—it's an evolution. As AI systems become the pr
 ---
 
 Ready to establish your brand as an authoritative source for AI systems? [Learn about The Nicosia Method™](/geo-vs-seo) or [contact us](#contact) to discuss your GEO strategy.`,
-    author: MOSTAFA_AUTHOR,
+    author: NADEZHDA_AUTHOR,
     publishedDate: '2025-01-15',
     modifiedDate: '2025-01-15',
     readTime: 8,
@@ -201,7 +204,7 @@ Once established, authority is self-reinforcing. As AI systems cite you more fre
 ---
 
 [Contact us](#contact) to learn how The Nicosia Method™ can establish your brand as a source of truth in your industry.`,
-    author: MOSTAFA_AUTHOR,
+    author: NADEZHDA_AUTHOR,
     publishedDate: '2025-01-20',
     modifiedDate: '2025-01-22',
     readTime: 12,
@@ -384,7 +387,7 @@ E-E-A-T signals compound over time. Each credential, publication, citation, and 
 Building E-E-A-T is not a one-time task—it's an ongoing strategy. As AI systems become more sophisticated in evaluating source credibility, strong E-E-A-T will separate authoritative brands from the noise.
 
 [Learn how The Nicosia Method™ systematically builds E-E-A-T signals](/blog/nicosia-method-deep-dive) or [contact us](#contact) for a personalized E-E-A-T audit.`,
-    author: MOSTAFA_AUTHOR,
+    author: NADEZHDA_AUTHOR,
     publishedDate: '2025-01-25',
     modifiedDate: '2025-01-25',
     readTime: 15,
@@ -613,7 +616,7 @@ Knowledge graph optimization is a marathon, not a sprint:
 Knowledge graphs are the foundation upon which AI authority is built. As AI systems increasingly rely on structured entity data, your presence in these graphs directly determines your GEO success.
 
 [Learn how The Nicosia Method™ systematically optimizes knowledge graph presence](/blog/nicosia-method-deep-dive) or [contact us](#contact) for a knowledge graph audit.`,
-    author: MOSTAFA_AUTHOR,
+    author: NADEZHDA_AUTHOR,
     publishedDate: '2025-02-01',
     modifiedDate: '2025-02-01',
     readTime: 18,

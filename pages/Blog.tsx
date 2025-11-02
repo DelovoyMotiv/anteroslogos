@@ -1,116 +1,35 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Calendar, Clock, User, ArrowRight, Tag } from 'lucide-react';
-
-export interface BlogPost {
-  slug: string;
-  title: string;
-  excerpt: string;
-  content?: string;
-  author: {
-    name: string;
-    slug: string;
-    image: string;
-  };
-  publishedDate: string;
-  modifiedDate: string;
-  readTime: number;
-  category: string;
-  tags: string[];
-  image?: string;
-  featured?: boolean;
-}
-
-// Mock blog posts - in production, fetch from CMS or markdown files
-const BLOG_POSTS: BlogPost[] = [
-  {
-    slug: 'intro-to-geo',
-    title: 'Introduction to Generative Engine Optimization',
-    excerpt: 'Understanding the fundamental shift from traditional SEO to GEO and why it matters for your brand\'s digital authority.',
-    author: {
-      name: 'Mostafa ElBermawy',
-      slug: 'mostafa-elbermawy',
-      image: '/images/authors/mostafa-elbermawy.jpg'
-    },
-    publishedDate: '2025-01-15',
-    modifiedDate: '2025-01-15',
-    readTime: 8,
-    category: 'GEO Fundamentals',
-    tags: ['GEO', 'AI Optimization', 'Digital Authority'],
-    image: '/images/blog/intro-to-geo.jpg',
-    featured: true
-  },
-  {
-    slug: 'nicosia-method-deep-dive',
-    title: 'The Nicosia Method™: A Deep Dive',
-    excerpt: 'Explore the three-phase framework that transforms brands into primary sources of truth for AI systems.',
-    author: {
-      name: 'Mostafa ElBermawy',
-      slug: 'mostafa-elbermawy',
-      image: '/images/authors/mostafa-elbermawy.jpg'
-    },
-    publishedDate: '2025-01-20',
-    modifiedDate: '2025-01-22',
-    readTime: 12,
-    category: 'Methodology',
-    tags: ['Nicosia Method', 'GEO Strategy', 'Framework'],
-    image: '/images/blog/nicosia-method.jpg',
-    featured: true
-  },
-  {
-    slug: 'e-e-a-t-signals-for-ai',
-    title: 'Building E-E-A-T Signals That AI Systems Trust',
-    excerpt: 'Learn how to establish Experience, Expertise, Authoritativeness, and Trustworthiness signals that AI models recognize and value.',
-    author: {
-      name: 'Mostafa ElBermawy',
-      slug: 'mostafa-elbermawy',
-      image: '/images/authors/mostafa-elbermawy.jpg'
-    },
-    publishedDate: '2025-01-25',
-    modifiedDate: '2025-01-25',
-    readTime: 10,
-    category: 'E-E-A-T',
-    tags: ['E-E-A-T', 'Authority Building', 'AI Trust'],
-    featured: false
-  },
-  {
-    slug: 'knowledge-graphs-explained',
-    title: 'Knowledge Graphs: The Foundation of AI Authority',
-    excerpt: 'How knowledge graphs work and why optimizing your presence in them is critical for GEO success.',
-    author: {
-      name: 'Mostafa ElBermawy',
-      slug: 'mostafa-elbermawy',
-      image: '/images/authors/mostafa-elbermawy.jpg'
-    },
-    publishedDate: '2025-02-01',
-    modifiedDate: '2025-02-01',
-    readTime: 15,
-    category: 'Technical GEO',
-    tags: ['Knowledge Graphs', 'Semantic Web', 'Structured Data'],
-    featured: false
-  }
-];
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import { BLOG_POSTS, getBlogCategories, getFeaturedPosts, getPostsByCategory } from '../data/blogPosts';
+import type { BlogPost } from '../data/blogPosts';
 
 export default function Blog() {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
   useEffect(() => {
     // Set page title and meta
     document.title = 'Blog - GEO Insights & Strategies | Anóteros Lógos';
-    
-    // In production, fetch from API or load markdown files
-    setPosts(BLOG_POSTS);
   }, []);
 
-  const categories = ['all', ...Array.from(new Set(posts.map(p => p.category)))];
-  const filteredPosts = selectedCategory === 'all' 
-    ? posts 
-    : posts.filter(p => p.category === selectedCategory);
-  const featuredPosts = posts.filter(p => p.featured);
+  const blogCategories = getBlogCategories();
+  const categories = ['all', ...blogCategories.map(c => c.name)];
+  const filteredPosts = getPostsByCategory(selectedCategory);
+  const featuredPosts = getFeaturedPosts();
 
   return (
-    <div className="min-h-screen bg-brand-bg pt-24 pb-16">
+    <div className="min-h-screen bg-brand-bg">
+      <Header 
+        onMethodClick={() => navigate('/')} 
+        onClientsClick={() => navigate('/')} 
+        onInsightsClick={() => navigate('/')} 
+        onTeamClick={() => navigate('/')} 
+        onContactClick={() => navigate('/')}
+      />
+      <div className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="text-center mb-16">
@@ -257,5 +176,13 @@ export default function Blog() {
           </div>
         </div>
       </div>
+      <Footer 
+        onPhilosophyClick={() => navigate('/')}
+        onMethodClick={() => navigate('/')}
+        onClientsClick={() => navigate('/')}
+        onFAQClick={() => navigate('/')}
+        onContactClick={() => navigate('/')}
+      />
+    </div>
   );
 }
