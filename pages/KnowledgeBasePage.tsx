@@ -115,8 +115,8 @@ const KnowledgeBasePage: React.FC = () => {
                 </div>
             </header>
 
-            <main className="relative z-10">
-                <div className="max-w-7xl mx-auto px-6 py-16 md:py-24">
+            <main className="relative z-10 pt-16 sm:pt-20">
+                <div className="max-w-7xl mx-auto px-6 py-8 md:py-12">
                     <div className="text-center mb-16">
                         <div className="inline-block mb-4">
                             <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-accent/10 border border-brand-accent/30 text-brand-accent text-sm font-mono">
