@@ -129,7 +129,7 @@ export default function Author() {
         onTeamClick={() => navigate('/')} 
         onContactClick={() => navigate('/')}
       />
-      <div className="pt-24 sm:pt-28 pb-16">
+      <div className="pt-32 sm:pt-36 pb-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Author Header */}
           <div className="bg-brand-secondary/30 rounded-2xl p-8 mb-12 border border-brand-accent/10">

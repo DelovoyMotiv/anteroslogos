@@ -42,7 +42,7 @@ const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick, onClientsC
     ];
 
     return (
-        <header ref={ref} className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'bg-brand-bg/85 backdrop-blur-xl shadow-2xl shadow-black/30 border-b border-white/5' : 'bg-transparent'}`}>
+        <header ref={ref} className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'bg-brand-bg/85 backdrop-blur-xl shadow-2xl shadow-black/30 border-b border-white/5' : isHomePage ? 'bg-transparent' : 'bg-brand-bg/95 backdrop-blur-xl border-b border-white/5'}`}>
             <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
                 {/* Logo */}
                 <button onClick={scrollToTop} aria-label="Anóteros Lógos, return to top" className="group flex items-center">
