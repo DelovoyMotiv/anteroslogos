@@ -1,39 +1,47 @@
 # Anóteros Lógos - Digital Authority Architects
 
-A modern, high-performance website for **Anóteros Lógos**, a specialized Generative Engine Optimization (GEO) agency. We establish brands as primary sources of truth for AI systems.
+A modern, high-performance website for Anóteros Lógos, a specialized Generative Engine Optimization (GEO) agency. We establish brands as primary sources of truth for AI systems.
 
-**Live Site**: [anoteroslogos.com](https://anoteroslogos.com)
+Live Site: https://anoteroslogos.com
 
-## 🚀 Features
+## Features
 
-- **Modern Design System**: Premium dark theme with sophisticated animations and gradients
-- **Fully Responsive**: Mobile-first design optimized for all devices
-- **SEO & GEO Optimized**: 
+- Modern Design System: Premium dark theme with sophisticated animations and gradients
+- Fully Responsive: Mobile-first design optimized for all devices
+- Blog Platform: Expert GEO insights with markdown rendering and proper article structure
+- SEO and GEO Optimized:
   - Comprehensive meta tags (Open Graph, Twitter Cards, AI-specific meta)
-  - Rich structured data with Schema.org JSON-LD (Organization, WebSite, Service, FAQPage, BreadcrumbList)
-  - AI-crawler friendly (robots.txt supporting 15+ AI crawlers including GPTBot, Claude-Web, PerplexityBot)
+  - Enhanced Schema.org structured data with Knowledge Graph properties
+  - Organization schema with knowsAbout, expertise, credentials
+  - Person schema with E-E-A-T signals (expertise, hasCredential, affiliation)
+  - BlogPosting schema with isAccessibleForFree, speakable, about properties
+  - BreadcrumbList, FAQPage, VideoObject, HowTo schema support
+  - AI-crawler friendly (robots.txt supporting 15+ AI crawlers)
   - Complete sitemap.xml with priority-based indexing
-  - Self-hosted fonts for optimal performance and reduced external requests
-- **Core Web Vitals Optimized**: 
-  - Route-based code splitting with React.lazy()
-  - LCP < 2.5s, CLS < 0.1, INP < 200ms
+  - Self-hosted fonts for optimal performance
+- Core Web Vitals Optimized:
+  - Route-based code splitting with React.lazy
+  - LCP under 2.5s, CLS under 0.1, INP under 200ms
   - Web Vitals monitoring integrated
-- **Accessible**: WCAG 2.1 AA compliant with proper ARIA labels and semantic HTML
-- **Type-Safe**: Full TypeScript 5.8 implementation with strict mode
-- **Knowledge Base**: Comprehensive GEO glossary with 21+ industry terms
+- Accessible: WCAG 2.1 AA compliant with proper ARIA labels and semantic HTML
+- Type-Safe: Full TypeScript 5.8 implementation with strict mode
+- Knowledge Base: Comprehensive GEO glossary with 21+ industry terms
+- Author Profiles: Detailed E-E-A-T compliant author pages with credentials
 
-## 🏗️ Tech Stack
+## Tech Stack
 
-- **React 18.3.1** - UI library with concurrent rendering
-- **TypeScript 5.8** - Type safety with strict mode
-- **Vite 6.0.11** - Lightning-fast build tool and dev server
-- **React Router 7.1.3** - Client-side routing with code splitting
-- **Tailwind CSS 3.4+** - Utility-first CSS framework with custom design tokens
-- **web-vitals 4.2.4** - Core Web Vitals monitoring
-- **Lucide React 0.469.0** - Modern icon library
-- **ESLint 9+** - Code quality and consistency
+- React 18.3.1 - UI library with concurrent rendering
+- TypeScript 5.8 - Type safety with strict mode
+- Vite 6.0.11 - Lightning-fast build tool and dev server
+- React Router 7.1.3 - Client-side routing with code splitting
+- Tailwind CSS 3.4+ - Utility-first CSS framework with custom design tokens
+- react-markdown - Markdown rendering for blog articles
+- remark-gfm - GitHub Flavored Markdown support
+- web-vitals 4.2.4 - Core Web Vitals monitoring
+- Lucide React 0.469.0 - Modern icon library
+- ESLint 9+ - Code quality and consistency
 
-## 📦 Installation
+## Installation
 
 ```bash
 # Install dependencies
@@ -55,7 +63,7 @@ npm run typecheck
 npm run lint
 ```
 
-## 🔧 Environment Variables
+## Environment Variables
 
 Copy `.env.example` to `.env` and configure:
 
@@ -73,7 +81,7 @@ VITE_SITE_DESCRIPTION=Generative Engine Optimization Agency
 # VITE_GA_TRACKING_ID=G-XXXXXXXXXX
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 F:\air\
@@ -81,6 +89,7 @@ F:\air\
 │   ├── components/          # React components
 │   │   ├── AnimatedSection.tsx
 │   │   ├── ClientProfile.tsx
+│   │   ├── CookieConsent.tsx
 │   │   ├── DigitalBackground.tsx
 │   │   ├── FAQ.tsx
 │   │   ├── FinalCTA.tsx
@@ -88,24 +97,41 @@ F:\air\
 │   │   ├── Header.tsx
 │   │   ├── Hero.tsx
 │   │   ├── Icons.tsx
+│   │   ├── Insights.tsx
 │   │   ├── Modal.tsx
 │   │   ├── NicosiaMethod.tsx
 │   │   ├── Philosophy.tsx
 │   │   ├── Stats.tsx
+│   │   ├── Team.tsx
 │   │   └── TheShift.tsx
 │   ├── pages/               # Route pages (lazy-loaded)
-│   │   ├── Home.tsx         # Main landing page
-│   │   ├── KnowledgeBase.tsx  # GEO glossary (21+ terms)
-│   │   └── GeoVsSeo.tsx     # Educational comparison page
+│   │   ├── HomePage.tsx     # Main landing page
+│   │   ├── Blog.tsx         # Blog listing with categories
+│   │   ├── BlogPost.tsx     # Individual article page with markdown rendering
+│   │   ├── Author.tsx       # Author profile with E-E-A-T signals
+│   │   ├── KnowledgeBasePage.tsx  # GEO glossary (21+ terms)
+│   │   ├── GeoVsSeoPage.tsx # Educational comparison page
+│   │   ├── PrivacyPolicy.tsx
+│   │   └── CookiePolicy.tsx
+│   ├── data/                # Content and data
+│   │   ├── blogPosts.ts     # Blog articles database
+│   │   ├── geoKnowledgeBase.ts  # Knowledge base terms
+│   │   └── teamMembers.ts   # Team information
+│   ├── utils/               # Utilities
+│   │   ├── schemas.ts       # Schema.org structured data generators
+│   │   └── analytics.ts     # Web vitals and analytics
 │   ├── App.tsx              # Main application with routing
 │   ├── main.tsx             # Application entry point
 │   ├── index.css            # Global styles, Tailwind, and custom fonts
 │   └── vite-env.d.ts        # Vite type definitions
 ├── public/                  # Static assets
-│   ├── robots.txt           # AI & search crawler configuration (15+ crawlers)
+│   ├── robots.txt           # AI and search crawler configuration (15+ crawlers)
 │   ├── sitemap.xml          # Priority-based site structure
-│   ├── index.html           # Main HTML with structured data
-│   └── logo.png             # Brand logo
+│   ├── favicon.svg          # Brand favicon
+│   ├── manifest.json        # Web app manifest
+│   └── privacy-policy.pdf   # Privacy policy document
+├── index.html               # Main HTML with enhanced structured data
+├── GEO_IMPLEMENTATION_ROADMAP.md  # GEO optimization action plan
 ├── tailwind.config.js       # Tailwind with custom animations
 ├── tsconfig.json            # TypeScript strict configuration
 ├── vite.config.ts           # Vite with optimizations
@@ -114,31 +140,39 @@ F:\air\
 └── README.md                # Project documentation
 ```
 
-## 🎨 Component Overview
+## Component Overview
 
 ### Pages (Route Components)
-- **Home**: Main landing page with all core sections
-- **KnowledgeBase**: Educational GEO glossary with 21+ industry terms and definitions
-- **GeoVsSeo**: Comprehensive comparison page explaining the evolution from SEO to GEO
+- HomePage: Main landing page with all core sections
+- Blog: Article listing with category filters and featured posts
+- BlogPost: Individual article page with markdown rendering, reading progress, share functionality
+- Author: Author profile pages with credentials, expertise, publications
+- KnowledgeBasePage: Educational GEO glossary with 21+ industry terms and definitions
+- GeoVsSeoPage: Comprehensive comparison page explaining the evolution from SEO to GEO
+- PrivacyPolicy: Privacy policy and data handling information
+- CookiePolicy: Cookie usage and consent information
 
 ### Core Sections (Home Page)
-- **Hero**: Main landing with animated CTA and value proposition
-- **TheShift**: Problem statement showcasing the SEO → GEO paradigm shift
-- **Philosophy**: Solution overview with Extract → Structure → Deploy framework
-- **Stats**: Social proof metrics with animated counters
-- **NicosiaMethod™**: Detailed 3-phase process (Intelligence → Authority → Amplification)
-- **ClientProfile**: Target audience segments with hover states
-- **FAQ**: 12 comprehensive Q&A items with structured data
-- **FinalCTA**: High-conversion section with contact form modal
+- Hero: Main landing with animated CTA and value proposition
+- TheShift: Problem statement showcasing the SEO to GEO paradigm shift
+- Philosophy: Solution overview with Extract, Structure, Deploy framework
+- Stats: Social proof metrics with animated counters
+- NicosiaMethod: Detailed 3-phase process (Intelligence, Authority, Amplification)
+- ClientProfile: Target audience segments with hover states
+- Insights: Latest research and industry insights
+- Team: Team member profiles with expertise areas
+- FAQ: 12 comprehensive Q&A items with structured data
+- FinalCTA: High-conversion section with contact form modal
 
 ### Utilities
-- **Header**: Sticky navigation with smooth scroll and active states
-- **Footer**: Site footer with navigation links, social links, and legal info
-- **Modal**: Contact form with validation and accessibility features
-- **AnimatedSection**: Intersection Observer wrapper for scroll-triggered animations
-- **DigitalBackground**: Animated particle/grid background effect
+- Header: Sticky navigation with smooth scroll and active states
+- Footer: Site footer with navigation links, social links, and legal info
+- Modal: Contact form with validation and accessibility features
+- AnimatedSection: Intersection Observer wrapper for scroll-triggered animations
+- DigitalBackground: Animated particle/grid background effect
+- CookieConsent: GDPR-compliant cookie consent banner
 
-## 🌐 SEO & GEO Features
+## SEO and GEO Features
 
 ### Meta Tags
 - Complete Open Graph tags for social sharing
@@ -147,12 +181,16 @@ F:\air\
 - Canonical URLs
 
 ### Structured Data (Schema.org)
-- Organization schema
+- Organization schema with Knowledge Graph properties (knowsAbout, about, sameAs, founder)
+- Person schema with E-E-A-T signals (expertise, knowsAbout, hasCredential, affiliation)
+- BlogPosting schema with AI-optimized properties (isAccessibleForFree, speakable, about)
+- Article schema for knowledge base content
 - WebSite schema with search action
-- WebPage schema for each page
 - Service schema for GEO services
-- FAQPage schema with all Q&A
-- BreadcrumbList for navigation
+- FAQPage schema with all questions and answers
+- BreadcrumbList for site navigation hierarchy
+- VideoObject schema prepared for multimodal content
+- HowTo schema for tutorial content
 
 ### AI Crawler Support
 Configured in `robots.txt` for:
@@ -164,7 +202,7 @@ Configured in `robots.txt` for:
 - Gemini (Google Bard)
 - And 10+ more AI crawlers
 
-## 🚢 Deployment
+## Deployment
 
 ### Vercel (Current Production Setup)
 
@@ -215,7 +253,7 @@ npm run build
 # Configure SPA fallback to index.html
 ```
 
-## 📝 Customization
+## Customization
 
 ### Colors (tailwind.config.js)
 ```js
@@ -242,7 +280,7 @@ await fetch('/api/contact', {
 });
 ```
 
-## ✅ Pre-Production Checklist
+## Pre-Production Checklist
 
 - [x] TypeScript compilation (no errors)
 - [x] ESLint passing (0 warnings, 0 errors)
@@ -256,7 +294,7 @@ await fetch('/api/contact', {
 - [x] Contact form validation
 - [x] Environment variables documented
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Build Errors
 ```bash
@@ -305,37 +343,49 @@ npm run build -- --mode production --sourcemap
 npm prune
 ```
 
-## 📈 Performance
+## Performance
 
 ### Production Build Stats (Latest)
-- **HTML**: 11.83 kB (gzip: 3.03 kB)
-- **CSS**: 39.57 kB (gzip: 6.76 kB)
-- **JS (vendor)**: 11.18 kB (gzip: 3.95 kB)
-- **JS (main)**: 247.65 kB (gzip: 72.71 kB)
-- **Total Bundle**: ~310 kB (gzip: ~86 kB)
-- **Build Time**: ~3s on CI/CD
+- HTML: 22.10 kB (gzip: 5.15 kB)
+- CSS: 58.26 kB (gzip: 9.05 kB)
+- JS (main): 183.59 kB (gzip: 58.35 kB)
+- JS (blog): 163.75 kB (gzip: 47.75 kB)
+- JS (home): 73.53 kB (gzip: 22.14 kB)
+- Total Bundle: approximately 500 kB (gzip: approximately 142 kB)
+- Build Time: approximately 5-6s on CI/CD
 
 ### Core Web Vitals (Production)
-- **LCP (Largest Contentful Paint)**: < 2.5s ✅
-- **FID/INP (Interaction Delay)**: < 200ms ✅
-- **CLS (Cumulative Layout Shift)**: < 0.1 ✅
+- LCP (Largest Contentful Paint): under 2.5s
+- FID/INP (Interaction Delay): under 200ms
+- CLS (Cumulative Layout Shift): under 0.1
 
 ### Optimization Features
-- Route-based code splitting with React.lazy()
+- Route-based code splitting with React.lazy
 - Tree-shaking and dead code elimination
 - CSS purging via Tailwind
 - Self-hosted fonts (no external requests)
+- Markdown rendering with proper code highlighting
 - Minified and optimized assets
 - Gzip compression enabled on Vercel
 
-## 📄 License
+## GEO Implementation
 
-Proprietary - © 2025 Anóteros Lógos. All rights reserved.
+For detailed GEO optimization roadmap and implementation plan, see GEO_IMPLEMENTATION_ROADMAP.md
 
-## 🤝 Support
+Key features implemented:
+- Enhanced Schema.org markup with Knowledge Graph connections
+- E-E-A-T signals in Person and Organization schemas
+- AI-crawler optimized robots.txt (GPTBot, Claude-Web, Google-Extended, PerplexityBot)
+- Priority-based sitemap with proper AI discovery hints
+- Multimodal content schema support (VideoObject, HowTo)
+- BreadcrumbList and FAQPage schemas for better AI understanding
+
+## License
+
+Proprietary - Copyright 2025 Anóteros Lógos. All rights reserved.
+
+## Support
 
 For technical support or customization requests, contact the development team.
 
----
-
-**Built with ❤️ for the AI-first era**
+Built for the AI-first era
