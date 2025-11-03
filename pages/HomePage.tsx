@@ -18,10 +18,10 @@ import CookieConsent from '../components/CookieConsent';
 const HomePage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     
-    const nicosiaMethodRef = useRef<HTMLElement>(null);
-    const philosophyRef = useRef<HTMLElement>(null);
-    const clientProfileRef = useRef<HTMLElement>(null);
-    const faqRef = useRef<HTMLElement>(null);
+    const nicosiaMethodRef = useRef<HTMLElement | null>(null);
+    const philosophyRef = useRef<HTMLElement | null>(null);
+    const clientProfileRef = useRef<HTMLElement | null>(null);
+    const faqRef = useRef<HTMLElement | null>(null);
 
     useEffect(() => {
         if (isModalOpen) {
@@ -34,7 +34,7 @@ const HomePage: React.FC = () => {
         };
     }, [isModalOpen]);
 
-    const handleScrollTo = (ref: React.RefObject<HTMLElement>) => {
+    const handleScrollTo = (ref: React.RefObject<HTMLElement | null>) => {
         ref.current?.scrollIntoView({ behavior: 'smooth' });
     };
 

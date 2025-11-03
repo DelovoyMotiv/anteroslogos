@@ -10,7 +10,7 @@ interface Feature {
     icon: React.ReactElement;
 }
 
-const Philosophy = forwardRef<HTMLElement>((props, ref) => {
+const Philosophy = forwardRef<HTMLElement>((_props, ref) => {
     const features: Feature[] = [
         {
             number: "01",

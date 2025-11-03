@@ -12,7 +12,7 @@ interface MethodStep {
     outcome: string;
 }
 
-const NicosiaMethod = forwardRef<HTMLElement>((props, ref) => {
+const NicosiaMethod = forwardRef<HTMLElement>((_props, ref) => {
     const steps: MethodStep[] = [
         {
             icon: AnalysisIcon,

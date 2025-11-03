@@ -1,6 +1,7 @@
 import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LoadingSpinner from './components/LoadingSpinner';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 // Lazy load all route components for optimal bundle splitting
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -15,21 +16,23 @@ const NotFound = lazy(() => import('./components/NotFound'));
 
 const App: React.FC = () => {
     return (
-        <Router>
-            <Suspense fallback={<LoadingSpinner />}>
-                <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/knowledge-base" element={<KnowledgeBasePage />} />
-                    <Route path="/geo-vs-seo" element={<GeoVsSeoPage />} />
-                    <Route path="/blog" element={<Blog />} />
-                    <Route path="/blog/:slug" element={<BlogPost />} />
-                    <Route path="/author/:slug" element={<AuthorPage />} />
-                    <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-                    <Route path="/cookie-policy" element={<CookiePolicyPage />} />
-                    <Route path="*" element={<NotFound />} />
-                </Routes>
-            </Suspense>
-        </Router>
+        <ErrorBoundary>
+            <Router>
+                <Suspense fallback={<LoadingSpinner />}>
+                    <Routes>
+                        <Route path="/" element={<HomePage />} />
+                        <Route path="/knowledge-base" element={<KnowledgeBasePage />} />
+                        <Route path="/geo-vs-seo" element={<GeoVsSeoPage />} />
+                        <Route path="/blog" element={<Blog />} />
+                        <Route path="/blog/:slug" element={<BlogPost />} />
+                        <Route path="/author/:slug" element={<AuthorPage />} />
+                        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                        <Route path="/cookie-policy" element={<CookiePolicyPage />} />
+                        <Route path="*" element={<NotFound />} />
+                    </Routes>
+                </Suspense>
+            </Router>
+        </ErrorBoundary>
     );
 };
 

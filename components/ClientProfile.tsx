@@ -16,7 +16,7 @@ interface ProfileData {
     highlight: string;
 }
 
-const ClientProfile = forwardRef<HTMLElement>((props, ref) => {
+const ClientProfile = forwardRef<HTMLElement>((_props, ref) => {
     const profiles: ProfileData[] = [
         { 
             icon: TechIcon, 

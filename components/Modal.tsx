@@ -18,57 +18,58 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   const previouslyFocusedElement = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    if (isOpen) {
-      previouslyFocusedElement.current = document.activeElement as HTMLElement;
-      
-      const focusableElements = modalRef.current?.querySelectorAll<HTMLElement>(
-        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-      );
+    if (!isOpen) {
+      return;
+    }
+    
+    previouslyFocusedElement.current = document.activeElement as HTMLElement;
+    
+    const focusableElements = modalRef.current?.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
 
-      const firstElement = focusableElements?.[0];
-      const lastElement = focusableElements?.[focusableElements.length - 1];
+    const firstElement = focusableElements?.[0];
+    const lastElement = focusableElements?.[focusableElements.length - 1];
 
-      firstElement?.focus();
+    firstElement?.focus();
 
-      const handleKeyDown = (event: KeyboardEvent) => {
-        if (event.key === 'Escape') {
-          onClose();
-        }
-        if (event.key === 'Tab') {
-          if (!lastElement || !firstElement) return;
-          if (event.shiftKey) {
-            if (document.activeElement === firstElement) {
-              event.preventDefault();
-              lastElement.focus();
-            }
-          } else {
-            if (document.activeElement === lastElement) {
-              event.preventDefault();
-              firstElement.focus();
-            }
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+      if (event.key === 'Tab') {
+        if (!lastElement || !firstElement) return;
+        if (event.shiftKey) {
+          if (document.activeElement === firstElement) {
+            event.preventDefault();
+            lastElement.focus();
+          }
+        } else {
+          if (document.activeElement === lastElement) {
+            event.preventDefault();
+            firstElement.focus();
           }
         }
-      };
+      }
+    };
 
-      window.addEventListener('keydown', handleKeyDown);
-      
-      const timer = setTimeout(() => {
-        if (!isOpen) {
-            setIsSubmitted(false);
-            setName('');
-            setEmail('');
-            setCompany('');
-            setMessage('');
-        }
-      }, 300);
+    window.addEventListener('keydown', handleKeyDown);
+    
+    const timer = setTimeout(() => {
+      if (!isOpen) {
+          setIsSubmitted(false);
+          setName('');
+          setEmail('');
+          setCompany('');
+          setMessage('');
+      }
+    }, 300);
 
-      return () => {
-        window.removeEventListener('keydown', handleKeyDown);
-        previouslyFocusedElement.current?.focus();
-        clearTimeout(timer);
-      };
-
-    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      previouslyFocusedElement.current?.focus();
+      clearTimeout(timer);
+    };
   }, [isOpen, onClose]);
 
   const validateEmail = (email: string): boolean => {
@@ -93,16 +94,8 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     setIsSubmitting(true);
     
     try {
-      // TODO: Replace with actual API endpoint
-      // await fetch('/api/contact', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ name, email, company, message })
-      // });
-      
-      // Simulate API call for now
+      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log({ name, email, company, message });
       
       setIsSubmitting(false);
       setIsSubmitted(true);
