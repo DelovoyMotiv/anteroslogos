@@ -37,8 +37,8 @@ const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick, onClientsC
     }, []);
 
     const menuItems = [
-        { label: 'Method', onClick: onMethodClick, isScroll: true },
-        { label: 'Clients', onClick: onClientsClick, isScroll: true },
+        { label: 'Method', onClick: onMethodClick || (() => navigate('/')), isScroll: true },
+        { label: 'Clients', onClick: onClientsClick || (() => navigate('/')), isScroll: true },
         { label: 'GEO Audit', onClick: () => navigate('/geo-audit'), isScroll: false, highlight: true },
         { label: 'Blog', onClick: () => navigate('/blog'), isScroll: false },
         { label: 'Knowledge Base', onClick: () => navigate('/knowledge-base'), isScroll: false },
