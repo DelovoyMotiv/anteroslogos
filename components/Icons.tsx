@@ -39,7 +39,7 @@ export const SynthesisIcon: React.FC<{className?: string}> = ({ className = "str
         <path d="M8 12L20 24" strokeWidth="2" strokeLinecap="round"/>
         <path d="M40 12L28 24" strokeWidth="2" strokeLinecap="round"/>
         <path d="M24 4V24" strokeWidth="2" strokeLinecap="round"/>
-        <path d="M24 24L16 34L24 44L32 34L24 24Z" strokeWidth="2" stroke-linejoin="round" className="fill-brand-accent/20"/>
+        <path d="M24 24L16 34L24 44L32 34L24 24Z" strokeWidth="2" strokeLinejoin="round" className="fill-brand-accent/20"/>
     </svg>
 );
 
