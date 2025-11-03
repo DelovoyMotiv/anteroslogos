@@ -56,4 +56,33 @@ Thumbs.db
 *.tmp
 *.temp
 
+# Vercel
 .vercel
+
+# Documentation and reports (keep only README.md and LICENSE)
+*_DOCUMENTATION.md
+*_AUDIT*.md
+*_REPORT*.md
+*_ANALYSIS*.md
+*_STRATEGY.md
+*_SUMMARY.md
+*_PLAN.md
+*_RESPONSE.md
+*_UPDATE.md
+*_SETUP.md
+*_READY.md
+*_DEPLOY*.md
+CONTRIBUTING.md
+docs/
+metadata.json
+
+# Scripts and validation
+*.ps1
+*.sh
+!scripts/*.sh
+validate-*.ps1
+
+# Text notes
+*.txt
+!humans.txt
+!robots.txt
