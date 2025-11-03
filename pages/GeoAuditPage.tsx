@@ -106,7 +106,7 @@ const GeoAuditPage = () => {
           {/* Analysis Form */}
           <form onSubmit={handleAnalyze} className="max-w-2xl mx-auto mb-8">
             {/* Desktop: Input with button inside */}
-            <div className="hidden sm:block relative">
+            <div className="hidden md:block relative">
               <input
                 type="text"
                 value={url}
@@ -135,7 +135,7 @@ const GeoAuditPage = () => {
             </div>
             
             {/* Mobile: Stacked input and button */}
-            <div className="sm:hidden space-y-4">
+            <div className="md:hidden space-y-4">
               <input
                 type="text"
                 value={url}
