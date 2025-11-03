@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { auditWebsite, type AuditResult } from '../utils/geoAudit';
-import { Search, AlertCircle, CheckCircle, TrendingUp, Download, Share2, ExternalLink, ArrowLeft } from 'lucide-react';
+import { auditWebsite, type AuditResult } from '../utils/geoAuditEnhanced';
+import { Search, AlertCircle, CheckCircle, TrendingUp, Download, Share2, ExternalLink, ArrowLeft, Award, Target, Zap } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
@@ -197,7 +197,21 @@ const GeoAuditPage = () => {
             <div className="mb-12 p-6 sm:p-8 bg-gradient-to-br from-brand-secondary/30 to-transparent border border-brand-accent/30 rounded-2xl">
               <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
                 <div className="text-center lg:text-left">
-                  <h2 className="text-xl sm:text-2xl font-bold mb-2">Overall GEO Score</h2>
+                  <div className="flex items-center gap-3 mb-3 justify-center lg:justify-start">
+                    <h2 className="text-xl sm:text-2xl font-bold">Overall GEO Score</h2>
+                    {result.grade && (
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
+                        result.grade === 'Authority' ? 'bg-purple-500/20 text-purple-300' :
+                        result.grade === 'Expert' ? 'bg-green-500/20 text-green-300' :
+                        result.grade === 'Advanced' ? 'bg-blue-500/20 text-blue-300' :
+                        result.grade === 'Intermediate' ? 'bg-yellow-500/20 text-yellow-300' :
+                        'bg-gray-500/20 text-gray-300'
+                      }`}>
+                        <Award className="w-3 h-3 inline mr-1" />
+                        {result.grade}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-sm sm:text-base text-white/60 break-all">Analyzed: {new URL(result.url).hostname}</p>
                 </div>
                 <div className="text-center">
@@ -227,10 +241,27 @@ const GeoAuditPage = () => {
               </div>
             </div>
 
+            {/* Insights */}
+            {result.insights && result.insights.length > 0 && (
+              <div className="mb-12 p-6 bg-gradient-to-br from-brand-accent/5 to-transparent border border-brand-accent/20 rounded-xl">
+                <div className="flex items-center gap-2 mb-4">
+                  <Target className="w-5 h-5 text-brand-accent" />
+                  <h3 className="text-xl font-bold">Key Insights</h3>
+                </div>
+                <div className="space-y-3">
+                  {result.insights.map((insight, i) => (
+                    <p key={i} className="text-white/80 pl-4 border-l-2 border-brand-accent/30">
+                      {insight}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Score Breakdown */}
             <div className="mb-12">
               <h3 className="text-2xl font-bold mb-6">Score Breakdown</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {Object.entries(result.scores).map(([key, score]) => (
                   <div key={key} className="p-6 bg-white/5 border border-brand-secondary rounded-xl">
                     <div className="flex items-center justify-between mb-3">
@@ -296,31 +327,61 @@ const GeoAuditPage = () => {
                     <div 
                       key={i} 
                       className={`p-6 border rounded-xl ${
-                        rec.priority === 'high' 
-                          ? 'bg-red-500/5 border-red-500/30' 
-                          : rec.priority === 'medium'
-                          ? 'bg-yellow-500/5 border-yellow-500/30'
-                          : 'bg-blue-500/5 border-blue-500/30'
+                        rec.priority === 'critical' ? 'bg-red-500/10 border-red-500/40' :
+                        rec.priority === 'high' ? 'bg-orange-500/5 border-orange-500/30' :
+                        rec.priority === 'medium' ? 'bg-yellow-500/5 border-yellow-500/30' :
+                        'bg-blue-500/5 border-blue-500/30'
                       }`}
                     >
                       <div className="flex flex-col sm:flex-row items-start gap-4">
-                        <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase flex-shrink-0 ${
-                          rec.priority === 'high'
-                            ? 'bg-red-500/20 text-red-400'
-                            : rec.priority === 'medium'
-                            ? 'bg-yellow-500/20 text-yellow-400'
-                            : 'bg-blue-500/20 text-blue-400'
-                        }`}>
-                          {rec.priority}
+                        <div className="flex gap-2 flex-shrink-0">
+                          <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
+                            rec.priority === 'critical' ? 'bg-red-500/30 text-red-300' :
+                            rec.priority === 'high' ? 'bg-orange-500/20 text-orange-300' :
+                            rec.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
+                            'bg-blue-500/20 text-blue-300'
+                          }`}>
+                            {rec.priority}
+                          </div>
+                          {rec.effort && (
+                            <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                              rec.effort === 'quick-win' ? 'bg-green-500/20 text-green-300' :
+                              rec.effort === 'strategic' ? 'bg-blue-500/20 text-blue-300' :
+                              'bg-purple-500/20 text-purple-300'
+                            }`}>
+                              {rec.effort === 'quick-win' && <Zap className="w-3 h-3 inline mr-1" />}
+                              {rec.effort === 'quick-win' ? 'Quick Win' : rec.effort === 'strategic' ? 'Strategic' : 'Long-term'}
+                            </div>
+                          )}
                         </div>
                         <div className="flex-1 w-full sm:w-auto">
                           <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
                             <h4 className="font-bold">{rec.title}</h4>
                             <span className="text-xs text-white/40">• {rec.category}</span>
+                            {rec.estimatedTime && (
+                              <span className="text-xs text-white/30">• {rec.estimatedTime}</span>
+                            )}
                           </div>
                           <p className="text-white/70 mb-3">{rec.description}</p>
-                          <div className="p-3 bg-white/5 rounded-lg border border-white/10">
-                            <p className="text-sm text-brand-accent">💡 Impact: {rec.impact}</p>
+                          <div className="space-y-2">
+                            <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+                              <p className="text-sm text-brand-accent font-semibold mb-1">💡 Impact</p>
+                              <p className="text-sm text-white/70">{rec.impact}</p>
+                            </div>
+                            {rec.implementation && (
+                              <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+                                <p className="text-sm text-green-400 font-semibold mb-1">🔧 Implementation</p>
+                                <p className="text-sm text-white/70">{rec.implementation}</p>
+                              </div>
+                            )}
+                            {rec.codeExample && (
+                              <details className="group">
+                                <summary className="cursor-pointer text-sm text-brand-accent hover:text-blue-400 font-semibold">View Code Example</summary>
+                                <pre className="mt-2 p-3 bg-black/30 rounded-lg text-xs text-green-400 overflow-x-auto border border-brand-accent/20">
+                                  <code>{rec.codeExample}</code>
+                                </pre>
+                              </details>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -350,22 +411,33 @@ const GeoAuditPage = () => {
 
       {/* How It Works */}
       <section className="py-16 px-6 bg-white/5">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-12">How GEO Score Works</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="max-w-6xl mx-auto text-center">
+          <h2 className="text-3xl font-bold mb-4">How GEO Score Works</h2>
+          <p className="text-white/60 mb-12 max-w-3xl mx-auto">
+            Our advanced algorithm analyzes 8 key dimensions of AI readiness to calculate your comprehensive GEO Score.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { title: 'Schema Markup (25%)', desc: 'Evaluates JSON-LD structured data for Organization, Person, Article, and other AI-friendly schemas' },
-              { title: 'AI Crawlers (20%)', desc: 'Checks robots.txt support for GPTBot, Claude, Perplexity, and other AI systems' },
-              { title: 'E-E-A-T (20%)', desc: 'Measures Experience, Expertise, Authoritativeness, and Trustworthiness signals' },
-              { title: 'Meta Tags (15%)', desc: 'Analyzes title, description, Open Graph, and Twitter Card optimization' },
-              { title: 'Structure (10%)', desc: 'Assesses HTML semantics, heading hierarchy, and accessibility' },
-              { title: 'Performance (10%)', desc: 'Evaluates page size, external resources, and loading optimization' }
+              { title: 'Schema Markup (20%)', desc: 'Evaluates 16+ schema types including Organization, Person, Article, Product, Review, HowTo, and validates @graph structure' },
+              { title: 'AI Crawlers (18%)', desc: 'Checks robots.txt for GPTBot, Claude, Perplexity, Google-Extended, and sitemap declaration' },
+              { title: 'E-E-A-T (18%)', desc: 'Analyzes author credentials, content freshness, expert quotes, citations, trust badges, and legal pages' },
+              { title: 'Meta Tags (12%)', desc: 'Validates title, description, OG tags, Twitter Card, canonical, viewport, charset, and lang attributes' },
+              { title: 'Content Quality (10%)', desc: 'Measures word count, readability, structure, multimedia usage, internal/external links, and content depth' },
+              { title: 'Structure (8%)', desc: 'Assesses HTML5 semantics, heading hierarchy, nav/main/footer elements, and accessibility' },
+              { title: 'Performance (8%)', desc: 'Evaluates HTML size, script/style optimization, lazy loading, and resource efficiency' },
+              { title: 'Citation Potential (6%)', desc: 'Calculates factual statements, data points, quotes, references, definitions, and unique insights' }
             ].map((item, i) => (
-              <div key={i} className="text-left">
-                <h4 className="font-bold text-brand-accent mb-2">{item.title}</h4>
-                <p className="text-sm text-white/60">{item.desc}</p>
+              <div key={i} className="text-left p-4 bg-white/5 rounded-xl border border-brand-secondary hover:border-brand-accent transition-all">
+                <h4 className="font-bold text-brand-accent mb-2 text-sm">{item.title}</h4>
+                <p className="text-xs text-white/60">{item.desc}</p>
               </div>
             ))}
+          </div>
+          <div className="mt-12 p-6 bg-brand-accent/5 rounded-xl border border-brand-accent/20">
+            <p className="text-sm text-white/70">
+              <strong className="text-brand-accent">Note:</strong> Weights are dynamically adjusted based on content type. 
+              Content-heavy sites receive higher weighting for Content Quality and Citation Potential.
+            </p>
           </div>
         </div>
       </section>
