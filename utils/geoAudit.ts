@@ -187,19 +187,17 @@ function normalizeUrl(url: string): string {
  * Fetch HTML content (with CORS handling)
  */
 async function fetchHTML(url: string): Promise<string> {
-  // Try direct fetch first
+  // Try direct fetch first (will work if target allows CORS)
   try {
     const response = await fetch(url, {
       method: 'GET',
-      headers: {
-        'User-Agent': 'GEO-Audit-Bot/1.0',
-      },
+      mode: 'cors',
     });
     if (response.ok) {
       return await response.text();
     }
   } catch {
-    // CORS error - use fallback
+    // CORS error expected - use proxy fallback
   }
 
   // Fallback: Use allorigins.win as CORS proxy

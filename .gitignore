@@ -86,3 +86,5 @@ validate-*.ps1
 *.txt
 !humans.txt
 !robots.txt
+
+.vercel
