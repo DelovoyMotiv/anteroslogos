@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Calendar, Clock, User, ArrowLeft, Tag, Share2 } from 'lucide-react';
+import { Calendar, Clock, User, ArrowLeft, Tag, Share2, BookOpen, Sparkles } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { generateBlogPostingSchema, injectSchema } from '../utils/schemas';
@@ -14,6 +14,7 @@ export default function BlogPost() {
   const navigate = useNavigate();
   const [post, setPost] = useState<BlogPost | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
+  const [readingProgress, setReadingProgress] = useState(0);
 
   useEffect(() => {
     if (!slug) return;
@@ -54,6 +55,19 @@ export default function BlogPost() {
     }
   }, [slug]);
 
+  useEffect(() => {
+    const updateReadingProgress = () => {
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight - windowHeight;
+      const scrolled = window.scrollY;
+      const progress = (scrolled / documentHeight) * 100;
+      setReadingProgress(progress);
+    };
+
+    window.addEventListener('scroll', updateReadingProgress);
+    return () => window.removeEventListener('scroll', updateReadingProgress);
+  }, []);
+
   if (!post) {
     return (
       <div className="min-h-screen bg-brand-bg flex items-center justify-center pt-32 sm:pt-36">
@@ -69,6 +83,14 @@ export default function BlogPost() {
 
   return (
     <div className="min-h-screen bg-brand-bg">
+      {/* Reading Progress Bar */}
+      <div className="fixed top-0 left-0 right-0 h-1 bg-brand-secondary/20 z-50">
+        <div 
+          className="h-full bg-gradient-to-r from-brand-accent to-blue-500 transition-all duration-150"
+          style={{ width: `${readingProgress}%` }}
+        />
+      </div>
+      
       <Header 
         onMethodClick={() => navigate('/')} 
         onClientsClick={() => navigate('/')} 
@@ -88,9 +110,63 @@ export default function BlogPost() {
           </Link>
 
           {/* Header */}
-          <header className="mb-12">
+          <header className="mb-16">
+            {/* Category Badge */}
+            <div className="flex items-center gap-3 mb-6">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-brand-accent/10 border border-brand-accent/30 rounded-full">
+                <Sparkles className="w-3.5 h-3.5 text-brand-accent" />
+                <span className="text-xs font-semibold text-brand-accent uppercase tracking-wider">{post.category}</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-brand-text/60">
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>{post.readTime} min read</span>
+              </div>
+            </div>
+
+            {/* Title */}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-brand-text mb-6 leading-tight">
+              {post.title}
+            </h1>
+
+            {/* Excerpt */}
+            <p className="text-xl text-brand-text/70 mb-8 leading-relaxed">
+              {post.excerpt}
+            </p>
+
+            {/* Author & Meta */}
+            <div className="flex flex-wrap items-center gap-4 sm:gap-6 pb-8 mb-8 border-b border-brand-accent/10">
+              <Link 
+                to={`/author/${post.author.slug}`}
+                className="flex items-center gap-3 text-brand-text hover:text-brand-accent transition-colors"
+              >
+                <img 
+                  src={post.author.image} 
+                  alt={post.author.name}
+                  className="w-10 h-10 rounded-full border-2 border-brand-accent/20"
+                />
+                <div className="flex flex-col">
+                  <span className="font-semibold text-sm">{post.author.name}</span>
+                  <span className="text-xs text-brand-text/60">Co-founder & CEO Marketing</span>
+                </div>
+              </Link>
+              <div className="h-8 w-px bg-brand-accent/20 hidden sm:block" />
+              <div className="flex items-center gap-1 text-sm">
+                <Calendar className="w-4 h-4" />
+                <span>{new Date(post.publishedDate).toLocaleDateString('en-US', { 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}</span>
+              </div>
+              <button className="flex items-center gap-2 px-4 py-2 bg-brand-accent/10 hover:bg-brand-accent/20 text-brand-accent rounded-lg transition-colors ml-auto">
+                <Share2 className="w-4 h-4" />
+                <span className="text-sm font-medium">Share</span>
+              </button>
+            </div>
+
+            {/* Featured Image */}
             {post.image && (
-              <div className="aspect-video rounded-2xl overflow-hidden mb-8">
+              <div className="aspect-video rounded-2xl overflow-hidden mb-12 shadow-2xl shadow-black/20">
                 <img 
                   src={post.image} 
                   alt={post.title}
@@ -99,64 +175,25 @@ export default function BlogPost() {
               </div>
             )}
 
-            <div className="flex items-center gap-2 text-brand-accent text-sm mb-4">
-              <Tag className="w-4 h-4" />
-              <span>{post.category}</span>
-            </div>
-
-            <h1 className="text-5xl font-bold text-brand-text mb-6">
-              {post.title}
-            </h1>
-
-            <div className="flex flex-wrap items-center gap-6 text-brand-text/60 mb-6">
-              <Link 
-                to={`/author/${post.author.slug}`}
-                className="flex items-center gap-3 hover:text-brand-accent transition-colors"
-              >
-                <img 
-                  src={post.author.image} 
-                  alt={post.author.name}
-                  className="w-10 h-10 rounded-full"
-                />
-                <span className="font-medium">{post.author.name}</span>
-              </Link>
-              <div className="flex items-center gap-1">
-                <Calendar className="w-4 h-4" />
-                <span>{new Date(post.publishedDate).toLocaleDateString('en-US', { 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Clock className="w-4 h-4" />
-                <span>{post.readTime} min read</span>
-              </div>
-              <button className="flex items-center gap-1 hover:text-brand-accent transition-colors">
-                <Share2 className="w-4 h-4" />
-                <span>Share</span>
-              </button>
-            </div>
-
-            {post.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {post.tags.map(tag => (
-                  <span 
-                    key={tag}
-                    className="text-sm bg-brand-accent/10 text-brand-accent px-4 py-2 rounded-full"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
           </header>
 
+          {/* Tags */}
+          {post.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-12 pb-12 border-b border-brand-accent/10">
+              {post.tags.map(tag => (
+                <span 
+                  key={tag}
+                  className="px-4 py-2 bg-brand-secondary/30 hover:bg-brand-secondary/40 text-brand-text/80 text-sm rounded-lg border border-brand-accent/10 transition-colors cursor-pointer"
+                >
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
+
           {/* Content */}
-          <div className="prose prose-invert prose-lg max-w-none">
-            <div 
-              className="text-brand-text/90 leading-relaxed whitespace-pre-wrap"
-            >
+          <div className="prose prose-invert prose-lg prose-headings:text-brand-text prose-p:text-brand-text/80 prose-strong:text-brand-text prose-a:text-brand-accent hover:prose-a:text-brand-accent/80 max-w-none mb-16">
+            <div className="text-brand-text/90 text-lg leading-relaxed whitespace-pre-wrap">
               {post.content}
             </div>
           </div>
@@ -164,24 +201,28 @@ export default function BlogPost() {
           {/* Related Posts */}
           {relatedPosts.length > 0 && (
             <div className="mt-16 pt-12 border-t border-brand-accent/20">
-              <h3 className="text-2xl font-bold text-brand-text mb-8">Related Articles</h3>
-              <div className="grid md:grid-cols-3 gap-6">
+              <h3 className="text-2xl sm:text-3xl font-bold text-brand-text mb-8 flex items-center gap-3">
+                <span className="w-1 h-8 bg-brand-accent rounded-full"></span>
+                Related Articles
+              </h3>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {relatedPosts.map(relatedPost => (
                   <Link
                     key={relatedPost.slug}
                     to={`/blog/${relatedPost.slug}`}
-                    className="group bg-brand-secondary/20 rounded-xl p-4 border border-brand-accent/10 hover:border-brand-accent/30 transition-all"
+                    className="group bg-gradient-to-br from-brand-secondary/30 to-brand-secondary/10 rounded-xl p-5 border border-brand-accent/10 hover:border-brand-accent/30 hover:shadow-lg hover:shadow-brand-accent/5 transition-all"
                   >
-                    <div className="flex items-center gap-2 text-brand-accent text-xs mb-2">
-                      <Tag className="w-3 h-3" />
-                      <span>{relatedPost.category}</span>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="px-2 py-1 bg-brand-accent/10 text-brand-accent text-xs font-semibold rounded-md uppercase tracking-wider">
+                        {relatedPost.category}
+                      </span>
                     </div>
-                    <h4 className="text-lg font-bold text-brand-text mb-2 group-hover:text-brand-accent transition-colors">
+                    <h4 className="text-lg font-bold text-brand-text mb-2 line-clamp-2 group-hover:text-brand-accent transition-colors">
                       {relatedPost.title}
                     </h4>
-                    <p className="text-brand-text/60 text-sm line-clamp-2">{relatedPost.excerpt}</p>
-                    <div className="flex items-center gap-2 mt-3 text-xs text-brand-text/50">
-                      <Clock className="w-3 h-3" />
+                    <p className="text-brand-text/60 text-sm line-clamp-2 mb-3">{relatedPost.excerpt}</p>
+                    <div className="flex items-center gap-2 text-xs text-brand-text/50">
+                      <Clock className="w-3.5 h-3.5" />
                       <span>{relatedPost.readTime} min read</span>
                     </div>
                   </Link>
