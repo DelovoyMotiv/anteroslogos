@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Calendar, Clock, User, ArrowLeft, Share2, BookOpen, Sparkles } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { generateBlogPostingSchema, injectSchema } from '../utils/schemas';
@@ -212,10 +214,10 @@ export default function BlogPost() {
           )}
 
           {/* Content */}
-          <div className="prose prose-invert prose-lg prose-headings:text-brand-text prose-headings:font-bold prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6 prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-4 prose-p:text-brand-text/80 prose-p:leading-relaxed prose-p:mb-6 prose-strong:text-brand-text prose-strong:font-semibold prose-a:text-brand-accent hover:prose-a:text-brand-accent/80 prose-ul:my-6 prose-li:text-brand-text/80 prose-li:mb-2 prose-code:text-brand-accent prose-code:bg-brand-secondary/30 prose-code:px-2 prose-code:py-1 prose-code:rounded max-w-none mb-16">
-            <div className="text-brand-text/90 text-base sm:text-lg leading-relaxed whitespace-pre-wrap">
+          <div className="prose prose-invert prose-lg prose-headings:text-brand-text prose-headings:font-bold prose-h1:text-4xl prose-h1:mt-0 prose-h1:mb-8 prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6 prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-4 prose-p:text-brand-text/80 prose-p:leading-relaxed prose-p:mb-6 prose-strong:text-brand-text prose-strong:font-semibold prose-a:text-brand-accent hover:prose-a:text-brand-accent/80 prose-ul:my-6 prose-ul:list-disc prose-ul:pl-6 prose-li:text-brand-text/80 prose-li:mb-2 prose-code:text-brand-accent prose-code:bg-brand-secondary/30 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-pre:bg-brand-secondary/20 prose-pre:border prose-pre:border-brand-accent/10 prose-pre:rounded-lg prose-pre:p-4 max-w-none mb-16">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {post.content}
-            </div>
+            </ReactMarkdown>
           </div>
 
           {/* Related Posts */}

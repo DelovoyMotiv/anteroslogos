@@ -96,13 +96,13 @@ Long-form content (2,000+ words) with proper heading structure and internal cita
 
 Traditional SEO metrics like rankings, traffic, and clicks do not capture GEO performance. The new metrics include:
 
-Reference Rate: How often you are cited in AI responses. Track this by querying your topic keywords across ChatGPT, Perplexity, Claude, and Google AI Overviews.
+- **Reference Rate**: How often you are cited in AI responses. Track this by querying your topic keywords across ChatGPT, Perplexity, Claude, and Google AI Overviews.
 
-Citation Quality: The context and prominence of your citations. Primary sources in AI responses carry 5x more authority value than tertiary mentions.
+- **Citation Quality**: The context and prominence of your citations. Primary sources in AI responses carry 5x more authority value than tertiary mentions.
 
-Authority Score: Your perceived expertise in your domain. Monitor knowledge panel presence, Wikipedia citations, and scholarly references.
+- **Authority Score**: Your perceived expertise in your domain. Monitor knowledge panel presence, Wikipedia citations, and scholarly references.
 
-Source Visibility: How often you appear as a primary source. Brands appearing in the first cited source position see 4x higher trust attribution.
+- **Source Visibility**: How often you appear as a primary source. Brands appearing in the first cited source position see 4x higher trust attribution.
 
 ## The Strategic Imperative
 
@@ -334,13 +334,21 @@ Track these metrics to gauge E-E-A-T strength:
 
 ## E-E-A-T Pitfalls to Avoid
 
-Generic author bios like "John is a marketing expert" lack credibility. Instead, use specific credentials: "John Smith, CMO with 15 years experience, certified AI strategist and published author."
+**Generic Author Bios**
+
+Author bios like "John is a marketing expert" lack credibility. Instead, use specific credentials: "John Smith, CMO with 15 years experience, certified AI strategist and published author."
+
+**Missing Source Citations**
 
 Claims without source citations reduce trust. Link to studies, data, and research that support your statements. Every factual claim should have a verifiable source.
 
-Anonymous content or unclear authorship damages E-E-A-T. Every article needs a real author with a complete bio, credentials, and photo.
+**Anonymous Content**
 
-Outdated content signals neglect. Content last updated in 2019 suggests you are not maintaining accuracy. Add revision dates and update content regularly to reflect current best practices.
+Unclear authorship damages E-E-A-T. Every article needs a real author with a complete bio, credentials, and photo.
+
+**Outdated Content**
+
+Content last updated in 2019 signals neglect and suggests you are not maintaining accuracy. Add revision dates and update content regularly to reflect current best practices.
 
 ## The Compounding Effect
 
@@ -350,9 +358,16 @@ In our analysis of 500 domains over 12 months, sites crossing the 15-citation th
 
 ## Action Plan
 
-Start with an E-E-A-T audit. Evaluate each dimension and identify where you are weakest. Implement Schema.org Person and Organization markup across all pages. Build credentials through certifications, awards, and publications. Create authority content that publishes expert-level insights with data and sources. Monitor citation growth by tracking Reference Rate across AI platforms. Iterate continuously to strengthen weak signals.
+1. **Audit Current E-E-A-T**: Evaluate each dimension and identify where you are weakest
+2. **Implement Schema Markup**: Add Person and Organization markup across all pages
+3. **Build Credentials**: Pursue certifications, awards, and publications
+4. **Create Authority Content**: Publish expert-level insights with data and sources
+5. **Monitor Citations**: Track Reference Rate growth across AI platforms
+6. **Iterate Continuously**: Strengthen weak signals based on performance data
 
-Building E-E-A-T is not a one-time task. It is an ongoing strategy. As AI systems become more sophisticated in evaluating source credibility, strong E-E-A-T will separate authoritative brands from the noise. Start now before authority spaces in your industry become saturated.
+Building E-E-A-T is not a one-time task. It is an ongoing strategy. 
+
+As AI systems become more sophisticated in evaluating source credibility, strong E-E-A-T will separate authoritative brands from the noise. Start now before authority spaces in your industry become saturated.
 
 [Learn how The Nicosia Method™ systematically builds E-E-A-T signals](/blog/nicosia-method-deep-dive) or [contact us](#contact) for a personalized E-E-A-T audit.`,
     author: NADEZHDA_AUTHOR,
@@ -554,15 +569,25 @@ Knowledge graph optimization is a marathon, not a sprint:
 
 ## Pitfalls to Avoid
 
-Inconsistent entity naming confuses AI systems. Using "Company Inc" on one platform and "Company LLC" on another prevents entity resolution. Maintain exact name consistency everywhere.
+**Inconsistent Entity Naming**
 
-Missing structured data makes you invisible to AI systems. Without Schema.org markup, AI cannot parse your entity information. This is the single biggest technical blocker to knowledge graph optimization.
+Using "Company Inc" on one platform and "Company LLC" on another prevents entity resolution. Maintain exact name consistency everywhere.
 
-Isolated presence without entity relationships limits your authority. If you are not connected to relevant topics, industries, or experts, AI systems cannot contextualize your expertise.
+**Missing Structured Data**
 
-Generic descriptions like "We are a marketing agency" provide no differentiation. AI systems need specific, unique positioning to understand your authoritative domain.
+Without Schema.org markup, AI cannot parse your entity information. This is the single biggest technical blocker to knowledge graph optimization.
 
-Lacking unique identifiers means AI cannot distinguish you from similar entities. Use consistent URLs, social profiles, and structured IDs across all platforms.
+**Isolated Presence**
+
+If you are not connected to relevant topics, industries, or experts, AI systems cannot contextualize your expertise.
+
+**Generic Descriptions**
+
+Descriptions like "We are a marketing agency" provide no differentiation. AI systems need specific, unique positioning to understand your authoritative domain.
+
+**Lacking Unique Identifiers**
+
+Without consistent URLs, social profiles, and structured IDs across platforms, AI cannot distinguish you from similar entities.
 
 ## Action Plan
 
