@@ -19,6 +19,7 @@ export interface AuditResult {
     performance: number;
     contentQuality: number;
     citationPotential: number;
+    technicalSEO: number;
   };
   details: {
     schemaMarkup: EnhancedSchemaDetails;
@@ -29,6 +30,7 @@ export interface AuditResult {
     performance: PerformanceDetails;
     contentQuality: ContentQualityDetails;
     citationPotential: CitationPotentialDetails;
+    technicalSEO: TechnicalSEODetails;
   };
   recommendations: EnhancedRecommendation[];
   insights: string[];
@@ -177,6 +179,30 @@ export interface PerformanceDetails {
   strengths: string[];
 }
 
+export interface TechnicalSEODetails {
+  hasViewport: boolean;
+  hasCharset: boolean;
+  hasLang: boolean;
+  hasHreflang: boolean;
+  hasAlternateMobile: boolean;
+  hasAMP: boolean;
+  isHTTPS: boolean;
+  hasSecurityHeaders: boolean;
+  hasSitemapXML: boolean;
+  sitemapAccessible: boolean;
+  hasRobotsTxt: boolean;
+  hasCanonical: boolean;
+  hasNoIndex: boolean;
+  httpStatus: number | null;
+  redirectChain: boolean;
+  viewport: string;
+  charset: string;
+  lang: string;
+  securityHeaders: string[];
+  issues: string[];
+  strengths: string[];
+}
+
 // ==================== MAIN AUDIT FUNCTION ====================
 
 export async function auditWebsite(url: string): Promise<AuditResult> {
@@ -198,20 +224,22 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
   const structure = auditStructure(doc);
   const performance = auditPerformance(htmlContent, doc);
   const eeat = auditEnhancedEEAT(doc, htmlContent);
+  const technicalSEO = await auditTechnicalSEO(doc, normalizedUrl);
   const contentQuality = auditContentQuality(doc, htmlContent);
   const citationPotential = auditCitationPotential(doc, htmlContent);
   const aiCrawlers = await auditAICrawlers(normalizedUrl);
 
-  // Calculate scores
+  // Calculate category scores
   const scores = {
     schemaMarkup: calculateSchemaScore(schemaMarkup),
     metaTags: calculateMetaScore(metaTags),
     aiCrawlers: calculateAICrawlersScore(aiCrawlers),
-    eeat: calculateEnhancedEEATScore(eeat),
+    eeat: calculateEEATScore(eeat),
     structure: calculateStructureScore(structure),
     performance: calculatePerformanceScore(performance),
     contentQuality: calculateContentQualityScore(contentQuality),
     citationPotential: calculateCitationPotentialScore(citationPotential),
+    technicalSEO: calculateTechnicalSEOScore(technicalSEO),
   };
 
   // Advanced weighted scoring with dynamic weights based on content type
@@ -250,10 +278,11 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
       aiCrawlers,
       eeat,
       structure,
-      performance,
-      contentQuality,
-      citationPotential,
-    },
+    performance,
+    contentQuality,
+    citationPotential,
+    technicalSEO,
+  };
     recommendations,
     insights,
   };
@@ -951,6 +980,132 @@ function auditPerformance(html: string, doc: Document): PerformanceDetails {
   };
 }
 
+async function auditTechnicalSEO(doc: Document, url: string): Promise<TechnicalSEODetails> {
+  const issues: string[] = [];
+  const strengths: string[] = [];
+  const securityHeaders: string[] = [];
+  
+  // Viewport meta tag
+  const viewportMeta = doc.querySelector('meta[name="viewport"]');
+  const hasViewport = !!viewportMeta;
+  const viewport = viewportMeta?.getAttribute('content') || '';
+  
+  // Charset
+  const charsetMeta = doc.querySelector('meta[charset]') || doc.querySelector('meta[http-equiv="Content-Type"]');
+  const hasCharset = !!charsetMeta;
+  const charset = charsetMeta?.getAttribute('charset') || 'unknown';
+  
+  // Lang attribute
+  const htmlElement = doc.querySelector('html');
+  const hasLang = htmlElement?.hasAttribute('lang') || false;
+  const lang = htmlElement?.getAttribute('lang') || '';
+  
+  // Hreflang tags
+  const hasHreflang = doc.querySelectorAll('link[rel="alternate"][hreflang]').length > 0;
+  
+  // Alternate mobile
+  const hasAlternateMobile = doc.querySelector('link[rel="alternate"][media*="handheld"], link[rel="alternate"][media*="mobile"]') !== null;
+  
+  // AMP support
+  const hasAMP = doc.querySelector('link[rel="amphtml"]') !== null || doc.querySelector('html[amp], html[⚡]') !== null;
+  
+  // HTTPS check
+  const isHTTPS = url.startsWith('https://');
+  
+  // Canonical
+  const hasCanonical = doc.querySelector('link[rel="canonical"]') !== null;
+  
+  // NoIndex check
+  const robotsMeta = doc.querySelector('meta[name="robots"]');
+  const hasNoIndex = robotsMeta?.getAttribute('content')?.includes('noindex') || false;
+  
+  // Sitemap check
+  let hasSitemapXML = false;
+  let sitemapAccessible = false;
+  try {
+    const sitemapUrl = new URL('/sitemap.xml', url).toString();
+    const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(sitemapUrl)}`);
+    hasSitemapXML = response.ok;
+    sitemapAccessible = response.ok;
+  } catch {
+    // Sitemap check failed
+  }
+  
+  // Robots.txt check (reuse from AI crawlers audit)
+  let hasRobotsTxt = false;
+  try {
+    const robotsUrl = new URL('/robots.txt', url).toString();
+    const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(robotsUrl)}`);
+    hasRobotsTxt = response.ok;
+  } catch {
+    // Robots.txt check failed
+  }
+  
+  // HTTP status (can't reliably check from client without CORS issues)
+  const httpStatus = null;
+  
+  // Redirect chain (can't detect from client)
+  const redirectChain = false;
+  
+  // Security headers (can't access from client, would need server-side check)
+  const hasSecurityHeaders = false;
+  
+  // Build issues and strengths
+  if (!hasViewport) issues.push('Missing viewport meta tag - critical for mobile');
+  else {
+    strengths.push('Viewport meta tag present');
+    if (viewport.includes('width=device-width')) strengths.push('Mobile-friendly viewport configuration');
+  }
+  
+  if (!hasCharset) issues.push('Missing charset declaration');
+  else if (charset.toLowerCase().includes('utf-8')) strengths.push('UTF-8 charset (optimal)');
+  
+  if (!hasLang) issues.push('Missing lang attribute on <html> - important for AI language detection');
+  else strengths.push(`Language declared (${lang})`);
+  
+  if (!hasCanonical) issues.push('Missing canonical URL - can cause duplicate content issues');
+  else strengths.push('Canonical URL specified');
+  
+  if (!isHTTPS) issues.push('⚠️ Site not using HTTPS - major security and ranking issue');
+  else strengths.push('✓ HTTPS enabled');
+  
+  if (hasHreflang) strengths.push('Hreflang tags for international SEO');
+  if (hasAlternateMobile) strengths.push('Mobile alternate URL specified');
+  if (hasAMP) strengths.push('AMP version available');
+  
+  if (hasSitemapXML && sitemapAccessible) strengths.push('Sitemap.xml accessible');
+  else if (!hasSitemapXML) issues.push('Sitemap.xml not found');
+  
+  if (hasRobotsTxt) strengths.push('Robots.txt present');
+  else issues.push('Robots.txt not found');
+  
+  if (hasNoIndex) issues.push('⚠️ Page has noindex directive - will not be indexed by search engines');
+  
+  return {
+    hasViewport,
+    hasCharset,
+    hasLang,
+    hasHreflang,
+    hasAlternateMobile,
+    hasAMP,
+    isHTTPS,
+    hasSecurityHeaders,
+    hasSitemapXML,
+    sitemapAccessible,
+    hasRobotsTxt,
+    hasCanonical,
+    hasNoIndex,
+    httpStatus,
+    redirectChain,
+    viewport,
+    charset,
+    lang,
+    securityHeaders,
+    issues,
+    strengths,
+  };
+}
+
 // ==================== SCORING FUNCTIONS ====================
 
 function calculateSchemaScore(details: EnhancedSchemaDetails): number {
@@ -1065,17 +1220,45 @@ function calculateCitationPotentialScore(details: CitationPotentialDetails): num
   return details.score;
 }
 
+function calculateTechnicalSEOScore(details: TechnicalSEODetails): number {
+  let score = 0;
+  
+  // Core technical elements (50 points)
+  if (details.hasViewport) score += 8;
+  if (details.hasCharset) score += 7;
+  if (details.hasLang) score += 8;
+  if (details.hasCanonical) score += 10;
+  if (details.isHTTPS) score += 12;
+  if (details.hasSitemapXML && details.sitemapAccessible) score += 5;
+  
+  // Advanced features (30 points)
+  if (details.hasHreflang) score += 10;
+  if (details.hasAlternateMobile) score += 5;
+  if (details.hasAMP) score += 5;
+  if (details.hasSecurityHeaders) score += 10;
+  
+  // Status checks (20 points)
+  if (details.httpStatus === 200) score += 10;
+  else if (details.httpStatus && details.httpStatus < 400) score += 5;
+  
+  if (!details.redirectChain) score += 5;
+  if (!details.hasNoIndex) score += 5;
+  
+  return Math.max(0, Math.min(100, score));
+}
+
 function calculateOverallScore(scores: any, _schemaDetails: EnhancedSchemaDetails): number {
   // Dynamic weighting based on content type
-  let weights = {
-    schemaMarkup: 0.20,
-    metaTags: 0.12,
-    aiCrawlers: 0.18,
-    eeat: 0.18,
-    structure: 0.08,
-    performance: 0.08,
+  const weights = {
+    schemaMarkup: 0.18,
+    aiCrawlers: 0.16,
+    eeat: 0.16,
+    technicalSEO: 0.14,
+    metaTags: 0.10,
     contentQuality: 0.10,
-    citationPotential: 0.06,
+    structure: 0.07,
+    performance: 0.07,
+    citationPotential: 0.02,
   };
 
   // Adjust weights for content-heavy sites
@@ -1093,7 +1276,8 @@ function calculateOverallScore(scores: any, _schemaDetails: EnhancedSchemaDetail
     scores.structure * weights.structure +
     scores.performance * weights.performance +
     scores.contentQuality * weights.contentQuality +
-    scores.citationPotential * weights.citationPotential;
+    scores.citationPotential * weights.citationPotential +
+    scores.technicalSEO * weights.technicalSEO;
 
   return Math.round(overall);
 }
@@ -1225,6 +1409,62 @@ Allow: /`,
     });
   }
 
+  // Critical: Technical SEO
+  if (!details.technicalSEO.isHTTPS) {
+    recommendations.push({
+      category: 'Technical SEO',
+      priority: 'critical',
+      effort: 'strategic',
+      title: 'Enable HTTPS',
+      description: 'Your site is not using HTTPS. This is a critical security and SEO issue.',
+      impact: 'HTTPS is a ranking factor and required for modern web. Non-HTTPS sites are marked as "Not Secure".',
+      implementation: 'Obtain and install SSL certificate from your hosting provider or use Let\'s Encrypt (free).',
+      estimatedTime: '1-2 hours',
+    });
+  }
+
+  if (!details.technicalSEO.hasViewport) {
+    recommendations.push({
+      category: 'Technical SEO',
+      priority: 'high',
+      effort: 'quick-win',
+      title: 'Add Viewport Meta Tag',
+      description: 'Missing viewport meta tag - critical for mobile responsiveness.',
+      impact: 'Essential for mobile-friendly rendering. Google uses mobile-first indexing.',
+      implementation: 'Add viewport meta tag to <head>',
+      estimatedTime: '2 minutes',
+      codeExample: `<meta name="viewport" content="width=device-width, initial-scale=1.0">`,
+    });
+  }
+
+  if (!details.technicalSEO.hasLang) {
+    recommendations.push({
+      category: 'Technical SEO',
+      priority: 'medium',
+      effort: 'quick-win',
+      title: 'Add Language Declaration',
+      description: 'Missing lang attribute on <html> element - important for AI language detection.',
+      impact: 'Helps search engines and AI understand your content language.',
+      implementation: 'Add lang attribute to <html> tag',
+      estimatedTime: '1 minute',
+      codeExample: `<html lang="en">`,
+    });
+  }
+
+  if (!details.technicalSEO.hasCanonical) {
+    recommendations.push({
+      category: 'Technical SEO',
+      priority: 'high',
+      effort: 'quick-win',
+      title: 'Add Canonical URL',
+      description: 'Missing canonical link - can cause duplicate content issues.',
+      impact: 'Prevents duplicate content penalties and consolidates page authority.',
+      implementation: 'Add canonical link in <head>',
+      estimatedTime: '5 minutes',
+      codeExample: `<link rel="canonical" href="https://yoursite.com/page-url">`,
+    });
+  }
+
   // Sort by priority
   const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
   return recommendations.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
@@ -1233,7 +1473,7 @@ Allow: /`,
 function generateInsights(scores: any, details: any): string[] {
   const insights: string[] = [];
 
-  const overall = (scores.schemaMarkup + scores.contentQuality + scores.citationPotential + scores.eeat) / 4;
+  const overall = (scores.schemaMarkup + scores.contentQuality + scores.citationPotential + scores.eeat + scores.technicalSEO) / 5;
 
   if (overall >= 80) {
     insights.push('Your site shows strong GEO optimization. Focus on maintaining content freshness.');
@@ -1243,6 +1483,10 @@ function generateInsights(scores: any, details: any): string[] {
     insights.push('Moderate GEO readiness. Focus on critical improvements: schema markup and E-E-A-T signals.');
   } else {
     insights.push('Significant GEO gaps detected. Start with Organization schema and comprehensive content.');
+  }
+
+  if (scores.technicalSEO < 60) {
+    insights.push('Technical SEO issues detected. Address critical items like HTTPS, viewport, and canonical URLs first.');
   }
 
   if (scores.schemaMarkup < 50) {
@@ -1267,6 +1511,10 @@ function generateInsights(scores: any, details: any): string[] {
 
   if (details.schemaMarkup.hasGraphStructure) {
     insights.push('Advanced: Using @graph structure shows sophisticated semantic markup.');
+  }
+
+  if (details.technicalSEO.isHTTPS && details.technicalSEO.hasViewport && details.technicalSEO.hasCanonical) {
+    insights.push('Strong technical foundation. Core SEO elements properly implemented.');
   }
 
   return insights;

@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auditWebsite, type AuditResult } from '../utils/geoAuditEnhanced';
-import { Search, AlertCircle, CheckCircle, TrendingUp, Download, Share2, ExternalLink, ArrowLeft, Award, Target, Zap } from 'lucide-react';
+import { Search, AlertCircle, CheckCircle, TrendingUp, Download, Share2, ExternalLink, ArrowLeft, Award, Target, Zap, TrendingDown, Minus, History, BarChart3 } from 'lucide-react';
+import { saveAuditToHistory, compareWithPrevious, checkScoreDrop, getScoreTrend, getHistoryStats } from '../utils/auditHistory';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
@@ -11,11 +12,16 @@ const GeoAuditPage = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AuditResult | null>(null);
   const [error, setError] = useState('');
+  const [comparison, setComparison] = useState<ReturnType<typeof compareWithPrevious> | null>(null);
+  const [scoreDrop, setScoreDrop] = useState<ReturnType<typeof checkScoreDrop> | null>(null);
+  const [historyStats, setHistoryStats] = useState(getHistoryStats());
 
   const handleAnalyze = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setResult(null);
+    setComparison(null);
+    setScoreDrop(null);
 
     if (!url.trim()) {
       setError('Please enter a URL');
@@ -26,6 +32,21 @@ const GeoAuditPage = () => {
     
     try {
       const auditResult = await auditWebsite(url);
+      
+      // Save to history
+      saveAuditToHistory(auditResult);
+      
+      // Get comparison with previous audit
+      const comp = compareWithPrevious(auditResult);
+      setComparison(comp);
+      
+      // Check for score drops
+      const drop = checkScoreDrop(auditResult.url, auditResult.overallScore);
+      setScoreDrop(drop);
+      
+      // Update history stats
+      setHistoryStats(getHistoryStats());
+      
       setResult(auditResult);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to analyze website');
@@ -219,6 +240,29 @@ const GeoAuditPage = () => {
                     {result.overallScore}
                   </div>
                   <div className="text-white/40 text-sm mt-1">out of 100</div>
+                  
+                  {/* Score Change Indicator */}
+                  {comparison?.changes && (
+                    <div className="mt-3 flex items-center justify-center gap-2">
+                      {comparison.changes.overallScore > 0 ? (
+                        <>
+                          <TrendingUp className="w-4 h-4 text-green-400" />
+                          <span className="text-green-400 font-semibold">+{comparison.changes.overallScore} points</span>
+                        </>
+                      ) : comparison.changes.overallScore < 0 ? (
+                        <>
+                          <TrendingDown className="w-4 h-4 text-red-400" />
+                          <span className="text-red-400 font-semibold">{comparison.changes.overallScore} points</span>
+                        </>
+                      ) : (
+                        <>
+                          <Minus className="w-4 h-4 text-gray-400" />
+                          <span className="text-gray-400">No change</span>
+                        </>
+                      )}
+                      <span className="text-white/40 text-xs">vs. previous audit</span>
+                    </div>
+                  )}
                 </div>
                 <div className="flex gap-3">
                   <button
@@ -241,6 +285,25 @@ const GeoAuditPage = () => {
               </div>
             </div>
 
+            {/* Score Drop Alert */}
+            {scoreDrop?.dropped && (
+              <div className="mb-8 p-6 bg-red-500/10 border-2 border-red-500/30 rounded-xl">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0" />
+                  <div>
+                    <h3 className="text-xl font-bold text-red-400 mb-2">⚠️ Score Drop Detected</h3>
+                    <p className="text-white/80 mb-2">
+                      Your GEO score dropped by <strong>{Math.abs(scoreDrop.difference)} points</strong> (from {scoreDrop.previousScore} to {result.overallScore}).
+                      This indicates potential issues that need immediate attention.
+                    </p>
+                    <p className="text-sm text-white/60">
+                      Review the detailed findings below to identify what changed.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Insights */}
             {result.insights && result.insights.length > 0 && (
               <div className="mb-12 p-6 bg-gradient-to-br from-brand-accent/5 to-transparent border border-brand-accent/20 rounded-xl">
@@ -260,13 +323,32 @@ const GeoAuditPage = () => {
 
             {/* Score Breakdown */}
             <div className="mb-12">
-              <h3 className="text-2xl font-bold mb-6">Score Breakdown</h3>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-bold">Score Breakdown</h3>
+                {comparison?.previous && (
+                  <div className="flex items-center gap-2 text-sm text-white/60">
+                    <History className="w-4 h-4" />
+                    <span>vs. {new Date(comparison.previous.timestamp).toLocaleDateString()}</span>
+                  </div>
+                )}
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {Object.entries(result.scores).map(([key, score]) => (
+                {Object.entries(result.scores).map(([key, score]) => {
+                  const change = comparison?.changes?.[key as keyof typeof comparison.changes] || 0;
+                  return (
                   <div key={key} className="p-6 bg-white/5 border border-brand-secondary rounded-xl">
                     <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-semibold capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</h4>
-                      <span className={`text-2xl font-bold ${getScoreColor(score)}`}>{score}</span>
+                      <h4 className="font-semibold capitalize text-sm">{key.replace(/([A-Z])/g, ' $1').trim()}</h4>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-2xl font-bold ${getScoreColor(score)}`}>{score}</span>
+                        {change !== 0 && (
+                          <span className={`text-xs font-semibold ${
+                            change > 0 ? 'text-green-400' : 'text-red-400'
+                          }`}>
+                            {change > 0 ? '+' : ''}{change}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <div className="h-2 bg-white/10 rounded-full overflow-hidden">
                       <div 
@@ -275,7 +357,8 @@ const GeoAuditPage = () => {
                       ></div>
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
