@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Logo } from './Icons';
 
-const NotFound: React.FC = () => {
+const NotFound = () => {
     const [seconds, setSeconds] = useState(0);
     const [existentialQuote, setExistentialQuote] = useState(0);
 
@@ -33,7 +33,7 @@ const NotFound: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-brand-bg text-brand-text flex flex-col items-center justify-center relative overflow-hidden px-6">
+        <main role="main" className="min-h-screen bg-brand-bg text-brand-text flex flex-col items-center justify-center relative overflow-hidden px-6" aria-labelledby="page-title">
             {/* Animated Background */}
             <div className="absolute inset-0 opacity-20">
                 <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-red-500/20 rounded-full blur-3xl animate-pulse-slow"></div>
@@ -58,7 +58,7 @@ const NotFound: React.FC = () => {
 
                 {/* 404 Number */}
                 <div className="mb-8">
-                    <h1 className="font-display text-[12rem] md:text-[16rem] font-bold leading-none bg-gradient-to-br from-red-400 via-red-500 to-red-600 bg-clip-text text-transparent opacity-90">
+                    <h1 id="page-title" className="font-display text-[12rem] md:text-[16rem] font-bold leading-none bg-gradient-to-br from-red-400 via-red-500 to-red-600 bg-clip-text text-transparent opacity-90">
                         404
                     </h1>
                 </div>
@@ -118,6 +118,7 @@ const NotFound: React.FC = () => {
                     <button
                         onClick={handleGoHome}
                         className="group relative bg-brand-accent hover:bg-blue-500 text-white px-8 py-4 rounded-full font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-brand-accent/30 hover:-translate-y-1 flex items-center gap-2"
+                        aria-label="Return to homepage"
                     >
                         <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -128,13 +129,14 @@ const NotFound: React.FC = () => {
                     <button
                         onClick={() => window.history.back()}
                         className="bg-brand-secondary/20 hover:bg-brand-secondary/30 text-brand-text border border-brand-secondary/30 hover:border-brand-accent/50 px-8 py-4 rounded-full font-semibold transition-all duration-300"
+                        aria-label="Go back to previous page"
                     >
                         Retrace Your Steps
                     </button>
                 </div>
 
                 {/* Helpful Links */}
-                <div className="text-brand-text/60 text-sm">
+                <nav className="text-brand-text/60 text-sm" aria-label="Suggested pages">
                     <p className="mb-3">Perhaps you were looking for:</p>
                     <div className="flex flex-wrap justify-center gap-3">
                         <a href="/#nicosia-method" className="hover:text-brand-accent transition-colors duration-300">The Nicosia Method</a>
@@ -145,7 +147,7 @@ const NotFound: React.FC = () => {
                         <span className="text-brand-text/30">•</span>
                         <a href="/#team" className="hover:text-brand-accent transition-colors duration-300">Team</a>
                     </div>
-                </div>
+                </nav>
 
                 {/* Poetic Footer */}
                 <div className="mt-16 pt-8 border-t border-brand-secondary/20">
@@ -191,7 +193,7 @@ const NotFound: React.FC = () => {
                     })
                 }}
             />
-        </div>
+        </main>
     );
 };
 
