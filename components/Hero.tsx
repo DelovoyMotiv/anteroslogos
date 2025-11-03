@@ -1,11 +1,15 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import AnimatedSection from './AnimatedSection';
 
 interface HeroProps {
     onScrollClick: () => void;
 }
 
-const Hero: React.FC<HeroProps> = ({ onScrollClick }) => (
+const Hero: React.FC<HeroProps> = ({ onScrollClick }) => {
+    const navigate = useNavigate();
+    
+    return (
     <section 
         id="hero" 
         aria-label="Hero section - Don't rank. Become the source"
@@ -55,17 +59,17 @@ const Hero: React.FC<HeroProps> = ({ onScrollClick }) => (
             <AnimatedSection delay={400}>
                 <div className="mt-10 sm:mt-12 md:mt-14 lg:mt-16 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5 px-4" role="group" aria-label="Call to action buttons">
                     <button 
-                        onClick={onScrollClick} 
-                        aria-label="Begin the descent - Learn about our GEO services"
-                        className="group relative w-full sm:w-auto font-semibold text-base sm:text-lg bg-white hover:bg-white/90 text-black py-4 sm:py-5 px-10 sm:px-14 rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-white/20 overflow-hidden active:scale-100"
+                        onClick={() => navigate('/geo-audit')} 
+                        aria-label="Test your GEO score - Free analysis tool"
+                        className="group relative w-full sm:w-auto font-semibold text-base sm:text-lg bg-brand-accent hover:bg-blue-500 text-white py-4 sm:py-5 px-10 sm:px-14 rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-brand-accent/40 overflow-hidden active:scale-100"
                     >
                         <span className="relative z-10 flex items-center justify-center gap-2">
-                            Begin the Descent
+                            Test Your GEO Score
                             <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
                             </svg>
                         </span>
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
                     </button>
                     <button 
                         onClick={onScrollClick}
@@ -111,6 +115,7 @@ const Hero: React.FC<HeroProps> = ({ onScrollClick }) => (
              </div>
         </div>
     </section>
-);
+    );
+};
 
 export default Hero;

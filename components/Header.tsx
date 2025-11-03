@@ -10,7 +10,7 @@ interface HeaderProps {
     onContactClick?: () => void;
 }
 
-const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick, onClientsClick, onInsightsClick, onTeamClick, onContactClick }, ref) => {
+const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick, onClientsClick, onContactClick }, ref) => {
     const navigate = useNavigate();
     const location = useLocation();
     const [scrolled, setScrolled] = useState(false);
@@ -39,8 +39,7 @@ const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick, onClientsC
     const menuItems = [
         { label: 'Method', onClick: onMethodClick, isScroll: true },
         { label: 'Clients', onClick: onClientsClick, isScroll: true },
-        { label: 'Insights', onClick: onInsightsClick, isScroll: true },
-        { label: 'Team', onClick: onTeamClick, isScroll: true },
+        { label: 'GEO Audit', onClick: () => navigate('/geo-audit'), isScroll: false, highlight: true },
         { label: 'Blog', onClick: () => navigate('/blog'), isScroll: false },
         { label: 'Knowledge Base', onClick: () => navigate('/knowledge-base'), isScroll: false },
     ];
@@ -68,7 +67,11 @@ const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick, onClientsC
                                     item.onClick?.();
                                 }
                             }}
-                            className="text-brand-text/80 hover:text-white transition-colors duration-300 text-sm font-medium relative group py-2 whitespace-nowrap"
+                            className={`transition-colors duration-300 text-sm font-medium relative group py-2 whitespace-nowrap ${
+                                'highlight' in item && item.highlight 
+                                    ? 'text-brand-accent hover:text-blue-400 font-semibold' 
+                                    : 'text-brand-text/80 hover:text-white'
+                            }`}
                         >
                             {item.label}
                             <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-brand-accent transition-all duration-300 group-hover:w-full"></span>

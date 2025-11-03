@@ -7,6 +7,7 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 const HomePage = lazy(() => import('./pages/HomePage'));
 const KnowledgeBasePage = lazy(() => import('./pages/KnowledgeBasePage'));
 const GeoVsSeoPage = lazy(() => import('./pages/GeoVsSeoPage'));
+const GeoAuditPage = lazy(() => import('./pages/GeoAuditPage'));
 const Blog = lazy(() => import('./pages/Blog'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
 const AuthorPage = lazy(() => import('./pages/Author'));
@@ -23,6 +24,7 @@ const App: React.FC = () => {
                         <Route path="/" element={<HomePage />} />
                         <Route path="/knowledge-base" element={<KnowledgeBasePage />} />
                         <Route path="/geo-vs-seo" element={<GeoVsSeoPage />} />
+                        <Route path="/geo-audit" element={<GeoAuditPage />} />
                         <Route path="/blog" element={<Blog />} />
                         <Route path="/blog/:slug" element={<BlogPost />} />
                         <Route path="/author/:slug" element={<AuthorPage />} />

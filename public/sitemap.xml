@@ -95,6 +95,14 @@
     <priority>1.0</priority>
   </url>
 
+  <!-- GEO Audit Tool - Interactive Analysis -->
+  <url>
+    <loc>https://anoteroslogos.com/geo-audit</loc>
+    <lastmod>2025-11-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
   <!-- Blog Index -->
   <url>
     <loc>https://anoteroslogos.com/blog</loc>
