@@ -1,8 +1,12 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { auditWebsite, type AuditResult } from '../utils/geoAudit';
-import { Search, AlertCircle, CheckCircle, TrendingUp, Download, Share2, ExternalLink } from 'lucide-react';
+import { Search, AlertCircle, CheckCircle, TrendingUp, Download, Share2, ExternalLink, ArrowLeft } from 'lucide-react';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 const GeoAuditPage = () => {
+  const navigate = useNavigate();
   const [url, setUrl] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AuditResult | null>(null);
@@ -64,12 +68,26 @@ const GeoAuditPage = () => {
 
   return (
     <div className="min-h-screen bg-brand-bg text-brand-text">
+      <Header 
+        onMethodClick={() => navigate('/')} 
+        onClientsClick={() => navigate('/')} 
+        onContactClick={() => navigate('/')}
+      />
       {/* Hero Section */}
-      <section className="relative py-20 md:py-32 overflow-hidden">
+      <section className="relative pt-32 pb-20 md:pt-40 md:pb-32 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-brand-accent/10 via-transparent to-transparent"></div>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(59,130,246,0.1),transparent)]"></div>
         
-        <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center">
+          {/* Back to Home */}
+          <button
+            onClick={() => navigate('/')}
+            className="inline-flex items-center gap-2 text-brand-accent hover:text-blue-400 transition-colors mb-8"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="text-sm font-medium">Back to Home</span>
+          </button>
+          
           <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 bg-brand-accent/10 border border-brand-accent/20 rounded-full">
             <TrendingUp className="w-4 h-4 text-brand-accent" />
             <span className="font-mono text-xs tracking-wider uppercase text-brand-accent">Free GEO Analysis Tool</span>
@@ -87,29 +105,59 @@ const GeoAuditPage = () => {
 
           {/* Analysis Form */}
           <form onSubmit={handleAnalyze} className="max-w-2xl mx-auto mb-8">
-            <div className="relative">
+            {/* Desktop: Input with button inside */}
+            <div className="hidden md:block relative">
               <input
                 type="text"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="Enter your website URL (e.g., example.com)"
-                className="w-full px-6 py-5 pr-32 bg-white/5 border-2 border-brand-secondary focus:border-brand-accent rounded-xl text-lg focus:outline-none transition-colors"
+                className="w-full px-6 py-5 pr-40 bg-white/5 border-2 border-brand-secondary focus:border-brand-accent rounded-xl text-lg focus:outline-none transition-colors"
                 disabled={isAnalyzing}
               />
               <button
                 type="submit"
                 disabled={isAnalyzing}
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-brand-accent hover:bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-brand-accent hover:bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
               >
                 {isAnalyzing ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Analyzing...
+                    <span>Analyzing...</span>
                   </>
                 ) : (
                   <>
                     <Search className="w-4 h-4" />
-                    Analyze
+                    <span>Analyze</span>
+                  </>
+                )}
+              </button>
+            </div>
+            
+            {/* Mobile: Stacked input and button */}
+            <div className="md:hidden space-y-4">
+              <input
+                type="text"
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                placeholder="Enter URL (e.g., example.com)"
+                className="w-full px-6 py-4 bg-white/5 border-2 border-brand-secondary focus:border-brand-accent rounded-xl text-base focus:outline-none transition-colors"
+                disabled={isAnalyzing}
+              />
+              <button
+                type="submit"
+                disabled={isAnalyzing}
+                className="w-full bg-brand-accent hover:bg-blue-500 text-white px-6 py-4 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isAnalyzing ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Analyzing Your Site...</span>
+                  </>
+                ) : (
+                  <>
+                    <Search className="w-5 h-5" />
+                    <span>Analyze Website</span>
                   </>
                 )}
               </button>
@@ -144,14 +192,14 @@ const GeoAuditPage = () => {
         <section className="py-16 px-6">
           <div className="max-w-6xl mx-auto">
             {/* Overall Score */}
-            <div className="mb-12 p-8 bg-gradient-to-br from-brand-secondary/30 to-transparent border border-brand-accent/30 rounded-2xl">
-              <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                <div>
-                  <h2 className="text-2xl font-bold mb-2">Overall GEO Score</h2>
-                  <p className="text-white/60">Analyzed: {new URL(result.url).hostname}</p>
+            <div className="mb-12 p-6 sm:p-8 bg-gradient-to-br from-brand-secondary/30 to-transparent border border-brand-accent/30 rounded-2xl">
+              <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+                <div className="text-center lg:text-left">
+                  <h2 className="text-xl sm:text-2xl font-bold mb-2">Overall GEO Score</h2>
+                  <p className="text-sm sm:text-base text-white/60 break-all">Analyzed: {new URL(result.url).hostname}</p>
                 </div>
                 <div className="text-center">
-                  <div className={`text-7xl font-bold ${getScoreColor(result.overallScore)}`}>
+                  <div className={`text-6xl sm:text-7xl font-bold ${getScoreColor(result.overallScore)}`}>
                     {result.overallScore}
                   </div>
                   <div className="text-white/40 text-sm mt-1">out of 100</div>
@@ -161,6 +209,7 @@ const GeoAuditPage = () => {
                     onClick={downloadReport}
                     className="p-3 bg-white/5 hover:bg-white/10 border border-brand-secondary hover:border-brand-accent rounded-lg transition-all"
                     title="Download Report"
+                    aria-label="Download JSON report"
                   >
                     <Download className="w-5 h-5" />
                   </button>
@@ -168,6 +217,7 @@ const GeoAuditPage = () => {
                     onClick={shareResults}
                     className="p-3 bg-white/5 hover:bg-white/10 border border-brand-secondary hover:border-brand-accent rounded-lg transition-all"
                     title="Share Results"
+                    aria-label="Share on Twitter"
                   >
                     <Share2 className="w-5 h-5" />
                   </button>
@@ -251,8 +301,8 @@ const GeoAuditPage = () => {
                           : 'bg-blue-500/5 border-blue-500/30'
                       }`}
                     >
-                      <div className="flex items-start gap-4">
-                        <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
+                      <div className="flex flex-col sm:flex-row items-start gap-4">
+                        <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase flex-shrink-0 ${
                           rec.priority === 'high'
                             ? 'bg-red-500/20 text-red-400'
                             : rec.priority === 'medium'
@@ -261,8 +311,8 @@ const GeoAuditPage = () => {
                         }`}>
                           {rec.priority}
                         </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
+                        <div className="flex-1 w-full sm:w-auto">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
                             <h4 className="font-bold">{rec.title}</h4>
                             <span className="text-xs text-white/40">• {rec.category}</span>
                           </div>
@@ -317,6 +367,14 @@ const GeoAuditPage = () => {
           </div>
         </div>
       </section>
+      
+      <Footer 
+        onMethodClick={() => navigate('/')} 
+        onClientsClick={() => navigate('/')} 
+        onFAQClick={() => navigate('/')} 
+        onPhilosophyClick={() => navigate('/')} 
+        onContactClick={() => navigate('/')}
+      />
     </div>
   );
 };
