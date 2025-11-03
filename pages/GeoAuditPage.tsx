@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auditWebsite, type AuditResult } from '../utils/geoAuditEnhanced';
-import { Search, AlertCircle, CheckCircle, TrendingUp, Download, Share2, ExternalLink, ArrowLeft, Award, Target, Zap, TrendingDown, Minus, History, BarChart3 } from 'lucide-react';
-import { saveAuditToHistory, compareWithPrevious, checkScoreDrop, getScoreTrend, getHistoryStats } from '../utils/auditHistory';
+import { Search, AlertCircle, CheckCircle, TrendingUp, Download, Share2, ExternalLink, ArrowLeft, Award, Target, Zap, TrendingDown, Minus, History } from 'lucide-react';
+import { saveAuditToHistory, compareWithPrevious, checkScoreDrop } from '../utils/auditHistory';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
@@ -14,7 +14,6 @@ const GeoAuditPage = () => {
   const [error, setError] = useState('');
   const [comparison, setComparison] = useState<ReturnType<typeof compareWithPrevious> | null>(null);
   const [scoreDrop, setScoreDrop] = useState<ReturnType<typeof checkScoreDrop> | null>(null);
-  const [historyStats, setHistoryStats] = useState(getHistoryStats());
 
   const handleAnalyze = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,9 +42,6 @@ const GeoAuditPage = () => {
       // Check for score drops
       const drop = checkScoreDrop(auditResult.url, auditResult.overallScore);
       setScoreDrop(drop);
-      
-      // Update history stats
-      setHistoryStats(getHistoryStats());
       
       setResult(auditResult);
     } catch (err) {

@@ -234,7 +234,7 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
     schemaMarkup: calculateSchemaScore(schemaMarkup),
     metaTags: calculateMetaScore(metaTags),
     aiCrawlers: calculateAICrawlersScore(aiCrawlers),
-    eeat: calculateEEATScore(eeat),
+    eeat: calculateEnhancedEEATScore(eeat),
     structure: calculateStructureScore(structure),
     performance: calculatePerformanceScore(performance),
     contentQuality: calculateContentQualityScore(contentQuality),
@@ -256,6 +256,7 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
     performance,
     contentQuality,
     citationPotential,
+    technicalSEO,
   }, scores);
 
   // Generate insights
@@ -264,6 +265,7 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
     contentQuality,
     citationPotential,
     eeat,
+    technicalSEO,
   });
 
   return {
@@ -278,11 +280,11 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
       aiCrawlers,
       eeat,
       structure,
-    performance,
-    contentQuality,
-    citationPotential,
-    technicalSEO,
-  };
+      performance,
+      contentQuality,
+      citationPotential,
+      technicalSEO,
+    },
     recommendations,
     insights,
   };
