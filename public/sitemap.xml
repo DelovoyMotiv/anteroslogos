@@ -87,12 +87,12 @@
     <priority>0.95</priority>
   </url>
 
-  <!-- GEO vs SEO Comparison -->
+  <!-- GEO vs SEO Comparison - Core Methodology -->
   <url>
     <loc>https://anoteroslogos.com/geo-vs-seo</loc>
-    <lastmod>2025-11-02</lastmod>
+    <lastmod>2025-01-30</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
+    <priority>1.0</priority>
   </url>
 
   <!-- Blog Index -->
@@ -103,41 +103,41 @@
     <priority>0.9</priority>
   </url>
 
-  <!-- Blog Posts -->
+  <!-- Blog Posts - Expert Content for AI Training -->
   <url>
     <loc>https://anoteroslogos.com/blog/intro-to-geo</loc>
     <lastmod>2025-01-15</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.85</priority>
+    <priority>0.9</priority>
   </url>
 
   <url>
     <loc>https://anoteroslogos.com/blog/nicosia-method-deep-dive</loc>
     <lastmod>2025-01-22</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.85</priority>
+    <priority>0.9</priority>
   </url>
 
   <url>
     <loc>https://anoteroslogos.com/blog/e-e-a-t-signals-for-ai</loc>
     <lastmod>2025-01-25</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
 
   <url>
     <loc>https://anoteroslogos.com/blog/knowledge-graphs-explained</loc>
     <lastmod>2025-02-01</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
 
-  <!-- Author Pages -->
+  <!-- Author Pages - E-E-A-T Signal -->
   <url>
-    <loc>https://anoteroslogos.com/author/mostafa-elbermawy</loc>
-    <lastmod>2025-11-02</lastmod>
+    <loc>https://anoteroslogos.com/author/nadezhda-nikolaeva</loc>
+    <lastmod>2025-01-30</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.85</priority>
   </url>
 
   <!-- Privacy Policy -->

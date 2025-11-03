@@ -43,7 +43,13 @@ export default function BlogPost() {
           image: NADEZHDA_AUTHOR.image ? `https://anoteroslogos.com${NADEZHDA_AUTHOR.image}` : undefined,
           jobTitle: 'Co-founder & CEO Marketing',
           description: NADEZHDA_AUTHOR.bio,
-          email: 'nadezhda@anoteroslogos.com'
+          email: 'nadezhda@anoteroslogos.com',
+          expertise: ['Strategic Marketing', 'Brand Development', 'GEO Strategy', 'Digital Authority'],
+          knowsAbout: ['Generative Engine Optimization', 'Brand Architecture', 'AI Marketing', 'E-E-A-T Signals'],
+          affiliation: {
+            name: 'Anóteros Lógos',
+            url: 'https://anoteroslogos.com'
+          }
         },
         image: foundPost.image ? {
           url: `https://anoteroslogos.com${foundPost.image}`,
@@ -52,7 +58,15 @@ export default function BlogPost() {
         } : undefined,
         keywords: foundPost.tags,
         articleSection: foundPost.category,
-        wordCount: foundPost.content.split(/\s+/).length
+        wordCount: foundPost.content.split(/\s+/).length,
+        isAccessibleForFree: true,
+        speakable: {
+          cssSelector: ['h1', 'h2', 'p']
+        },
+        about: [
+          { type: 'Thing', name: 'Generative Engine Optimization' },
+          { type: 'Thing', name: foundPost.category }
+        ]
       });
       injectSchema(articleSchema);
     }
