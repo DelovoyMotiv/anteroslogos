@@ -30,7 +30,7 @@ export default function Blog() {
         onContactClick={() => navigate('/')}
       />
       {/* Main Content */}
-      <div className="pt-32 sm:pt-36 md:pt-40 lg:pt-44 pb-16">
+      <div className="pt-36 sm:pt-40 md:pt-44 lg:pt-48 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Page Header */}
           <div className="mb-12 sm:mb-14">
@@ -90,17 +90,17 @@ export default function Blog() {
                       <p className="text-brand-text/70 text-base sm:text-lg mb-6 line-clamp-3">
                         {featuredPosts[0].excerpt}
                       </p>
-                      <div className="flex flex-wrap items-center gap-4 text-sm text-brand-text/60">
-                        <div className="flex items-center gap-2">
-                          <User className="w-4 h-4" />
+                      <div className="flex flex-wrap items-center gap-3 pt-4 mt-4 border-t border-brand-accent/10 text-xs text-brand-text/60">
+                        <div className="flex items-center gap-1.5">
+                          <User className="w-3 h-3" />
                           <span>{featuredPosts[0].author.name}</span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <Calendar className="w-4 h-4" />
+                          <Calendar className="w-3 h-3" />
                           <span>{new Date(featuredPosts[0].publishedDate).toLocaleDateString()}</span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
+                          <Clock className="w-3 h-3" />
                           <span>{featuredPosts[0].readTime} min read</span>
                         </div>
                       </div>
@@ -183,18 +183,18 @@ export default function Blog() {
                     <p className="text-brand-text/70 text-sm sm:text-base mb-4 line-clamp-2">
                       {post.excerpt}
                     </p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 text-xs text-brand-text/60">
-                        <User className="w-3.5 h-3.5" />
+                    <div className="flex items-center justify-between pt-3 border-t border-brand-accent/5">
+                      <div className="flex items-center gap-1.5 text-xs text-brand-text/60">
+                        <User className="w-3 h-3" />
                         <span>{post.author.name}</span>
                       </div>
-                      <div className="flex items-center gap-3 text-xs text-brand-text/60">
+                      <div className="flex items-center gap-2.5 text-xs text-brand-text/60">
                         <span className="flex items-center gap-1">
-                          <Calendar className="w-3.5 h-3.5" />
+                          <Calendar className="w-3 h-3" />
                           {new Date(post.publishedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                         </span>
                         <span className="flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5" />
+                          <Clock className="w-3 h-3" />
                           {post.readTime} min
                         </span>
                       </div>
