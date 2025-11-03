@@ -29,10 +29,21 @@ export default function Blog() {
         onTeamClick={() => navigate('/')} 
         onContactClick={() => navigate('/')}
       />
-      <div className="pt-24 sm:pt-28 pb-16">
+      {/* Main Content */}
+      <div className="pt-28 sm:pt-32 md:pt-36 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Page Header */}
+          <div className="mb-8 sm:mb-10">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-brand-text mb-3">
+              Blog
+            </h1>
+            <p className="text-base sm:text-lg text-brand-text/60">
+              Insights on Generative Engine Optimization
+            </p>
+          </div>
+
           {/* Category Filter */}
-          <div className="flex flex-wrap justify-center gap-2 sm:gap-3 mb-8 sm:mb-12">
+          <div className="flex flex-wrap justify-start gap-2 sm:gap-3 mb-10 sm:mb-12">
             {categories.map(category => (
               <button
                 key={category}
@@ -50,8 +61,11 @@ export default function Blog() {
 
           {/* Featured Posts */}
           {selectedCategory === 'all' && featuredPosts.length > 0 && (
-            <div className="mb-16">
-              <h2 className="text-2xl sm:text-3xl font-bold text-brand-text mb-6 sm:mb-8">Featured Articles</h2>
+            <div className="mb-12 sm:mb-16">
+              <h2 className="text-2xl sm:text-3xl font-bold text-brand-text mb-6 sm:mb-8 flex items-center gap-3">
+                <span className="w-1 h-8 bg-brand-accent rounded-full"></span>
+                Featured Articles
+              </h2>
               <div className="grid sm:grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
                 {featuredPosts.map(post => (
                   <Link
@@ -102,7 +116,8 @@ export default function Blog() {
 
           {/* All Posts */}
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-brand-text mb-6 sm:mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-brand-text mb-6 sm:mb-8 flex items-center gap-3">
+              <span className="w-1 h-8 bg-brand-accent rounded-full"></span>
               {selectedCategory === 'all' ? 'All Articles' : selectedCategory}
             </h2>
             <div className="grid gap-6">
