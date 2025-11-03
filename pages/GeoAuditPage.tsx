@@ -5,6 +5,7 @@ import { Search, AlertCircle, CheckCircle, TrendingUp, Download, Share2, Externa
 import { saveAuditToHistory, compareWithPrevious, checkScoreDrop } from '../utils/auditHistory';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import AnalysisProgress from '../components/AnalysisProgress';
 
 const GeoAuditPage = () => {
   const navigate = useNavigate();
@@ -85,6 +86,9 @@ const GeoAuditPage = () => {
 
   return (
     <div className="min-h-screen bg-brand-bg text-brand-text">
+      {/* Analysis Progress Overlay */}
+      <AnalysisProgress isAnalyzing={isAnalyzing} url={url} />
+      
       <Header 
         onMethodClick={() => navigate('/')} 
         onClientsClick={() => navigate('/')} 
