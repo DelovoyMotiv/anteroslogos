@@ -1,0 +1,4 @@
+# Force rebuild trigger
+node_modules
+.git
+*.log
