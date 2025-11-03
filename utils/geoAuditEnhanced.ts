@@ -398,7 +398,7 @@ function checkSchemaType(schemas: any[], types: string | string[]): boolean {
   });
 }
 
-function auditContentQuality(doc: Document, html: string): ContentQualityDetails {
+function auditContentQuality(doc: Document, _html: string): ContentQualityDetails {
   const bodyText = doc.body?.textContent || '';
   const words = bodyText.trim().split(/\s+/).filter(w => w.length > 0);
   const wordCount = words.length;
@@ -1047,7 +1047,7 @@ function calculateCitationPotentialScore(details: CitationPotentialDetails): num
   return details.score;
 }
 
-function calculateOverallScore(scores: any, schemaDetails: EnhancedSchemaDetails): number {
+function calculateOverallScore(scores: any, _schemaDetails: EnhancedSchemaDetails): number {
   // Dynamic weighting based on content type
   let weights = {
     schemaMarkup: 0.20,
