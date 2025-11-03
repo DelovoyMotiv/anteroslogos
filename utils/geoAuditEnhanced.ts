@@ -270,25 +270,43 @@ function normalizeUrl(url: string): string {
 }
 
 async function fetchHTML(url: string): Promise<string> {
+  // Try direct fetch first
   try {
     const response = await fetch(url, {
       method: 'GET',
       mode: 'cors',
     });
     if (response.ok) {
-      return await response.text();
+      const html = await response.text();
+      if (html && html.length > 0) {
+        return html;
+      }
     }
-  } catch {
-    // CORS error - use proxy
+  } catch (error) {
+    // Expected CORS error - will use proxy
+    console.log('Direct fetch failed, trying proxy:', error);
   }
 
-  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-  const response = await fetch(proxyUrl);
-  if (!response.ok) {
-    throw new Error('Failed to fetch via proxy');
+  // Fallback to proxy
+  try {
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const response = await fetch(proxyUrl);
+    
+    if (!response.ok) {
+      throw new Error(`Proxy returned status ${response.status}`);
+    }
+    
+    const data = await response.json();
+    
+    if (!data.contents || data.contents.length === 0) {
+      throw new Error('Proxy returned empty content');
+    }
+    
+    return data.contents;
+  } catch (error) {
+    console.error('Proxy fetch failed:', error);
+    throw new Error(`Unable to fetch website. The site may be blocking automated access or the URL is incorrect.`);
   }
-  const data = await response.json();
-  return data.contents;
 }
 
 // ==================== ENHANCED AUDIT FUNCTIONS ====================
