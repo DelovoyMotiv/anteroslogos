@@ -19,11 +19,8 @@ const HomePage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     
     const nicosiaMethodRef = useRef<HTMLElement>(null);
-    const headerRef = useRef<HTMLElement>(null);
     const philosophyRef = useRef<HTMLElement>(null);
     const clientProfileRef = useRef<HTMLElement>(null);
-    const glossaryRef = useRef<HTMLElement>(null);
-    const insightsRef = useRef<HTMLElement>(null);
     const faqRef = useRef<HTMLElement>(null);
 
     useEffect(() => {
@@ -48,7 +45,6 @@ const HomePage: React.FC = () => {
         <div className="bg-brand-bg text-brand-text font-sans antialiased">
             <DigitalBackground />
             <Header 
-                ref={headerRef} 
                 onMethodClick={() => handleScrollTo(nicosiaMethodRef)}
                 onClientsClick={() => handleScrollTo(clientProfileRef)}
                 onInsightsClick={() => {

@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Calendar, Clock, User, ArrowRight, Tag, TrendingUp, Sparkles, BookOpen } from 'lucide-react';
+import { Calendar, Clock, User, ArrowRight } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { BLOG_POSTS, getBlogCategories, getFeaturedPosts, getPostsByCategory } from '../data/blogPosts';
-import type { BlogPost } from '../data/blogPosts';
+import { getBlogCategories, getFeaturedPosts, getPostsByCategory } from '../data/blogPosts';
 
 export default function Blog() {
   const navigate = useNavigate();

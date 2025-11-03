@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Calendar, Clock, User, ArrowLeft, Tag, Share2, BookOpen, Sparkles } from 'lucide-react';
+import { Calendar, Clock, User, ArrowLeft, Share2, BookOpen, Sparkles } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { generateBlogPostingSchema, injectSchema } from '../utils/schemas';
@@ -15,6 +15,7 @@ export default function BlogPost() {
   const [post, setPost] = useState<BlogPost | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
   const [readingProgress, setReadingProgress] = useState(0);
+  const [showShareToast, setShowShareToast] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -37,7 +38,7 @@ export default function BlogPost() {
         author: {
           name: NADEZHDA_AUTHOR.name,
           url: `https://anoteroslogos.com/author/${NADEZHDA_AUTHOR.slug}`,
-          image: `https://anoteroslogos.com${NADEZHDA_AUTHOR.image}`,
+          image: NADEZHDA_AUTHOR.image ? `https://anoteroslogos.com${NADEZHDA_AUTHOR.image}` : undefined,
           jobTitle: 'Co-founder & CEO Marketing',
           description: NADEZHDA_AUTHOR.bio,
           email: 'nadezhda@anoteroslogos.com'
@@ -54,6 +55,30 @@ export default function BlogPost() {
       injectSchema(articleSchema);
     }
   }, [slug]);
+
+  const handleShare = async () => {
+    const shareData = {
+      title: post?.title || '',
+      text: post?.excerpt || '',
+      url: window.location.href
+    };
+
+    try {
+      if (navigator.share && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        setShowShareToast(true);
+        setTimeout(() => setShowShareToast(false), 3000);
+      }
+    } catch (err) {
+      if (err instanceof Error && err.name !== 'AbortError') {
+        await navigator.clipboard.writeText(window.location.href);
+        setShowShareToast(true);
+        setTimeout(() => setShowShareToast(false), 3000);
+      }
+    }
+  };
 
   useEffect(() => {
     const updateReadingProgress = () => {
@@ -83,6 +108,12 @@ export default function BlogPost() {
 
   return (
     <div className="min-h-screen bg-brand-bg">
+      {/* Share Toast Notification */}
+      {showShareToast && (
+        <div className="fixed top-24 right-4 z-50 bg-brand-accent text-white px-6 py-3 rounded-lg shadow-lg animate-fade-in">
+          Link copied to clipboard!
+        </div>
+      )}
       {/* Reading Progress Bar */}
       <div className="fixed top-0 left-0 right-0 h-1 bg-brand-secondary/20 z-40">
         <div 
@@ -156,7 +187,10 @@ export default function BlogPost() {
                   day: 'numeric' 
                 })}</span>
               </div>
-              <button className="flex items-center gap-2 px-4 py-2 bg-brand-accent/10 hover:bg-brand-accent/20 text-brand-accent rounded-lg transition-colors ml-auto">
+              <button 
+                onClick={handleShare}
+                className="flex items-center gap-2 px-4 py-2 bg-brand-accent/10 hover:bg-brand-accent/20 text-brand-accent rounded-lg transition-colors ml-auto"
+              >
                 <Share2 className="w-4 h-4" />
                 <span className="text-sm font-medium">Share</span>
               </button>
@@ -178,8 +212,8 @@ export default function BlogPost() {
           )}
 
           {/* Content */}
-          <div className="prose prose-invert prose-lg prose-headings:text-brand-text prose-p:text-brand-text/80 prose-strong:text-brand-text prose-a:text-brand-accent hover:prose-a:text-brand-accent/80 max-w-none mb-16">
-            <div className="text-brand-text/90 text-lg leading-relaxed whitespace-pre-wrap">
+          <div className="prose prose-invert prose-lg prose-headings:text-brand-text prose-headings:font-bold prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6 prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-4 prose-p:text-brand-text/80 prose-p:leading-relaxed prose-p:mb-6 prose-strong:text-brand-text prose-strong:font-semibold prose-a:text-brand-accent hover:prose-a:text-brand-accent/80 prose-ul:my-6 prose-li:text-brand-text/80 prose-li:mb-2 prose-code:text-brand-accent prose-code:bg-brand-secondary/30 prose-code:px-2 prose-code:py-1 prose-code:rounded max-w-none mb-16">
+            <div className="text-brand-text/90 text-base sm:text-lg leading-relaxed whitespace-pre-wrap">
               {post.content}
             </div>
           </div>

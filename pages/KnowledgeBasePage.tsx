@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import DigitalBackground from '../components/DigitalBackground';
 import { Logo } from '../components/Icons';
-import { knowledgeTerms, categories, KnowledgeTerm } from '../data/geoKnowledgeBase';
+import { knowledgeTerms, categories } from '../data/geoKnowledgeBase';
 
 const KnowledgeBasePage: React.FC = () => {
     const [selectedCategory, setSelectedCategory] = useState<string>('all');

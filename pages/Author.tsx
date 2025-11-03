@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { generatePersonSchema, injectSchema } from '../utils/schemas';
-import { NADEZHDA_AUTHOR } from '../data/blogPosts';
 import { BookOpen, Award, Linkedin, Twitter, Github, Mail, ExternalLink } from 'lucide-react';
 
 interface AuthorProfile {
