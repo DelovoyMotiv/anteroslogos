@@ -806,13 +806,21 @@ async function auditAICrawlers(baseUrl: string): Promise<AICrawlersDetails> {
   
   let robotsTxt = '';
   try {
-    const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(robotsUrl)}`);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    
+    const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(robotsUrl)}`, {
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    
     if (response.ok) {
       const data = await response.json();
       robotsTxt = data.contents.toLowerCase();
     }
-  } catch {
-    // robots.txt not accessible
+  } catch (error) {
+    // robots.txt not accessible - timeout or network error
+    console.log('Robots.txt fetch failed:', error instanceof Error ? error.message : 'Unknown error');
   }
 
   const robotsTxtFound = robotsTxt.length > 0;
@@ -1021,26 +1029,42 @@ async function auditTechnicalSEO(doc: Document, url: string): Promise<TechnicalS
   const robotsMeta = doc.querySelector('meta[name="robots"]');
   const hasNoIndex = robotsMeta?.getAttribute('content')?.includes('noindex') || false;
   
-  // Sitemap check
+  // Sitemap check with timeout
   let hasSitemapXML = false;
   let sitemapAccessible = false;
   try {
     const sitemapUrl = new URL('/sitemap.xml', url).toString();
-    const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(sitemapUrl)}`);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    
+    const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(sitemapUrl)}`, {
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    
     hasSitemapXML = response.ok;
     sitemapAccessible = response.ok;
-  } catch {
-    // Sitemap check failed
+  } catch (error) {
+    // Sitemap check failed - timeout or network error
+    console.log('Sitemap check failed:', error instanceof Error ? error.message : 'Unknown error');
   }
   
-  // Robots.txt check (reuse from AI crawlers audit)
+  // Robots.txt check with timeout
   let hasRobotsTxt = false;
   try {
     const robotsUrl = new URL('/robots.txt', url).toString();
-    const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(robotsUrl)}`);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    
+    const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(robotsUrl)}`, {
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    
     hasRobotsTxt = response.ok;
-  } catch {
-    // Robots.txt check failed
+  } catch (error) {
+    // Robots.txt check failed - timeout or network error
+    console.log('Robots.txt check failed:', error instanceof Error ? error.message : 'Unknown error');
   }
   
   // HTTP status (can't reliably check from client without CORS issues)

@@ -40,35 +40,43 @@ const AnalysisProgress = ({ isAnalyzing, url }: AnalysisProgressProps) => {
     }
 
     let stepIndex = 0;
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: NodeJS.Timeout | null = null;
+    let progressInterval: NodeJS.Timeout | null = null;
+    let isMounted = true;
 
     const advanceStep = () => {
-      if (stepIndex < ANALYSIS_STEPS.length) {
-        setCurrentStep(stepIndex);
-        
-        // Simulate step progress
-        const step = ANALYSIS_STEPS[stepIndex];
-        const progressInterval = setInterval(() => {
-          setProgress(prev => {
-            const increment = 100 / (step.duration / 50);
-            return Math.min(prev + increment, 100);
-          });
-        }, 50);
-
-        timeoutId = setTimeout(() => {
-          clearInterval(progressInterval);
-          setCompletedSteps(prev => new Set(prev).add(stepIndex));
-          setProgress(0);
-          stepIndex++;
-          advanceStep();
-        }, step.duration);
+      if (!isMounted || stepIndex >= ANALYSIS_STEPS.length) {
+        return;
       }
+
+      setCurrentStep(stepIndex);
+      
+      // Simulate step progress
+      const step = ANALYSIS_STEPS[stepIndex];
+      progressInterval = setInterval(() => {
+        if (!isMounted) return;
+        setProgress(prev => {
+          const increment = 100 / (step.duration / 50);
+          return Math.min(prev + increment, 100);
+        });
+      }, 50);
+
+      timeoutId = setTimeout(() => {
+        if (!isMounted) return;
+        if (progressInterval) clearInterval(progressInterval);
+        setCompletedSteps(prev => new Set(prev).add(stepIndex));
+        setProgress(0);
+        stepIndex++;
+        advanceStep();
+      }, step.duration);
     };
 
     advanceStep();
 
     return () => {
-      clearTimeout(timeoutId);
+      isMounted = false;
+      if (timeoutId) clearTimeout(timeoutId);
+      if (progressInterval) clearInterval(progressInterval);
       setProgress(0);
     };
   }, [isAnalyzing]);
