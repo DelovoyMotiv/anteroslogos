@@ -30,11 +30,11 @@ export default function Blog() {
         onContactClick={() => navigate('/')}
       />
       {/* Main Content */}
-      <div className="pt-28 sm:pt-32 md:pt-36 pb-16">
+      <div className="pt-32 sm:pt-36 md:pt-40 lg:pt-44 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Page Header */}
-          <div className="mb-8 sm:mb-10">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-brand-text mb-3">
+          <div className="mb-10 sm:mb-12">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-brand-text mb-4">
               Blog
             </h1>
             <p className="text-base sm:text-lg text-brand-text/60">
@@ -43,7 +43,7 @@ export default function Blog() {
           </div>
 
           {/* Category Filter */}
-          <div className="flex flex-wrap justify-start gap-2 sm:gap-3 mb-10 sm:mb-12">
+          <div className="flex flex-wrap justify-start gap-2 sm:gap-3 mb-12 sm:mb-14">
             {categories.map(category => (
               <button
                 key={category}
