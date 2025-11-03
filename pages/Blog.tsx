@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Calendar, Clock, User, ArrowRight, Tag, TrendingUp, Sparkles } from 'lucide-react';
+import { Calendar, Clock, User, ArrowRight, Tag, TrendingUp, Sparkles, BookOpen } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { BLOG_POSTS, getBlogCategories, getFeaturedPosts, getPostsByCategory } from '../data/blogPosts';
@@ -30,7 +30,7 @@ export default function Blog() {
         onContactClick={() => navigate('/')}
       />
       {/* Main Content */}
-      <div className="pt-32 sm:pt-36 md:pt-40 lg:pt-44 pb-16">
+      <div className="pt-28 sm:pt-32 md:pt-36 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Page Header */}
           <div className="mb-8 sm:mb-10">
@@ -75,22 +75,22 @@ export default function Blog() {
                     to={`/blog/${featuredPosts[0].slug}`}
                     className="group relative bg-gradient-to-br from-brand-secondary/40 to-brand-secondary/20 rounded-2xl overflow-hidden border border-brand-accent/20 hover:border-brand-accent/40 transition-all duration-300 hover:shadow-2xl hover:shadow-brand-accent/10"
                   >
-                    {featuredPosts[0].image && (
-                      <div className="aspect-[16/9] bg-brand-secondary/50 overflow-hidden relative">
-                        <img 
-                          src={featuredPosts[0].image} 
-                          alt={featuredPosts[0].title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                        <div className="absolute top-4 left-4">
-                          <div className="flex items-center gap-2 px-3 py-1.5 bg-brand-accent/90 backdrop-blur-sm rounded-full">
-                            <TrendingUp className="w-3.5 h-3.5 text-white" />
-                            <span className="text-xs font-bold text-white uppercase tracking-wider">Featured</span>
-                          </div>
-                        </div>
+                    {/* Featured Badge */}
+                    <div className="absolute top-6 right-6 z-10">
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-brand-accent backdrop-blur-sm rounded-full shadow-lg">
+                        <TrendingUp className="w-3.5 h-3.5 text-white" />
+                        <span className="text-xs font-bold text-white uppercase tracking-wider">Featured</span>
                       </div>
-                    )}
-                    <div className="p-6 sm:p-8">
+                    </div>
+                    
+                    {/* Icon Header */}
+                    <div className="p-6 sm:p-8 pb-0">
+                      <div className="w-16 h-16 bg-brand-accent/10 rounded-2xl flex items-center justify-center mb-6">
+                        <Sparkles className="w-8 h-8 text-brand-accent" />
+                      </div>
+                    </div>
+                    
+                    <div className="p-6 sm:p-8 pt-0">
                       <div className="flex items-center gap-2 mb-4">
                         <span className="px-3 py-1 bg-brand-accent/10 text-brand-accent text-xs font-semibold rounded-full uppercase tracking-wider">
                           {featuredPosts[0].category}
@@ -179,16 +179,11 @@ export default function Blog() {
                   to={`/blog/${post.slug}`}
                   className="group relative bg-gradient-to-br from-brand-secondary/30 to-brand-secondary/10 rounded-xl overflow-hidden border border-brand-accent/10 hover:border-brand-accent/30 hover:shadow-xl hover:shadow-brand-accent/5 transition-all duration-300"
                 >
-                  {post.image && (
-                    <div className="aspect-video bg-brand-secondary/50 overflow-hidden">
-                      <img 
-                        src={post.image} 
-                        alt={post.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    </div>
-                  )}
                   <div className="p-5 sm:p-6">
+                    {/* Category Icon */}
+                    <div className="w-12 h-12 bg-brand-accent/10 rounded-xl flex items-center justify-center mb-4">
+                      <BookOpen className="w-6 h-6 text-brand-accent" />
+                    </div>
                     <div className="flex items-center gap-2 mb-3">
                       <span className="px-2.5 py-1 bg-brand-accent/10 text-brand-accent text-xs font-semibold rounded-md uppercase tracking-wider">
                         {post.category}

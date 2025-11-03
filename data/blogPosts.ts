@@ -41,7 +41,7 @@ export interface BlogCategory {
 export const NADEZHDA_AUTHOR: BlogAuthor = {
   name: 'Nadezhda Nikolaeva',
   slug: 'nadezhda-nikolaeva',
-  image: '/images/authors/nadezhda-nikolaeva.jpg',
+  image: '',
   bio: 'Co-founder & CEO Marketing at Anóteros Lógos. Leading strategic vision and marketing direction with expertise in brand architecture and digital authority positioning.'
 };
 
@@ -122,12 +122,10 @@ Ready to establish your brand as an authoritative source for AI systems? [Learn 
     readTime: 8,
     category: 'GEO Fundamentals',
     tags: ['GEO', 'AI Optimization', 'Digital Authority', 'SEO Evolution'],
-    image: '/images/blog/intro-to-geo.jpg',
     featured: true,
     seo: {
       metaDescription: 'Discover how Generative Engine Optimization (GEO) is transforming digital marketing. Learn the three pillars of GEO and why becoming a cited source matters more than ranking.',
-      keywords: ['Generative Engine Optimization', 'GEO', 'AI search', 'digital authority', 'SEO evolution'],
-      ogImage: '/images/blog/intro-to-geo-og.jpg'
+      keywords: ['Generative Engine Optimization', 'GEO', 'AI search', 'digital authority', 'SEO evolution']
     }
   },
   {
@@ -210,12 +208,10 @@ Once established, authority is self-reinforcing. As AI systems cite you more fre
     readTime: 12,
     category: 'Methodology',
     tags: ['Nicosia Method', 'GEO Strategy', 'Framework', 'Authority Building'],
-    image: '/images/blog/nicosia-method.jpg',
     featured: true,
     seo: {
       metaDescription: 'Learn the three phases of The Nicosia Method™: Intelligence Extraction, Structural Authority, and Amplification & Validation. Transform your brand into an AI-cited source.',
-      keywords: ['Nicosia Method', 'GEO framework', 'brand authority', 'AI citation strategy'],
-      ogImage: '/images/blog/nicosia-method-og.jpg'
+      keywords: ['Nicosia Method', 'GEO framework', 'brand authority', 'AI citation strategy']
     }
   },
   {
@@ -396,8 +392,7 @@ Building E-E-A-T is not a one-time task—it's an ongoing strategy. As AI system
     featured: false,
     seo: {
       metaDescription: 'Master E-E-A-T for AI systems: Experience, Expertise, Authoritativeness, and Trustworthiness. Build signals that increase AI citations and Reference Rate.',
-      keywords: ['E-E-A-T', 'AI trust signals', 'author authority', 'content credibility', 'GEO signals'],
-      ogImage: '/images/blog/e-e-a-t-og.jpg'
+      keywords: ['E-E-A-T', 'AI trust signals', 'author authority', 'content credibility', 'GEO signals']
     }
   },
   {
@@ -625,8 +620,7 @@ Knowledge graphs are the foundation upon which AI authority is built. As AI syst
     featured: false,
     seo: {
       metaDescription: 'Deep dive into knowledge graphs: understand how they work, why they matter for GEO, and how to optimize your entity presence for AI systems.',
-      keywords: ['knowledge graphs', 'entity optimization', 'Wikidata', 'semantic web', 'structured data'],
-      ogImage: '/images/blog/knowledge-graphs-og.jpg'
+      keywords: ['knowledge graphs', 'entity optimization', 'Wikidata', 'semantic web', 'structured data']
     }
   }
 ];

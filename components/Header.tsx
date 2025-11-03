@@ -17,11 +17,15 @@ const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick, onClientsC
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const isHomePage = location.pathname === '/';
 
-    const scrollToTop = () => {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
+    const handleLogoClick = () => {
+        if (isHomePage) {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        } else {
+            navigate('/');
+        }
     };
 
     useEffect(() => {
@@ -45,7 +49,7 @@ const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick, onClientsC
         <header ref={ref} className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'bg-brand-bg/85 backdrop-blur-xl shadow-2xl shadow-black/30 border-b border-white/5' : isHomePage ? 'bg-transparent' : 'bg-brand-bg/95 backdrop-blur-xl border-b border-white/5'}`}>
             <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
                 {/* Logo */}
-                <button onClick={scrollToTop} aria-label="Anóteros Lógos, return to top" className="group flex items-center">
+                <button onClick={handleLogoClick} aria-label="Anóteros Lógos" className="group flex items-center cursor-pointer">
                     <div className="flex items-center gap-2.5 sm:gap-3 transition-all duration-300 group-hover:scale-105">
                         <Logo className="h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0 transition-transform duration-300" />
                         <span className="font-display text-lg sm:text-xl md:text-2xl font-semibold tracking-tight bg-gradient-to-r from-brand-text to-brand-text/70 bg-clip-text text-transparent whitespace-nowrap">Anóteros Lógos</span>

@@ -139,11 +139,9 @@ export default function BlogPost() {
                 to={`/author/${post.author.slug}`}
                 className="flex items-center gap-3 text-brand-text hover:text-brand-accent transition-colors"
               >
-                <img 
-                  src={post.author.image} 
-                  alt={post.author.name}
-                  className="w-10 h-10 rounded-full border-2 border-brand-accent/20"
-                />
+                <div className="w-10 h-10 rounded-full bg-brand-accent/10 flex items-center justify-center border-2 border-brand-accent/20">
+                  <User className="w-5 h-5 text-brand-accent" />
+                </div>
                 <div className="flex flex-col">
                   <span className="font-semibold text-sm">{post.author.name}</span>
                   <span className="text-xs text-brand-text/60">Co-founder & CEO Marketing</span>
@@ -163,18 +161,6 @@ export default function BlogPost() {
                 <span className="text-sm font-medium">Share</span>
               </button>
             </div>
-
-            {/* Featured Image */}
-            {post.image && (
-              <div className="aspect-video rounded-2xl overflow-hidden mb-12 shadow-2xl shadow-black/20">
-                <img 
-                  src={post.image} 
-                  alt={post.title}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            )}
-
           </header>
 
           {/* Tags */}
@@ -237,11 +223,9 @@ export default function BlogPost() {
               to={`/author/${post.author.slug}`}
               className="flex items-start gap-6 bg-brand-secondary/20 rounded-2xl p-6 hover:bg-brand-secondary/30 transition-colors group"
             >
-              <img 
-                src={post.author.image} 
-                alt={post.author.name}
-                className="w-20 h-20 rounded-full flex-shrink-0"
-              />
+              <div className="w-20 h-20 rounded-full bg-brand-accent/10 flex items-center justify-center border-2 border-brand-accent/20 flex-shrink-0">
+                <User className="w-10 h-10 text-brand-accent" />
+              </div>
               <div>
                 <h3 className="text-2xl font-bold text-brand-text mb-2 group-hover:text-brand-accent transition-colors">
                   {post.author.name}
