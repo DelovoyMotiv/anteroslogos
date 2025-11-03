@@ -106,7 +106,7 @@ const GeoAuditPage = () => {
           {/* Analysis Form */}
           <form onSubmit={handleAnalyze} className="max-w-2xl mx-auto mb-8">
             {/* Desktop: Input with button inside */}
-            <div className="hidden md:block relative">
+            <div className="hidden sm:block relative">
               <input
                 type="text"
                 value={url}
@@ -135,7 +135,7 @@ const GeoAuditPage = () => {
             </div>
             
             {/* Mobile: Stacked input and button */}
-            <div className="md:hidden space-y-4">
+            <div className="sm:hidden space-y-4">
               <input
                 type="text"
                 value={url}
@@ -171,7 +171,8 @@ const GeoAuditPage = () => {
             </div>
           )}
 
-          {/* Features Grid */}
+          {/* Features Grid - Only show if no results */}
+          {!result && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
             {[
               { title: 'Schema Analysis', desc: 'Check JSON-LD structured data' },
@@ -184,6 +185,7 @@ const GeoAuditPage = () => {
               </div>
             ))}
           </div>
+          )}
         </div>
       </section>
 

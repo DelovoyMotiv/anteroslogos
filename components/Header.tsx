@@ -78,7 +78,7 @@ const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick, onClientsC
                         </button>
                     ))}
                     <button 
-                        onClick={onContactClick}
+                        onClick={onContactClick || (() => navigate('/'))} 
                         className="bg-brand-accent/10 hover:bg-brand-accent text-brand-accent hover:text-white px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 border border-brand-accent/30 hover:border-brand-accent hover:shadow-lg hover:shadow-brand-accent/30 hover:-translate-y-0.5 whitespace-nowrap"
                     >
                         Get Started
