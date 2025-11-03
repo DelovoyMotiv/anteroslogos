@@ -70,7 +70,7 @@ export default function BlogPost() {
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-brand-bg flex items-center justify-center pt-32 sm:pt-36">
+      <div className="min-h-screen bg-brand-bg flex items-center justify-center pt-28 sm:pt-32 md:pt-36 lg:pt-40">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-brand-text mb-4">Article Not Found</h1>
           <Link to="/blog" className="text-brand-accent hover:underline">
@@ -84,7 +84,7 @@ export default function BlogPost() {
   return (
     <div className="min-h-screen bg-brand-bg">
       {/* Reading Progress Bar */}
-      <div className="fixed top-0 left-0 right-0 h-1 bg-brand-secondary/20 z-50">
+      <div className="fixed top-0 left-0 right-0 h-1 bg-brand-secondary/20 z-40">
         <div 
           className="h-full bg-gradient-to-r from-brand-accent to-blue-500 transition-all duration-150"
           style={{ width: `${readingProgress}%` }}
@@ -98,7 +98,7 @@ export default function BlogPost() {
         onTeamClick={() => navigate('/')} 
         onContactClick={() => navigate('/')}
       />
-      <div className="pt-32 sm:pt-36 pb-16">
+      <div className="pt-28 sm:pt-32 md:pt-36 lg:pt-40 pb-16">
         <article className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Back Link */}
           <Link 
