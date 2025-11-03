@@ -20,6 +20,7 @@ export interface AuditResult {
     contentQuality: number;
     citationPotential: number;
     technicalSEO: number;
+    linkAnalysis: number;
   };
   details: {
     schemaMarkup: EnhancedSchemaDetails;
@@ -31,6 +32,7 @@ export interface AuditResult {
     contentQuality: ContentQualityDetails;
     citationPotential: CitationPotentialDetails;
     technicalSEO: TechnicalSEODetails;
+    linkAnalysis: LinkAnalysisDetails;
   };
   recommendations: EnhancedRecommendation[];
   insights: string[];
@@ -203,6 +205,26 @@ export interface TechnicalSEODetails {
   strengths: string[];
 }
 
+export interface LinkAnalysisDetails {
+  totalLinks: number;
+  internalLinks: number;
+  externalLinks: number;
+  nofollowLinks: number;
+  nofollowRatio: number;
+  uniqueInternalLinks: number;
+  uniqueExternalLinks: number;
+  brokenLinks: number;
+  linkDepth: 'shallow' | 'balanced' | 'deep';
+  anchorTextQuality: number;
+  emptyAnchors: number;
+  imageLinks: number;
+  externalDomains: string[];
+  topInternalPages: Array<{ url: string; count: number }>;
+  linkDistribution: 'poor' | 'fair' | 'good' | 'excellent';
+  issues: string[];
+  strengths: string[];
+}
+
 // ==================== MAIN AUDIT FUNCTION ====================
 
 export async function auditWebsite(url: string): Promise<AuditResult> {
@@ -227,6 +249,7 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
   const technicalSEO = await auditTechnicalSEO(doc, normalizedUrl);
   const contentQuality = auditContentQuality(doc, htmlContent);
   const citationPotential = auditCitationPotential(doc, htmlContent);
+  const linkAnalysis = auditLinkAnalysis(doc, normalizedUrl);
   const aiCrawlers = await auditAICrawlers(normalizedUrl);
 
   // Calculate category scores
@@ -240,6 +263,7 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
     contentQuality: calculateContentQualityScore(contentQuality),
     citationPotential: calculateCitationPotentialScore(citationPotential),
     technicalSEO: calculateTechnicalSEOScore(technicalSEO),
+    linkAnalysis: calculateLinkAnalysisScore(linkAnalysis),
   };
 
   // Advanced weighted scoring with dynamic weights based on content type
@@ -257,6 +281,7 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
     contentQuality,
     citationPotential,
     technicalSEO,
+    linkAnalysis,
   }, scores);
 
   // Generate insights
@@ -284,6 +309,7 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
       contentQuality,
       citationPotential,
       technicalSEO,
+      linkAnalysis,
     },
     recommendations,
     insights,
@@ -990,6 +1016,172 @@ function auditPerformance(html: string, doc: Document): PerformanceDetails {
   };
 }
 
+function auditLinkAnalysis(doc: Document, baseUrl: string): LinkAnalysisDetails {
+  const allLinks = Array.from(doc.querySelectorAll('a[href]'));
+  const totalLinks = allLinks.length;
+  
+  const baseHostname = new URL(baseUrl).hostname.replace('www.', '');
+  
+  let internalLinks = 0;
+  let externalLinks = 0;
+  let nofollowLinks = 0;
+  let emptyAnchors = 0;
+  let imageLinks = 0;
+  
+  const internalUrls = new Set<string>();
+  const externalUrls = new Set<string>();
+  const externalDomains = new Set<string>();
+  const internalPageCount = new Map<string, number>();
+  
+  allLinks.forEach(link => {
+    const href = link.getAttribute('href') || '';
+    const text = link.textContent?.trim() || '';
+    const rel = link.getAttribute('rel') || '';
+    
+    // Check for nofollow
+    if (rel.includes('nofollow')) {
+      nofollowLinks++;
+    }
+    
+    // Check for empty anchors
+    if (!text && !link.querySelector('img')) {
+      emptyAnchors++;
+    }
+    
+    // Check for image links
+    if (link.querySelector('img')) {
+      imageLinks++;
+    }
+    
+    // Categorize link
+    try {
+      if (href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) {
+        // Skip anchors, mailto, tel
+        return;
+      }
+      
+      if (href.startsWith('/') || href.startsWith('./') || href.startsWith('../')) {
+        // Relative URL - internal
+        internalLinks++;
+        const normalizedPath = href.split('?')[0].split('#')[0];
+        internalUrls.add(normalizedPath);
+        internalPageCount.set(normalizedPath, (internalPageCount.get(normalizedPath) || 0) + 1);
+      } else if (href.startsWith('http')) {
+        // Absolute URL
+        const linkUrl = new URL(href);
+        const linkHostname = linkUrl.hostname.replace('www.', '');
+        
+        if (linkHostname === baseHostname) {
+          internalLinks++;
+          const normalizedPath = linkUrl.pathname + linkUrl.search;
+          internalUrls.add(normalizedPath);
+          internalPageCount.set(normalizedPath, (internalPageCount.get(normalizedPath) || 0) + 1);
+        } else {
+          externalLinks++;
+          externalUrls.add(href);
+          externalDomains.add(linkHostname);
+        }
+      }
+    } catch {
+      // Invalid URL - skip
+    }
+  });
+  
+  const uniqueInternalLinks = internalUrls.size;
+  const uniqueExternalLinks = externalUrls.size;
+  const nofollowRatio = totalLinks > 0 ? (nofollowLinks / totalLinks) * 100 : 0;
+  
+  // Calculate link depth
+  let linkDepth: 'shallow' | 'balanced' | 'deep' = 'shallow';
+  if (internalLinks > 50) linkDepth = 'deep';
+  else if (internalLinks > 20) linkDepth = 'balanced';
+  
+  // Calculate anchor text quality (% of links with meaningful text)
+  const meaningfulAnchors = allLinks.filter(link => {
+    const text = link.textContent?.trim() || '';
+    return text.length > 3 && !['click here', 'read more', 'here', 'link'].includes(text.toLowerCase());
+  }).length;
+  const anchorTextQuality = totalLinks > 0 ? Math.round((meaningfulAnchors / totalLinks) * 100) : 0;
+  
+  // Get top internal pages
+  const topInternalPages = Array.from(internalPageCount.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([url, count]) => ({ url, count }));
+  
+  // Calculate link distribution
+  let linkDistribution: 'poor' | 'fair' | 'good' | 'excellent' = 'poor';
+  const internalToExternalRatio = externalLinks > 0 ? internalLinks / externalLinks : internalLinks;
+  if (internalToExternalRatio >= 3 && anchorTextQuality >= 70) linkDistribution = 'excellent';
+  else if (internalToExternalRatio >= 2 && anchorTextQuality >= 50) linkDistribution = 'good';
+  else if (internalToExternalRatio >= 1) linkDistribution = 'fair';
+  
+  const issues: string[] = [];
+  const strengths: string[] = [];
+  
+  if (totalLinks === 0) {
+    issues.push('No links found on the page');
+  } else {
+    strengths.push(`${totalLinks} total links found`);
+  }
+  
+  if (internalLinks < 5) {
+    issues.push('Very few internal links - poor site structure connectivity');
+  } else if (internalLinks > 10) {
+    strengths.push(`${internalLinks} internal links help with site navigation`);
+  }
+  
+  if (externalLinks === 0) {
+    issues.push('No external links - may signal lack of research and citations');
+  } else if (externalLinks > 0 && externalLinks < 20) {
+    strengths.push(`${externalLinks} external links show research and credibility`);
+  }
+  
+  if (nofollowRatio > 50) {
+    issues.push(`High nofollow ratio (${Math.round(nofollowRatio)}%) - may limit link juice flow`);
+  }
+  
+  if (emptyAnchors > 0) {
+    issues.push(`${emptyAnchors} links with empty anchor text - bad for accessibility and SEO`);
+  }
+  
+  if (anchorTextQuality < 50) {
+    issues.push('Poor anchor text quality - use descriptive link text');
+  } else if (anchorTextQuality >= 70) {
+    strengths.push('Good anchor text quality - descriptive and meaningful');
+  }
+  
+  if (linkDistribution === 'excellent') {
+    strengths.push('Excellent link distribution and structure');
+  } else if (linkDistribution === 'poor') {
+    issues.push('Poor link distribution - imbalanced internal/external ratio');
+  }
+  
+  if (externalDomains.size > 5) {
+    strengths.push(`Links to ${externalDomains.size} unique domains show diverse sources`);
+  }
+  
+  return {
+    totalLinks,
+    internalLinks,
+    externalLinks,
+    nofollowLinks,
+    nofollowRatio: Math.round(nofollowRatio * 10) / 10,
+    uniqueInternalLinks,
+    uniqueExternalLinks,
+    brokenLinks: 0, // Can't check without actual HTTP requests
+    linkDepth,
+    anchorTextQuality,
+    emptyAnchors,
+    imageLinks,
+    externalDomains: Array.from(externalDomains).slice(0, 10),
+    topInternalPages,
+    linkDistribution,
+    issues,
+    strengths,
+  };
+}
+
 async function auditTechnicalSEO(doc: Document, url: string): Promise<TechnicalSEODetails> {
   const issues: string[] = [];
   const strengths: string[] = [];
@@ -1273,18 +1465,57 @@ function calculateTechnicalSEOScore(details: TechnicalSEODetails): number {
   return Math.max(0, Math.min(100, score));
 }
 
+function calculateLinkAnalysisScore(details: LinkAnalysisDetails): number {
+  let score = 0;
+  
+  // Link quantity (0-20 points)
+  if (details.totalLinks >= 20) score += 20;
+  else if (details.totalLinks >= 10) score += 15;
+  else if (details.totalLinks >= 5) score += 10;
+  
+  // Internal links (0-20 points)
+  if (details.internalLinks >= 15) score += 20;
+  else if (details.internalLinks >= 10) score += 15;
+  else if (details.internalLinks >= 5) score += 10;
+  
+  // External links (0-15 points)
+  if (details.externalLinks >= 3 && details.externalLinks <= 20) score += 15;
+  else if (details.externalLinks > 0) score += 10;
+  
+  // Anchor text quality (0-20 points)
+  score += Math.round(details.anchorTextQuality * 0.2);
+  
+  // Link distribution (0-15 points)
+  if (details.linkDistribution === 'excellent') score += 15;
+  else if (details.linkDistribution === 'good') score += 12;
+  else if (details.linkDistribution === 'fair') score += 8;
+  else score += 3;
+  
+  // Nofollow ratio (0-10 points)
+  if (details.nofollowRatio < 10) score += 10;
+  else if (details.nofollowRatio < 30) score += 7;
+  else if (details.nofollowRatio < 50) score += 4;
+  
+  // Penalties
+  if (details.emptyAnchors > 5) score -= 10;
+  if (details.emptyAnchors > 2) score -= 5;
+  
+  return Math.max(0, Math.min(100, score));
+}
+
 function calculateOverallScore(scores: any, _schemaDetails: EnhancedSchemaDetails): number {
   // Dynamic weighting based on content type
   const weights = {
-    schemaMarkup: 0.18,
-    aiCrawlers: 0.16,
-    eeat: 0.16,
-    technicalSEO: 0.14,
-    metaTags: 0.10,
-    contentQuality: 0.10,
-    structure: 0.07,
-    performance: 0.07,
-    citationPotential: 0.02,
+    schemaMarkup: 0.16,
+    aiCrawlers: 0.15,
+    eeat: 0.15,
+    technicalSEO: 0.13,
+    linkAnalysis: 0.12,
+    metaTags: 0.09,
+    contentQuality: 0.09,
+    structure: 0.06,
+    performance: 0.05,
+    citationPotential: 0.00,
   };
 
   // Adjust weights for content-heavy sites
@@ -1303,7 +1534,8 @@ function calculateOverallScore(scores: any, _schemaDetails: EnhancedSchemaDetail
     scores.performance * weights.performance +
     scores.contentQuality * weights.contentQuality +
     scores.citationPotential * weights.citationPotential +
-    scores.technicalSEO * weights.technicalSEO;
+    scores.technicalSEO * weights.technicalSEO +
+    scores.linkAnalysis * weights.linkAnalysis;
 
   return Math.round(overall);
 }
@@ -1491,6 +1723,59 @@ Allow: /`,
     });
   }
 
+  // High: Link Analysis
+  if (scores.linkAnalysis < 50) {
+    recommendations.push({
+      category: 'Link Analysis',
+      priority: 'high',
+      effort: 'strategic',
+      title: 'Improve Internal Linking Structure',
+      description: 'Poor internal linking limits site crawlability and link equity distribution.',
+      impact: 'Strong internal linking helps AI systems understand site structure and content relationships.',
+      implementation: 'Add contextual links to related pages, create hub pages, improve navigation.',
+      estimatedTime: '2-3 hours',
+    });
+  }
+
+  if (details.linkAnalysis.emptyAnchors > 2) {
+    recommendations.push({
+      category: 'Link Analysis',
+      priority: 'medium',
+      effort: 'quick-win',
+      title: 'Fix Empty Anchor Text',
+      description: `${details.linkAnalysis.emptyAnchors} links have no descriptive text - bad for accessibility and SEO.`,
+      impact: 'Descriptive anchor text helps AI understand link context and improves accessibility.',
+      implementation: 'Add meaningful text to all links. Avoid "click here" and use descriptive phrases.',
+      estimatedTime: '30 minutes',
+    });
+  }
+
+  if (details.linkAnalysis.anchorTextQuality < 50) {
+    recommendations.push({
+      category: 'Link Analysis',
+      priority: 'medium',
+      effort: 'strategic',
+      title: 'Improve Anchor Text Quality',
+      description: 'Many links use generic text like "click here" or "read more".',
+      impact: 'Descriptive anchor text improves SEO and helps AI understand content relationships.',
+      implementation: 'Replace generic anchor text with descriptive phrases that indicate link destination.',
+      estimatedTime: '1-2 hours',
+    });
+  }
+
+  if (details.linkAnalysis.externalLinks === 0) {
+    recommendations.push({
+      category: 'Link Analysis',
+      priority: 'medium',
+      effort: 'quick-win',
+      title: 'Add External Citations',
+      description: 'No external links found - may signal lack of research and credibility.',
+      impact: 'Linking to authoritative sources strengthens content credibility and E-E-A-T signals.',
+      implementation: 'Add 3-5 relevant external links to authoritative sources in your content.',
+      estimatedTime: '20 minutes',
+    });
+  }
+
   // Sort by priority
   const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
   return recommendations.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
@@ -1541,6 +1826,14 @@ function generateInsights(scores: any, details: any): string[] {
 
   if (details.technicalSEO.isHTTPS && details.technicalSEO.hasViewport && details.technicalSEO.hasCanonical) {
     insights.push('Strong technical foundation. Core SEO elements properly implemented.');
+  }
+
+  if (scores.linkAnalysis < 50) {
+    insights.push('Weak link structure detected. Improve internal linking and anchor text quality for better SEO.');
+  }
+
+  if (details.linkAnalysis && details.linkAnalysis.linkDistribution === 'excellent') {
+    insights.push('Excellent link distribution shows well-structured content with good internal/external balance.');
   }
 
   return insights;
