@@ -30,26 +30,24 @@ export default function Blog() {
         onContactClick={() => navigate('/')}
       />
       {/* Main Content */}
-      <div className="pt-28 sm:pt-32 md:pt-36 pb-16">
+      <div className="pt-32 sm:pt-36 md:pt-40 lg:pt-44 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Page Header */}
-          <div className="mb-8 sm:mb-10">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex items-center gap-2 px-3 py-1 bg-brand-accent/10 border border-brand-accent/30 rounded-full">
-                <Sparkles className="w-4 h-4 text-brand-accent" />
-                <span className="text-xs font-semibold text-brand-accent uppercase tracking-wider">Blog</span>
-              </div>
+          <div className="mb-12 sm:mb-14">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-brand-accent/5 border border-brand-accent/20 rounded-full mb-6">
+              <div className="w-1.5 h-1.5 rounded-full bg-brand-accent animate-pulse"></div>
+              <span className="text-xs font-semibold text-brand-accent uppercase tracking-wider">Blog</span>
             </div>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-brand-text mb-4 leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-brand-text mb-5 leading-tight">
               GEO Insights & Strategies
             </h1>
-            <p className="text-base sm:text-lg md:text-xl text-brand-text/60 max-w-3xl">
+            <p className="text-lg sm:text-xl text-brand-text/60 max-w-3xl leading-relaxed">
               Expert perspectives on Generative Engine Optimization, AI authority, and the future of digital presence
             </p>
           </div>
 
           {/* Category Filter */}
-          <div className="flex flex-wrap gap-2 sm:gap-3 mb-10 sm:mb-12">
+          <div className="flex flex-wrap gap-2 sm:gap-3 mb-12 sm:mb-16">
             {categories.map(category => (
               <button
                 key={category}
@@ -75,22 +73,12 @@ export default function Blog() {
                     to={`/blog/${featuredPosts[0].slug}`}
                     className="group relative bg-gradient-to-br from-brand-secondary/40 to-brand-secondary/20 rounded-2xl overflow-hidden border border-brand-accent/20 hover:border-brand-accent/40 transition-all duration-300 hover:shadow-2xl hover:shadow-brand-accent/10"
                   >
-                    {/* Featured Badge */}
-                    <div className="absolute top-6 right-6 z-10">
-                      <div className="flex items-center gap-2 px-3 py-1.5 bg-brand-accent backdrop-blur-sm rounded-full shadow-lg">
-                        <TrendingUp className="w-3.5 h-3.5 text-white" />
-                        <span className="text-xs font-bold text-white uppercase tracking-wider">Featured</span>
+                    <div className="p-6 sm:p-8">
+                      {/* Featured Badge */}
+                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-brand-accent/10 rounded-full mb-5">
+                        <div className="w-1 h-1 rounded-full bg-brand-accent"></div>
+                        <span className="text-xs font-bold text-brand-accent uppercase tracking-wider">Featured</span>
                       </div>
-                    </div>
-                    
-                    {/* Icon Header */}
-                    <div className="p-6 sm:p-8 pb-0">
-                      <div className="w-16 h-16 bg-brand-accent/10 rounded-2xl flex items-center justify-center mb-6">
-                        <Sparkles className="w-8 h-8 text-brand-accent" />
-                      </div>
-                    </div>
-                    
-                    <div className="p-6 sm:p-8 pt-0">
                       <div className="flex items-center gap-2 mb-4">
                         <span className="px-3 py-1 bg-brand-accent/10 text-brand-accent text-xs font-semibold rounded-full uppercase tracking-wider">
                           {featuredPosts[0].category}
@@ -122,10 +110,12 @@ export default function Blog() {
 
                 {/* Sidebar - Recent Posts */}
                 <div className="lg:col-span-1">
-                  <h3 className="text-xl font-bold text-brand-text mb-6 flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-brand-accent" />
-                    Latest Articles
-                  </h3>
+                  <div className="flex items-center gap-2 mb-6">
+                    <div className="w-1 h-6 bg-brand-accent rounded-full"></div>
+                    <h3 className="text-xl font-bold text-brand-text">
+                      Latest Articles
+                    </h3>
+                  </div>
                   <div className="space-y-4">
                     {filteredPosts.slice(0, 4).map((post, idx) => (
                       <Link
@@ -172,7 +162,7 @@ export default function Blog() {
                 {filteredPosts.length} {filteredPosts.length === 1 ? 'article' : 'articles'}
               </span>
             </div>
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredPosts.map(post => (
                 <Link
                   key={post.slug}
@@ -180,12 +170,10 @@ export default function Blog() {
                   className="group relative bg-gradient-to-br from-brand-secondary/30 to-brand-secondary/10 rounded-xl overflow-hidden border border-brand-accent/10 hover:border-brand-accent/30 hover:shadow-xl hover:shadow-brand-accent/5 transition-all duration-300"
                 >
                   <div className="p-5 sm:p-6">
-                    {/* Category Icon */}
-                    <div className="w-12 h-12 bg-brand-accent/10 rounded-xl flex items-center justify-center mb-4">
-                      <BookOpen className="w-6 h-6 text-brand-accent" />
-                    </div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="px-2.5 py-1 bg-brand-accent/10 text-brand-accent text-xs font-semibold rounded-md uppercase tracking-wider">
+                    {/* Category Indicator */}
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-brand-accent/10 rounded-full mb-4">
+                      <div className="w-1 h-1 rounded-full bg-brand-accent"></div>
+                      <span className="text-xs font-semibold text-brand-accent uppercase tracking-wider">
                         {post.category}
                       </span>
                     </div>
@@ -225,7 +213,7 @@ export default function Blog() {
                     )}
                   </div>
                   <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ArrowRight className="w-5 h-5 text-brand-accent" />
+                    <ArrowRight className="w-4 h-4 text-brand-accent" />
                   </div>
                 </Link>
               ))}
