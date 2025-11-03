@@ -47,14 +47,6 @@ const HomePage: React.FC = () => {
             <Header 
                 onMethodClick={() => handleScrollTo(nicosiaMethodRef)}
                 onClientsClick={() => handleScrollTo(clientProfileRef)}
-                onInsightsClick={() => {
-                    const insightsSection = document.getElementById('insights');
-                    insightsSection?.scrollIntoView({ behavior: 'smooth' });
-                }}
-                onTeamClick={() => {
-                    const teamSection = document.getElementById('team');
-                    teamSection?.scrollIntoView({ behavior: 'smooth' });
-                }}
                 onContactClick={handleOpenModal}
             />
             <main>

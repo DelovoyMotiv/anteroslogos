@@ -14,8 +14,6 @@ const GeoVsSeoPage: React.FC = () => {
             <Header 
                 onMethodClick={() => window.location.href = '/#nicosia-method'}
                 onClientsClick={() => window.location.href = '/#clients'}
-                onInsightsClick={() => window.location.href = '/#insights'}
-                onTeamClick={() => window.location.href = '/#team'}
                 onContactClick={() => {}}
             />
             

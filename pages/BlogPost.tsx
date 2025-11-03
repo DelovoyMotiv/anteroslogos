@@ -141,8 +141,6 @@ export default function BlogPost() {
       <Header 
         onMethodClick={() => navigate('/')} 
         onClientsClick={() => navigate('/')} 
-        onInsightsClick={() => navigate('/')} 
-        onTeamClick={() => navigate('/')} 
         onContactClick={() => navigate('/')}
       />
       <div className="pt-28 sm:pt-32 md:pt-36 lg:pt-40 pb-16">

@@ -24,8 +24,6 @@ export default function Blog() {
       <Header 
         onMethodClick={() => navigate('/')} 
         onClientsClick={() => navigate('/')} 
-        onInsightsClick={() => navigate('/')} 
-        onTeamClick={() => navigate('/')} 
         onContactClick={() => navigate('/')}
       />
       {/* Main Content */}
