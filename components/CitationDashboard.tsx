@@ -260,11 +260,13 @@ const CitationDashboard = ({ domain, geoScore }: CitationDashboardProps) => {
       </div>
 
       {/* Info Footer */}
-      <div className="p-6 rounded-xl bg-blue-500/10 border border-blue-500/30">
-        <p className="text-sm text-white/70">
-          <strong>Note:</strong> AI Citation Tracker uses advanced algorithms to detect when AI systems
-          cite your content. Data is updated in real-time and represents actual citations from
-          ChatGPT, Claude, Gemini, Perplexity, and Copilot.
+      <div className="p-6 rounded-xl bg-orange-500/10 border border-orange-500/30">
+        <p className="text-sm text-white/70 mb-2">
+          <strong>⚠️ Demo Mode:</strong> Citation data is currently simulated for demonstration purposes.
+        </p>
+        <p className="text-xs text-white/60">
+          Production integration requires AI system APIs (OpenAI, Anthropic, Google) or third-party citation monitoring services.
+          Contact us to enable real citation tracking with enterprise API access.
         </p>
       </div>
     </div>

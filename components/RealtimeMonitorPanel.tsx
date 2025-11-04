@@ -313,10 +313,13 @@ const RealtimeMonitorPanel = ({ domain }: RealtimeMonitorPanelProps) => {
       )}
 
       {/* Info Footer */}
-      <div className="p-6 rounded-xl bg-cyan-500/10 border border-cyan-500/30">
-        <p className="text-sm text-white/70">
-          <strong>Note:</strong> Real-time GEO Monitor provides live tracking of your site's health metrics.
-          In production, this connects to actual monitoring APIs. Auto-refresh updates data every 30 seconds.
+      <div className="p-6 rounded-xl bg-orange-500/10 border border-orange-500/30">
+        <p className="text-sm text-white/70 mb-2">
+          <strong>⚠️ Demo Mode:</strong> Monitoring data is simulated for demonstration. Auto-refresh: 30 seconds.
+        </p>
+        <p className="text-xs text-white/60">
+          Production integration requires: Server log access for crawler tracking, uptime monitoring service (UptimeRobot/Pingdom),
+          and real schema validation APIs. Health metrics simulate realistic GEO monitoring patterns.
         </p>
       </div>
     </div>

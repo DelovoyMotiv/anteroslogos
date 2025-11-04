@@ -229,8 +229,11 @@ const PredictiveDashboard = ({ currentScore, history }: PredictiveDashboardProps
 
       {/* Info Footer */}
       <div className="p-6 rounded-xl bg-purple-500/10 border border-purple-500/30">
-        <p className="text-sm text-white/70">
-          <strong>Note:</strong> Predictive GEO Score uses linear regression ML models trained on your historical audit data.
+        <p className="text-sm text-white/70 mb-2">
+          <strong>ML-Powered Forecasting:</strong> Predictive GEO Score uses linear regression models trained on your audit history.
+        </p>
+        <p className="text-xs text-white/60">
+          Forecasts are based on historical trends with diminishing returns modeling. Requires minimum 2 audit data points.
           Confidence intervals reflect prediction accuracy based on data volatility and trend consistency.
         </p>
       </div>

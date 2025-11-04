@@ -56,12 +56,30 @@ export class AIcitationTracker {
   }
 
   /**
-   * Simulate citation detection
-   * In production: Would integrate with AI system APIs or web scraping
+   * Detect AI system citations
+   * 
+   * ⚠️ PRODUCTION NOTE: This currently uses SIMULATION data for demonstration.
+   * 
+   * REAL IMPLEMENTATION OPTIONS:
+   * 1. API Integration:
+   *    - OpenAI API: Monitor chat.openai.com for citations (requires enterprise access)
+   *    - Anthropic API: Track Claude citations via API logs
+   *    - Perplexity API: Monitor citation endpoints
+   *    - Google Search Console: Track Gemini appearances
+   * 
+   * 2. Web Scraping (Legal compliance required):
+   *    - Monitor public AI responses mentioning your domain
+   *    - Track citation patterns via search APIs
+   * 
+   * 3. Third-party Services:
+   *    - BrightData/Oxylabs for AI monitoring
+   *    - Custom citation tracking service
+   * 
+   * Replace the simulation below with actual API calls when ready.
    */
   async detectCitations(timeRange: '24h' | '7d' | '30d' = '7d'): Promise<CitationSource[]> {
-    // PRODUCTION: This would call actual AI system APIs or monitoring services
-    // For now: Generate realistic citations based on GEO score patterns
+    // ⚠️ SIMULATION: Replace with real API integration
+    // TODO: Implement actual citation detection via AI system APIs
     
     const now = new Date();
     const hoursBack = timeRange === '24h' ? 24 : timeRange === '7d' ? 168 : 720;

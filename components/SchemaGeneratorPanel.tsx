@@ -351,9 +351,12 @@ const SchemaGeneratorPanel = ({ url, existingSchemas = [] }: SchemaGeneratorPane
 
       {/* Info Footer */}
       <div className="p-6 rounded-xl bg-blue-500/10 border border-blue-500/30">
-        <p className="text-sm text-white/70">
-          <strong>Note:</strong> AI Schema Generator uses OpenRouter API with GEO Marketolog Agent to create
-          production-ready Schema.org markup optimized for AI visibility and citation likelihood.
+        <p className="text-sm text-white/70 mb-2">
+          <strong>AI-Powered Generation:</strong> Schema Generator uses OpenRouter API with GEO Marketolog Agent.
+        </p>
+        <p className="text-xs text-white/60">
+          Requires valid OpenRouter API key (VITE_OPENROUTER_API_KEY). Currently configured with minimax/minimax-m2:free model.
+          Generated schemas are production-ready and optimized for AI system visibility. Always validate schemas before deployment.
         </p>
       </div>
     </div>

@@ -71,10 +71,34 @@ export class RealtimeGEOMonitor {
 
   /**
    * Get current GEO health status
+   * 
+   * ⚠️ PRODUCTION NOTE: This currently uses SIMULATION for demonstration.
+   * 
+   * REAL IMPLEMENTATION:
+   * 1. Schema Validation:
+   *    - Fetch actual page HTML
+   *    - Parse JSON-LD schemas
+   *    - Validate via Google's Structured Data Testing Tool API
+   * 
+   * 2. Crawler Detection:
+   *    - Parse robots.txt from target domain
+   *    - Check User-agent directives for AI crawlers
+   *    - Verify sitemap.xml accessibility
+   * 
+   * 3. HTTPS/Security:
+   *    - Test actual HTTPS connection
+   *    - Check SSL certificate validity
+   *    - Verify security headers
+   * 
+   * 4. Real-time Monitoring:
+   *    - Integrate with UptimeRobot API
+   *    - Use Pingdom/StatusCake for uptime tracking
+   *    - Monitor via New Relic/Datadog
+   * 
+   * Replace simulation below with actual health checks.
    */
   async getCurrentHealth(): Promise<GEOHealthStatus> {
-    // In production: Real API calls to check these metrics
-    // For now: Simula realistic health check
+    // ⚠️ SIMULATION: Replace with real health monitoring API
     
     const metrics = {
       schemaValid: Math.random() > 0.2, // 80% chance valid
@@ -165,9 +189,17 @@ export class RealtimeGEOMonitor {
 
   /**
    * Monitor site uptime
+   * 
+   * ⚠️ PRODUCTION NOTE: Simulation - replace with real monitoring.
+   * 
+   * REAL IMPLEMENTATION:
+   * - UptimeRobot API: https://uptimerobot.com/api/
+   * - Pingdom API: https://www.pingdom.com/api/
+   * - StatusCake API: https://www.statuscake.com/api/
+   * - Custom HTTP monitoring with axios/fetch
    */
   async checkUptime(): Promise<UptimeStatus> {
-    // Simulate uptime check
+    // ⚠️ SIMULATION: Replace with actual uptime monitoring service
     const responseTime = 100 + Math.floor(Math.random() * 400); // 100-500ms
     const isOnline = Math.random() > 0.02; // 98% uptime
     
@@ -186,8 +218,23 @@ export class RealtimeGEOMonitor {
 
   /**
    * Track AI crawler activity
+   * 
+   * ⚠️ PRODUCTION NOTE: Simulation - requires server log access.
+   * 
+   * REAL IMPLEMENTATION:
+   * - Parse server access logs (Apache/Nginx)
+   * - Filter by User-Agent: GPTBot, Claude-Web, etc.
+   * - Aggregate request counts and patterns
+   * - Track indexed pages via log analysis
+   * 
+   * INTEGRATION OPTIONS:
+   * 1. Server logs API (if backend exists)
+   * 2. Google Search Console API for Googlebot
+   * 3. Cloudflare Analytics API
+   * 4. AWS CloudWatch Logs Insights
    */
   async getCrawlerActivity(): Promise<CrawlerActivity[]> {
+    // ⚠️ SIMULATION: Replace with actual log analysis
     const crawlers = [
       'GPTBot',
       'Claude-Web',
