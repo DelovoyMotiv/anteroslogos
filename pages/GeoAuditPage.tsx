@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auditWebsite, type AuditResult } from '../utils/geoAuditEnhanced';
-import { Search, AlertCircle, CheckCircle, TrendingUp, Download, Share2, ExternalLink, ArrowLeft, Award, Target, Zap, TrendingDown, Minus, History, Shield } from 'lucide-react';
+import { Search, AlertCircle, CheckCircle, TrendingUp, Download, Share2, ExternalLink, ArrowLeft, Award, Target, Zap, TrendingDown, Minus, History, Shield, FileText } from 'lucide-react';
 import { saveAuditToHistory, compareWithPrevious, checkScoreDrop } from '../utils/auditHistory';
 import { validateAndSanitizeUrl, checkRateLimit, validateAuditResult } from '../utils/urlValidator';
+import { generatePDFReport } from '../utils/pdfReportGenerator';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import AnalysisProgress from '../components/AnalysisProgress';
@@ -102,6 +103,22 @@ const GeoAuditPage = () => {
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileDefaultName);
     linkElement.click();
+  };
+
+  const downloadPDFReport = async () => {
+    if (!result) return;
+    try {
+      await generatePDFReport(result, {
+        includeCharts: true,
+        includeRecommendations: true,
+        includeDetails: true,
+        companyName: 'Anóteros Lógos',
+        reportDate: new Date().toLocaleDateString(),
+      });
+    } catch (error) {
+      console.error('Failed to generate PDF:', error);
+      alert('Failed to generate PDF report. Please try again.');
+    }
   };
 
   const shareResults = () => {
@@ -322,9 +339,17 @@ const GeoAuditPage = () => {
                 {/* Right: Action Buttons */}
                 <div className="flex lg:flex-col gap-3 flex-shrink-0">
                   <button
+                    onClick={downloadPDFReport}
+                    className="p-3 bg-brand-accent/20 hover:bg-brand-accent/30 border border-brand-accent hover:border-brand-accent rounded-lg transition-all group"
+                    title="Download PDF Report"
+                    aria-label="Download professional PDF report"
+                  >
+                    <FileText className="w-5 h-5 text-brand-accent group-hover:scale-110 transition-transform" />
+                  </button>
+                  <button
                     onClick={downloadReport}
                     className="p-3 bg-white/5 hover:bg-white/10 border border-brand-secondary hover:border-brand-accent rounded-lg transition-all"
-                    title="Download Report"
+                    title="Download JSON"
                     aria-label="Download JSON report"
                   >
                     <Download className="w-5 h-5" />
