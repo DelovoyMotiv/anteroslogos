@@ -11,6 +11,7 @@ import ScoreRadarChart from '../components/charts/ScoreRadarChart';
 import ScoreTrendChart from '../components/charts/ScoreTrendChart';
 import PriorityMatrix from '../components/charts/PriorityMatrix';
 import CategoryBarChart from '../components/charts/CategoryBarChart';
+import ExecutiveSummary from '../components/ExecutiveSummary';
 
 const GeoAuditPage = () => {
   const navigate = useNavigate();
@@ -358,6 +359,9 @@ const GeoAuditPage = () => {
                 </div>
               </div>
             )}
+
+            {/* Executive Summary Dashboard */}
+            <ExecutiveSummary result={result} />
 
             {/* Insights */}
             {result.insights && result.insights.length > 0 && (
