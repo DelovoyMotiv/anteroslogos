@@ -11,10 +11,10 @@ const ScoreTrendChart = ({ url }: ScoreTrendChartProps) => {
 
   if (trend.length === 0) {
     return (
-      <div className="w-full h-[300px] bg-gradient-to-br from-white/5 to-transparent border border-brand-secondary rounded-xl p-6 flex items-center justify-center">
-        <div className="text-center text-white/60">
-          <p className="text-lg font-semibold mb-2">No Historical Data</p>
-          <p className="text-sm">Analyze this site multiple times to see score trends</p>
+      <div className="w-full h-[300px] flex items-center justify-center">
+        <div className="text-center text-white/40">
+          <p className="text-sm font-semibold mb-1">No Historical Data</p>
+          <p className="text-xs">Analyze this site multiple times to see score trends</p>
         </div>
       </div>
     );
@@ -39,37 +39,20 @@ const ScoreTrendChart = ({ url }: ScoreTrendChartProps) => {
   const latestScore = data[data.length - 1]?.score || 0;
 
   return (
-    <div className="relative w-full h-[300px] rounded-xl p-6 overflow-hidden">
-      {/* Gradient background with blur */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-800/50 via-slate-900/30 to-slate-800/50 backdrop-blur-sm" />
-      <div className="absolute inset-0 border border-slate-700/50 rounded-xl" />
-      
-      {/* Glow effects */}
-      <div className="absolute top-0 right-1/3 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl" />
-      
-      <div className="relative z-10 h-full flex flex-col">
-        <div className="flex items-center justify-between mb-4 flex-shrink-0">
-          <h3 className="text-lg font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-            Score History Trend
-          </h3>
-          <div className="flex items-center gap-3 px-4 py-2 rounded-lg" style={{
-            background: 'rgba(15, 23, 42, 0.6)',
-            border: '1px solid rgba(100, 116, 139, 0.3)',
-            backdropFilter: 'blur(8px)',
-          }}>
-            <span className="text-sm" style={{ color: CHART_THEME.axis.tick }}>Latest:</span>
-            <span 
-              className="text-2xl font-bold"
-              style={{ 
-                color: getScoreColor(latestScore),
-                textShadow: `0 0 20px ${getScoreColor(latestScore)}40`,
-              }}
-            >
-              {latestScore}
-            </span>
-          </div>
+    <div className="w-full h-[300px] flex flex-col">
+      <div className="flex items-center justify-between mb-6 flex-shrink-0">
+        <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+          Score History Trend
+        </h3>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-white/40">Latest:</span>
+          <span 
+            className={`text-2xl font-bold tabular-nums ${getScoreColor(latestScore)}`}
+          >
+            {latestScore}
+          </span>
         </div>
+      </div>
         <div className="flex-1 min-h-0">
           <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data}>
@@ -184,7 +167,6 @@ const ScoreTrendChart = ({ url }: ScoreTrendChartProps) => {
           </AreaChart>
           </ResponsiveContainer>
         </div>
-      </div>
     </div>
   );
 };

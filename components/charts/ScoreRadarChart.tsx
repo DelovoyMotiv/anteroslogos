@@ -40,19 +40,10 @@ const ScoreRadarChart = ({ scores, comparison }: ScoreRadarChartProps) => {
   ];
 
   return (
-    <div className="relative w-full h-[400px] rounded-xl p-6 overflow-hidden">
-      {/* Gradient background with blur */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-800/50 via-slate-900/30 to-slate-800/50 backdrop-blur-sm" />
-      <div className="absolute inset-0 border border-slate-700/50 rounded-xl" />
-      
-      {/* Glow effects */}
-      <div className="absolute top-0 left-1/4 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl" />
-      
-      <div className="relative z-10 h-full flex flex-col">
-        <h3 className="text-lg font-bold mb-4 text-center bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
-          Category Performance Radar
-        </h3>
+    <div className="w-full h-[400px] flex flex-col">
+      <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-wider">
+        Category Performance Radar
+      </h3>
         <div className="flex-1 min-h-0">
           <ResponsiveContainer width="100%" height="100%">
           <RadarChart data={data}>
@@ -138,7 +129,6 @@ const ScoreRadarChart = ({ scores, comparison }: ScoreRadarChartProps) => {
           </RadarChart>
           </ResponsiveContainer>
         </div>
-      </div>
     </div>
   );
 };

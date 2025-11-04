@@ -62,19 +62,10 @@ const CategoryBarChart = ({ scores }: CategoryBarChartProps) => {
   };
 
   return (
-    <div className="relative w-full h-[400px] rounded-xl p-6 overflow-hidden">
-      {/* Gradient background with blur */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-800/50 via-slate-900/30 to-slate-800/50 backdrop-blur-sm" />
-      <div className="absolute inset-0 border border-slate-700/50 rounded-xl" />
-      
-      {/* Glow effects */}
-      <div className="absolute top-1/4 right-0 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 left-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl" />
-      
-      <div className="relative z-10 h-full flex flex-col">
-        <h3 className="text-lg font-bold mb-4 text-center bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
-          Category Scores (Weighted by Importance)
-        </h3>
+    <div className="w-full h-[400px] flex flex-col">
+      <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-wider">
+        Category Scores (Weighted by Importance)
+      </h3>
         <div className="flex-1 min-h-0">
           <ResponsiveContainer width="100%" height="100%">
           <BarChart 
@@ -143,7 +134,6 @@ const CategoryBarChart = ({ scores }: CategoryBarChartProps) => {
           </BarChart>
           </ResponsiveContainer>
         </div>
-      </div>
     </div>
   );
 };

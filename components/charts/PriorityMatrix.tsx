@@ -77,19 +77,10 @@ const PriorityMatrix = ({ recommendations }: PriorityMatrixProps) => {
   };
 
   return (
-    <div className="relative w-full h-[400px] rounded-xl p-6 overflow-hidden">
-      {/* Gradient background with blur */}
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-800/50 via-slate-900/30 to-slate-800/50 backdrop-blur-sm" />
-      <div className="absolute inset-0 border border-slate-700/50 rounded-xl" />
-      
-      {/* Glow effects */}
-      <div className="absolute top-1/4 left-0 w-56 h-56 bg-red-500/10 rounded-full blur-3xl" />
-      <div className="absolute bottom-1/4 right-0 w-56 h-56 bg-green-500/10 rounded-full blur-3xl" />
-      
-      <div className="relative z-10 h-full flex flex-col">
-        <h3 className="text-lg font-bold mb-4 text-center bg-gradient-to-r from-red-400 via-orange-400 to-green-400 bg-clip-text text-transparent">
-          Priority vs Effort Matrix
-        </h3>
+    <div className="w-full h-[400px] flex flex-col">
+      <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-wider">
+        Priority vs Effort Matrix
+      </h3>
         <div className="flex-1 min-h-0">
           <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 20, right: 20, bottom: 40, left: 60 }}>
@@ -172,27 +163,22 @@ const PriorityMatrix = ({ recommendations }: PriorityMatrixProps) => {
               Reconsider
             </text>
           </ScatterChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="mt-4 flex flex-wrap gap-4 justify-center text-xs flex-shrink-0">
-          {['critical', 'high', 'medium', 'low'].map((priority) => (
-            <div key={priority} className="flex items-center gap-2">
-              <div 
-                className="w-4 h-4 rounded-full"
-                style={{
-                  backgroundColor: getColor(priority),
-                  boxShadow: `0 0 12px ${getGlow(priority)}`,
-                }}
-              />
-              <span 
-                className="font-medium capitalize"
-                style={{ color: CHART_THEME.axis.label }}
-              >
-                {priority}
-              </span>
-            </div>
-          ))}
-        </div>
+        </ResponsiveContainer>
+      </div>
+      <div className="mt-4 flex flex-wrap gap-4 justify-center text-xs flex-shrink-0">
+        {['critical', 'high', 'medium', 'low'].map((priority) => (
+          <div key={priority} className="flex items-center gap-2">
+            <div 
+              className="w-3 h-3 rounded-full"
+              style={{
+                backgroundColor: getColor(priority),
+              }}
+            />
+            <span className="text-white/40 capitalize text-xs">
+              {priority}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );
