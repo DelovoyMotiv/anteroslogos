@@ -260,81 +260,81 @@ const GeoAuditPage = () => {
       {result && (
         <section className="py-16 px-6">
           <div className="max-w-6xl mx-auto">
-            {/* Overall Score - Optimized Compact Layout */}
-            <div className="mb-12 p-5 sm:p-6 bg-gradient-to-br from-brand-secondary/30 to-transparent border border-brand-accent/30 rounded-2xl">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
+            {/* Overall Score - Optimized Desktop Layout */}
+            <div className="mb-12 p-6 lg:p-8 bg-gradient-to-br from-brand-secondary/30 to-transparent border border-brand-accent/30 rounded-2xl">
+              <div className="flex flex-col lg:flex-row items-center lg:items-center justify-between gap-6">
                 {/* Left: Title + Domain + Grade Badge */}
-                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 w-full sm:w-auto">
-                  <div className="text-center sm:text-left">
-                    <h2 className="text-lg sm:text-xl font-bold mb-1">Overall GEO Score</h2>
-                    <p className="text-xs sm:text-sm text-white/60 break-all max-w-[280px] sm:max-w-xs">
-                      {new URL(result.url).hostname}
-                    </p>
+                <div className="flex flex-col items-center lg:items-start gap-3 flex-shrink-0">
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-2xl font-bold whitespace-nowrap">Overall GEO Score</h2>
+                    {result.grade && (
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase whitespace-nowrap ${
+                        result.grade === 'Authority' ? 'bg-purple-500/20 text-purple-300' :
+                        result.grade === 'Expert' ? 'bg-green-500/20 text-green-300' :
+                        result.grade === 'Advanced' ? 'bg-blue-500/20 text-blue-300' :
+                        result.grade === 'Intermediate' ? 'bg-yellow-500/20 text-yellow-300' :
+                        'bg-gray-500/20 text-gray-300'
+                      }`}>
+                        <Award className="w-3 h-3 inline mr-1" />
+                        {result.grade}
+                      </span>
+                    )}
                   </div>
-                  {result.grade && (
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase whitespace-nowrap self-center sm:self-start ${
-                      result.grade === 'Authority' ? 'bg-purple-500/20 text-purple-300' :
-                      result.grade === 'Expert' ? 'bg-green-500/20 text-green-300' :
-                      result.grade === 'Advanced' ? 'bg-blue-500/20 text-blue-300' :
-                      result.grade === 'Intermediate' ? 'bg-yellow-500/20 text-yellow-300' :
-                      'bg-gray-500/20 text-gray-300'
-                    }`}>
-                      <Award className="w-3 h-3 inline mr-1" />
-                      {result.grade}
-                    </span>
-                  )}
+                  <p className="text-sm text-white/60 break-all max-w-[240px] text-center lg:text-left">
+                    {new URL(result.url).hostname}
+                  </p>
                 </div>
                 
-                {/* Center: Score Display + Change */}
-                <div className="flex items-center gap-4 sm:gap-6">
+                {/* Center: Score Display + Change Indicator */}
+                <div className="flex items-center gap-6 lg:gap-8 flex-shrink-0">
                   <div className="text-center">
-                    <div className={`text-5xl sm:text-6xl font-bold leading-none ${getScoreColor(result.overallScore)}`}>
+                    <div className={`text-7xl font-bold leading-none ${getScoreColor(result.overallScore)}`}>
                       {result.overallScore}
                     </div>
-                    <div className="text-white/40 text-xs mt-0.5">/ 100</div>
+                    <div className="text-white/40 text-sm mt-1">/ 100</div>
                   </div>
                   
-                  {/* Score Change - Compact Vertical Layout */}
+                  {/* Score Change Indicator */}
                   {comparison?.changes && (
-                    <div className="flex flex-col items-center justify-center gap-1 min-w-[80px]">
+                    <div className="flex flex-col items-center justify-center gap-1.5 min-w-[90px] py-2 px-4 bg-white/5 rounded-lg border border-white/10">
                       {comparison.changes.overallScore > 0 ? (
                         <>
-                          <TrendingUp className="w-4 h-4 text-green-400" />
-                          <span className="text-green-400 font-bold text-sm">+{comparison.changes.overallScore}</span>
+                          <TrendingUp className="w-5 h-5 text-green-400" />
+                          <span className="text-green-400 font-bold text-base">+{comparison.changes.overallScore}</span>
                         </>
                       ) : comparison.changes.overallScore < 0 ? (
                         <>
-                          <TrendingDown className="w-4 h-4 text-red-400" />
-                          <span className="text-red-400 font-bold text-sm">{comparison.changes.overallScore}</span>
+                          <TrendingDown className="w-5 h-5 text-red-400" />
+                          <span className="text-red-400 font-bold text-base">{comparison.changes.overallScore}</span>
                         </>
                       ) : (
                         <>
-                          <Minus className="w-4 h-4 text-gray-400" />
-                          <span className="text-gray-400 text-sm">—</span>
+                          <Minus className="w-5 h-5 text-gray-400" />
+                          <span className="text-gray-400 text-base font-medium">0</span>
                         </>
                       )}
-                      <span className="text-white/30 text-[10px] leading-none">vs prev</span>
+                      <span className="text-white/40 text-xs leading-none">vs previous</span>
                     </div>
                   )}
                 </div>
                 
-                {/* Right: Action Buttons - Vertical on mobile */}
-                <div className="flex sm:flex-col gap-2">
+                {/* Right: Action Buttons */}
+                <div className="flex lg:flex-col gap-3 flex-shrink-0">
                   <button
                     onClick={downloadReport}
-                    className="p-2.5 bg-white/5 hover:bg-white/10 border border-brand-secondary hover:border-brand-accent rounded-lg transition-all"
+                    className="p-3 bg-white/5 hover:bg-white/10 border border-brand-secondary hover:border-brand-accent rounded-lg transition-all"
                     title="Download Report"
                     aria-label="Download JSON report"
                   >
-                    <Download className="w-4 h-4" />
+                    <Download className="w-5 h-5" />
                   </button>
                   <button
                     onClick={shareResults}
-                    className="p-2.5 bg-white/5 hover:bg-white/10 border border-brand-secondary hover:border-brand-accent rounded-lg transition-all"
+                    className="p-3 bg-white/5 hover:bg-white/10 border border-brand-secondary hover:border-brand-accent rounded-lg transition-all"
                     title="Share Results"
                     aria-label="Share on Twitter"
                   >
-                    <Share2 className="w-4 h-4" />
+                    <Share2 className="w-5 h-5" />
                   </button>
                 </div>
               </div>
