@@ -470,15 +470,15 @@ const GeoAuditPage = () => {
 
       {/* Results Section */}
       {result && (
-        <section className="py-16 px-6">
-          <div className="max-w-6xl mx-auto">
-            {/* Overall Score - Optimized Desktop Layout */}
-            <div className="mb-12 p-6 lg:p-8 bg-gradient-to-br from-brand-secondary/30 to-transparent border border-brand-accent/30 rounded-2xl">
-              <div className="flex flex-col lg:flex-row items-center lg:items-center justify-between gap-6">
+        <section className="py-8 px-4 lg:px-6">
+          <div className="max-w-[1800px] mx-auto">
+            {/* Overall Score - Compact Header */}
+            <div className="mb-6 p-4 lg:p-5 bg-gradient-to-br from-brand-secondary/30 to-transparent border border-brand-accent/30 rounded-xl">
+              <div className="flex flex-col lg:flex-row items-center lg:items-center justify-between gap-4">
                 {/* Left: Title + Domain + Grade Badge */}
-                <div className="flex flex-col items-center lg:items-start gap-3 flex-shrink-0">
-                  <div className="flex items-center gap-3">
-                    <h2 className="text-2xl font-bold whitespace-nowrap">Overall GEO Score</h2>
+                <div className="flex flex-col items-center lg:items-start gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-bold whitespace-nowrap">Overall GEO Score</h2>
                     {result.grade && (
                       <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase whitespace-nowrap ${
                         result.grade === 'Authority' ? 'bg-purple-500/20 text-purple-300' :
@@ -498,17 +498,17 @@ const GeoAuditPage = () => {
                 </div>
                 
                 {/* Center: Score Display + Change Indicator */}
-                <div className="flex items-center gap-6 lg:gap-8 flex-shrink-0">
+                <div className="flex items-center gap-4 lg:gap-6 flex-shrink-0">
                   <div className="text-center">
-                    <div className={`text-7xl font-bold leading-none ${getScoreColor(result.overallScore)}`}>
+                    <div className={`text-5xl lg:text-6xl font-bold leading-none ${getScoreColor(result.overallScore)}`}>
                       {result.overallScore}
                     </div>
-                    <div className="text-white/40 text-sm mt-1">/ 100</div>
+                    <div className="text-white/40 text-xs mt-1">/ 100</div>
                   </div>
                   
                   {/* Score Change Indicator */}
                   {comparison?.changes && (
-                    <div className="flex flex-col items-center justify-center gap-1.5 min-w-[90px] py-2 px-4 bg-white/5 rounded-lg border border-white/10">
+                    <div className="flex flex-col items-center justify-center gap-1 min-w-[70px] py-1.5 px-3 bg-white/5 rounded-lg border border-white/10">
                       {comparison.changes.overallScore > 0 ? (
                         <>
                           <TrendingUp className="w-5 h-5 text-green-400" />
@@ -531,30 +531,30 @@ const GeoAuditPage = () => {
                 </div>
                 
                 {/* Right: Action Buttons */}
-                <div className="flex lg:flex-col gap-3 flex-shrink-0">
+                <div className="flex gap-2 flex-shrink-0">
                   <button
                     onClick={downloadPDFReport}
-                    className="p-3 bg-brand-accent/20 hover:bg-brand-accent/30 border border-brand-accent hover:border-brand-accent rounded-lg transition-all group"
+                    className="p-2.5 bg-brand-accent/20 hover:bg-brand-accent/30 border border-brand-accent hover:border-brand-accent rounded-lg transition-all group"
                     title="Download PDF Report"
                     aria-label="Download professional PDF report"
                   >
-                    <FileText className="w-5 h-5 text-brand-accent group-hover:scale-110 transition-transform" />
+                    <FileText className="w-4 h-4 text-brand-accent group-hover:scale-110 transition-transform" />
                   </button>
                   <button
                     onClick={downloadReport}
-                    className="p-3 bg-white/5 hover:bg-white/10 border border-brand-secondary hover:border-brand-accent rounded-lg transition-all"
+                    className="p-2.5 bg-white/5 hover:bg-white/10 border border-brand-secondary hover:border-brand-accent rounded-lg transition-all"
                     title="Download JSON"
                     aria-label="Download JSON report"
                   >
-                    <Download className="w-5 h-5" />
+                    <Download className="w-4 h-4" />
                   </button>
                   <button
                     onClick={shareResults}
-                    className="p-3 bg-white/5 hover:bg-white/10 border border-brand-secondary hover:border-brand-accent rounded-lg transition-all"
+                    className="p-2.5 bg-white/5 hover:bg-white/10 border border-brand-secondary hover:border-brand-accent rounded-lg transition-all"
                     title="Share Results"
                     aria-label="Share on Twitter"
                   >
-                    <Share2 className="w-5 h-5" />
+                    <Share2 className="w-4 h-4" />
                   </button>
                 </div>
               </div>
@@ -562,7 +562,7 @@ const GeoAuditPage = () => {
 
             {/* Score Drop Alert */}
             {scoreDrop?.dropped && (
-              <div className="mb-8 p-6 bg-red-500/10 border-2 border-red-500/30 rounded-xl">
+              <div className="mb-6 p-4 bg-red-500/10 border-2 border-red-500/30 rounded-xl">
                 <div className="flex items-start gap-3">
                   <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0" />
                   <div>
@@ -599,26 +599,34 @@ const GeoAuditPage = () => {
               </div>
             )}
 
-            {/* Visual Analytics */}
-            <div className="mb-12">
-              <h3 className="text-2xl font-bold mb-6">Visual Analytics</h3>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                <ScoreRadarChart 
-                  scores={result.scores} 
-                  comparison={comparison?.previous?.scores}
-                />
-                <CategoryBarChart scores={result.scores} />
+            {/* Visual Analytics - Optimized Layout */}
+            <div className="mb-8">
+              <h3 className="text-xl font-bold mb-4">Visual Analytics</h3>
+              {/* Top Row: Charts 3 columns on desktop */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+                <div className="lg:col-span-1">
+                  <ScoreRadarChart 
+                    scores={result.scores} 
+                    comparison={comparison?.previous?.scores}
+                  />
+                </div>
+                <div className="lg:col-span-1">
+                  <CategoryBarChart scores={result.scores} />
+                </div>
+                <div className="lg:col-span-1">
+                  <PriorityMatrix recommendations={result.recommendations} />
+                </div>
               </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Bottom Row: Trend Chart Full Width */}
+              <div className="w-full">
                 <ScoreTrendChart url={result.url} />
-                <PriorityMatrix recommendations={result.recommendations} />
               </div>
             </div>
 
-            {/* Score Breakdown */}
-            <div className="mb-12">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold">Score Breakdown</h3>
+            {/* Score Breakdown - Compact Grid */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-bold">Score Breakdown</h3>
                 {comparison?.previous && (
                   <div className="flex items-center gap-2 text-sm text-white/60">
                     <History className="w-4 h-4" />
@@ -626,14 +634,14 @@ const GeoAuditPage = () => {
                   </div>
                 )}
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                 {Object.entries(result.scores).map(([key, score]) => {
                   const change = comparison?.changes?.[key as keyof typeof comparison.changes] || 0;
                   return (
-                  <div key={key} className="p-6 bg-white/5 border border-brand-secondary rounded-xl">
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-semibold capitalize text-sm">{key.replace(/([A-Z])/g, ' $1').trim()}</h4>
-                      <div className="flex items-center gap-2">
+                  <div key={key} className="p-4 bg-white/5 border border-brand-secondary rounded-xl hover:border-brand-accent/50 transition-all">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-semibold capitalize text-xs text-white/60">{key.replace(/([A-Z])/g, ' $1').trim()}</h4>
+                      <div className="flex items-center gap-1">
                         <span className={`text-2xl font-bold ${getScoreColor(score)}`}>{score}</span>
                         {change !== 0 && (
                           <span className={`text-xs font-semibold ${
@@ -644,7 +652,7 @@ const GeoAuditPage = () => {
                         )}
                       </div>
                     </div>
-                    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
                       <div 
                         className={`h-full bg-gradient-to-r ${getScoreGradient(score)} transition-all duration-1000`}
                         style={{ width: `${score}%` }}
@@ -656,21 +664,21 @@ const GeoAuditPage = () => {
               </div>
             </div>
 
-            {/* Detailed Findings */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            {/* Detailed Findings - 3 Column Grid on Large Screens */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
               {Object.entries(result.details).map(([category, details]) => (
-                <div key={category} className="p-6 bg-white/5 border border-brand-secondary rounded-xl">
-                  <h4 className="text-xl font-bold mb-4 capitalize">
+                <div key={category} className="p-4 bg-white/5 border border-brand-secondary rounded-xl hover:border-brand-accent/30 transition-all">
+                  <h4 className="text-base font-bold mb-3 capitalize">
                     {category.replace(/([A-Z])/g, ' $1').trim()}
                   </h4>
                   
                   {details.strengths.length > 0 && (
-                    <div className="mb-4">
-                      <p className="text-sm text-green-400 font-semibold mb-2">✓ Strengths</p>
-                      <ul className="space-y-1">
+                    <div className="mb-3">
+                      <p className="text-xs text-green-400 font-semibold mb-1.5">✓ Strengths</p>
+                      <ul className="space-y-0.5">
                         {details.strengths.map((strength, i) => (
-                          <li key={i} className="text-sm text-white/70 flex items-start gap-2">
-                            <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0 mt-0.5" />
+                          <li key={i} className="text-xs text-white/70 flex items-start gap-1.5">
+                            <CheckCircle className="w-3 h-3 text-green-400 flex-shrink-0 mt-0.5" />
                             {strength}
                           </li>
                         ))}
@@ -680,11 +688,11 @@ const GeoAuditPage = () => {
 
                   {details.issues.length > 0 && (
                     <div>
-                      <p className="text-sm text-orange-400 font-semibold mb-2">⚠ Issues</p>
-                      <ul className="space-y-1">
+                      <p className="text-xs text-orange-400 font-semibold mb-1.5">⚠ Issues</p>
+                      <ul className="space-y-0.5">
                         {details.issues.map((issue, i) => (
-                          <li key={i} className="text-sm text-white/70 flex items-start gap-2">
-                            <AlertCircle className="w-4 h-4 text-orange-400 flex-shrink-0 mt-0.5" />
+                          <li key={i} className="text-xs text-white/70 flex items-start gap-1.5">
+                            <AlertCircle className="w-3 h-3 text-orange-400 flex-shrink-0 mt-0.5" />
                             {issue}
                           </li>
                         ))}
@@ -697,8 +705,8 @@ const GeoAuditPage = () => {
 
             {/* Monitoring Alerts */}
             {alerts.length > 0 && (
-              <div className="mb-12">
-                <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
+              <div className="mb-8">
+                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                   <AlertCircle className="w-6 h-6 text-red-400" />
                   Monitoring Alerts ({alerts.length})
                 </h3>
@@ -747,14 +755,14 @@ const GeoAuditPage = () => {
 
             {/* Advanced Analytics - Trends & Insights */}
             {(trend || insights) && (
-              <div className="mb-12">
-                <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
+              <div className="mb-8">
+                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                   <TrendingUp className="w-6 h-6 text-brand-accent" />
                   Performance Analytics
                 </h3>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {trend && (
-                    <div className="p-6 bg-white/5 border border-brand-secondary rounded-xl">
+                    <div className="p-4 bg-white/5 border border-brand-secondary rounded-xl">
                       <h4 className="font-bold mb-4 flex items-center gap-2">
                         📈 Trend Analysis
                         <span className={`text-xs px-2 py-0.5 rounded-full ${
@@ -795,7 +803,7 @@ const GeoAuditPage = () => {
                     </div>
                   )}
                   {insights && (
-                    <div className="p-6 bg-white/5 border border-brand-secondary rounded-xl">
+                    <div className="p-4 bg-white/5 border border-brand-secondary rounded-xl">
                       <h4 className="font-bold mb-4">📊 Performance Insights</h4>
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
@@ -836,12 +844,12 @@ const GeoAuditPage = () => {
 
             {/* Competitive Intelligence */}
             {competitive && (
-              <div className="mb-12">
-                <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
+              <div className="mb-8">
+                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                   <Target className="w-6 h-6 text-purple-400" />
                   Competitive Analysis
                 </h3>
-                <div className="p-6 bg-white/5 border border-brand-secondary rounded-xl">
+                <div className="p-4 bg-white/5 border border-brand-secondary rounded-xl">
                   <div className="mb-6">
                     <h4 className="font-bold mb-3">Your Position</h4>
                     <div className="flex items-center gap-4">
@@ -896,15 +904,15 @@ const GeoAuditPage = () => {
               </div>
             )}
 
-            {/* Recommendations */}
+            {/* Recommendations - Compact Action Plan */}
             {result.recommendations.length > 0 && (
-              <div>
-                <h3 className="text-2xl font-bold mb-6">Action Plan</h3>
-                <div className="space-y-4">
+              <div className="mb-8">
+                <h3 className="text-xl font-bold mb-4">Action Plan</h3>
+                <div className="space-y-3">
                   {result.recommendations.map((rec, i) => (
                     <div 
                       key={i} 
-                      className={`p-6 border rounded-xl ${
+                      className={`p-4 border rounded-xl hover:border-opacity-100 transition-all ${
                         rec.priority === 'critical' ? 'bg-red-500/10 border-red-500/40' :
                         rec.priority === 'high' ? 'bg-orange-500/5 border-orange-500/30' :
                         rec.priority === 'medium' ? 'bg-yellow-500/5 border-yellow-500/30' :
@@ -933,29 +941,29 @@ const GeoAuditPage = () => {
                           )}
                         </div>
                         <div className="flex-1 w-full sm:w-auto">
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-2">
-                            <h4 className="font-bold">{rec.title}</h4>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1.5">
+                            <h4 className="font-semibold text-sm">{rec.title}</h4>
                             <span className="text-xs text-white/40">• {rec.category}</span>
                             {rec.estimatedTime && (
                               <span className="text-xs text-white/30">• {rec.estimatedTime}</span>
                             )}
                           </div>
-                          <p className="text-white/70 mb-3">{rec.description}</p>
-                          <div className="space-y-2">
-                            <div className="p-3 bg-white/5 rounded-lg border border-white/10">
-                              <p className="text-sm text-brand-accent font-semibold mb-1">💡 Impact</p>
-                              <p className="text-sm text-white/70">{rec.impact}</p>
+                          <p className="text-xs text-white/70 mb-2">{rec.description}</p>
+                          <div className="space-y-1.5">
+                            <div className="p-2.5 bg-white/5 rounded-lg border border-white/10">
+                              <p className="text-xs text-brand-accent font-semibold mb-0.5">💡 Impact</p>
+                              <p className="text-xs text-white/70">{rec.impact}</p>
                             </div>
                             {rec.implementation && (
-                              <div className="p-3 bg-white/5 rounded-lg border border-white/10">
-                                <p className="text-sm text-green-400 font-semibold mb-1">🔧 Implementation</p>
-                                <p className="text-sm text-white/70">{rec.implementation}</p>
+                              <div className="p-2.5 bg-white/5 rounded-lg border border-white/10">
+                                <p className="text-xs text-green-400 font-semibold mb-0.5">🔧 Implementation</p>
+                                <p className="text-xs text-white/70">{rec.implementation}</p>
                               </div>
                             )}
                             {rec.codeExample && (
                               <details className="group">
-                                <summary className="cursor-pointer text-sm text-brand-accent hover:text-blue-400 font-semibold">View Code Example</summary>
-                                <pre className="mt-2 p-3 bg-black/30 rounded-lg text-xs text-green-400 overflow-x-auto border border-brand-accent/20">
+                                <summary className="cursor-pointer text-xs text-brand-accent hover:text-blue-400 font-semibold">View Code Example</summary>
+                                <pre className="mt-1.5 p-2.5 bg-black/30 rounded-lg text-xs text-green-400 overflow-x-auto border border-brand-accent/20">
                                   <code>{rec.codeExample}</code>
                                 </pre>
                               </details>
@@ -970,8 +978,8 @@ const GeoAuditPage = () => {
             )}
 
             {/* CTA */}
-            <div className="mt-16 p-8 bg-gradient-to-br from-brand-accent/10 to-transparent border border-brand-accent/30 rounded-2xl text-center">
-              <h3 className="text-2xl font-bold mb-4">Need Expert Help?</h3>
+            <div className="mt-12 p-6 bg-gradient-to-br from-brand-accent/10 to-transparent border border-brand-accent/30 rounded-xl text-center">
+              <h3 className="text-xl font-bold mb-3">Need Expert Help?</h3>
               <p className="text-white/70 mb-6 max-w-2xl mx-auto">
                 Our GEO specialists can implement these recommendations and transform your website into an AI-cited authority in your industry.
               </p>
