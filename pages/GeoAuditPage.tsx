@@ -503,77 +503,87 @@ const GeoAuditPage = () => {
       {result && (
         <section className="py-8 px-4 lg:px-6">
           <div className="max-w-[1800px] mx-auto">
-            {/* Overall Score - Compact Header */}
-            <div className="mb-6 p-4 lg:p-5 bg-gradient-to-br from-brand-secondary/30 to-transparent border border-brand-accent/30 rounded-xl">
-              <div className="flex flex-col lg:flex-row items-center lg:items-center justify-between gap-4">
-                {/* Left: Title + Domain + Grade Badge */}
-                <div className="flex flex-col items-center lg:items-start gap-2 flex-shrink-0">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-xl font-bold whitespace-nowrap">Overall GEO Score</h2>
-                    {result.grade && (
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase whitespace-nowrap ${
-                        result.grade === 'Authority' ? 'bg-purple-500/20 text-purple-300' :
-                        result.grade === 'Expert' ? 'bg-green-500/20 text-green-300' :
-                        result.grade === 'Advanced' ? 'bg-blue-500/20 text-blue-300' :
-                        result.grade === 'Intermediate' ? 'bg-yellow-500/20 text-yellow-300' :
-                        'bg-gray-500/20 text-gray-300'
-                      }`}>
-                        <Award className="w-3 h-3 inline mr-1" />
-                        {result.grade}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm text-white/60 break-all max-w-[240px] text-center lg:text-left">
+            {/* Overall Score - Minimalist Header */}
+            <div className="mb-12 py-6">
+              <div className="flex flex-col lg:flex-row items-center lg:items-center justify-between gap-6">
+                {/* Left: Title + Domain */}
+                <div className="flex flex-col items-center lg:items-start gap-1 flex-shrink-0">
+                  <h2 className="text-2xl font-bold text-white tracking-tight">Overall GEO Score</h2>
+                  <p className="text-sm text-white/40 break-all max-w-[280px] text-center lg:text-left">
                     {new URL(result.url).hostname}
                   </p>
                 </div>
                 
-                {/* Center: Score Display + Change Indicator */}
-                <div className="flex items-center gap-4 lg:gap-6 flex-shrink-0">
+                {/* Center: Score Display + Grade */}
+                <div className="flex items-center gap-6 flex-shrink-0">
                   <div className="text-center">
-                    <div className={`text-5xl lg:text-6xl font-bold leading-none ${getScoreColor(result.overallScore)}`}>
+                    <div className={`text-7xl font-bold leading-none tabular-nums ${getScoreColor(result.overallScore)}`} style={{
+                      textShadow: `0 0 40px ${getScoreColor(result.overallScore).includes('green') ? '#34d39960' : getScoreColor(result.overallScore).includes('yellow') ? '#fbbf2460' : getScoreColor(result.overallScore).includes('red') ? '#f8717160' : '#60a5fa60'}`
+                    }}>
                       {result.overallScore}
                     </div>
-                    <div className="text-white/40 text-xs mt-1">/ 100</div>
+                    <div className="text-white/30 text-xs mt-1 font-light">/ 100</div>
                   </div>
+                  
+                  {/* Grade Badge */}
+                  {result.grade && (
+                    <div className="flex flex-col items-center gap-1">
+                      <Award className={`w-8 h-8 ${
+                        result.grade === 'Authority' ? 'text-purple-400' :
+                        result.grade === 'Expert' ? 'text-green-400' :
+                        result.grade === 'Advanced' ? 'text-blue-400' :
+                        result.grade === 'Intermediate' ? 'text-yellow-400' :
+                        'text-gray-400'
+                      }`} />
+                      <span className={`text-xs font-semibold uppercase tracking-wider ${
+                        result.grade === 'Authority' ? 'text-purple-400' :
+                        result.grade === 'Expert' ? 'text-green-400' :
+                        result.grade === 'Advanced' ? 'text-blue-400' :
+                        result.grade === 'Intermediate' ? 'text-yellow-400' :
+                        'text-gray-400'
+                      }`}>
+                        {result.grade}
+                      </span>
+                    </div>
+                  )}
                   
                   {/* Score Change Indicator */}
                   {comparison?.changes && (
-                    <div className="flex flex-col items-center justify-center gap-1 min-w-[70px] py-1.5 px-3 bg-white/5 rounded-lg border border-white/10">
+                    <div className="flex flex-col items-center justify-center gap-1">
                       {comparison.changes.overallScore > 0 ? (
                         <>
-                          <TrendingUp className="w-5 h-5 text-green-400" />
-                          <span className="text-green-400 font-bold text-base">+{comparison.changes.overallScore}</span>
+                          <TrendingUp className="w-6 h-6 text-green-400" />
+                          <span className="text-green-400 font-bold text-lg tabular-nums">+{comparison.changes.overallScore}</span>
                         </>
                       ) : comparison.changes.overallScore < 0 ? (
                         <>
-                          <TrendingDown className="w-5 h-5 text-red-400" />
-                          <span className="text-red-400 font-bold text-base">{comparison.changes.overallScore}</span>
+                          <TrendingDown className="w-6 h-6 text-red-400" />
+                          <span className="text-red-400 font-bold text-lg tabular-nums">{comparison.changes.overallScore}</span>
                         </>
                       ) : (
                         <>
-                          <Minus className="w-5 h-5 text-gray-400" />
-                          <span className="text-gray-400 text-base font-medium">0</span>
+                          <Minus className="w-6 h-6 text-gray-400" />
+                          <span className="text-gray-400 text-lg font-medium tabular-nums">0</span>
                         </>
                       )}
-                      <span className="text-white/40 text-xs leading-none">vs previous</span>
+                      <span className="text-white/30 text-xs">vs prev</span>
                     </div>
                   )}
                 </div>
                 
                 {/* Right: Export & Share Buttons */}
-                <div className="flex gap-2 flex-shrink-0 flex-wrap justify-center lg:justify-end max-w-[280px] lg:max-w-none">
+                <div className="flex gap-2 flex-shrink-0 flex-wrap justify-center lg:justify-end">
                   <button
                     onClick={downloadPDFReport}
-                    className="p-2.5 bg-brand-accent/20 hover:bg-brand-accent/30 border border-brand-accent hover:border-brand-accent rounded-lg transition-all group"
+                    className="p-2.5 hover:bg-white/5 rounded-lg transition-all group"
                     title="Download PDF Report"
                     aria-label="Download professional PDF report"
                   >
-                    <FileText className="w-4 h-4 text-brand-accent group-hover:scale-110 transition-transform" />
+                    <FileText className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" />
                   </button>
                   <button
                     onClick={downloadHTMLReport}
-                    className="p-2.5 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/50 hover:border-orange-500 rounded-lg transition-all group"
+                    className="p-2.5 hover:bg-white/5 rounded-lg transition-all group"
                     title="Download HTML Report"
                     aria-label="Download standalone HTML report"
                   >
@@ -581,7 +591,7 @@ const GeoAuditPage = () => {
                   </button>
                   <button
                     onClick={downloadMarkdownReport}
-                    className="p-2.5 bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 hover:border-green-500 rounded-lg transition-all group"
+                    className="p-2.5 hover:bg-white/5 rounded-lg transition-all group"
                     title="Download Markdown Report"
                     aria-label="Download markdown report for GitHub/docs"
                   >
@@ -589,7 +599,7 @@ const GeoAuditPage = () => {
                   </button>
                   <button
                     onClick={downloadCSVReport}
-                    className="p-2.5 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/50 hover:border-purple-500 rounded-lg transition-all group"
+                    className="p-2.5 hover:bg-white/5 rounded-lg transition-all group"
                     title="Download CSV Report"
                     aria-label="Download CSV report for data analysis"
                   >
@@ -597,19 +607,19 @@ const GeoAuditPage = () => {
                   </button>
                   <button
                     onClick={downloadReport}
-                    className="p-2.5 bg-white/5 hover:bg-white/10 border border-brand-secondary hover:border-brand-accent rounded-lg transition-all"
+                    className="p-2.5 hover:bg-white/5 rounded-lg transition-all group"
                     title="Download JSON"
                     aria-label="Download JSON report"
                   >
-                    <Download className="w-4 h-4" />
+                    <Download className="w-4 h-4 text-white/60 group-hover:text-white/90 transition-colors" />
                   </button>
                   <button
                     onClick={shareResults}
-                    className="p-2.5 bg-white/5 hover:bg-white/10 border border-brand-secondary hover:border-brand-accent rounded-lg transition-all"
+                    className="p-2.5 hover:bg-white/5 rounded-lg transition-all group"
                     title="Share on Twitter"
                     aria-label="Share results on Twitter"
                   >
-                    <Share2 className="w-4 h-4" />
+                    <Share2 className="w-4 h-4 text-white/60 group-hover:text-white/90 transition-colors" />
                   </button>
                 </div>
               </div>
@@ -639,14 +649,11 @@ const GeoAuditPage = () => {
 
             {/* Insights */}
             {result.insights && result.insights.length > 0 && (
-              <div className="mb-12 p-6 bg-gradient-to-br from-brand-accent/5 to-transparent border border-brand-accent/20 rounded-xl">
-                <div className="flex items-center gap-2 mb-4">
-                  <Target className="w-5 h-5 text-brand-accent" />
-                  <h3 className="text-xl font-bold">Key Insights</h3>
-                </div>
-                <div className="space-y-3">
+              <div className="mb-16">
+                <h3 className="text-xl font-bold text-white mb-6 tracking-tight">Key Insights</h3>
+                <div className="space-y-4">
                   {result.insights.map((insight, i) => (
-                    <p key={i} className="text-white/80 pl-4 border-l-2 border-brand-accent/30">
+                    <p key={i} className="text-white/70 pl-4 border-l border-blue-400/40 text-sm leading-relaxed">
                       {insight}
                     </p>
                   ))}
@@ -655,8 +662,8 @@ const GeoAuditPage = () => {
             )}
 
             {/* Visual Analytics - Optimized Layout */}
-            <div className="mb-8">
-              <h3 className="text-xl font-bold mb-4">Visual Analytics</h3>
+            <div className="mb-16">
+              <h3 className="text-xl font-bold text-white mb-6 tracking-tight">Visual Analytics</h3>
               {/* Top Row: Charts 3 columns on desktop */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
                 <div className="lg:col-span-1">
@@ -678,36 +685,38 @@ const GeoAuditPage = () => {
               </div>
             </div>
 
-            {/* Score Breakdown - Compact Grid */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold">Score Breakdown</h3>
+            {/* Score Breakdown - Minimalist Grid */}
+            <div className="mb-16">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold text-white tracking-tight">Score Breakdown</h3>
                 {comparison?.previous && (
-                  <div className="flex items-center gap-2 text-sm text-white/60">
-                    <History className="w-4 h-4" />
+                  <div className="flex items-center gap-2 text-xs text-white/40">
+                    <History className="w-3 h-3" />
                     <span>vs. {new Date(comparison.previous.timestamp).toLocaleDateString()}</span>
                   </div>
                 )}
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
                 {Object.entries(result.scores).map(([key, score]) => {
                   const change = comparison?.changes?.[key as keyof typeof comparison.changes] || 0;
                   return (
-                  <div key={key} className="p-4 bg-white/5 border border-brand-secondary rounded-xl hover:border-brand-accent/50 transition-all">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-semibold capitalize text-xs text-white/60">{key.replace(/([A-Z])/g, ' $1').trim()}</h4>
-                      <div className="flex items-center gap-1">
-                        <span className={`text-2xl font-bold ${getScoreColor(score)}`}>{score}</span>
-                        {change !== 0 && (
-                          <span className={`text-xs font-semibold ${
-                            change > 0 ? 'text-green-400' : 'text-red-400'
-                          }`}>
-                            {change > 0 ? '+' : ''}{change}
-                          </span>
-                        )}
-                      </div>
+                  <div key={key} className="space-y-3">
+                    <div className="flex items-baseline justify-between">
+                      <h4 className="text-xs text-white/40 uppercase tracking-wider font-medium">
+                        {key.replace(/([A-Z])/g, ' $1').trim()}
+                      </h4>
+                      {change !== 0 && (
+                        <span className={`text-xs font-semibold tabular-nums ${
+                          change > 0 ? 'text-green-400' : 'text-red-400'
+                        }`}>
+                          {change > 0 ? '+' : ''}{change}
+                        </span>
+                      )}
                     </div>
-                    <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                    <div className={`text-4xl font-bold tabular-nums ${getScoreColor(score)}`}>
+                      {score}
+                    </div>
+                    <div className="h-1 bg-white/5 rounded-full overflow-hidden">
                       <div 
                         className={`h-full bg-gradient-to-r ${getScoreGradient(score)} transition-all duration-1000`}
                         style={{ width: `${score}%` }}
@@ -719,43 +728,46 @@ const GeoAuditPage = () => {
               </div>
             </div>
 
-            {/* Detailed Findings - 3 Column Grid on Large Screens */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-              {Object.entries(result.details).map(([category, details]) => (
-                <div key={category} className="p-4 bg-white/5 border border-brand-secondary rounded-xl hover:border-brand-accent/30 transition-all">
-                  <h4 className="text-base font-bold mb-3 capitalize">
-                    {category.replace(/([A-Z])/g, ' $1').trim()}
-                  </h4>
-                  
-                  {details.strengths.length > 0 && (
-                    <div className="mb-3">
-                      <p className="text-xs text-green-400 font-semibold mb-1.5">✓ Strengths</p>
-                      <ul className="space-y-0.5">
-                        {details.strengths.map((strength, i) => (
-                          <li key={i} className="text-xs text-white/70 flex items-start gap-1.5">
-                            <CheckCircle className="w-3 h-3 text-green-400 flex-shrink-0 mt-0.5" />
-                            {strength}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
+            {/* Detailed Findings - Minimalist Grid */}
+            <div className="mb-16">
+              <h3 className="text-xl font-bold text-white mb-6 tracking-tight">Detailed Analysis</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10">
+                {Object.entries(result.details).map(([category, details]) => (
+                  <div key={category} className="space-y-4">
+                    <h4 className="text-sm font-bold text-white uppercase tracking-wider">
+                      {category.replace(/([A-Z])/g, ' $1').trim()}
+                    </h4>
+                    
+                    {details.strengths.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-xs text-green-400 font-semibold uppercase tracking-wider">Strengths</p>
+                        <ul className="space-y-2">
+                          {details.strengths.map((strength, i) => (
+                            <li key={i} className="text-xs text-white/60 flex items-start gap-2 leading-relaxed">
+                              <CheckCircle className="w-3.5 h-3.5 text-green-400 flex-shrink-0 mt-0.5" />
+                              <span>{strength}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
 
-                  {details.issues.length > 0 && (
-                    <div>
-                      <p className="text-xs text-orange-400 font-semibold mb-1.5">⚠ Issues</p>
-                      <ul className="space-y-0.5">
-                        {details.issues.map((issue, i) => (
-                          <li key={i} className="text-xs text-white/70 flex items-start gap-1.5">
-                            <AlertCircle className="w-3 h-3 text-orange-400 flex-shrink-0 mt-0.5" />
-                            {issue}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              ))}
+                    {details.issues.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-xs text-orange-400 font-semibold uppercase tracking-wider">Issues</p>
+                        <ul className="space-y-2">
+                          {details.issues.map((issue, i) => (
+                            <li key={i} className="text-xs text-white/60 flex items-start gap-2 leading-relaxed">
+                              <AlertCircle className="w-3.5 h-3.5 text-orange-400 flex-shrink-0 mt-0.5" />
+                              <span>{issue}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Monitoring Alerts */}
