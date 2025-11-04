@@ -1,4 +1,5 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { CHART_THEME, getScoreGradient } from '../../utils/chartTheme';
 
 interface CategoryBarChartProps {
   scores: {
@@ -27,21 +28,33 @@ const CategoryBarChart = ({ scores }: CategoryBarChartProps) => {
     { name: 'Performance', score: scores.performance, weight: '5%' },
   ];
 
-  const getColor = (score: number): string => {
-    if (score >= 80) return '#a3be8c';
-    if (score >= 60) return '#ebcb8b';
-    if (score >= 40) return '#d08770';
-    return '#bf616a';
+  const getGradientId = (_score: number, index: number): string => {
+    return `barGradient${index}`;
   };
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
+      const gradient = getScoreGradient(data.score);
       return (
-        <div className="bg-[#2e3440] border border-[#4c566a] rounded-lg p-3 shadow-lg">
-          <p className="font-bold text-[#88c0d0] mb-1">{data.name}</p>
-          <p className="text-sm text-[#e5e9f0]">Score: <span className="font-bold">{data.score}/100</span></p>
-          <p className="text-xs text-[#d8dee9] mt-1">Weight: {data.weight}</p>
+        <div 
+          className="rounded-xl p-4 shadow-2xl backdrop-blur-md"
+          style={{
+            backgroundColor: CHART_THEME.tooltip.bg,
+            border: `1px solid ${CHART_THEME.tooltip.border}`,
+          }}
+        >
+          <p className="font-bold mb-2" style={{ color: gradient.colors[0], fontSize: '15px' }}>
+            {data.name}
+          </p>
+          <div className="space-y-1">
+            <p className="text-sm" style={{ color: CHART_THEME.tooltip.text }}>
+              Score: <span className="font-bold text-lg">{data.score}/100</span>
+            </p>
+            <p className="text-xs" style={{ color: CHART_THEME.axis.tick }}>
+              Weight: {data.weight}
+            </p>
+          </div>
         </div>
       );
     }
@@ -49,40 +62,86 @@ const CategoryBarChart = ({ scores }: CategoryBarChartProps) => {
   };
 
   return (
-    <div className="w-full h-[400px] bg-gradient-to-br from-white/5 to-transparent border border-brand-secondary rounded-xl p-6">
-      <h3 className="text-lg font-bold mb-4 text-center">Category Scores (Weighted by Importance)</h3>
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart 
-          data={data}
-          layout="vertical"
-          margin={{ top: 5, right: 30, left: 120, bottom: 5 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" stroke="#3b4252" strokeOpacity={0.3} horizontal={false} />
-          <XAxis 
-            type="number" 
-            domain={[0, 100]}
-            stroke="#d8dee9"
-            tick={{ fill: '#e5e9f0', fontSize: 11 }}
-          />
-          <YAxis 
-            type="category" 
-            dataKey="name"
-            stroke="#d8dee9"
-            tick={{ fill: '#e5e9f0', fontSize: 11 }}
-            width={110}
-          />
-          <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} />
-          <Bar 
-            dataKey="score" 
-            radius={[0, 8, 8, 0]}
-            label={{ position: 'right', fill: '#e5e9f0', fontSize: 12 }}
+    <div className="relative w-full h-[400px] rounded-xl p-6 overflow-hidden">
+      {/* Gradient background with blur */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-800/50 via-slate-900/30 to-slate-800/50 backdrop-blur-sm" />
+      <div className="absolute inset-0 border border-slate-700/50 rounded-xl" />
+      
+      {/* Glow effects */}
+      <div className="absolute top-1/4 right-0 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl" />
+      <div className="absolute bottom-1/4 left-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl" />
+      
+      <div className="relative z-10">
+        <h3 className="text-lg font-bold mb-4 text-center bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
+          Category Scores (Weighted by Importance)
+        </h3>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart 
+            data={data}
+            layout="vertical"
+            margin={{ top: 5, right: 30, left: 120, bottom: 5 }}
           >
-            {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={getColor(entry.score)} />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+            <defs>
+              {data.map((entry, index) => {
+                const gradient = getScoreGradient(entry.score);
+                return (
+                  <linearGradient key={`grad-${index}`} id={getGradientId(entry.score, index)} x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor={gradient.colors[0]} stopOpacity={0.9} />
+                    <stop offset="50%" stopColor={gradient.colors[1]} stopOpacity={0.85} />
+                    <stop offset="100%" stopColor={gradient.colors[2] || gradient.colors[1]} stopOpacity={0.8} />
+                  </linearGradient>
+                );
+              })}
+            </defs>
+            <CartesianGrid 
+              strokeDasharray="3 3" 
+              stroke={CHART_THEME.grid.stroke} 
+              strokeOpacity={CHART_THEME.grid.opacity} 
+              horizontal={false} 
+            />
+            <XAxis 
+              type="number" 
+              domain={[0, 100]}
+              stroke={CHART_THEME.axis.stroke}
+              tick={{ fill: CHART_THEME.axis.label, fontSize: 11, fontWeight: 500 }}
+            />
+            <YAxis 
+              type="category" 
+              dataKey="name"
+              stroke={CHART_THEME.axis.stroke}
+              tick={{ fill: CHART_THEME.axis.label, fontSize: 11, fontWeight: 500 }}
+              width={110}
+            />
+            <Tooltip 
+              content={<CustomTooltip />} 
+              cursor={{ fill: 'rgba(255, 255, 255, 0.02)' }} 
+            />
+            <Bar 
+              dataKey="score" 
+              radius={[0, 12, 12, 0]}
+              label={{ 
+                position: 'right', 
+                fill: CHART_THEME.axis.label, 
+                fontSize: 12,
+                fontWeight: 600,
+              }}
+            >
+              {data.map((entry, index) => {
+                const gradient = getScoreGradient(entry.score);
+                return (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={`url(#${getGradientId(entry.score, index)})`}
+                    style={{
+                      filter: `drop-shadow(0 0 8px ${gradient.glow})`,
+                    }}
+                  />
+                );
+              })}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 };
