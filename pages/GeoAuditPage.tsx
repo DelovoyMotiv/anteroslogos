@@ -5,6 +5,7 @@ import { Search, AlertCircle, CheckCircle, TrendingUp, Download, Share2, Externa
 import { saveAuditToHistory, compareWithPrevious, checkScoreDrop } from '../utils/auditHistory';
 import { validateAndSanitizeUrl, checkRateLimit, validateAuditResult } from '../utils/urlValidator';
 import { generatePDFReport } from '../utils/pdfReportGenerator';
+import { exportToCSV, exportToMarkdown, exportToHTML } from '../utils/exportFormats';
 import { analyzeAndGenerateAlerts, type Alert } from '../utils/monitoringAlerts';
 import { analyzeTrend, generatePerformanceInsights, type TrendAnalysis, type PerformanceInsights } from '../utils/advancedAnalytics';
 import { generateCompetitiveComparison, updateCompetitorData, type CompetitiveComparison } from '../utils/competitiveIntelligence';
@@ -138,6 +139,36 @@ const GeoAuditPage = () => {
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileDefaultName);
     linkElement.click();
+  };
+
+  const downloadCSVReport = () => {
+    if (!result) return;
+    try {
+      exportToCSV(result);
+    } catch (error) {
+      console.error('Failed to export CSV:', error);
+      alert('Failed to export CSV report. Please try again.');
+    }
+  };
+
+  const downloadMarkdownReport = () => {
+    if (!result) return;
+    try {
+      exportToMarkdown(result);
+    } catch (error) {
+      console.error('Failed to export Markdown:', error);
+      alert('Failed to export Markdown report. Please try again.');
+    }
+  };
+
+  const downloadHTMLReport = () => {
+    if (!result) return;
+    try {
+      exportToHTML(result);
+    } catch (error) {
+      console.error('Failed to export HTML:', error);
+      alert('Failed to export HTML report. Please try again.');
+    }
   };
 
   const downloadPDFReport = async () => {
@@ -530,8 +561,8 @@ const GeoAuditPage = () => {
                   )}
                 </div>
                 
-                {/* Right: Action Buttons */}
-                <div className="flex gap-2 flex-shrink-0">
+                {/* Right: Export & Share Buttons */}
+                <div className="flex gap-2 flex-shrink-0 flex-wrap justify-center lg:justify-end max-w-[280px] lg:max-w-none">
                   <button
                     onClick={downloadPDFReport}
                     className="p-2.5 bg-brand-accent/20 hover:bg-brand-accent/30 border border-brand-accent hover:border-brand-accent rounded-lg transition-all group"
@@ -539,6 +570,30 @@ const GeoAuditPage = () => {
                     aria-label="Download professional PDF report"
                   >
                     <FileText className="w-4 h-4 text-brand-accent group-hover:scale-110 transition-transform" />
+                  </button>
+                  <button
+                    onClick={downloadHTMLReport}
+                    className="p-2.5 bg-orange-500/20 hover:bg-orange-500/30 border border-orange-500/50 hover:border-orange-500 rounded-lg transition-all group"
+                    title="Download HTML Report"
+                    aria-label="Download standalone HTML report"
+                  >
+                    <FileText className="w-4 h-4 text-orange-400 group-hover:scale-110 transition-transform" />
+                  </button>
+                  <button
+                    onClick={downloadMarkdownReport}
+                    className="p-2.5 bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 hover:border-green-500 rounded-lg transition-all group"
+                    title="Download Markdown Report"
+                    aria-label="Download markdown report for GitHub/docs"
+                  >
+                    <FileText className="w-4 h-4 text-green-400 group-hover:scale-110 transition-transform" />
+                  </button>
+                  <button
+                    onClick={downloadCSVReport}
+                    className="p-2.5 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/50 hover:border-purple-500 rounded-lg transition-all group"
+                    title="Download CSV Report"
+                    aria-label="Download CSV report for data analysis"
+                  >
+                    <Download className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
                   </button>
                   <button
                     onClick={downloadReport}
@@ -551,8 +606,8 @@ const GeoAuditPage = () => {
                   <button
                     onClick={shareResults}
                     className="p-2.5 bg-white/5 hover:bg-white/10 border border-brand-secondary hover:border-brand-accent rounded-lg transition-all"
-                    title="Share Results"
-                    aria-label="Share on Twitter"
+                    title="Share on Twitter"
+                    aria-label="Share results on Twitter"
                   >
                     <Share2 className="w-4 h-4" />
                   </button>
