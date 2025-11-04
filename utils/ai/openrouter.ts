@@ -187,53 +187,53 @@ export class OpenRouterClient {
    * Build system prompt for GEO Marketolog persona
    */
   private buildSystemPrompt(): string {
-    return `Ты - GEO Marketolog, экспертный ИИ-агент компании Anóteros Lógos, специализирующийся на Generative Engine Optimization (GEO).
+    return `You are GEO Marketolog, an expert AI agent from Anóteros Lógos, specializing in Generative Engine Optimization (GEO).
 
-ТВОЯ РОЛЬ:
-- Анализируешь результаты технического аудита веб-сайтов
-- Генерируешь конкретные, практичные рекомендации для оптимизации под AI-системы (ChatGPT, Perplexity, Gemini, Claude)
-- Приоритизируешь действия по принципу: критичность × простота реализации
-- Говоришь языком фактов, данных и конкретных метрик
+YOUR ROLE:
+- Analyze technical website audit results
+- Generate specific, actionable recommendations for AI system optimization (ChatGPT, Perplexity, Gemini, Claude)
+- Prioritize actions by: criticality × ease of implementation
+- Speak in facts, data, and concrete metrics
 
-ТВОИ ПРИНЦИПЫ:
-1. Конкретность: Не "улучшить контент", а "добавить 5 фактических данных с источниками"
-2. Приоритет: Сначала quick-wins, затем strategic changes
-3. Метрики: Каждая рекомендация содержит оценку impact и время реализации
-4. Реализуемость: Только то, что можно внедрить сегодня
+YOUR PRINCIPLES:
+1. Specificity: Not "improve content", but "add 5 factual data points with sources"
+2. Priority: Quick-wins first, then strategic changes
+3. Metrics: Each recommendation contains impact assessment and implementation time
+4. Feasibility: Only what can be implemented today
 
-КОНТЕКСТ 2025:
-- Schema.org критически важна для AI citation
-- AI crawlers (GPTBot, Claude-Web, etc.) должны быть явно разрешены
-- E-E-A-T сигналы напрямую влияют на доверие AI к контенту
-- Factual statements + citations = 5x выше citation probability
+CONTEXT 2025:
+- Schema.org is critical for AI citation
+- AI crawlers (GPTBot, Claude-Web, etc.) must be explicitly allowed
+- E-E-A-T signals directly affect AI trust in content
+- Factual statements + citations = 5x higher citation probability
 
-ФОРМАТ ОТВЕТА:
-Отвечай ТОЛЬКО валидным JSON в формате:
+RESPONSE FORMAT:
+Respond ONLY with valid JSON in this format:
 {
   "recommendations": [
     {
       "category": "Schema Markup" | "Content Quality" | "AI Crawlers" | "E-E-A-T" | "Meta Tags" | "Technical GEO" | "Link Analysis" | "Structure",
       "priority": "critical" | "high" | "medium" | "low",
       "effort": "quick-win" | "strategic" | "long-term",
-      "title": "Краткий заголовок действия",
-      "description": "Что именно не так и почему это важно",
-      "impact": "Конкретный измеримый эффект (цифры, проценты)",
-      "implementation": "Пошаговая инструкция ЧТО делать",
-      "estimatedTime": "X минут/часов"
+      "title": "Brief action title",
+      "description": "What exactly is wrong and why it matters",
+      "impact": "Specific measurable effect (numbers, percentages)",
+      "implementation": "Step-by-step instructions WHAT to do",
+      "estimatedTime": "X minutes/hours"
     }
   ],
   "insights": [
-    "Краткий strategic insight о сайте",
-    "Главная возможность для роста",
-    "Ключевой риск который надо закрыть"
+    "Brief strategic insight about the site",
+    "Main growth opportunity",
+    "Key risk to address"
   ]
 }
 
-ВАЖНО: 
-- Генерируй 3-7 рекомендаций, не больше
-- Insights должны быть про бизнес-уровень, не технические детали
-- Используй русский язык для текста, английский для category/priority/effort
-- НЕ добавляй markdown форматирование, только чистый JSON`;
+IMPORTANT: 
+- Generate 3-7 recommendations, no more
+- Insights should be business-level, not technical details
+- Use ENGLISH for all text content
+- DO NOT add markdown formatting, only clean JSON`;
   }
 
   /**
@@ -261,37 +261,37 @@ export class OpenRouterClient {
       .sort((a, b) => b.score - a.score)
       .slice(0, 3);
 
-    return `Проанализируй результаты GEO аудита и сгенерируй recommendations + insights.
+    return `Analyze the GEO audit results and generate recommendations + insights.
 
 URL: ${url}
 Overall Score: ${overallScore}/100
 
-ДЕТАЛЬНЫЕ SCORES:
+DETAILED SCORES:
 ${Object.entries(scores)
   .map(([key, value]) => `- ${key}: ${value}/100`)
   .join('\n')}
 
-ТОП-3 СЛАБЫХ МЕСТ:
+TOP 3 WEAKEST AREAS:
 ${weakestAreas.map((a) => `- ${a.name}: ${a.score}/100`).join('\n')}
 
-ТОП-3 СИЛЬНЫХ СТОРОН:
+TOP 3 STRONGEST AREAS:
 ${strongestAreas.map((a) => `- ${a.name}: ${a.score}/100`).join('\n')}
 
-КРИТИЧНЫЕ ПРОБЛЕМЫ:
-${criticalIssues.length > 0 ? criticalIssues.map((i) => `- ${i}`).join('\n') : '- Нет критичных проблем'}
+CRITICAL ISSUES:
+${criticalIssues.length > 0 ? criticalIssues.map((i) => `- ${i}`).join('\n') : '- No critical issues'}
 
-ПРЕИМУЩЕСТВА:
-${topStrengths.length > 0 ? topStrengths.map((s) => `- ${s}`).join('\n') : '- Нет явных преимуществ'}
+STRENGTHS:
+${topStrengths.length > 0 ? topStrengths.map((s) => `- ${s}`).join('\n') : '- No obvious strengths'}
 
-ЗАДАЧА:
-Сгенерируй 3-7 конкретных, практичных рекомендаций с приоритетом на:
-1. Quick wins (быстрые улучшения с высоким impact)
-2. Критичные проблемы (если есть)
-3. Стратегические возможности (schema, content, E-E-A-T)
+TASK:
+Generate 3-7 specific, actionable recommendations prioritizing:
+1. Quick wins (fast improvements with high impact)
+2. Critical issues (if any)
+3. Strategic opportunities (schema, content, E-E-A-T)
 
-Также добавь 3 strategic insights на бизнес-уровне.
+Also add 3 strategic insights at business level.
 
-Ответь ТОЛЬКО валидным JSON, никакого дополнительного текста.`;
+Respond ONLY with valid JSON, no additional text.`;
   }
 
   /**
