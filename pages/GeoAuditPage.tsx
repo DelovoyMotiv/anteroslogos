@@ -260,72 +260,81 @@ const GeoAuditPage = () => {
       {result && (
         <section className="py-16 px-6">
           <div className="max-w-6xl mx-auto">
-            {/* Overall Score */}
-            <div className="mb-12 p-6 sm:p-8 bg-gradient-to-br from-brand-secondary/30 to-transparent border border-brand-accent/30 rounded-2xl">
-              <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
-                <div className="text-center lg:text-left">
-                  <div className="flex items-center gap-3 mb-3 justify-center lg:justify-start">
-                    <h2 className="text-xl sm:text-2xl font-bold">Overall GEO Score</h2>
-                    {result.grade && (
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
-                        result.grade === 'Authority' ? 'bg-purple-500/20 text-purple-300' :
-                        result.grade === 'Expert' ? 'bg-green-500/20 text-green-300' :
-                        result.grade === 'Advanced' ? 'bg-blue-500/20 text-blue-300' :
-                        result.grade === 'Intermediate' ? 'bg-yellow-500/20 text-yellow-300' :
-                        'bg-gray-500/20 text-gray-300'
-                      }`}>
-                        <Award className="w-3 h-3 inline mr-1" />
-                        {result.grade}
-                      </span>
-                    )}
+            {/* Overall Score - Optimized Compact Layout */}
+            <div className="mb-12 p-5 sm:p-6 bg-gradient-to-br from-brand-secondary/30 to-transparent border border-brand-accent/30 rounded-2xl">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6">
+                {/* Left: Title + Domain + Grade Badge */}
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 sm:gap-4 w-full sm:w-auto">
+                  <div className="text-center sm:text-left">
+                    <h2 className="text-lg sm:text-xl font-bold mb-1">Overall GEO Score</h2>
+                    <p className="text-xs sm:text-sm text-white/60 break-all max-w-[280px] sm:max-w-xs">
+                      {new URL(result.url).hostname}
+                    </p>
                   </div>
-                  <p className="text-sm sm:text-base text-white/60 break-all">Analyzed: {new URL(result.url).hostname}</p>
+                  {result.grade && (
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase whitespace-nowrap self-center sm:self-start ${
+                      result.grade === 'Authority' ? 'bg-purple-500/20 text-purple-300' :
+                      result.grade === 'Expert' ? 'bg-green-500/20 text-green-300' :
+                      result.grade === 'Advanced' ? 'bg-blue-500/20 text-blue-300' :
+                      result.grade === 'Intermediate' ? 'bg-yellow-500/20 text-yellow-300' :
+                      'bg-gray-500/20 text-gray-300'
+                    }`}>
+                      <Award className="w-3 h-3 inline mr-1" />
+                      {result.grade}
+                    </span>
+                  )}
                 </div>
-                <div className="text-center">
-                  <div className={`text-6xl sm:text-7xl font-bold ${getScoreColor(result.overallScore)}`}>
-                    {result.overallScore}
+                
+                {/* Center: Score Display + Change */}
+                <div className="flex items-center gap-4 sm:gap-6">
+                  <div className="text-center">
+                    <div className={`text-5xl sm:text-6xl font-bold leading-none ${getScoreColor(result.overallScore)}`}>
+                      {result.overallScore}
+                    </div>
+                    <div className="text-white/40 text-xs mt-0.5">/ 100</div>
                   </div>
-                  <div className="text-white/40 text-sm mt-1">out of 100</div>
                   
-                  {/* Score Change Indicator */}
+                  {/* Score Change - Compact Vertical Layout */}
                   {comparison?.changes && (
-                    <div className="mt-3 flex items-center justify-center gap-2">
+                    <div className="flex flex-col items-center justify-center gap-1 min-w-[80px]">
                       {comparison.changes.overallScore > 0 ? (
                         <>
                           <TrendingUp className="w-4 h-4 text-green-400" />
-                          <span className="text-green-400 font-semibold">+{comparison.changes.overallScore} points</span>
+                          <span className="text-green-400 font-bold text-sm">+{comparison.changes.overallScore}</span>
                         </>
                       ) : comparison.changes.overallScore < 0 ? (
                         <>
                           <TrendingDown className="w-4 h-4 text-red-400" />
-                          <span className="text-red-400 font-semibold">{comparison.changes.overallScore} points</span>
+                          <span className="text-red-400 font-bold text-sm">{comparison.changes.overallScore}</span>
                         </>
                       ) : (
                         <>
                           <Minus className="w-4 h-4 text-gray-400" />
-                          <span className="text-gray-400">No change</span>
+                          <span className="text-gray-400 text-sm">—</span>
                         </>
                       )}
-                      <span className="text-white/40 text-xs">vs. previous audit</span>
+                      <span className="text-white/30 text-[10px] leading-none">vs prev</span>
                     </div>
                   )}
                 </div>
-                <div className="flex gap-3">
+                
+                {/* Right: Action Buttons - Vertical on mobile */}
+                <div className="flex sm:flex-col gap-2">
                   <button
                     onClick={downloadReport}
-                    className="p-3 bg-white/5 hover:bg-white/10 border border-brand-secondary hover:border-brand-accent rounded-lg transition-all"
+                    className="p-2.5 bg-white/5 hover:bg-white/10 border border-brand-secondary hover:border-brand-accent rounded-lg transition-all"
                     title="Download Report"
                     aria-label="Download JSON report"
                   >
-                    <Download className="w-5 h-5" />
+                    <Download className="w-4 h-4" />
                   </button>
                   <button
                     onClick={shareResults}
-                    className="p-3 bg-white/5 hover:bg-white/10 border border-brand-secondary hover:border-brand-accent rounded-lg transition-all"
+                    className="p-2.5 bg-white/5 hover:bg-white/10 border border-brand-secondary hover:border-brand-accent rounded-lg transition-all"
                     title="Share Results"
                     aria-label="Share on Twitter"
                   >
-                    <Share2 className="w-5 h-5" />
+                    <Share2 className="w-4 h-4" />
                   </button>
                 </div>
               </div>
