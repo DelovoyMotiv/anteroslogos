@@ -5,6 +5,9 @@ import { Search, AlertCircle, CheckCircle, TrendingUp, Download, Share2, Externa
 import { saveAuditToHistory, compareWithPrevious, checkScoreDrop } from '../utils/auditHistory';
 import { validateAndSanitizeUrl, checkRateLimit, validateAuditResult } from '../utils/urlValidator';
 import { generatePDFReport } from '../utils/pdfReportGenerator';
+import { analyzeAndGenerateAlerts, type Alert } from '../utils/monitoringAlerts';
+import { analyzeTrend, generatePerformanceInsights, type TrendAnalysis, type PerformanceInsights } from '../utils/advancedAnalytics';
+import { generateCompetitiveComparison, updateCompetitorData, type CompetitiveComparison } from '../utils/competitiveIntelligence';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import AnalysisProgress from '../components/AnalysisProgress';
@@ -22,6 +25,10 @@ const GeoAuditPage = () => {
   const [error, setError] = useState('');
   const [comparison, setComparison] = useState<ReturnType<typeof compareWithPrevious> | null>(null);
   const [scoreDrop, setScoreDrop] = useState<ReturnType<typeof checkScoreDrop> | null>(null);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [trend, setTrend] = useState<TrendAnalysis | null>(null);
+  const [insights, setInsights] = useState<PerformanceInsights | null>(null);
+  const [competitive, setCompetitive] = useState<CompetitiveComparison | null>(null);
 
   const handleAnalyze = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,6 +78,33 @@ const GeoAuditPage = () => {
       // Check for score drops
       const drop = checkScoreDrop(auditResult.url, auditResult.overallScore);
       setScoreDrop(drop);
+      
+      // Generate monitoring alerts
+      const generatedAlerts = analyzeAndGenerateAlerts(auditResult);
+      setAlerts(generatedAlerts);
+      console.log('Generated alerts:', generatedAlerts);
+      
+      // Analyze trends with advanced analytics
+      const urlHistory = (await import('../utils/auditHistory')).getUrlHistory(auditResult.url);
+      if (urlHistory.length >= 2) {
+        const trendAnalysis = analyzeTrend(urlHistory);
+        setTrend(trendAnalysis);
+        console.log('Trend analysis:', trendAnalysis);
+        
+        const perfInsights = generatePerformanceInsights(urlHistory);
+        setInsights(perfInsights);
+        console.log('Performance insights:', perfInsights);
+      }
+      
+      // Update competitor data if this is a tracked competitor
+      updateCompetitorData(auditResult.url, auditResult);
+      
+      // Generate competitive comparison
+      const competitiveComparison = generateCompetitiveComparison(auditResult.url, auditResult);
+      setCompetitive(competitiveComparison);
+      if (competitiveComparison) {
+        console.log('Competitive comparison:', competitiveComparison);
+      }
       
       setResult(auditResult);
     } catch (err) {
@@ -500,6 +534,207 @@ const GeoAuditPage = () => {
                 </div>
               ))}
             </div>
+
+            {/* Monitoring Alerts */}
+            {alerts.length > 0 && (
+              <div className="mb-12">
+                <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                  <AlertCircle className="w-6 h-6 text-red-400" />
+                  Monitoring Alerts ({alerts.length})
+                </h3>
+                <div className="space-y-3">
+                  {alerts.slice(0, 5).map((alert) => (
+                    <div 
+                      key={alert.id} 
+                      className={`p-4 border rounded-xl ${
+                        alert.severity === 'critical' ? 'bg-red-500/10 border-red-500/40' :
+                        alert.severity === 'high' ? 'bg-orange-500/10 border-orange-500/40' :
+                        alert.severity === 'medium' ? 'bg-yellow-500/10 border-yellow-500/40' :
+                        'bg-blue-500/10 border-blue-500/40'
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <AlertCircle className={`w-5 h-5 flex-shrink-0 ${
+                          alert.severity === 'critical' ? 'text-red-400' :
+                          alert.severity === 'high' ? 'text-orange-400' :
+                          alert.severity === 'medium' ? 'text-yellow-400' :
+                          'text-blue-400'
+                        }`} />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className={`text-xs px-2 py-0.5 rounded-full uppercase font-bold ${
+                              alert.severity === 'critical' ? 'bg-red-500/20 text-red-300' :
+                              alert.severity === 'high' ? 'bg-orange-500/20 text-orange-300' :
+                              alert.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
+                              'bg-blue-500/20 text-blue-300'
+                            }`}>
+                              {alert.severity}
+                            </span>
+                            <span className="text-xs text-white/40">{alert.category}</span>
+                          </div>
+                          <h4 className="font-bold mb-1">{alert.title}</h4>
+                          <p className="text-sm text-white/70 mb-2">{alert.message}</p>
+                          {alert.recommendation && (
+                            <p className="text-xs text-brand-accent">💡 {alert.recommendation}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Advanced Analytics - Trends & Insights */}
+            {(trend || insights) && (
+              <div className="mb-12">
+                <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                  <TrendingUp className="w-6 h-6 text-brand-accent" />
+                  Performance Analytics
+                </h3>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {trend && (
+                    <div className="p-6 bg-white/5 border border-brand-secondary rounded-xl">
+                      <h4 className="font-bold mb-4 flex items-center gap-2">
+                        📈 Trend Analysis
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${
+                          trend.direction === 'improving' ? 'bg-green-500/20 text-green-300' :
+                          trend.direction === 'declining' ? 'bg-red-500/20 text-red-300' :
+                          'bg-gray-500/20 text-gray-300'
+                        }`}>
+                          {trend.direction}
+                        </span>
+                      </h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-white/60">Trend Slope:</span>
+                          <span className="font-mono text-brand-accent">{trend.slope} pts/audit</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-white/60">Confidence:</span>
+                          <span className="font-mono">{Math.round(trend.confidence * 100)}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-white/60">Volatility:</span>
+                          <span className="font-mono">{trend.volatility}</span>
+                        </div>
+                        <div className="pt-3 mt-3 border-t border-white/10">
+                          <p className="text-white/60 text-xs mb-2">Forecast:</p>
+                          <div className="space-y-1">
+                            <div className="flex justify-between">
+                              <span className="text-white/50 text-xs">7 days:</span>
+                              <span className="font-mono text-xs">{trend.forecast.next7Days}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-white/50 text-xs">30 days:</span>
+                              <span className="font-mono text-xs">{trend.forecast.next30Days}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {insights && (
+                    <div className="p-6 bg-white/5 border border-brand-secondary rounded-xl">
+                      <h4 className="font-bold mb-4">📊 Performance Insights</h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-white/60">Best Score:</span>
+                          <span className="font-mono text-green-400">{insights.bestScore.score}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-white/60">Worst Score:</span>
+                          <span className="font-mono text-red-400">{insights.worstScore.score}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-white/60">Average:</span>
+                          <span className="font-mono">{insights.averageScore}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-white/60">Improvement:</span>
+                          <span className={`font-mono ${
+                            insights.improvement > 0 ? 'text-green-400' : insights.improvement < 0 ? 'text-red-400' : 'text-gray-400'
+                          }`}>
+                            {insights.improvement > 0 && '+'}{insights.improvement.toFixed(1)}%
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-white/60">Consistency:</span>
+                          <span className="font-mono">{insights.consistency}/100</span>
+                        </div>
+                        {insights.timeToReachTarget && (
+                          <div className="pt-3 mt-3 border-t border-white/10">
+                            <p className="text-brand-accent text-xs">🎯 {insights.timeToReachTarget} days to reach 90+ score</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Competitive Intelligence */}
+            {competitive && (
+              <div className="mb-12">
+                <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                  <Target className="w-6 h-6 text-purple-400" />
+                  Competitive Analysis
+                </h3>
+                <div className="p-6 bg-white/5 border border-brand-secondary rounded-xl">
+                  <div className="mb-6">
+                    <h4 className="font-bold mb-3">Your Position</h4>
+                    <div className="flex items-center gap-4">
+                      <div className="text-4xl font-bold text-brand-accent">#{competitive.yourSite.rank}</div>
+                      <div className="flex-1">
+                        <p className="text-sm text-white/60">out of {competitive.competitors.length + 1} sites analyzed</p>
+                        <p className="text-lg font-semibold">{competitive.yourSite.score} points</p>
+                      </div>
+                    </div>
+                  </div>
+                  {competitive.insights.length > 0 && (
+                    <div className="mb-4">
+                      <h5 className="text-sm font-bold text-white/60 mb-2">INSIGHTS</h5>
+                      {competitive.insights.map((insight, i) => (
+                        <p key={i} className="text-sm text-white/80 mb-1">{insight}</p>
+                      ))}
+                    </div>
+                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {competitive.strengths.length > 0 && (
+                      <div>
+                        <h5 className="text-sm font-bold text-green-400 mb-2">✓ STRENGTHS</h5>
+                        <ul className="text-xs space-y-1">
+                          {competitive.strengths.map((str, i) => (
+                            <li key={i} className="text-white/70">{str}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {competitive.weaknesses.length > 0 && (
+                      <div>
+                        <h5 className="text-sm font-bold text-red-400 mb-2">⚠ WEAKNESSES</h5>
+                        <ul className="text-xs space-y-1">
+                          {competitive.weaknesses.map((weak, i) => (
+                            <li key={i} className="text-white/70">{weak}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                  {competitive.opportunities.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-white/10">
+                      <h5 className="text-sm font-bold text-purple-400 mb-2">🎯 OPPORTUNITIES</h5>
+                      <ul className="text-xs space-y-1">
+                        {competitive.opportunities.map((opp, i) => (
+                          <li key={i} className="text-white/70">{opp}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Recommendations */}
             {result.recommendations.length > 0 && (
