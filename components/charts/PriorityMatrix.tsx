@@ -86,11 +86,12 @@ const PriorityMatrix = ({ recommendations }: PriorityMatrixProps) => {
       <div className="absolute top-1/4 left-0 w-56 h-56 bg-red-500/10 rounded-full blur-3xl" />
       <div className="absolute bottom-1/4 right-0 w-56 h-56 bg-green-500/10 rounded-full blur-3xl" />
       
-      <div className="relative z-10">
+      <div className="relative z-10 h-full flex flex-col">
         <h3 className="text-lg font-bold mb-4 text-center bg-gradient-to-r from-red-400 via-orange-400 to-green-400 bg-clip-text text-transparent">
           Priority vs Effort Matrix
         </h3>
-        <ResponsiveContainer width="100%" height="100%">
+        <div className="flex-1 min-h-0">
+          <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 20, right: 20, bottom: 40, left: 60 }}>
             <defs>
               {data.map((entry, index) => (
@@ -171,8 +172,9 @@ const PriorityMatrix = ({ recommendations }: PriorityMatrixProps) => {
               Reconsider
             </text>
           </ScatterChart>
-        </ResponsiveContainer>
-        <div className="mt-4 flex flex-wrap gap-4 justify-center text-xs">
+          </ResponsiveContainer>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-4 justify-center text-xs flex-shrink-0">
           {['critical', 'high', 'medium', 'low'].map((priority) => (
             <div key={priority} className="flex items-center gap-2">
               <div 

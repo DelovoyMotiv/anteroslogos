@@ -48,8 +48,8 @@ const ScoreTrendChart = ({ url }: ScoreTrendChartProps) => {
       <div className="absolute top-0 right-1/3 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl" />
       <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl" />
       
-      <div className="relative z-10">
-        <div className="flex items-center justify-between mb-4">
+      <div className="relative z-10 h-full flex flex-col">
+        <div className="flex items-center justify-between mb-4 flex-shrink-0">
           <h3 className="text-lg font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
             Score History Trend
           </h3>
@@ -70,7 +70,8 @@ const ScoreTrendChart = ({ url }: ScoreTrendChartProps) => {
             </span>
           </div>
         </div>
-        <ResponsiveContainer width="100%" height="100%">
+        <div className="flex-1 min-h-0">
+          <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data}>
             <defs>
               {/* Multi-layer gradient for overall score */}
@@ -181,7 +182,8 @@ const ScoreTrendChart = ({ url }: ScoreTrendChartProps) => {
               name="Content"
             />
           </AreaChart>
-        </ResponsiveContainer>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );

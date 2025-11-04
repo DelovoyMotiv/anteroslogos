@@ -71,11 +71,12 @@ const CategoryBarChart = ({ scores }: CategoryBarChartProps) => {
       <div className="absolute top-1/4 right-0 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl" />
       <div className="absolute bottom-1/4 left-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl" />
       
-      <div className="relative z-10">
+      <div className="relative z-10 h-full flex flex-col">
         <h3 className="text-lg font-bold mb-4 text-center bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-400 bg-clip-text text-transparent">
           Category Scores (Weighted by Importance)
         </h3>
-        <ResponsiveContainer width="100%" height="100%">
+        <div className="flex-1 min-h-0">
+          <ResponsiveContainer width="100%" height="100%">
           <BarChart 
             data={data}
             layout="vertical"
@@ -140,7 +141,8 @@ const CategoryBarChart = ({ scores }: CategoryBarChartProps) => {
               })}
             </Bar>
           </BarChart>
-        </ResponsiveContainer>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );

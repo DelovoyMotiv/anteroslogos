@@ -49,11 +49,12 @@ const ScoreRadarChart = ({ scores, comparison }: ScoreRadarChartProps) => {
       <div className="absolute top-0 left-1/4 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl" />
       <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl" />
       
-      <div className="relative z-10">
+      <div className="relative z-10 h-full flex flex-col">
         <h3 className="text-lg font-bold mb-4 text-center bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">
           Category Performance Radar
         </h3>
-        <ResponsiveContainer width="100%" height="100%">
+        <div className="flex-1 min-h-0">
+          <ResponsiveContainer width="100%" height="100%">
           <RadarChart data={data}>
             <defs>
               <linearGradient id="radarGradientCurrent" x1="0" y1="0" x2="0" y2="1">
@@ -135,7 +136,8 @@ const ScoreRadarChart = ({ scores, comparison }: ScoreRadarChartProps) => {
               iconType="circle"
             />
           </RadarChart>
-        </ResponsiveContainer>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );
