@@ -237,11 +237,17 @@ export interface LinkAnalysisDetails {
 
 // ==================== MAIN AUDIT FUNCTION ====================
 
-export async function auditWebsite(url: string): Promise<AuditResult> {
+export async function auditWebsite(
+  url: string, 
+  options?: { useAI?: boolean; onProgress?: (stage: string) => void }
+): Promise<AuditResult> {
+  const { useAI = true, onProgress } = options || {};
+  
   const normalizedUrl = normalizeUrl(url);
   
   let htmlContent: string;
   try {
+    onProgress?.('Fetching website content...');
     htmlContent = await fetchHTML(normalizedUrl);
   } catch (error) {
     throw new Error('Failed to fetch website. Please check the URL and try again.');
@@ -251,15 +257,34 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
   const doc = parser.parseFromString(htmlContent, 'text/html');
 
   // Run all audits
+  onProgress?.('Analyzing schema markup...');
   const schemaMarkup = auditSchemaMarkup(doc);
+  
+  onProgress?.('Analyzing meta tags...');
   const metaTags = auditMetaTags(doc);
+  
+  onProgress?.('Analyzing structure...');
   const structure = auditStructure(doc);
+  
+  onProgress?.('Analyzing performance...');
   const performance = auditPerformance(htmlContent, doc);
+  
+  onProgress?.('Analyzing E-E-A-T signals...');
   const eeat = auditEnhancedEEAT(doc, htmlContent);
+  
+  onProgress?.('Analyzing technical GEO...');
   const technicalSEO = await auditTechnicalSEO(doc, normalizedUrl);
+  
+  onProgress?.('Analyzing content quality...');
   const contentQuality = auditContentQuality(doc, htmlContent);
+  
+  onProgress?.('Analyzing citation potential...');
   const citationPotential = auditCitationPotential(doc, htmlContent);
+  
+  onProgress?.('Analyzing link structure...');
   const linkAnalysis = auditLinkAnalysis(doc, normalizedUrl);
+  
+  onProgress?.('Checking AI crawler access...');
   const aiCrawlers = await auditAICrawlers(normalizedUrl);
 
   // Calculate category scores
@@ -280,8 +305,8 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
   const overallScore = calculateOverallScore(scores, schemaMarkup);
   const grade = getGrade(overallScore);
 
-  // Generate enhanced recommendations
-  const recommendations = generateEnhancedRecommendations({
+  // Generate default recommendations
+  const defaultRecommendations = generateEnhancedRecommendations({
     schemaMarkup,
     metaTags,
     aiCrawlers,
@@ -294,16 +319,18 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
     linkAnalysis,
   }, scores);
 
-  // Generate insights
-  const insights = generateInsights(scores, {
+  // Generate default insights
+  const defaultInsights = generateInsights(scores, {
     schemaMarkup,
     contentQuality,
     citationPotential,
     eeat,
     technicalSEO,
+    linkAnalysis,
   });
 
-  return {
+  // Create base result
+  const baseResult: AuditResult = {
     url: normalizedUrl,
     timestamp: new Date().toISOString(),
     overallScore,
@@ -321,9 +348,44 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
       technicalSEO,
       linkAnalysis,
     },
-    recommendations,
-    insights,
+    recommendations: defaultRecommendations,
+    insights: defaultInsights,
   };
+
+  // === AI AGENT ENHANCEMENT ===
+  // If AI is enabled, enhance recommendations with GEO Marketolog AI Agent
+  if (useAI) {
+    try {
+      onProgress?.('Generating AI recommendations...');
+      
+      // Lazy import to avoid circular dependencies and reduce bundle size
+      const { getGeoMarketologAgent } = await import('./ai/geoMarketologAgent');
+      const agent = getGeoMarketologAgent();
+      
+      if (agent.isReady()) {
+        const agentResult = await agent.generateRecommendations(baseResult);
+        
+        // Use AI recommendations if successful
+        if (agentResult.source === 'ai') {
+          console.log('✓ AI recommendations generated successfully');
+          baseResult.recommendations = agentResult.recommendations;
+          baseResult.insights = agentResult.insights;
+        } else {
+          console.log('→ Using fallback recommendations');
+          // Keep default recommendations
+        }
+      } else {
+        console.log('→ AI Agent not configured, using default recommendations');
+      }
+    } catch (error) {
+      console.error('AI Agent error, using default recommendations:', error);
+      // Keep default recommendations on error
+    }
+  }
+
+  onProgress?.('Analysis complete!');
+  
+  return baseResult;
 }
 
 // ==================== UTILITY FUNCTIONS ====================

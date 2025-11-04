@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Search, Globe, Brain, Shield, Layout, Zap, FileText, Target, Code } from 'lucide-react';
+import { Search, Globe, Brain, Shield, Layout, Zap, FileText, Target, Code, Sparkles } from 'lucide-react';
 
 interface AnalysisStep {
   id: string;
@@ -19,6 +19,7 @@ const ANALYSIS_STEPS: AnalysisStep[] = [
   { id: 'performance', label: 'Performance', icon: Zap, color: 'text-yellow-400', duration: 1100 },
   { id: 'content', label: 'Content Quality', icon: FileText, color: 'text-teal-400', duration: 1400 },
   { id: 'technical', label: 'Technical GEO', icon: Target, color: 'text-orange-400', duration: 1000 },
+  { id: 'ai-agent', label: 'AI Analysis', icon: Sparkles, color: 'text-fuchsia-400', duration: 2000 },
 ];
 
 interface AnalysisProgressProps {
@@ -210,6 +211,7 @@ function getTipForStep(stepIndex: number): string {
     'Measuring page weight, scripts, and optimization',
     'Assessing content depth, readability, and citation potential',
     'Validating technical GEO elements like HTTPS and canonical URLs',
+    'GEO Marketolog AI Agent generating personalized recommendations...',
   ];
   return tips[stepIndex] || 'Running comprehensive analysis...';
 }
