@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { submitContactForm } from '../utils/contactService';
 
 interface ModalProps {
   isOpen: boolean;
@@ -94,18 +95,28 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     setIsSubmitting(true);
     
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const result = await submitContactForm({
+        name: name.trim(),
+        email: email.trim(),
+        company: company.trim() || undefined,
+        message: message.trim() || undefined,
+      });
       
       setIsSubmitting(false);
-      setIsSubmitted(true);
       
-      setTimeout(() => {
-        onClose();
-      }, 2500);
-    } catch {
+      if (result.success) {
+        setIsSubmitted(true);
+        
+        setTimeout(() => {
+          onClose();
+        }, 2500);
+      } else {
+        setError(result.message || 'Something went wrong. Please try again.');
+      }
+    } catch (error) {
       setIsSubmitting(false);
-      setError('Something went wrong. Please try again.');
+      setError('Network error. Please check your connection and try again.');
+      console.error('Contact form error:', error);
     }
   };
   

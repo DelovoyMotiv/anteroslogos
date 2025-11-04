@@ -178,53 +178,6 @@ export function getHistoricalMetrics(days: number = 90): ReferenceRateMetric[] {
   return metrics;
 }
 
-/**
- * Initialize tracking with mock data for demo
- */
-export function initializeDemoData() {
-  if (typeof window === 'undefined') return;
-  
-  // Only add demo data if no existing data
-  const existing = getStoredCitations();
-  if (existing.length > 0) return;
-  
-  const demoSources: AISource[] = [
-    {
-      name: 'ChatGPT',
-      url: 'https://chatgpt.com',
-      citedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-      context: 'Cited as source for GEO definition',
-      prominence: 'primary'
-    },
-    {
-      name: 'Perplexity',
-      url: 'https://perplexity.ai',
-      citedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-      context: 'Referenced in AI optimization query',
-      prominence: 'secondary'
-    },
-    {
-      name: 'Claude',
-      url: 'https://claude.ai',
-      citedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-      context: 'Mentioned in digital authority discussion',
-      prominence: 'mention'
-    }
-  ];
-  
-  const demoMentions: MediaMention[] = [
-    {
-      source: 'TechCrunch',
-      url: 'https://techcrunch.com',
-      publishedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-      type: 'article',
-      sentiment: 'positive'
-    }
-  ];
-  
-  localStorage.setItem('geo_citations', JSON.stringify(demoSources));
-  localStorage.setItem('geo_mentions', JSON.stringify(demoMentions));
-}
 
 // Helper functions
 function getStoredCitations(): AISource[] {
