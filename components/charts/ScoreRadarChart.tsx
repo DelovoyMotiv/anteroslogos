@@ -56,16 +56,16 @@ const ScoreRadarChart = ({ scores, comparison }: ScoreRadarChartProps) => {
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart data={data}>
             <defs>
-              <linearGradient id="radarGradient" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="radarGradientCurrent" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#a78bfa" stopOpacity={0.8} />
                 <stop offset="50%" stopColor="#818cf8" stopOpacity={0.6} />
                 <stop offset="100%" stopColor="#60a5fa" stopOpacity={0.4} />
               </linearGradient>
-              <linearGradient id="radarGradientPrev" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="radarGradientPrevious" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#22d3ee" stopOpacity={0.5} />
                 <stop offset="100%" stopColor="#06b6d4" stopOpacity={0.2} />
               </linearGradient>
-              <filter id="glow">
+              <filter id="radarGlow">
                 <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
                 <feMerge>
                   <feMergeNode in="coloredBlur"/>
@@ -94,17 +94,17 @@ const ScoreRadarChart = ({ scores, comparison }: ScoreRadarChartProps) => {
               name="Current Score"
               dataKey="current"
               stroke="#a78bfa"
-              fill="url(#radarGradient)"
+              fill="url(#radarGradientCurrent)"
               fillOpacity={1}
               strokeWidth={3}
-              filter="url(#glow)"
+              filter="url(#radarGlow)"
             />
             {comparison && (
               <Radar
                 name="Previous Score"
                 dataKey="previous"
                 stroke="#22d3ee"
-                fill="url(#radarGradientPrev)"
+                fill="url(#radarGradientPrevious)"
                 fillOpacity={1}
                 strokeWidth={2}
                 strokeDasharray="5 5"

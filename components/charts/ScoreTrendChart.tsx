@@ -74,24 +74,24 @@ const ScoreTrendChart = ({ url }: ScoreTrendChartProps) => {
           <AreaChart data={data}>
             <defs>
               {/* Multi-layer gradient for overall score */}
-              <linearGradient id="scoreGradient" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="trendScoreGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#a78bfa" stopOpacity={0.9}/>
                 <stop offset="30%" stopColor="#818cf8" stopOpacity={0.7}/>
                 <stop offset="70%" stopColor="#60a5fa" stopOpacity={0.4}/>
                 <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.1}/>
               </linearGradient>
               {/* Gradient for schema line */}
-              <linearGradient id="schemaGradient" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="trendSchemaGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#34d399" stopOpacity={0.6}/>
                 <stop offset="100%" stopColor="#10b981" stopOpacity={0.1}/>
               </linearGradient>
               {/* Gradient for technical line */}
-              <linearGradient id="technicalGradient" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="trendTechnicalGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#fbbf24" stopOpacity={0.6}/>
                 <stop offset="100%" stopColor="#f59e0b" stopOpacity={0.1}/>
               </linearGradient>
               {/* Gradient for content line */}
-              <linearGradient id="contentGradient" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="trendContentGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#22d3ee" stopOpacity={0.6}/>
                 <stop offset="100%" stopColor="#06b6d4" stopOpacity={0.1}/>
               </linearGradient>
@@ -149,7 +149,7 @@ const ScoreTrendChart = ({ url }: ScoreTrendChartProps) => {
               dataKey="score"
               stroke="#a78bfa"
               strokeWidth={3}
-              fill="url(#scoreGradient)"
+              fill="url(#trendScoreGradient)"
               name="Overall Score"
               style={{ filter: 'drop-shadow(0 0 8px rgba(167, 139, 250, 0.4))' }}
             />
@@ -158,7 +158,7 @@ const ScoreTrendChart = ({ url }: ScoreTrendChartProps) => {
               dataKey="schema"
               stroke="#34d399"
               strokeWidth={2}
-              fill="url(#schemaGradient)"
+              fill="url(#trendSchemaGradient)"
               dot={{ fill: '#34d399', r: 5, strokeWidth: 2, stroke: '#10b981' }}
               name="Schema"
             />
@@ -167,7 +167,7 @@ const ScoreTrendChart = ({ url }: ScoreTrendChartProps) => {
               dataKey="technical"
               stroke="#fbbf24"
               strokeWidth={2}
-              fill="url(#technicalGradient)"
+              fill="url(#trendTechnicalGradient)"
               dot={{ fill: '#fbbf24', r: 5, strokeWidth: 2, stroke: '#f59e0b' }}
               name="Technical"
             />
@@ -176,7 +176,7 @@ const ScoreTrendChart = ({ url }: ScoreTrendChartProps) => {
               dataKey="content"
               stroke="#22d3ee"
               strokeWidth={2}
-              fill="url(#contentGradient)"
+              fill="url(#trendContentGradient)"
               dot={{ fill: '#22d3ee', r: 5, strokeWidth: 2, stroke: '#06b6d4' }}
               name="Content"
             />

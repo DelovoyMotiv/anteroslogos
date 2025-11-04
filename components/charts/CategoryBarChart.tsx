@@ -29,7 +29,7 @@ const CategoryBarChart = ({ scores }: CategoryBarChartProps) => {
   ];
 
   const getGradientId = (_score: number, index: number): string => {
-    return `barGradient${index}`;
+    return `categoryBarGradient${index}`;
   };
 
   const CustomTooltip = ({ active, payload }: any) => {

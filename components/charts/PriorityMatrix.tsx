@@ -94,7 +94,7 @@ const PriorityMatrix = ({ recommendations }: PriorityMatrixProps) => {
           <ScatterChart margin={{ top: 20, right: 20, bottom: 40, left: 60 }}>
             <defs>
               {data.map((entry, index) => (
-                <radialGradient key={`grad-${index}`} id={`dotGradient${index}`}>
+                <radialGradient key={`grad-${index}`} id={`priorityDotGradient${index}`}>
                   <stop offset="0%" stopColor={getColor(entry.priority)} stopOpacity={1} />
                   <stop offset="100%" stopColor={getColor(entry.priority)} stopOpacity={0.7} />
                 </radialGradient>
@@ -149,7 +149,7 @@ const PriorityMatrix = ({ recommendations }: PriorityMatrixProps) => {
               {data.map((entry, index) => (
                 <Cell 
                   key={`cell-${index}`} 
-                  fill={`url(#dotGradient${index})`}
+                  fill={`url(#priorityDotGradient${index})`}
                   style={{
                     filter: `drop-shadow(0 0 12px ${getGlow(entry.priority)})`,
                   }}
