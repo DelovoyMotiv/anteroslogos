@@ -9,6 +9,7 @@ Live Site: https://anoteroslogos.com
 - Modern Design System: Premium dark theme with sophisticated animations and gradients
 - Fully Responsive: Mobile-first design optimized for all devices
 - GEO Audit Tool: Production-grade website analysis with real-time monitoring and competitive intelligence
+- **AI-Powered Recommendations**: GEO Marketolog AI Agent generates expert-level, personalized recommendations using OpenRouter LLM
 - Blog Platform: Expert GEO insights with markdown rendering and proper article structure
 - SEO and GEO Optimized:
   - Comprehensive meta tags (Open Graph, Twitter Cards, AI-specific meta)
@@ -31,17 +32,18 @@ Live Site: https://anoteroslogos.com
 
 ## Tech Stack
 
-- React 18.3.1 - UI library with concurrent rendering
+- React 19.2 - UI library with concurrent rendering
 - TypeScript 5.8 - Type safety with strict mode
-- Vite 6.0.11 - Lightning-fast build tool and dev server
-- React Router 7.1.3 - Client-side routing with code splitting
+- Vite 6.2 - Lightning-fast build tool and dev server
+- React Router 7.9.5 - Client-side routing with code splitting
 - Tailwind CSS 3.4+ - Utility-first CSS framework with custom design tokens
-- Recharts 2.x - Advanced data visualization for analytics
-- jsPDF 2.5.2 - PDF report generation
+- Recharts 3.3 - Advanced data visualization for analytics
+- **OpenRouter API** - AI-powered recommendation engine with LLM integration
+- jsPDF 3.0.3 - PDF report generation
 - react-markdown - Markdown rendering for blog articles
 - remark-gfm - GitHub Flavored Markdown support
-- web-vitals 4.2.4 - Core Web Vitals monitoring
-- Lucide React 0.469.0 - Modern icon library
+- web-vitals 5.1.0 - Core Web Vitals monitoring
+- Lucide React 0.552.0 - Modern icon library
 - ESLint 9+ - Code quality and consistency
 
 ## Installation
@@ -75,6 +77,11 @@ Copy `.env.example` to `.env` and configure:
 VITE_SITE_URL=https://anoteroslogos.com
 VITE_SITE_NAME=Anóteros Lógos
 VITE_SITE_DESCRIPTION=Generative Engine Optimization Agency
+
+# AI Agent Configuration (GEO Marketolog)
+VITE_OPENROUTER_API_KEY=your_openrouter_api_key_here
+VITE_OPENROUTER_MODEL=minimax/minimax-m2:free
+# Alternative models: meta-llama/llama-3.2-3b-instruct:free, google/gemma-2-9b-it:free
 
 # API Configuration (when ready)
 # VITE_API_URL=https://api.yoursite.com
@@ -131,11 +138,14 @@ F:\air\
 │   │   ├── geoKnowledgeBase.ts  # Knowledge base terms
 │   │   └── teamMembers.ts   # Team information
 │   ├── utils/               # Utilities and services
+│   │   ├── ai/                     # AI Agent modules
+│   │   │   ├── openrouter.ts       # OpenRouter API client with LLM integration
+│   │   │   └── geoMarketologAgent.ts  # AI recommendation engine
 │   │   ├── advancedAnalytics.ts    # Trend analysis, regression, forecasting
 │   │   ├── advancedMetrics.ts      # Core Web Vitals, security audit
 │   │   ├── auditHistory.ts         # Historical performance tracking
 │   │   ├── competitiveIntelligence.ts  # Competitor analysis
-│   │   ├── geoAuditEnhanced.ts     # Main audit engine (1800+ lines)
+│   │   ├── geoAuditEnhanced.ts     # Main audit engine (2000+ lines, AI-integrated)
 │   │   ├── monitoringAlerts.ts     # Real-time alerts system
 │   │   ├── nlpContentAnalysis.ts   # Natural language processing
 │   │   ├── pdfReportGenerator.ts   # PDF export functionality
@@ -397,9 +407,47 @@ npm prune
 
 ## GEO Audit Tool
 
-Production-ready website analysis platform with advanced analytics capabilities.
+Production-ready website analysis platform with advanced analytics capabilities and AI-powered recommendations.
 
-### Core Analysis Engine (geoAuditEnhanced.ts - 1800+ lines)
+### AI-Powered Recommendations (NEW)
+
+**GEO Marketolog AI Agent** - Elite AI strategist integrated into the audit process:
+
+**Technology Stack:**
+- OpenRouter API for LLM access
+- Current Model: MiniMax M2 (free tier) with multilingual support
+- Graceful fallback to default recommendations if API unavailable
+- 30-second timeout protection
+
+**Expertise Areas:**
+- AI/LLM architecture (ChatGPT, Claude, Gemini, Perplexity citation mechanics)
+- Semantic web technologies (Schema.org ontologies, knowledge graphs)
+- Information retrieval (TF-IDF, vector embeddings, RAG systems)
+- E-E-A-T signals and authority patterns
+- Citation probability optimization
+
+**Analytical Approach:**
+1. Root Cause Analysis - explains WHY issues matter for AI systems
+2. Competitive Context - compares to high-authority sources
+3. Systemic Thinking - identifies interconnected issues
+4. ROI Prioritization - focuses on multiplicative effects
+5. Technical Precision - uses exact terminology and specific Schema types
+
+**Recommendation Quality:**
+- Professional, specific titles ("Implement Organization Schema with knowledge graph structure")
+- Deep analysis with mechanism explanations
+- Quantified impact with research-backed metrics ("3x entity recognition accuracy")
+- Precise technical steps with validation methods
+- Strategic insights connecting multiple observations
+
+**Output Format:**
+- 3-7 expert-level recommendations per audit
+- Priority levels: critical, high, medium, low
+- Effort estimation: quick-win, strategic, long-term
+- Business-level strategic insights
+- Competitive positioning analysis
+
+### Core Analysis Engine (geoAuditEnhanced.ts - 2000+ lines)
 
 Analyzes 10 key categories with weighted scoring:
 - Schema Markup (16%): Detects 16+ schema types including Organization, Person, Article, Product, Review, HowTo, FAQ, LocalBusiness
@@ -516,10 +564,11 @@ Proprietary - Copyright 2025 Anóteros Lógos. All rights reserved.
 For technical support or customization requests, contact the development team.
 
 Total Project Scale:
-- 6800+ lines of production code
-- 10 major utility modules
+- 7500+ lines of production code
+- 12 major utility modules (including AI Agent)
 - 25+ React components
 - 8 route pages
 - Full TypeScript strict mode
+- AI-powered recommendation engine
 
-Built for the AI-first era
+Built for the AI-first era with cutting-edge LLM integration
