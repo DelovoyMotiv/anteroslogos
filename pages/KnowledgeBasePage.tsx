@@ -115,7 +115,7 @@ const KnowledgeBasePage: React.FC = () => {
                 </div>
             </header>
 
-            <main className="relative z-10 pt-28 sm:pt-32 md:pt-36 lg:pt-40">
+            <main className="relative z-10" style={{ paddingTop: 'calc(var(--header-height) + 3rem)' }}>
                 <div className="max-w-7xl mx-auto px-6 py-8 md:py-12">
                     <div className="text-center mb-16">
                         <div className="inline-block mb-4">

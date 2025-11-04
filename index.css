@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --header-height: 64px; /* 16 * 4 = 64px (h-16 mobile) */
+}
+
+@media (min-width: 640px) {
+  :root {
+    --header-height: 80px; /* 20 * 4 = 80px (sm:h-20) */
+  }
+}
+
 * {
   margin: 0;
   padding: 0;

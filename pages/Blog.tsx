@@ -27,7 +27,7 @@ export default function Blog() {
         onContactClick={() => navigate('/')}
       />
       {/* Main Content */}
-      <div className="pt-36 sm:pt-40 md:pt-44 lg:pt-48 pb-16">
+      <div className="pb-16" style={{ paddingTop: 'calc(var(--header-height) + 4rem)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Page Header */}
           <div className="mb-12 sm:mb-14">

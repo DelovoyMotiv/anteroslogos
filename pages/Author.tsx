@@ -126,7 +126,7 @@ export default function Author() {
         onClientsClick={() => navigate('/')} 
         onContactClick={() => navigate('/')}
       />
-      <div className="pt-28 sm:pt-32 md:pt-36 lg:pt-40 pb-16">
+      <div className="pb-16" style={{ paddingTop: 'calc(var(--header-height) + 3rem)' }}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Author Header */}
           <div className="bg-brand-secondary/30 rounded-2xl p-8 mb-12 border border-brand-accent/10">

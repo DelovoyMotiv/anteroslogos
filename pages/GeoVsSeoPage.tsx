@@ -19,7 +19,7 @@ const GeoVsSeoPage: React.FC = () => {
             
             <main className="relative z-10">
                 {/* Hero Section */}
-                <section className="pt-28 sm:pt-32 md:pt-36 lg:pt-40 pb-16 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto">
+                <section className="pb-16 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto" style={{ paddingTop: 'calc(var(--header-height) + 3rem)' }}>
                     <AnimatedSection>
                         <nav className="text-sm text-white/60 mb-6" aria-label="Breadcrumb">
                             <Link to="/" className="hover:text-brand-accent transition-colors">Home</Link>

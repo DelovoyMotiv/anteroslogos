@@ -365,7 +365,7 @@ const GeoAuditPage = () => {
         onContactClick={() => navigate('/')}
       />
       {/* Hero Section */}
-      <section className="relative pt-28 pb-20 md:pt-36 md:pb-32 overflow-hidden">
+      <section className="relative pb-20 md:pb-32 overflow-hidden" style={{ paddingTop: 'calc(var(--header-height) + 3rem)' }}>
         <div className="absolute inset-0 bg-gradient-to-br from-brand-accent/10 via-transparent to-transparent"></div>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(59,130,246,0.1),transparent)]"></div>
         
