@@ -80,6 +80,16 @@ export interface ContentQualityDetails {
   externalLinks: number;
   linkRatio: number;
   contentDepth: 'shallow' | 'moderate' | 'deep';
+  // AI Readability metrics
+  aiReadabilityScore: number;
+  passiveVoicePercentage: number;
+  jargonDensity: number;
+  sentenceComplexity: 'simple' | 'moderate' | 'complex';
+  informationDensity: number;
+  hasHeadings: boolean;
+  hasClearStructure: boolean;
+  technicalTermCount: number;
+  transitionWords: number;
   issues: string[];
   strengths: string[];
 }
@@ -513,6 +523,29 @@ function auditContentQuality(doc: Document, _html: string): ContentQualityDetail
   if (wordCount > 2000 && paragraphCount > 15) contentDepth = 'deep';
   else if (wordCount > 800 && paragraphCount > 8) contentDepth = 'moderate';
 
+  // AI Readability Analysis
+  const passiveVoicePercentage = calculatePassiveVoice(sentences);
+  const jargonDensity = calculateJargonDensity(words, bodyText);
+  const sentenceComplexity = classifySentenceComplexity(averageSentenceLength);
+  const informationDensity = calculateInformationDensity(bodyText, wordCount);
+  const transitionWords = countTransitionWords(bodyText);
+  const technicalTermCount = countTechnicalTerms(bodyText);
+  
+  const hasHeadings = doc.querySelectorAll('h1, h2, h3, h4, h5, h6').length > 0;
+  const hasClearStructure = hasHeadings && hasLists && paragraphCount > 3;
+  
+  // Calculate AI Readability Score (0-100)
+  const aiReadabilityScore = calculateAIReadabilityScore({
+    readabilityScore,
+    passiveVoicePercentage,
+    jargonDensity,
+    sentenceComplexity,
+    informationDensity,
+    hasClearStructure,
+    transitionWords,
+    wordCount,
+  });
+
   const issues: string[] = [];
   const strengths: string[] = [];
 
@@ -539,6 +572,37 @@ function auditContentQuality(doc: Document, _html: string): ContentQualityDetail
   else if (linkRatio > 5) issues.push('Too many links - may dilute authority');
   else strengths.push('Good link distribution');
 
+  // AI Readability feedback
+  if (aiReadabilityScore >= 80) {
+    strengths.push('Excellent AI readability - clear, well-structured content');
+  } else if (aiReadabilityScore < 50) {
+    issues.push('Poor AI readability - simplify structure and reduce complexity');
+  }
+
+  if (passiveVoicePercentage > 30) {
+    issues.push(`High passive voice usage (${passiveVoicePercentage}%) - use active voice for clarity`);
+  } else if (passiveVoicePercentage < 10) {
+    strengths.push('Excellent active voice usage');
+  }
+
+  if (jargonDensity > 15) {
+    issues.push('High jargon density - may confuse AI and readers');
+  }
+
+  if (sentenceComplexity === 'complex') {
+    issues.push('Sentences too complex - break into shorter, clearer statements');
+  } else if (sentenceComplexity === 'simple') {
+    strengths.push('Clear, concise sentence structure');
+  }
+
+  if (!hasClearStructure) {
+    issues.push('Lacks clear structure - add headings and organize content');
+  }
+
+  if (transitionWords < 5 && wordCount > 500) {
+    issues.push('Few transition words - improve logical flow between ideas');
+  }
+
   return {
     wordCount,
     readabilityScore,
@@ -553,6 +617,15 @@ function auditContentQuality(doc: Document, _html: string): ContentQualityDetail
     externalLinks,
     linkRatio,
     contentDepth,
+    aiReadabilityScore,
+    passiveVoicePercentage,
+    jargonDensity,
+    sentenceComplexity,
+    informationDensity,
+    hasHeadings,
+    hasClearStructure,
+    technicalTermCount,
+    transitionWords,
     issues,
     strengths,
   };
@@ -579,6 +652,135 @@ function countSyllables(text: string): number {
     }
   });
   return count;
+}
+
+function calculatePassiveVoice(sentences: string[]): number {
+  if (sentences.length === 0) return 0;
+  
+  // Detect passive voice patterns: "be" verb + past participle
+  const passivePatterns = [
+    /\b(is|are|was|were|be|been|being)\s+\w+ed\b/gi,
+    /\b(is|are|was|were|be|been|being)\s+\w+en\b/gi,
+  ];
+  
+  let passiveCount = 0;
+  sentences.forEach(sentence => {
+    if (passivePatterns.some(pattern => pattern.test(sentence))) {
+      passiveCount++;
+    }
+  });
+  
+  return Math.round((passiveCount / sentences.length) * 100);
+}
+
+function calculateJargonDensity(words: string[], text: string): number {
+  if (words.length === 0) return 0;
+  
+  // Common jargon indicators
+  const jargonPatterns = [
+    /\w{15,}/g, // Very long words
+    /\b[A-Z]{3,}\b/g, // Acronyms
+    /\w+ization\b/gi, // -ization words
+    /\w+ology\b/gi, // -ology words
+  ];
+  
+  let jargonCount = 0;
+  jargonPatterns.forEach(pattern => {
+    const matches = text.match(pattern);
+    if (matches) jargonCount += matches.length;
+  });
+  
+  return Math.round((jargonCount / words.length) * 100);
+}
+
+function classifySentenceComplexity(avgLength: number): 'simple' | 'moderate' | 'complex' {
+  if (avgLength <= 15) return 'simple';
+  if (avgLength <= 25) return 'moderate';
+  return 'complex';
+}
+
+function calculateInformationDensity(text: string, wordCount: number): number {
+  if (wordCount === 0) return 0;
+  
+  // Count information-carrying elements
+  const numbers = (text.match(/\d+/g) || []).length;
+  const properNouns = (text.match(/\b[A-Z][a-z]+/g) || []).length;
+  const technicalTerms = (text.match(/\w{10,}/g) || []).length;
+  
+  const infoElements = numbers + properNouns + technicalTerms;
+  return Math.round((infoElements / wordCount) * 100);
+}
+
+function countTransitionWords(text: string): number {
+  const transitions = [
+    'however', 'therefore', 'moreover', 'furthermore', 'additionally',
+    'consequently', 'meanwhile', 'subsequently', 'nevertheless', 'nonetheless',
+    'thus', 'hence', 'accordingly', 'similarly', 'likewise',
+    'in contrast', 'on the other hand', 'for example', 'for instance',
+    'in addition', 'as a result', 'in conclusion', 'in summary',
+  ];
+  
+  const lowerText = text.toLowerCase();
+  let count = 0;
+  transitions.forEach(word => {
+    const regex = new RegExp(`\\b${word}\\b`, 'gi');
+    const matches = lowerText.match(regex);
+    if (matches) count += matches.length;
+  });
+  
+  return count;
+}
+
+function countTechnicalTerms(text: string): number {
+  // Count words longer than 12 characters (likely technical)
+  const matches = text.match(/\b\w{12,}\b/g);
+  return matches ? matches.length : 0;
+}
+
+function calculateAIReadabilityScore(params: {
+  readabilityScore: number;
+  passiveVoicePercentage: number;
+  jargonDensity: number;
+  sentenceComplexity: 'simple' | 'moderate' | 'complex';
+  informationDensity: number;
+  hasClearStructure: boolean;
+  transitionWords: number;
+  wordCount: number;
+}): number {
+  let score = 0;
+  
+  // Base readability (0-30 points)
+  score += Math.min(30, params.readabilityScore * 0.3);
+  
+  // Active voice bonus (0-20 points)
+  if (params.passiveVoicePercentage < 10) score += 20;
+  else if (params.passiveVoicePercentage < 20) score += 15;
+  else if (params.passiveVoicePercentage < 30) score += 10;
+  else score += 5;
+  
+  // Low jargon bonus (0-15 points)
+  if (params.jargonDensity < 5) score += 15;
+  else if (params.jargonDensity < 10) score += 10;
+  else if (params.jargonDensity < 15) score += 5;
+  
+  // Sentence simplicity (0-15 points)
+  if (params.sentenceComplexity === 'simple') score += 15;
+  else if (params.sentenceComplexity === 'moderate') score += 10;
+  else score += 5;
+  
+  // Information density balance (0-10 points)
+  if (params.informationDensity >= 5 && params.informationDensity <= 15) score += 10;
+  else if (params.informationDensity > 0) score += 5;
+  
+  // Clear structure (0-10 points)
+  if (params.hasClearStructure) score += 10;
+  
+  // Transition words (0-10 points)
+  const transitionRatio = params.wordCount > 0 ? (params.transitionWords / params.wordCount) * 100 : 0;
+  if (transitionRatio >= 1 && transitionRatio <= 3) score += 10;
+  else if (transitionRatio > 0) score += 5;
+  
+  return Math.min(100, Math.round(score));
 }
 
 function auditCitationPotential(doc: Document, html: string): CitationPotentialDetails {
