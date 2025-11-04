@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auditWebsite, type AuditResult } from '../utils/geoAuditEnhanced';
-import { Search, AlertCircle, CheckCircle, TrendingUp, Download, Share2, ExternalLink, ArrowLeft, Award, Target, Zap, TrendingDown, Minus, History, Shield, FileText } from 'lucide-react';
+import { Search, AlertCircle, CheckCircle, TrendingUp, Download, Share2, ExternalLink, Award, Target, Zap, TrendingDown, Minus, History, Shield, FileText } from 'lucide-react';
 import { saveAuditToHistory, compareWithPrevious, checkScoreDrop } from '../utils/auditHistory';
 import { validateAndSanitizeUrl, checkRateLimit, validateAuditResult } from '../utils/urlValidator';
 import { generatePDFReport } from '../utils/pdfReportGenerator';
@@ -370,15 +370,6 @@ const GeoAuditPage = () => {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(59,130,246,0.1),transparent)]"></div>
         
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          {/* Back to Home */}
-          <button
-            onClick={() => navigate('/')}
-            className="inline-flex items-center gap-2 text-brand-accent hover:text-blue-400 transition-colors mb-8"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="text-sm font-medium">Back to Home</span>
-          </button>
-          
           <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 bg-brand-accent/10 border border-brand-accent/20 rounded-full">
             <TrendingUp className="w-4 h-4 text-brand-accent" />
             <span className="font-mono text-xs tracking-wider uppercase text-brand-accent">Free GEO Analysis Tool</span>
