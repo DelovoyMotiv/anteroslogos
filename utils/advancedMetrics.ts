@@ -180,7 +180,7 @@ export interface InternationalSEODetails {
 
 export async function auditCoreWebVitals(
   doc: Document,
-  url: string,
+  _url: string,
   htmlContent: string
 ): Promise<CoreWebVitalsDetails> {
   const issues: string[] = [];
@@ -218,7 +218,7 @@ export async function auditCoreWebVitals(
   // Simulate Core Web Vitals (in production, would use Lighthouse API or real measurements)
   let lcp = totalPageSize > 500000 ? 3500 : totalPageSize > 200000 ? 2200 : 1800;
   let fid = scripts.length > 20 ? 150 : scripts.length > 10 ? 80 : 50;
-  let cls = images.some(img => !img.hasAttribute('width') || !img.hasAttribute('height')) ? 0.15 : 0.05;
+  let cls = Array.from(images).some(img => !img.hasAttribute('width') || !img.hasAttribute('height')) ? 0.15 : 0.05;
   let fcp = totalPageSize > 300000 ? 2000 : 1500;
   let ttfb = 300;
   let tti = lcp + 500;

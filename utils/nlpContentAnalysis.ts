@@ -291,11 +291,10 @@ function extractEntities(text: string): {
   concepts: string[];
 } {
   // Simple entity extraction using capitalization and context
-  const sentences = text.split(/[.!?]+/);
   const capitalizedWords = text.match(/\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b/g) || [];
   
   // Filter out sentence-starting words
-  const entities = capitalizedWords.filter((word, idx) => {
+  const entities = capitalizedWords.filter((word) => {
     // Skip if it's the first word of a sentence
     const precedingText = text.substring(0, text.indexOf(word));
     return !precedingText.endsWith('. ') && !precedingText.endsWith('? ') && !precedingText.endsWith('! ');
@@ -313,7 +312,7 @@ function extractEntities(text: string): {
   };
 }
 
-function classifyContentType(text: string, keywords: string[]): {
+function classifyContentType(text: string, _keywords: string[]): {
   type: 'informational' | 'commercial' | 'navigational' | 'transactional' | 'mixed';
   intent: string[];
 } {
