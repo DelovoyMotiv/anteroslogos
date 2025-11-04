@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auditWebsite, type AuditResult } from '../utils/geoAuditEnhanced';
-import { Search, AlertCircle, CheckCircle, TrendingUp, Download, Share2, ExternalLink, ArrowLeft, Award, Target, Zap, TrendingDown, Minus, History, Shield, FileText } from 'lucide-react';
-import { saveAuditToHistory, compareWithPrevious, checkScoreDrop } from '../utils/auditHistory';
+import { Search, AlertCircle, CheckCircle, TrendingUp, Download, Share2, ExternalLink, ArrowLeft, Award, Target, Zap, TrendingDown, Minus, History, Shield, FileText, Sparkles, Activity, Code, BarChart3 } from 'lucide-react';
+import { saveAuditToHistory, compareWithPrevious, checkScoreDrop, getUrlHistory } from '../utils/auditHistory';
 import { validateAndSanitizeUrl, checkRateLimit, validateAuditResult } from '../utils/urlValidator';
 import { generatePDFReport } from '../utils/pdfReportGenerator';
 import { exportToCSV, exportToMarkdown, exportToHTML } from '../utils/exportFormats';
@@ -18,6 +18,11 @@ import PriorityMatrix from '../components/charts/PriorityMatrix';
 import CategoryBarChart from '../components/charts/CategoryBarChart';
 import ExecutiveSummary from '../components/ExecutiveSummary';
 import SEOHead from '../components/SEOHead';
+import CitationDashboard from '../components/CitationDashboard';
+import PredictiveDashboard from '../components/PredictiveDashboard';
+import SchemaGeneratorPanel from '../components/SchemaGeneratorPanel';
+import RealtimeMonitorPanel from '../components/RealtimeMonitorPanel';
+import type { ScoreHistory } from '../utils/ai/predictiveScore';
 
 const GeoAuditPage = () => {
   const navigate = useNavigate();
@@ -31,6 +36,7 @@ const GeoAuditPage = () => {
   const [trend, setTrend] = useState<TrendAnalysis | null>(null);
   const [insights, setInsights] = useState<PerformanceInsights | null>(null);
   const [competitive, setCompetitive] = useState<CompetitiveComparison | null>(null);
+  const [activeAAAtab, setActiveAAAtab] = useState<'citations' | 'predictive' | 'schema' | 'monitor'>('citations');
 
   const handleAnalyze = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1043,6 +1049,105 @@ const GeoAuditPage = () => {
                 </div>
               </div>
             )}
+
+            {/* AAA-Level Features Section */}
+            <div className="mt-16 mb-12">
+              <div className="text-center mb-8">
+                <h2 className="text-3xl font-bold mb-3">
+                  <span className="bg-gradient-to-r from-fuchsia-400 via-purple-400 to-cyan-400 bg-clip-text text-transparent">
+                    Revolutionary AAA-Level Features
+                  </span>
+                </h2>
+                <p className="text-white/60 max-w-3xl mx-auto">
+                  Industry-first capabilities powered by AI and ML. Track citations across 5 AI systems, predict future scores,
+                  generate optimized schemas, and monitor your GEO health in real-time.
+                </p>
+              </div>
+
+              {/* AAA Tabs */}
+              <div className="flex gap-3 mb-8 overflow-x-auto pb-2">
+                <button
+                  onClick={() => setActiveAAAtab('citations')}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${
+                    activeAAAtab === 'citations'
+                      ? 'bg-gradient-to-r from-fuchsia-500/20 to-purple-500/20 border-2 border-fuchsia-500/50 text-fuchsia-300'
+                      : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white/90'
+                  }`}
+                >
+                  <Sparkles className="w-5 h-5" />
+                  AI Citation Tracker™
+                </button>
+                <button
+                  onClick={() => setActiveAAAtab('predictive')}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${
+                    activeAAAtab === 'predictive'
+                      ? 'bg-gradient-to-r from-purple-500/20 to-blue-500/20 border-2 border-purple-500/50 text-purple-300'
+                      : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white/90'
+                  }`}
+                >
+                  <BarChart3 className="w-5 h-5" />
+                  Predictive GEO Score™
+                </button>
+                <button
+                  onClick={() => setActiveAAAtab('schema')}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${
+                    activeAAAtab === 'schema'
+                      ? 'bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border-2 border-blue-500/50 text-blue-300'
+                      : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white/90'
+                  }`}
+                >
+                  <Code className="w-5 h-5" />
+                  AI Schema Generator
+                </button>
+                <button
+                  onClick={() => setActiveAAAtab('monitor')}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap ${
+                    activeAAAtab === 'monitor'
+                      ? 'bg-gradient-to-r from-cyan-500/20 to-green-500/20 border-2 border-cyan-500/50 text-cyan-300'
+                      : 'bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white/90'
+                  }`}
+                >
+                  <Activity className="w-5 h-5" />
+                  Real-time Monitor™
+                </button>
+              </div>
+
+              {/* AAA Tab Content */}
+              <div className="p-8 bg-white/5 border border-white/10 rounded-2xl">
+                {activeAAAtab === 'citations' && (
+                  <CitationDashboard 
+                    domain={new URL(result.url).hostname} 
+                    geoScore={result.overallScore} 
+                  />
+                )}
+                {activeAAAtab === 'predictive' && (
+                  <PredictiveDashboard 
+                    domain={new URL(result.url).hostname}
+                    currentScore={result.overallScore}
+                    history={getUrlHistory(result.url).map(h => ({
+                      timestamp: h.timestamp,
+                      overallScore: h.overallScore,
+                      categoryScores: {
+                        schemaMarkup: h.scores.schemaMarkup,
+                        aiCrawlers: h.scores.aiCrawlers,
+                        eeat: h.scores.eeat,
+                        contentQuality: h.scores.contentQuality,
+                        citationPotential: h.scores.citationPotential,
+                      },
+                    } as ScoreHistory))}
+                  />
+                )}
+                {activeAAAtab === 'schema' && (
+                  <SchemaGeneratorPanel 
+                    url={result.url}
+                    existingSchemas={[]}
+                  />
+                )}
+                {activeAAAtab === 'monitor' && (
+                  <RealtimeMonitorPanel domain={new URL(result.url).hostname} />
+                )}
+              </div>
+            </div>
 
             {/* CTA */}
             <div className="mt-12 p-6 bg-gradient-to-br from-brand-accent/10 to-transparent border border-brand-accent/30 rounded-xl text-center">
