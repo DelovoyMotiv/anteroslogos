@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/geo-audit", "destination": "/geo-audit.html" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
