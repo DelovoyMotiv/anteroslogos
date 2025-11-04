@@ -1869,15 +1869,15 @@ Allow: /`,
     });
   }
 
-  // Critical: Technical SEO
+  // Critical: Technical GEO
   if (!details.technicalSEO.isHTTPS) {
     recommendations.push({
-      category: 'Technical SEO',
+      category: 'Technical GEO',
       priority: 'critical',
       effort: 'strategic',
       title: 'Enable HTTPS',
       description: 'Your site is not using HTTPS. This is a critical security and SEO issue.',
-      impact: 'HTTPS is a ranking factor and required for modern web. Non-HTTPS sites are marked as "Not Secure".',
+      impact: 'HTTPS is a ranking factor for GEO and required for modern web. Non-HTTPS sites are marked as "Not Secure".',
       implementation: 'Obtain and install SSL certificate from your hosting provider or use Let\'s Encrypt (free).',
       estimatedTime: '1-2 hours',
     });
@@ -1885,7 +1885,7 @@ Allow: /`,
 
   if (!details.technicalSEO.hasViewport) {
     recommendations.push({
-      category: 'Technical SEO',
+      category: 'Technical GEO',
       priority: 'high',
       effort: 'quick-win',
       title: 'Add Viewport Meta Tag',
@@ -1899,7 +1899,7 @@ Allow: /`,
 
   if (!details.technicalSEO.hasLang) {
     recommendations.push({
-      category: 'Technical SEO',
+      category: 'Technical GEO',
       priority: 'medium',
       effort: 'quick-win',
       title: 'Add Language Declaration',
@@ -1913,7 +1913,7 @@ Allow: /`,
 
   if (!details.technicalSEO.hasCanonical) {
     recommendations.push({
-      category: 'Technical SEO',
+      category: 'Technical GEO',
       priority: 'high',
       effort: 'quick-win',
       title: 'Add Canonical URL',
@@ -1945,7 +1945,7 @@ Allow: /`,
       priority: 'medium',
       effort: 'quick-win',
       title: 'Fix Empty Anchor Text',
-      description: `${details.linkAnalysis.emptyAnchors} links have no descriptive text - bad for accessibility and SEO.`,
+      description: `${details.linkAnalysis.emptyAnchors} links have no descriptive text - bad for accessibility and GEO.`,
       impact: 'Descriptive anchor text helps AI understand link context and improves accessibility.',
       implementation: 'Add meaningful text to all links. Avoid "click here" and use descriptive phrases.',
       estimatedTime: '30 minutes',
@@ -1959,7 +1959,7 @@ Allow: /`,
       effort: 'strategic',
       title: 'Improve Anchor Text Quality',
       description: 'Many links use generic text like "click here" or "read more".',
-      impact: 'Descriptive anchor text improves SEO and helps AI understand content relationships.',
+      impact: 'Descriptive anchor text improves GEO and helps AI understand content relationships.',
       implementation: 'Replace generic anchor text with descriptive phrases that indicate link destination.',
       estimatedTime: '1-2 hours',
     });
@@ -1999,7 +1999,7 @@ function generateInsights(scores: any, details: any): string[] {
   }
 
   if (scores.technicalSEO < 60) {
-    insights.push('Technical SEO issues detected. Address critical items like HTTPS, viewport, and canonical URLs first.');
+    insights.push('Technical GEO issues detected. Address critical items like HTTPS, viewport, and canonical URLs first.');
   }
 
   if (scores.schemaMarkup < 50) {
@@ -2027,11 +2027,11 @@ function generateInsights(scores: any, details: any): string[] {
   }
 
   if (details.technicalSEO.isHTTPS && details.technicalSEO.hasViewport && details.technicalSEO.hasCanonical) {
-    insights.push('Strong technical foundation. Core SEO elements properly implemented.');
+    insights.push('Strong technical foundation. Core GEO elements properly implemented.');
   }
 
   if (scores.linkAnalysis < 50) {
-    insights.push('Weak link structure detected. Improve internal linking and anchor text quality for better SEO.');
+    insights.push('Weak link structure detected. Improve internal linking and anchor text quality for better GEO.');
   }
 
   if (details.linkAnalysis && details.linkAnalysis.linkDistribution === 'excellent') {

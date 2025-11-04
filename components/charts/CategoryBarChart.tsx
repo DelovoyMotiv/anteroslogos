@@ -19,7 +19,7 @@ const CategoryBarChart = ({ scores }: CategoryBarChartProps) => {
     { name: 'Schema Markup', score: scores.schemaMarkup, weight: '16%' },
     { name: 'AI Crawlers', score: scores.aiCrawlers, weight: '15%' },
     { name: 'E-E-A-T', score: scores.eeat, weight: '15%' },
-    { name: 'Technical SEO', score: scores.technicalSEO, weight: '13%' },
+    { name: 'Technical GEO', score: scores.technicalSEO, weight: '13%' },
     { name: 'Link Analysis', score: scores.linkAnalysis, weight: '12%' },
     { name: 'Meta Tags', score: scores.metaTags, weight: '9%' },
     { name: 'Content Quality', score: scores.contentQuality, weight: '9%' },

@@ -18,7 +18,7 @@ const ANALYSIS_STEPS: AnalysisStep[] = [
   { id: 'structure', label: 'HTML Structure', icon: Layout, color: 'text-pink-400', duration: 900 },
   { id: 'performance', label: 'Performance', icon: Zap, color: 'text-yellow-400', duration: 1100 },
   { id: 'content', label: 'Content Quality', icon: FileText, color: 'text-teal-400', duration: 1400 },
-  { id: 'technical', label: 'Technical SEO', icon: Target, color: 'text-orange-400', duration: 1000 },
+  { id: 'technical', label: 'Technical GEO', icon: Target, color: 'text-orange-400', duration: 1000 },
 ];
 
 interface AnalysisProgressProps {
@@ -122,12 +122,12 @@ const AnalysisProgress = ({ isAnalyzing, url }: AnalysisProgressProps) => {
             return (
               <div
                 key={step.id}
-                className={`relative p-4 rounded-xl border transition-all duration-300 ${
+                className={`relative p-4 rounded-xl border transition-all duration-500 ${
                   isCompleted 
-                    ? 'bg-white/10 border-green-500/50 shadow-lg shadow-green-500/20' 
+                    ? 'bg-white/10 border-green-500/50 shadow-lg shadow-green-500/20 scale-100' 
                     : isCurrent
-                    ? 'bg-brand-accent/10 border-brand-accent animate-pulse'
-                    : 'bg-white/5 border-brand-secondary/30'
+                    ? 'bg-brand-accent/10 border-brand-accent shadow-lg shadow-brand-accent/30 scale-105'
+                    : 'bg-white/5 border-brand-secondary/30 scale-95 opacity-60'
                 }`}
               >
                 {/* Step Icon */}
@@ -139,7 +139,7 @@ const AnalysisProgress = ({ isAnalyzing, url }: AnalysisProgressProps) => {
                       ? step.color 
                       : 'text-white/30'
                   }`}>
-                    <Icon className={`w-5 h-5 ${isCurrent ? 'animate-bounce' : ''}`} />
+                    <Icon className={`w-5 h-5 transition-transform duration-300 ${isCurrent ? 'scale-110' : ''}`} />
                   </div>
                   <span className={`text-xs font-medium ${
                     isUpcoming ? 'text-white/40' : 'text-white/90'
@@ -169,9 +169,9 @@ const AnalysisProgress = ({ isAnalyzing, url }: AnalysisProgressProps) => {
                   </div>
                 )}
 
-                {/* Pulse animation for current step */}
+                {/* Pulse animation for current step - optimized */}
                 {isCurrent && (
-                  <div className="absolute inset-0 rounded-xl border-2 border-brand-accent/50 animate-ping" />
+                  <div className="absolute inset-0 rounded-xl border-2 border-brand-accent/50 animate-ping opacity-75" style={{ animationDuration: '1.5s' }} />
                 )}
               </div>
             );
@@ -203,13 +203,13 @@ function getTipForStep(stepIndex: number): string {
   const tips = [
     'We\'re fetching your website HTML and resources...',
     'Checking for Schema.org structured data in JSON-LD format',
-    'Analyzing meta tags for SEO and social sharing',
+    'Analyzing meta tags for GEO and social sharing optimization',
     'Verifying robots.txt allows AI crawlers like GPTBot and Claude',
     'Evaluating expertise, authority, and trust signals',
     'Examining semantic HTML5 structure and heading hierarchy',
     'Measuring page weight, scripts, and optimization',
     'Assessing content depth, readability, and citation potential',
-    'Validating technical SEO elements like HTTPS and canonical URLs',
+    'Validating technical GEO elements like HTTPS and canonical URLs',
   ];
   return tips[stepIndex] || 'Running comprehensive analysis...';
 }
