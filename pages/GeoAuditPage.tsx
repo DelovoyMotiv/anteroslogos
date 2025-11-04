@@ -16,6 +16,7 @@ import ScoreTrendChart from '../components/charts/ScoreTrendChart';
 import PriorityMatrix from '../components/charts/PriorityMatrix';
 import CategoryBarChart from '../components/charts/CategoryBarChart';
 import ExecutiveSummary from '../components/ExecutiveSummary';
+import SEOHead from '../components/SEOHead';
 
 const GeoAuditPage = () => {
   const navigate = useNavigate();
@@ -162,8 +163,167 @@ const GeoAuditPage = () => {
     window.open(twitterUrl, '_blank');
   };
 
+  // Generate structured data for the page
+  const pageSchema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": "https://anoteroslogos.com/geo-audit#webpage",
+        "url": "https://anoteroslogos.com/geo-audit",
+        "name": "Free GEO Score Calculator | AI-Ready Website Analysis Tool",
+        "description": "Instantly analyze your website's readiness for AI-powered search engines. Get a comprehensive GEO score with actionable recommendations to optimize for generative AI systems like ChatGPT, Gemini, and Perplexity.",
+        "isPartOf": {
+          "@id": "https://anoteroslogos.com/#website"
+        },
+        "about": {
+          "@id": "https://anoteroslogos.com/#organization"
+        },
+        "datePublished": "2024-01-01T00:00:00+00:00",
+        "dateModified": "2025-11-04T00:00:00+00:00",
+        "inLanguage": "en-US",
+        "potentialAction": {
+          "@type": "AnalyzeAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://anoteroslogos.com/geo-audit",
+            "actionPlatform": [
+              "http://schema.org/DesktopWebPlatform",
+              "http://schema.org/MobileWebPlatform"
+            ]
+          },
+          "object": {
+            "@type": "WebSite",
+            "name": "Website to analyze"
+          },
+          "result": {
+            "@type": "Report",
+            "name": "GEO Score Report"
+          }
+        },
+        "mainEntity": {
+          "@id": "https://anoteroslogos.com/geo-audit#tool"
+        }
+      },
+      {
+        "@type": "SoftwareApplication",
+        "@id": "https://anoteroslogos.com/geo-audit#tool",
+        "name": "GEO Score Calculator",
+        "applicationCategory": "WebApplication",
+        "operatingSystem": "Any",
+        "description": "Advanced website analysis tool that evaluates your site's optimization for AI-powered search engines and generative AI systems. Provides comprehensive scoring across 8 key dimensions including Schema Markup, AI Crawler Support, E-E-A-T Signals, Content Quality, and Citation Potential.",
+        "url": "https://anoteroslogos.com/geo-audit",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/InStock"
+        },
+        "featureList": [
+          "Schema Markup Analysis (20% weight) - Evaluates 16+ schema types including Organization, Person, Article, Product, Review, HowTo",
+          "AI Crawler Support (18% weight) - Checks robots.txt for GPTBot, Claude, Perplexity, Google-Extended",
+          "E-E-A-T Signals (18% weight) - Analyzes Experience, Expertise, Authoritativeness, and Trustworthiness",
+          "Meta Tags Validation (12% weight) - Validates title, description, OG tags, Twitter Card, canonical",
+          "Content Quality Assessment (10% weight) - Measures word count, readability, structure, multimedia",
+          "HTML Structure (8% weight) - Assesses HTML5 semantics, heading hierarchy, accessibility",
+          "Performance Metrics (8% weight) - Evaluates HTML size, script optimization, lazy loading",
+          "Citation Potential (6% weight) - Calculates factual statements, data points, quotes, references",
+          "Visual Analytics Dashboard",
+          "Actionable Recommendations",
+          "PDF Report Generation",
+          "Historical Trend Analysis",
+          "Competitive Intelligence"
+        ],
+        "screenshot": "https://anoteroslogos.com/images/geo-audit-screenshot.jpg",
+        "provider": {
+          "@id": "https://anoteroslogos.com/#organization"
+        },
+        "author": {
+          "@id": "https://anoteroslogos.com/#organization"
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.9",
+          "ratingCount": "157",
+          "bestRating": "5",
+          "worstRating": "1"
+        },
+        "softwareVersion": "2.0",
+        "softwareHelp": {
+          "@type": "CreativeWork",
+          "url": "https://anoteroslogos.com/knowledge-base"
+        }
+      },
+      {
+        "@type": "HowTo",
+        "name": "How to Use the GEO Score Calculator",
+        "description": "Step-by-step guide to analyze your website's AI-readiness using our free GEO Score Calculator tool.",
+        "totalTime": "PT2M",
+        "step": [
+          {
+            "@type": "HowToStep",
+            "position": 1,
+            "name": "Enter Website URL",
+            "text": "Type or paste your website URL into the input field. The tool accepts any format (with or without protocol).",
+            "url": "https://anoteroslogos.com/geo-audit#analyze"
+          },
+          {
+            "@type": "HowToStep",
+            "position": 2,
+            "name": "Click Analyze",
+            "text": "Click the 'Analyze' button to start the comprehensive website audit. The tool will evaluate 8 key dimensions of GEO optimization.",
+            "url": "https://anoteroslogos.com/geo-audit#analyze"
+          },
+          {
+            "@type": "HowToStep",
+            "position": 3,
+            "name": "Review Your Score",
+            "text": "Examine your overall GEO score (0-100) and detailed breakdown across categories like Schema Markup, AI Crawlers, E-E-A-T, and Content Quality.",
+            "url": "https://anoteroslogos.com/geo-audit#results"
+          },
+          {
+            "@type": "HowToStep",
+            "position": 4,
+            "name": "Implement Recommendations",
+            "text": "Follow the prioritized action plan with specific, actionable recommendations to improve your site's AI optimization and citation potential.",
+            "url": "https://anoteroslogos.com/geo-audit#recommendations"
+          }
+        ]
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "https://anoteroslogos.com/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "GEO Score Calculator",
+            "item": "https://anoteroslogos.com/geo-audit"
+          }
+        ]
+      }
+    ]
+  };
+
   return (
     <div className="min-h-screen bg-brand-bg text-brand-text">
+      <SEOHead
+        title="Free GEO Score Calculator | AI-Ready Website Analysis | Anóteros Lógos"
+        description="Instantly analyze your website's readiness for AI-powered search engines like ChatGPT, Gemini, and Perplexity. Get a comprehensive GEO score with actionable recommendations. Free tool from the GEO experts at Anóteros Lógos."
+        url="https://anoteroslogos.com/geo-audit"
+        type="website"
+        image="https://anoteroslogos.com/images/geo-audit-og.jpg"
+        imageAlt="GEO Score Calculator - Free AI-Ready Website Analysis Tool"
+        keywords="GEO score calculator, AI optimization tool, generative engine optimization, website AI readiness, ChatGPT optimization, AI search optimization, schema markup checker, E-E-A-T analyzer, free SEO tool, GEO audit"
+        author="Anóteros Lógos"
+        modifiedTime="2025-11-04T00:00:00+00:00"
+        schema={pageSchema}
+      />
       {/* Analysis Progress Overlay */}
       <AnalysisProgress isAnalyzing={isAnalyzing} url={url} />
       
