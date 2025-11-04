@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auditWebsite, type AuditResult } from '../utils/geoAuditEnhanced';
-import { Search, AlertCircle, CheckCircle, TrendingUp, Download, Share2, ExternalLink, ArrowLeft, Award, Target, Zap, TrendingDown, Minus, History } from 'lucide-react';
+import { Search, AlertCircle, CheckCircle, TrendingUp, Download, Share2, ExternalLink, ArrowLeft, Award, Target, Zap, TrendingDown, Minus, History, Shield } from 'lucide-react';
 import { saveAuditToHistory, compareWithPrevious, checkScoreDrop } from '../utils/auditHistory';
+import { validateAndSanitizeUrl, checkRateLimit, validateAuditResult } from '../utils/urlValidator';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import AnalysisProgress from '../components/AnalysisProgress';
@@ -27,15 +28,36 @@ const GeoAuditPage = () => {
     setComparison(null);
     setScoreDrop(null);
 
-    if (!url.trim()) {
-      setError('Please enter a URL');
+    // 1. Rate limiting check
+    const rateLimitCheck = checkRateLimit();
+    if (!rateLimitCheck.allowed) {
+      setError(rateLimitCheck.error || 'Rate limit exceeded');
       return;
+    }
+
+    // 2. Input validation and sanitization
+    const validation = validateAndSanitizeUrl(url);
+    if (!validation.isValid) {
+      setError(validation.error || 'Invalid URL');
+      return;
+    }
+
+    const sanitizedUrl = validation.sanitizedUrl!;
+
+    // Show warnings if any
+    if (validation.warnings && validation.warnings.length > 0) {
+      console.log('URL validation warnings:', validation.warnings);
     }
 
     setIsAnalyzing(true);
     
     try {
-      const auditResult = await auditWebsite(url);
+      const auditResult = await auditWebsite(sanitizedUrl);
+      
+      // 3. Validate audit result
+      if (!validateAuditResult(auditResult)) {
+        throw new Error('Invalid audit result received');
+      }
       
       // Save to history
       saveAuditToHistory(auditResult);
@@ -139,6 +161,13 @@ const GeoAuditPage = () => {
                 placeholder="Enter your website URL (e.g., example.com)"
                 className="w-full px-6 py-5 pr-40 bg-white/5 border-2 border-brand-secondary focus:border-brand-accent rounded-xl text-lg focus:outline-none transition-colors"
                 disabled={isAnalyzing}
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck="false"
+                maxLength={2048}
+                pattern="[^<>{}[\]|;`]*"
+                title="Enter a valid website URL"
               />
               <button
                 type="submit"
@@ -168,6 +197,13 @@ const GeoAuditPage = () => {
                 placeholder="Enter URL (e.g., example.com)"
                 className="w-full px-6 py-4 bg-white/5 border-2 border-brand-secondary focus:border-brand-accent rounded-xl text-base focus:outline-none transition-colors"
                 disabled={isAnalyzing}
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+                spellCheck="false"
+                maxLength={2048}
+                pattern="[^<>{}[\]|;`]*"
+                title="Enter a valid website URL"
               />
               <button
                 type="submit"
@@ -195,6 +231,12 @@ const GeoAuditPage = () => {
               <span>{error}</span>
             </div>
           )}
+
+          {/* Security Badge */}
+          <div className="mt-8 flex items-center justify-center gap-2 text-xs text-white/40">
+            <Shield className="w-3 h-3" />
+            <span>Input validated • Rate limited • XSS protected</span>
+          </div>
 
           {/* Features Grid - Only show if no results */}
           {!result && (
