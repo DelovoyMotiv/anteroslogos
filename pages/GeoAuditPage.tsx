@@ -6,6 +6,10 @@ import { saveAuditToHistory, compareWithPrevious, checkScoreDrop } from '../util
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import AnalysisProgress from '../components/AnalysisProgress';
+import ScoreRadarChart from '../components/charts/ScoreRadarChart';
+import ScoreTrendChart from '../components/charts/ScoreTrendChart';
+import PriorityMatrix from '../components/charts/PriorityMatrix';
+import CategoryBarChart from '../components/charts/CategoryBarChart';
 
 const GeoAuditPage = () => {
   const navigate = useNavigate();
@@ -320,6 +324,22 @@ const GeoAuditPage = () => {
                 </div>
               </div>
             )}
+
+            {/* Visual Analytics */}
+            <div className="mb-12">
+              <h3 className="text-2xl font-bold mb-6">Visual Analytics</h3>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <ScoreRadarChart 
+                  scores={result.scores} 
+                  comparison={comparison?.previous?.scores}
+                />
+                <CategoryBarChart scores={result.scores} />
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <ScoreTrendChart url={result.url} />
+                <PriorityMatrix recommendations={result.recommendations} />
+              </div>
+            </div>
 
             {/* Score Breakdown */}
             <div className="mb-12">

@@ -23,16 +23,9 @@ export interface HistoryItem {
     performance: number;
     contentQuality: number;
     citationPotential: number;
+    technicalSEO: number;
+    linkAnalysis: number;
   };
-}
-
-export interface ScoreTrend {
-  url: string;
-  data: Array<{
-    timestamp: string;
-    score: number;
-    grade: string;
-  }>;
 }
 
 /**
@@ -96,17 +89,9 @@ export function getUrlHistory(url: string): HistoryItem[] {
 /**
  * Get score trend for URL
  */
-export function getScoreTrend(url: string): ScoreTrend {
+export function getScoreTrend(url: string): HistoryItem[] {
   const urlHistory = getUrlHistory(url);
-  
-  return {
-    url,
-    data: urlHistory.map(item => ({
-      timestamp: item.timestamp,
-      score: item.overallScore,
-      grade: item.grade,
-    })).reverse(), // Oldest first for chart display
-  };
+  return urlHistory.reverse(); // Oldest first for chart display
 }
 
 /**
@@ -134,6 +119,8 @@ export function compareWithPrevious(
     performance: number;
     contentQuality: number;
     citationPotential: number;
+    technicalSEO: number;
+    linkAnalysis: number;
   } | null;
 } {
   const urlHistory = getUrlHistory(current.url);
@@ -155,7 +142,9 @@ export function compareWithPrevious(
     structure: current.scores.structure - previous.scores.structure,
     performance: current.scores.performance - previous.scores.performance,
     contentQuality: current.scores.contentQuality - previous.scores.contentQuality,
-    citationPotential: current.scores.citationPotential - previous.scores.citationPotential,
+    citationPotential: current.scores.citationPotential - (previous.scores.citationPotential || 0),
+    technicalSEO: current.scores.technicalSEO - (previous.scores.technicalSEO || 0),
+    linkAnalysis: current.scores.linkAnalysis - (previous.scores.linkAnalysis || 0),
   };
   
   return { previous, changes };
