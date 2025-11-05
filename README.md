@@ -1,5 +1,12 @@
 # Anóteros Lógos - Generative Engine Optimization Platform
 
+[![License](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](CHANGELOG.md)
+[![Node](https://img.shields.io/badge/node-20.x-brightgreen.svg)](https://nodejs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19.2-61dafb.svg)](https://react.dev)
+[![Build](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/DelovoyMotiv/anteroslogos/actions)
+
 Enterprise-grade web platform for AI-powered search optimization and real-time GEO analytics.
 
 **Production URL:** https://anoteroslogos.com
