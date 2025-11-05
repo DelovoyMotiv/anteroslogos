@@ -912,69 +912,69 @@ const GeoAuditPage = () => {
               </div>
             )}
 
-            {/* Competitive Intelligence */}
+            {/* Competitive Intelligence - Compact */}
             {competitive && (
               <div className="mb-8">
-                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <Target className="w-6 h-6 text-purple-400" />
+                <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
+                  <Target className="w-5 h-5 text-purple-400" />
                   Competitive Analysis
                 </h3>
-                <div className="p-4 bg-white/5 border border-brand-secondary rounded-xl">
-                  <div className="mb-6">
-                    <h4 className="font-bold mb-3">Your Position</h4>
-                    <div className="flex items-center gap-4">
-                      <div className="text-4xl font-bold text-brand-accent">#{competitive.yourSite.rank}</div>
+                <div className="p-3 bg-white/5 border border-brand-secondary rounded-lg">
+                  <div className="mb-4">
+                    <h4 className="font-bold text-sm mb-2">Your Position</h4>
+                    <div className="flex items-center gap-3">
+                      <div className="text-3xl font-bold text-brand-accent tabular-nums">#{competitive.yourSite.rank}</div>
                       <div className="flex-1">
-                        <p className="text-sm text-white/60">out of {competitive.competitors.length + 1} sites analyzed</p>
-                        <p className="text-lg font-semibold">{competitive.yourSite.score} points</p>
+                        <p className="text-xs text-white/60">out of {competitive.competitors.length + 1} sites analyzed</p>
+                        <p className="text-base font-semibold tabular-nums">{competitive.yourSite.score} points</p>
                       </div>
                     </div>
                   </div>
                   {competitive.insights.length > 0 && (
-                    <div className="mb-4">
-                      <h5 className="text-sm font-bold text-white/60 mb-2">INSIGHTS</h5>
+                    <div className="mb-3">
+                      <h5 className="text-[10px] font-bold text-white/50 mb-1.5 uppercase tracking-wide">Insights</h5>
                       {competitive.insights.map((insight, i) => (
-                        <p key={i} className="text-sm text-white/80 mb-1">{insight}</p>
+                        <p key={i} className="text-xs text-white/80 mb-1 leading-snug">{insight}</p>
                       ))}
                     </div>
                   )}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {competitive.strengths.length > 0 && (
                       <div>
-                        <h5 className="text-sm font-bold text-green-400 mb-2 flex items-center gap-1">
+                        <h5 className="text-[10px] font-bold text-green-400 mb-1.5 flex items-center gap-1 uppercase tracking-wide">
                           <CheckCircle className="w-3 h-3" />
-                          STRENGTHS
+                          Strengths
                         </h5>
-                        <ul className="text-xs space-y-1">
+                        <ul className="text-[11px] space-y-1">
                           {competitive.strengths.map((str, i) => (
-                            <li key={i} className="text-white/70">{str}</li>
+                            <li key={i} className="text-white/70 leading-snug">{str}</li>
                           ))}
                         </ul>
                       </div>
                     )}
                     {competitive.weaknesses.length > 0 && (
                       <div>
-                        <h5 className="text-sm font-bold text-red-400 mb-2 flex items-center gap-1">
+                        <h5 className="text-[10px] font-bold text-red-400 mb-1.5 flex items-center gap-1 uppercase tracking-wide">
                           <AlertCircle className="w-3 h-3" />
-                          WEAKNESSES
+                          Weaknesses
                         </h5>
-                        <ul className="text-xs space-y-1">
+                        <ul className="text-[11px] space-y-1">
                           {competitive.weaknesses.map((weak, i) => (
-                            <li key={i} className="text-white/70">{weak}</li>
+                            <li key={i} className="text-white/70 leading-snug">{weak}</li>
                           ))}
                         </ul>
                       </div>
                     )}
                   </div>
                   {competitive.opportunities.length > 0 && (
-                    <div className="mt-4 pt-4 border-t border-white/10">
-                      <h5 className="text-sm font-bold text-purple-400 mb-2 flex items-center gap-1">
+                    <div className="mt-3 pt-3 border-t border-white/10">
+                      <h5 className="text-[10px] font-bold text-purple-400 mb-1.5 flex items-center gap-1 uppercase tracking-wide">
                         <Target className="w-3 h-3" />
-                        OPPORTUNITIES
+                        Opportunities
                       </h5>
-                      <ul className="text-xs space-y-1">
+                      <ul className="text-[11px] space-y-1">
                         {competitive.opportunities.map((opp, i) => (
-                          <li key={i} className="text-white/70">{opp}</li>
+                          <li key={i} className="text-white/70 leading-snug">{opp}</li>
                         ))}
                       </ul>
                     </div>
@@ -983,24 +983,24 @@ const GeoAuditPage = () => {
               </div>
             )}
 
-            {/* Recommendations - Compact Action Plan */}
+            {/* Action Plan - Ultra Compact */}
             {result.recommendations.length > 0 && (
               <div className="mb-8">
-                <h3 className="text-xl font-bold mb-4">Action Plan</h3>
-                <div className="space-y-3">
+                <h3 className="text-xl font-bold mb-3">Action Plan</h3>
+                <div className="space-y-2">
                   {result.recommendations.map((rec, i) => (
                     <div 
                       key={i} 
-                      className={`p-4 border rounded-xl hover:border-opacity-100 transition-all ${
+                      className={`p-3 border rounded-lg hover:border-opacity-100 transition-all ${
                         rec.priority === 'critical' ? 'bg-red-500/10 border-red-500/40' :
                         rec.priority === 'high' ? 'bg-orange-500/5 border-orange-500/30' :
                         rec.priority === 'medium' ? 'bg-yellow-500/5 border-yellow-500/30' :
                         'bg-blue-500/5 border-blue-500/30'
                       }`}
                     >
-                      <div className="flex flex-col sm:flex-row items-start gap-4">
-                        <div className="flex gap-2 flex-shrink-0">
-                          <div className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
+                      <div className="flex flex-col sm:flex-row items-start gap-3">
+                        <div className="flex gap-1.5 flex-shrink-0">
+                          <div className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                             rec.priority === 'critical' ? 'bg-red-500/30 text-red-300' :
                             rec.priority === 'high' ? 'bg-orange-500/20 text-orange-300' :
                             rec.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
@@ -1009,40 +1009,40 @@ const GeoAuditPage = () => {
                             {rec.priority}
                           </div>
                           {rec.effort && (
-                            <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            <div className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
                               rec.effort === 'quick-win' ? 'bg-green-500/20 text-green-300' :
                               rec.effort === 'strategic' ? 'bg-blue-500/20 text-blue-300' :
                               'bg-purple-500/20 text-purple-300'
                             }`}>
-                              {rec.effort === 'quick-win' && <Zap className="w-3 h-3 inline mr-1" />}
+                              {rec.effort === 'quick-win' && <Zap className="w-3 h-3 inline mr-0.5" />}
                               {rec.effort === 'quick-win' ? 'Quick Win' : rec.effort === 'strategic' ? 'Strategic' : 'Long-term'}
                             </div>
                           )}
                         </div>
-                        <div className="flex-1 w-full sm:w-auto">
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1.5">
+                        <div className="flex-1 w-full sm:w-auto min-w-0">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1">
                             <h4 className="font-semibold text-sm">{rec.title}</h4>
-                            <span className="text-xs text-white/40">• {rec.category}</span>
+                            <span className="text-[10px] text-white/40">• {rec.category}</span>
                             {rec.estimatedTime && (
-                              <span className="text-xs text-white/30">• {rec.estimatedTime}</span>
+                              <span className="text-[10px] text-white/30">• {rec.estimatedTime}</span>
                             )}
                           </div>
-                          <p className="text-xs text-white/70 mb-2">{rec.description}</p>
+                          <p className="text-[11px] text-white/70 mb-2 leading-snug">{rec.description}</p>
                           <div className="space-y-1.5">
-                            <div className="p-2.5 bg-white/5 rounded-lg border border-white/10">
-                              <p className="text-xs text-brand-accent font-semibold mb-0.5">Impact</p>
-                              <p className="text-xs text-white/70">{rec.impact}</p>
+                            <div className="p-2 bg-white/5 rounded border border-white/10">
+                              <p className="text-[10px] text-brand-accent font-semibold mb-0.5">Impact</p>
+                              <p className="text-[11px] text-white/70 leading-snug">{rec.impact}</p>
                             </div>
                             {rec.implementation && (
-                              <div className="p-2.5 bg-white/5 rounded-lg border border-white/10">
-                                <p className="text-xs text-green-400 font-semibold mb-0.5">Implementation</p>
-                                <p className="text-xs text-white/70">{rec.implementation}</p>
+                              <div className="p-2 bg-white/5 rounded border border-white/10">
+                                <p className="text-[10px] text-green-400 font-semibold mb-0.5">Implementation</p>
+                                <p className="text-[11px] text-white/70 leading-snug">{rec.implementation}</p>
                               </div>
                             )}
                             {rec.codeExample && (
                               <details className="group">
-                                <summary className="cursor-pointer text-xs text-brand-accent hover:text-blue-400 font-semibold">View Code Example</summary>
-                                <pre className="mt-1.5 p-2.5 bg-black/30 rounded-lg text-xs text-green-400 overflow-x-auto border border-brand-accent/20">
+                                <summary className="cursor-pointer text-[11px] text-brand-accent hover:text-blue-400 font-semibold">View Code Example</summary>
+                                <pre className="mt-1.5 p-2 bg-black/30 rounded text-[10px] text-green-400 overflow-x-auto border border-brand-accent/20">
                                   <code>{rec.codeExample}</code>
                                 </pre>
                               </details>
