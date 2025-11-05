@@ -776,6 +776,7 @@ For technical support or customization requests, contact the development team.
 ## Recent Updates (2025)
 
 **Major Features:**
+- ✅ **Investor Relations Page** - comprehensive investment analysis with TAM/SAM/SOM, SWOT, competitive landscape
 - ✅ AI Visibility Index - unified AI citation probability metric
 - ✅ GEO Health Tracker - daily monitoring with historical trends and forecasts
 - ✅ High-Precision Scoring - 3-decimal accuracy with component breakdown
@@ -788,11 +789,25 @@ For technical support or customization requests, contact the development team.
 - ⚡ Build time optimized to 12-15s
 - ⚡ Code splitting for PDF generator (392KB separate chunk)
 
+## Investor Relations
+
+Comprehensive investment analysis page at `/investors` featuring:
+- **Investment Rating**: STRONG BUY ⭐⭐⭐⭐⭐ (Series A: $10-25M valuation)
+- **Market Analysis**: Interactive TAM/SAM/SOM visualization ($2-3B TAM, 45%+ CAGR)
+- **Revenue Model**: 5 streams with unit economics (CLV/CAC ratio 5-9x)
+- **Competitive Landscape**: 3-tier analysis with strengths/weaknesses
+- **Risk Assessment**: 4 key risks with mitigation strategies
+- **SWOT Analysis**: Color-coded quadrants with 22 total items
+- **Market Growth Chart**: Interactive Recharts visualization (2024-2030 projections)
+- **Strategic Differentiators**: Proprietary IP, first-mover position, perfect timing
+
+All data sourced from real investment analysis report - no mock data.
+
 Total Project Scale:
 - **8000+ lines** of production code
 - **13 major utility modules** (including AI Agent)
-- **30+ React components** (including new AI Visibility, Health Tracker)
-- **8 route pages** with lazy loading
+- **31+ React components** (including AI Visibility, Health Tracker, Market Growth Chart)
+- **9 route pages** with lazy loading (including Investor Relations)
 - **Full TypeScript strict mode** with Zod validation
 - **AI-powered recommendation engine** with enhanced precision scoring
 - **LocalStorage-based history** for audit tracking and trends
