@@ -932,20 +932,6 @@ For technical support or customization requests, contact the development team.
 - ⚡ Build time optimized to 12-15s
 - ⚡ Code splitting for PDF generator (392KB separate chunk)
 
-## Investor Relations
-
-Comprehensive investment analysis page at `/investors` featuring:
-- **Investment Rating**: STRONG BUY ⭐⭐⭐⭐⭐ (Series A: $10-25M valuation)
-- **Market Analysis**: Interactive TAM/SAM/SOM visualization ($2-3B TAM, 45%+ CAGR)
-- **Revenue Model**: 5 streams with unit economics (CLV/CAC ratio 5-9x)
-- **Competitive Landscape**: 3-tier analysis with strengths/weaknesses
-- **Risk Assessment**: 4 key risks with mitigation strategies
-- **SWOT Analysis**: Color-coded quadrants with 22 total items
-- **Market Growth Chart**: Interactive Recharts visualization (2024-2030 projections)
-- **Strategic Differentiators**: Proprietary IP, first-mover position, perfect timing
-
-All data sourced from real investment analysis report - no mock data.
-
 Total Project Scale:
 - **9000+ lines** of production code
 - **14 major utility modules** (including AI Agent, AID Discovery)
