@@ -25,6 +25,20 @@ root.render(
   </React.StrictMode>
 );
 
+// Service Worker registration for PWA functionality
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then((registration) => {
+        console.log('SW registered: ', registration);
+      })
+      .catch((registrationError) => {
+        console.log('SW registration failed: ', registrationError);
+      });
+  });
+}
+
 // Core Web Vitals monitoring
 if (typeof window !== 'undefined') {
   import('web-vitals').then(({ onCLS, onFCP, onINP, onLCP, onTTFB }) => {
