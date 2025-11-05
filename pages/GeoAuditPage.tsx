@@ -769,18 +769,18 @@ const GeoAuditPage = () => {
               </div>
             </div>
 
-            {/* Monitoring Alerts - Compact */}
+            {/* Monitoring Alerts - Grid Layout */}
             {alerts.length > 0 && (
               <div className="mb-8">
                 <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
                   <AlertCircle className="w-5 h-5 text-red-400" />
                   Monitoring Alerts ({alerts.length})
                 </h3>
-                <div className="space-y-2">
-                  {alerts.slice(0, 5).map((alert) => (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
+                  {alerts.slice(0, 6).map((alert) => (
                     <div 
                       key={alert.id} 
-                      className={`p-3 border rounded-lg ${
+                      className={`p-2.5 border rounded-lg hover:border-opacity-100 transition-all ${
                         alert.severity === 'critical' ? 'bg-red-500/10 border-red-500/40' :
                         alert.severity === 'high' ? 'bg-orange-500/10 border-orange-500/40' :
                         alert.severity === 'medium' ? 'bg-yellow-500/10 border-yellow-500/40' :
@@ -788,15 +788,15 @@ const GeoAuditPage = () => {
                       }`}
                     >
                       <div className="flex items-start gap-2">
-                        <AlertCircle className={`w-4 h-4 flex-shrink-0 mt-0.5 ${
+                        <AlertCircle className={`w-3.5 h-3.5 flex-shrink-0 mt-0.5 ${
                           alert.severity === 'critical' ? 'text-red-400' :
                           alert.severity === 'high' ? 'text-orange-400' :
                           alert.severity === 'medium' ? 'text-yellow-400' :
                           'text-blue-400'
                         }`} />
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className={`text-[10px] px-1.5 py-0.5 rounded uppercase font-bold ${
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-bold ${
                               alert.severity === 'critical' ? 'bg-red-500/20 text-red-300' :
                               alert.severity === 'high' ? 'bg-orange-500/20 text-orange-300' :
                               alert.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
@@ -804,12 +804,12 @@ const GeoAuditPage = () => {
                             }`}>
                               {alert.severity}
                             </span>
-                            <span className="text-[10px] text-white/40">{alert.category}</span>
+                            <span className="text-[9px] text-white/40 uppercase tracking-wide">{alert.category}</span>
                           </div>
-                          <h4 className="font-bold text-sm mb-1">{alert.title}</h4>
-                          <p className="text-xs text-white/70 mb-1.5 leading-snug">{alert.message}</p>
+                          <h4 className="font-bold text-xs mb-1 leading-tight">{alert.title}</h4>
+                          <p className="text-[10px] text-white/70 mb-1.5 leading-snug">{alert.message}</p>
                           {alert.recommendation && (
-                            <p className="text-[11px] text-brand-accent"><span className="font-bold">Recommendation:</span> {alert.recommendation}</p>
+                            <p className="text-[10px] text-brand-accent leading-snug"><span className="font-bold">→</span> {alert.recommendation}</p>
                           )}
                         </div>
                       </div>
