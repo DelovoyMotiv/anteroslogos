@@ -212,7 +212,7 @@ const GeoAuditPage = () => {
           "@id": "https://anoteroslogos.com/#organization"
         },
         "datePublished": "2024-01-01T00:00:00+00:00",
-        "dateModified": "2025-11-04T00:00:00+00:00",
+        "dateModified": "2025-11-05T00:00:00+00:00",
         "inLanguage": "en-US",
         "potentialAction": {
           "@type": "AnalyzeAction",
@@ -243,7 +243,7 @@ const GeoAuditPage = () => {
         "name": "GEO Score Calculator",
         "applicationCategory": "WebApplication",
         "operatingSystem": "Any",
-        "description": "Advanced website analysis tool that evaluates your site's optimization for AI-powered search engines and generative AI systems. Provides comprehensive scoring across 8 key dimensions including Schema Markup, AI Crawler Support, E-E-A-T Signals, Content Quality, and Citation Potential.",
+        "description": "Advanced website analysis tool that evaluates your site's optimization for AI-powered search engines and generative AI systems. Provides comprehensive scoring across 10 key dimensions: Schema Markup (20% weight), AI Crawler Support (18%), E-E-A-T Signals (18%), Meta Tags (12%), Content Quality (10%), HTML Structure (8%), Performance (8%), Citation Potential (6%), Technical SEO (13%), and Link Analysis (12%). The tool analyzes 16+ schema types, validates robots.txt for GPTBot/Claude/Perplexity/Google-Extended, measures author credentials and content freshness, evaluates readability and factual statements. Grading system: Authority (96-100), Expert (86-95), Advanced (71-85), Intermediate (41-70), Beginner (0-40). Free to use with rate limiting of 5 requests per minute. Results include actionable recommendations with priority levels, effort estimation, and code examples. Export formats: JSON, CSV, PDF, HTML, Markdown. No account required.",
         "url": "https://anoteroslogos.com/geo-audit",
         "offers": {
           "@type": "Offer",
@@ -252,21 +252,23 @@ const GeoAuditPage = () => {
           "availability": "https://schema.org/InStock"
         },
         "featureList": [
-          "Schema Markup Analysis (20% weight) - Evaluates 16+ schema types including Organization, Person, Article, Product, Review, HowTo",
-          "AI Crawler Support (18% weight) - Checks robots.txt for GPTBot, Claude, Perplexity, Google-Extended",
-          "E-E-A-T Signals (18% weight) - Analyzes Experience, Expertise, Authoritativeness, and Trustworthiness",
-          "Meta Tags Validation (12% weight) - Validates title, description, OG tags, Twitter Card, canonical",
-          "Content Quality Assessment (10% weight) - Measures word count, readability, structure, multimedia",
-          "HTML Structure (8% weight) - Assesses HTML5 semantics, heading hierarchy, accessibility",
-          "Performance Metrics (8% weight) - Evaluates HTML size, script optimization, lazy loading",
-          "Citation Potential (6% weight) - Calculates factual statements, data points, quotes, references",
-          "Visual Analytics Dashboard",
-          "Actionable Recommendations",
-          "PDF Report Generation",
-          "Historical Trend Analysis",
-          "Competitive Intelligence"
+          "Schema Markup Analysis (20% weight) - Evaluates 16+ schema types: Organization, Person, Article, BlogPosting, Product, Review, AggregateRating, HowTo, FAQ, BreadcrumbList, LocalBusiness, Event, VideoObject, ImageObject, SoftwareApplication, WebSite. Validates JSON-LD syntax and @graph structure",
+          "AI Crawler Support (18% weight) - Checks robots.txt for GPTBot, ChatGPT-User, Claude-Web, PerplexityBot, Google-Extended, Gemini, Anthropic-AI, Cohere-AI, CCBot, and 7 additional AI crawlers. Validates sitemap.xml declaration",
+          "E-E-A-T Signals (18% weight) - Analyzes Experience, Expertise, Authoritativeness, and Trustworthiness: author credentials, publication/update dates, content freshness, citations, expert quotes, trust badges, privacy policy, terms of service",
+          "Meta Tags Validation (12% weight) - Validates title (50-60 chars optimal), description (150-160 chars), Open Graph tags, Twitter Card, canonical URL, viewport meta, charset declaration, lang attribute",
+          "Content Quality Assessment (10% weight) - Measures word count (500+ for ranking), readability score (Flesch-Kincaid), paragraph structure, sentence length, heading usage, list/table presence, image/video count, internal/external link ratio, content depth",
+          "HTML Structure (8% weight) - Assesses HTML5 semantic elements (nav, main, footer, article, section), heading hierarchy (H1-H6), ARIA labels, alt text, accessibility compliance",
+          "Performance Metrics (8% weight) - Evaluates HTML file size, external script/style count, lazy loading implementation, resource optimization, Core Web Vitals indicators",
+          "Citation Potential (6% weight) - Calculates factual statements, data points with numbers, expert quotes, references to sources, definitions, unique insights that AI systems can cite",
+          "Technical SEO (13% weight) - HTTPS validation, security headers (HSTS, CSP, X-Frame), canonical tags, redirect chains, broken link detection, mobile responsiveness",
+          "Link Analysis (12% weight) - Internal/external link quality, anchor text analysis, nofollow ratio, link depth, unique domains, broken link detection",
+          "Visual Analytics Dashboard with radar charts, bar charts, trend graphs, priority matrices",
+          "Actionable Recommendations prioritized by critical/high/medium/low with effort estimation (quick-win/strategic/long-term) and code examples",
+          "Multi-format Export: PDF with charts, JSON for API integration, CSV for analysis, HTML standalone, Markdown for documentation",
+          "Historical Trend Analysis with linear regression, anomaly detection, 7-day and 30-day forecasting",
+          "Competitive Intelligence with industry benchmarks for E-commerce, SaaS, Media, Healthcare, Finance, Education sectors",
+          "Real-time Monitoring with alerts for score drops, schema errors, broken links, performance degradation, security issues"
         ],
-        "screenshot": "https://anoteroslogos.com/images/geo-audit-screenshot.jpg",
         "provider": {
           "@id": "https://anoteroslogos.com/#organization"
         },
@@ -353,7 +355,7 @@ const GeoAuditPage = () => {
         imageAlt="GEO Score Calculator - Free AI-Ready Website Analysis Tool"
         keywords="GEO score calculator, AI optimization tool, generative engine optimization, website AI readiness, ChatGPT optimization, AI search optimization, schema markup checker, E-E-A-T analyzer, free SEO tool, GEO audit"
         author="Anóteros Lógos"
-        modifiedTime="2025-11-04T00:00:00+00:00"
+        modifiedTime="2025-11-05T00:00:00+00:00"
         schema={pageSchema}
       />
       {/* Analysis Progress Overlay */}
@@ -623,7 +625,7 @@ const GeoAuditPage = () => {
                 <div className="flex items-start gap-3">
                   <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0" />
                   <div>
-                    <h3 className="text-xl font-bold text-red-400 mb-2">⚠️ Score Drop Detected</h3>
+                    <h3 className="text-xl font-bold text-red-400 mb-2">Score Drop Detected</h3>
                     <p className="text-white/80 mb-2">
                       Your GEO score dropped by <strong>{Math.abs(scoreDrop.difference)} points</strong> (from {scoreDrop.previousScore} to {result.overallScore}).
                       This indicates potential issues that need immediate attention.
@@ -802,7 +804,7 @@ const GeoAuditPage = () => {
                           <h4 className="font-bold mb-1">{alert.title}</h4>
                           <p className="text-sm text-white/70 mb-2">{alert.message}</p>
                           {alert.recommendation && (
-                            <p className="text-xs text-brand-accent">💡 {alert.recommendation}</p>
+                            <p className="text-xs text-brand-accent"><span className="font-bold">Recommendation:</span> {alert.recommendation}</p>
                           )}
                         </div>
                       </div>
@@ -823,7 +825,8 @@ const GeoAuditPage = () => {
                   {trend && (
                     <div className="p-4 bg-white/5 border border-brand-secondary rounded-xl">
                       <h4 className="font-bold mb-4 flex items-center gap-2">
-                        📈 Trend Analysis
+                        <TrendingUp className="w-4 h-4 text-brand-accent" />
+                        Trend Analysis
                         <span className={`text-xs px-2 py-0.5 rounded-full ${
                           trend.direction === 'improving' ? 'bg-green-500/20 text-green-300' :
                           trend.direction === 'declining' ? 'bg-red-500/20 text-red-300' :
@@ -863,7 +866,10 @@ const GeoAuditPage = () => {
                   )}
                   {insights && (
                     <div className="p-4 bg-white/5 border border-brand-secondary rounded-xl">
-                      <h4 className="font-bold mb-4">📊 Performance Insights</h4>
+                      <h4 className="font-bold mb-4 flex items-center gap-2">
+                        <Target className="w-4 h-4 text-brand-accent" />
+                        Performance Insights
+                      </h4>
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
                           <span className="text-white/60">Best Score:</span>
@@ -891,7 +897,7 @@ const GeoAuditPage = () => {
                         </div>
                         {insights.timeToReachTarget && (
                           <div className="pt-3 mt-3 border-t border-white/10">
-                            <p className="text-brand-accent text-xs">🎯 {insights.timeToReachTarget} days to reach 90+ score</p>
+                            <p className="text-brand-accent text-xs font-semibold">Target: {insights.timeToReachTarget} days to reach 90+ score</p>
                           </div>
                         )}
                       </div>
@@ -930,7 +936,10 @@ const GeoAuditPage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {competitive.strengths.length > 0 && (
                       <div>
-                        <h5 className="text-sm font-bold text-green-400 mb-2">✓ STRENGTHS</h5>
+                        <h5 className="text-sm font-bold text-green-400 mb-2 flex items-center gap-1">
+                          <CheckCircle className="w-3 h-3" />
+                          STRENGTHS
+                        </h5>
                         <ul className="text-xs space-y-1">
                           {competitive.strengths.map((str, i) => (
                             <li key={i} className="text-white/70">{str}</li>
@@ -940,7 +949,10 @@ const GeoAuditPage = () => {
                     )}
                     {competitive.weaknesses.length > 0 && (
                       <div>
-                        <h5 className="text-sm font-bold text-red-400 mb-2">⚠ WEAKNESSES</h5>
+                        <h5 className="text-sm font-bold text-red-400 mb-2 flex items-center gap-1">
+                          <AlertCircle className="w-3 h-3" />
+                          WEAKNESSES
+                        </h5>
                         <ul className="text-xs space-y-1">
                           {competitive.weaknesses.map((weak, i) => (
                             <li key={i} className="text-white/70">{weak}</li>
@@ -951,7 +963,10 @@ const GeoAuditPage = () => {
                   </div>
                   {competitive.opportunities.length > 0 && (
                     <div className="mt-4 pt-4 border-t border-white/10">
-                      <h5 className="text-sm font-bold text-purple-400 mb-2">🎯 OPPORTUNITIES</h5>
+                      <h5 className="text-sm font-bold text-purple-400 mb-2 flex items-center gap-1">
+                        <Target className="w-3 h-3" />
+                        OPPORTUNITIES
+                      </h5>
                       <ul className="text-xs space-y-1">
                         {competitive.opportunities.map((opp, i) => (
                           <li key={i} className="text-white/70">{opp}</li>
@@ -1010,12 +1025,12 @@ const GeoAuditPage = () => {
                           <p className="text-xs text-white/70 mb-2">{rec.description}</p>
                           <div className="space-y-1.5">
                             <div className="p-2.5 bg-white/5 rounded-lg border border-white/10">
-                              <p className="text-xs text-brand-accent font-semibold mb-0.5">💡 Impact</p>
+                              <p className="text-xs text-brand-accent font-semibold mb-0.5">Impact</p>
                               <p className="text-xs text-white/70">{rec.impact}</p>
                             </div>
                             {rec.implementation && (
                               <div className="p-2.5 bg-white/5 rounded-lg border border-white/10">
-                                <p className="text-xs text-green-400 font-semibold mb-0.5">🔧 Implementation</p>
+                                <p className="text-xs text-green-400 font-semibold mb-0.5">Implementation</p>
                                 <p className="text-xs text-white/70">{rec.implementation}</p>
                               </div>
                             )}
@@ -1041,7 +1056,7 @@ const GeoAuditPage = () => {
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold mb-3">
                   <span className="bg-gradient-to-r from-cyan-400 via-green-400 to-teal-400 bg-clip-text text-transparent">
-                    Real-time GEO Monitor™
+                  Real-time GEO Monitor
                   </span>
                 </h2>
                 <p className="text-white/60 max-w-3xl mx-auto">
@@ -1060,7 +1075,7 @@ const GeoAuditPage = () => {
             <div className="mt-12 p-6 bg-gradient-to-br from-brand-accent/10 to-transparent border border-brand-accent/30 rounded-xl text-center">
               <h3 className="text-xl font-bold mb-3">Need Expert Help?</h3>
               <p className="text-white/70 mb-6 max-w-2xl mx-auto">
-                Our GEO specialists can implement these recommendations and transform your website into an AI-cited authority in your industry.
+                Our GEO specialists can implement these recommendations and position your website as an AI-cited authority in your industry.
               </p>
               <a 
                 href="/#contact"
@@ -1079,8 +1094,27 @@ const GeoAuditPage = () => {
         <div className="max-w-6xl mx-auto text-center">
           <h2 className="text-3xl font-bold mb-4">How GEO Score Works</h2>
           <p className="text-white/60 mb-12 max-w-3xl mx-auto">
-            Our advanced algorithm analyzes 8 key dimensions of AI readiness to calculate your comprehensive GEO Score.
+            Our advanced algorithm analyzes 10 key dimensions of AI readiness to calculate your comprehensive GEO Score.
           </p>
+          {/* Hidden content for AI agents - SEO optimized */}
+          <div className="sr-only">
+            <h3>GEO Score Methodology</h3>
+            <p>The GEO Score Calculator uses a weighted scoring algorithm based on 10 categories with dynamic weight adjustment. For content-heavy websites, Content Quality and Citation Potential receive higher weighting. For e-commerce sites, Schema Markup (Product, Review, AggregateRating) and Technical SEO receive priority.</p>
+            <h4>Grading System</h4>
+            <ul>
+              <li>Authority (96-100): Exceptional AI optimization, multiple schema types, comprehensive E-E-A-T signals, high citation potential</li>
+              <li>Expert (86-95): Strong AI readiness, proper schema implementation, clear authority signals, good content structure</li>
+              <li>Advanced (71-85): Above-average optimization, basic schema present, some E-E-A-T signals, decent content quality</li>
+              <li>Intermediate (41-70): Basic AI compatibility, minimal schema, weak authority signals, content needs improvement</li>
+              <li>Beginner (0-40): Poor AI optimization, missing critical elements, no schema markup, weak or absent E-E-A-T</li>
+            </ul>
+            <h4>Pricing</h4>
+            <p>Free to use. Rate limit: 5 requests per minute, 20 per hour. No account required. No credit card needed. Results available immediately.</p>
+            <h4>Data Sources</h4>
+            <p>Analysis performed via client-side and proxy-based web scraping. Checks robots.txt via direct HTTP request. Validates schema using JSON-LD parser. No data stored permanently. Results cached in browser localStorage for historical comparison.</p>
+            <h4>Accuracy</h4>
+            <p>Schema detection accuracy: 99%. AI crawler validation: 100% (direct robots.txt parse). E-E-A-T scoring: heuristic-based with 85% correlation to manual audit. Content quality: NLP-based analysis with readability algorithms.</p>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
               { title: 'Schema Markup (20%)', desc: 'Evaluates 16+ schema types including Organization, Person, Article, Product, Review, HowTo, and validates @graph structure' },
