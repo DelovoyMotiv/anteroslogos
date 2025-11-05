@@ -1,4 +1,7 @@
+import { useState } from 'react';
 import SEOHead from '../components/SEOHead';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 import {
   Bot, 
   Network, 
@@ -11,26 +14,117 @@ import {
   Terminal,
   FileJson,
   Database,
-  Lock
+  Check,
+  Copy,
+  ChevronRight,
+  BookOpen,
+  Zap
 } from 'lucide-react';
 
 const AgentIdentityPage = () => {
+  const [copied, setCopied] = useState(false);
+  
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
     <>
       <SEOHead
-        title="Agent Identity & Discovery (AID) - Anóteros Lógos"
-        description="AID protocol implementation for agent discovery. DNS-first approach for AI agent identification with cryptographic proof of ownership and protocol-agnostic service discovery."
-        keywords="AID protocol, agent discovery, DNS agent, agent identity, A2A protocol, agent-to-agent, agent marketplace, AI agent discovery, agent registry"
-        type="website"
+        title="Agent Identity & Discovery (AID Protocol v1.1) - DNS-Based AI Agent Discovery | Anóteros Lógos"
+        description="Production AID v1.1 implementation with DNS TXT and HTTPS well-known discovery. Enable AI agents (ChatGPT, Claude, Perplexity) to find your services via single TXT record. RFC 8615 compliant, Ed25519 signatures, A2A/MCP/ANP protocol support."
+        keywords="AID protocol v1.1, agent discovery, DNS TXT agent, AI agent identity, A2A protocol, agent-to-agent, MCP protocol, ANP protocol, agent marketplace, AI agent discovery, agent registry, agentcommunity.org, RFC 8615, Ed25519 signatures, DNS-over-HTTPS"
+        type="article"
         url="https://anoteroslogos.com/agent-identity"
+      />
+      
+      {/* Schema.org Article markup for GEO */}
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "TechArticle",
+          "headline": "Agent Identity & Discovery (AID) Protocol Implementation",
+          "description": "Complete guide to AID v1.1 protocol for AI agent discovery via DNS TXT records and HTTPS well-known endpoints",
+          "author": {
+            "@type": "Organization",
+            "name": "Anóteros Lógos",
+            "url": "https://anoteroslogos.com"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "Anóteros Lógos",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://anoteroslogos.com/logo.svg"
+            }
+          },
+          "about": {
+            "@type": "SoftwareApplication",
+            "name": "AID Protocol",
+            "applicationCategory": "DeveloperApplication",
+            "operatingSystem": "Any",
+            "description": "DNS-first agent discovery protocol for AI systems"
+          },
+          "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https://anoteroslogos.com/agent-identity"
+          },
+          "datePublished": "2025-01-30",
+          "dateModified": "2025-01-30",
+          "keywords": "AID protocol, agent discovery, DNS TXT, AI agents, A2A protocol"
+        })}
+      </script>
+      
+      {/* Schema.org HowTo for implementation guide */}
+      <script type="application/ld+json">
+        {JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "HowTo",
+          "name": "How to Implement AID Protocol for AI Agent Discovery",
+          "description": "Step-by-step guide to make your AI agent discoverable via AID protocol v1.1",
+          "step": [
+            {
+              "@type": "HowToStep",
+              "name": "Create agent.json file",
+              "text": "Create /.well-known/agent.json with AID v1.1 metadata including protocols, capabilities, and endpoint"
+            },
+            {
+              "@type": "HowToStep",
+              "name": "Add DNS TXT record",
+              "text": "Add TXT record at _agent.yourdomain.com with version, protocols, endpoint URL, service ID, and domain"
+            },
+            {
+              "@type": "HowToStep",
+              "name": "Configure CORS headers",
+              "text": "Set Access-Control-Allow-Origin: * for /.well-known/agent.json endpoint"
+            },
+            {
+              "@type": "HowToStep",
+              "name": "Verify discovery",
+              "text": "Test DNS lookup via dig command and HTTPS endpoint accessibility"
+            }
+          ],
+          "totalTime": "PT30M"
+        })}
+      </script>
+      
+      <Header 
+        onMethodClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        onClientsClick={() => window.location.href = '/#clients'}
+        onContactClick={() => window.location.href = '/#contact'}
       />
 
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pt-20 sm:pt-24 pb-12 sm:pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          {/* Breadcrumbs */}
+          <nav className="flex items-center gap-2 text-sm text-slate-600 mb-6" aria-label="Breadcrumb">
+            <a href="/" className="hover:text-blue-600 transition-colors">Home</a>
+            <ChevronRight className="w-4 h-4" />
+            <span className="text-slate-900 font-medium">Agent Identity</span>
+          </nav>
           
           {/* Hero Section */}
           <div className="text-center mb-12 sm:mb-16">
@@ -126,9 +220,20 @@ const AgentIdentityPage = () => {
                 <span className="text-green-400 font-mono text-xs sm:text-sm">_agent.anoteroslogos.com TXT</span>
                 <button 
                   onClick={() => copyToClipboard('v=1.1;p=a2a,http;u=https://anoteroslogos.com/api/a2a;s=geoaudit;d=anoteroslogos.com')}
-                  className="text-xs bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded transition-colors self-start sm:self-auto"
+                  className="inline-flex items-center gap-2 text-xs bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded transition-all self-start sm:self-auto"
+                  aria-label="Copy DNS TXT record to clipboard"
                 >
-                  Copy
+                  {copied ? (
+                    <>
+                      <Check className="w-3 h-3" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3 h-3" />
+                      Copy
+                    </>
+                  )}
                 </button>
               </div>
               <pre className="text-xs sm:text-sm text-slate-200 font-mono overflow-x-auto whitespace-pre-wrap break-all">
@@ -279,7 +384,7 @@ const AgentIdentityPage = () => {
           {/* Security & Verification */}
           <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 mb-8 sm:mb-12">
             <div className="flex items-center gap-3 mb-6">
-              <Lock className="w-6 h-6 sm:w-8 sm:h-8 text-red-600" />
+              <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
               <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900">
                 Security & Verification
               </h2>
@@ -354,33 +459,110 @@ const AgentIdentityPage = () => {
             </div>
           </div>
 
+          {/* Quick Start Guide */}
+          <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl shadow-lg p-6 sm:p-8 mb-8 sm:mb-12 border-2 border-emerald-200">
+            <div className="flex items-center gap-3 mb-6">
+              <Zap className="w-6 h-6 sm:w-8 sm:h-8 text-emerald-600" />
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900">
+                Quick Start Guide
+              </h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white rounded-lg p-5 shadow-sm">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm">1</div>
+                  <h3 className="font-semibold text-slate-900">Create agent.json</h3>
+                </div>
+                <p className="text-sm text-slate-600 mb-2">Add to <code className="bg-slate-100 px-2 py-0.5 rounded text-xs font-mono">public/.well-known/agent.json</code></p>
+                <p className="text-xs text-slate-500">Include version, protocols, endpoint, capabilities</p>
+              </div>
+              
+              <div className="bg-white rounded-lg p-5 shadow-sm">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm">2</div>
+                  <h3 className="font-semibold text-slate-900">Add DNS TXT Record</h3>
+                </div>
+                <p className="text-sm text-slate-600 mb-2">At <code className="bg-slate-100 px-2 py-0.5 rounded text-xs font-mono">_agent.yourdomain.com</code></p>
+                <p className="text-xs text-slate-500">Use compact format: v=1.1;p=a2a,http;u=...</p>
+              </div>
+              
+              <div className="bg-white rounded-lg p-5 shadow-sm">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm">3</div>
+                  <h3 className="font-semibold text-slate-900">Configure CORS</h3>
+                </div>
+                <p className="text-sm text-slate-600 mb-2">Enable cross-origin access</p>
+                <p className="text-xs text-slate-500">Add Access-Control-Allow-Origin: * header</p>
+              </div>
+              
+              <div className="bg-white rounded-lg p-5 shadow-sm">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm">4</div>
+                  <h3 className="font-semibold text-slate-900">Verify Setup</h3>
+                </div>
+                <p className="text-sm text-slate-600 mb-2">Test DNS and HTTPS endpoints</p>
+                <p className="text-xs text-slate-500">Use dig command or online DNS tools</p>
+              </div>
+            </div>
+            
+            <div className="mt-6 flex flex-wrap gap-3 justify-center">
+              <a 
+                href="/.well-known/agent.json"
+                target="_blank"
+                className="inline-flex items-center gap-2 bg-emerald-600 text-white px-5 py-2.5 rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium"
+              >
+                <FileJson className="w-4 h-4" />
+                View Example
+              </a>
+              <a 
+                href="https://github.com/agentcommunity/aid-protocol"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-white text-emerald-700 px-5 py-2.5 rounded-lg hover:bg-emerald-50 transition-colors text-sm font-medium border-2 border-emerald-600"
+              >
+                <BookOpen className="w-4 h-4" />
+                Full Documentation
+              </a>
+            </div>
+          </div>
+          
           {/* CTA Section */}
           <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 text-center">
             <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 mb-4">
-              Try Our Agent
+              Test AID Discovery on Your Domain
             </h2>
             <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto mb-6 sm:mb-8">
-              Experience GEO audit capabilities through our A2A API. Request comprehensive analysis, competitive intelligence, and AI visibility optimization recommendations.
+              Use our GEO Audit tool to check if your domain has AID protocol configured. Get instant feedback on DNS TXT records, HTTPS endpoints, and agent metadata completeness.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
               <a 
                 href="/geo-audit" 
-                className="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base font-medium"
+                className="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base font-medium shadow-lg hover:shadow-xl"
               >
-                Start GEO Audit
+                Test Your Domain
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </a>
               <a 
                 href="/knowledge-base" 
                 className="inline-flex items-center justify-center gap-2 bg-slate-100 text-slate-900 px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-slate-200 transition-colors text-sm sm:text-base font-medium"
               >
-                Documentation
+                <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
+                Learn More
               </a>
             </div>
           </div>
 
         </div>
       </div>
+      
+      <Footer 
+        onPhilosophyClick={() => window.location.href = '/#philosophy'}
+        onMethodClick={() => window.location.href = '/#nicosia-method'}
+        onClientsClick={() => window.location.href = '/#clients'}
+        onFAQClick={() => window.location.href = '/#faq'}
+        onContactClick={() => window.location.href = '/#contact'}
+      />
     </>
   );
 };
