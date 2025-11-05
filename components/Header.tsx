@@ -10,7 +10,7 @@ interface HeaderProps {
     onContactClick?: () => void;
 }
 
-const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick, onClientsClick, onContactClick }, ref) => {
+const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick, onContactClick }, ref) => {
     const navigate = useNavigate();
     const location = useLocation();
     const [scrolled, setScrolled] = useState(false);
@@ -38,10 +38,11 @@ const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick, onClientsC
 
     const menuItems = [
         { label: 'Method', onClick: onMethodClick || (() => navigate('/')), isScroll: true },
-        { label: 'Clients', onClick: onClientsClick || (() => navigate('/')), isScroll: true },
+        { label: 'GEO vs SEO', onClick: () => navigate('/geo-vs-seo'), isScroll: false },
         { label: 'GEO Audit', onClick: () => navigate('/geo-audit'), isScroll: false, highlight: true },
-        { label: 'Blog', onClick: () => navigate('/blog'), isScroll: false },
         { label: 'Knowledge Base', onClick: () => navigate('/knowledge-base'), isScroll: false },
+        { label: 'Blog', onClick: () => navigate('/blog'), isScroll: false },
+        { label: 'Investors', onClick: () => navigate('/investors'), isScroll: false },
     ];
 
     return (
