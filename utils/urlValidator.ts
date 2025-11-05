@@ -206,8 +206,8 @@ export function validateAndSanitizeUrl(input: string): ValidationResult {
     warnings.push('URL contains multiple redirect parameters');
   }
 
-  // 17. Remove any trailing slash for consistency
-  const finalUrl = urlObject.toString().replace(/\/$/, '');
+  // 17. Keep URL as-is (don't remove trailing slash - some sites need it)
+  const finalUrl = urlObject.toString();
 
   // 18. Final security check - ensure URL hasn't been corrupted
   try {

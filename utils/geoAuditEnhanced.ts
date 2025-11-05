@@ -404,43 +404,82 @@ function normalizeUrl(url: string): string {
 }
 
 async function fetchHTML(url: string): Promise<string> {
-  // Try direct fetch first
+  // Try direct fetch first (with timeout)
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+    
     const response = await fetch(url, {
       method: 'GET',
       mode: 'cors',
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'GEO-Audit/2.0 (+https://anoteroslogos.com)',
+      },
     });
+    
+    clearTimeout(timeoutId);
+    
     if (response.ok) {
       const html = await response.text();
-      if (html && html.length > 0) {
+      if (html && html.length > 100) { // Min 100 chars for valid HTML
+        console.log('✓ Direct fetch successful');
         return html;
       }
     }
   } catch (error) {
-    // Expected CORS error - will use proxy
-    console.log('Direct fetch failed, trying proxy:', error);
+    // Expected CORS error or timeout - will use proxy
+    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+    console.log(`Direct fetch failed (${errorMsg}), using proxy...`);
   }
 
-  // Fallback to proxy
-  try {
-    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-    const response = await fetch(proxyUrl);
-    
-    if (!response.ok) {
-      throw new Error(`Proxy returned status ${response.status}`);
+  // Fallback to proxy with timeout and retry
+  const maxRetries = 2;
+  let lastError: Error | null = null;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout for proxy
+      
+      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+      const response = await fetch(proxyUrl, {
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`Proxy returned status ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (!data.contents || data.contents.length < 100) {
+        throw new Error('Proxy returned empty or invalid content');
+      }
+      
+      console.log(`✓ Proxy fetch successful (attempt ${attempt})`);
+      return data.contents;
+      
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error('Unknown error');
+      console.warn(`Proxy attempt ${attempt}/${maxRetries} failed:`, lastError.message);
+      
+      // Wait before retry (exponential backoff)
+      if (attempt < maxRetries) {
+        await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+      }
     }
-    
-    const data = await response.json();
-    
-    if (!data.contents || data.contents.length === 0) {
-      throw new Error('Proxy returned empty content');
-    }
-    
-    return data.contents;
-  } catch (error) {
-    console.error('Proxy fetch failed:', error);
-    throw new Error(`Unable to fetch website. The site may be blocking automated access or the URL is incorrect.`);
   }
+  
+  // All attempts failed
+  console.error('All fetch attempts failed:', lastError);
+  throw new Error(
+    `Unable to fetch website after ${maxRetries} attempts. ` +
+    `The site may be blocking automated access, temporarily down, or the URL is incorrect. ` +
+    `Error: ${lastError?.message || 'Unknown error'}`
+  );
 }
 
 // ==================== ENHANCED AUDIT FUNCTIONS ====================

@@ -71,7 +71,7 @@ const GeoAuditPage = () => {
       
       // 3. Validate audit result
       if (!validateAuditResult(auditResult)) {
-        throw new Error('Invalid audit result received');
+        throw new Error('Invalid audit result received. Please try again.');
       }
       
       // Save to history
@@ -113,8 +113,19 @@ const GeoAuditPage = () => {
       }
       
       setResult(auditResult);
+      setError(''); // Clear any previous errors on success
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to analyze website');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to analyze website';
+      console.error('Analysis error:', err);
+      
+      // Provide user-friendly error with retry suggestion
+      if (errorMessage.includes('fetch') || errorMessage.includes('network') || errorMessage.includes('timeout')) {
+        setError(`${errorMessage} Please try again in a moment.`);
+      } else if (errorMessage.includes('blocking')) {
+        setError(`${errorMessage} Some sites block automated access - this is normal.`);
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setIsAnalyzing(false);
     }
