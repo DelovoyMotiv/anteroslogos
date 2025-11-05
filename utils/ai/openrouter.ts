@@ -59,6 +59,12 @@ export interface OpenRouterError {
 export interface AIRecommendationRequest {
   url: string;
   overallScore: number;
+  preciseScore?: number; // High-precision score with 3 decimals
+  scoreBreakdown?: {
+    core: number;
+    technical: number;
+    content: number;
+  };
   scores: {
     schemaMarkup: number;
     metaTags: number;
@@ -205,29 +211,39 @@ YOUR ANALYTICAL APPROACH:
 
 CRITICAL GEO PRINCIPLES (2025):
 
+**Scoring System (High-Precision):**
+- Overall GEO Score calculated with 3-decimal precision (e.g., 54.649/100)
+- Three-component breakdown: Core (Schema + AI Access + E-E-A-T), Technical (SEO + Links + Meta + Structure), Content (Quality + Citation + Performance)
+- Each component weighted dynamically based on site type (content-heavy sites prioritize content quality)
+- Scores reflect AI systems' actual ranking algorithms, not generic SEO metrics
+
 **Schema.org Strategy:**
 - AI systems use Schema for entity disambiguation and fact verification
-- Graph structures (@graph) enable AI to understand entity relationships
-- Key types: Organization, Person, Article, FAQPage, HowTo, BreadcrumbList
+- Graph structures (@graph) enable AI to understand entity relationships  
+- Key types: Organization, Person, Article, FAQPage, HowTo, BreadcrumbList, Product, Review, AggregateRating
 - Missing Schema = invisible to AI semantic understanding
+- Schema Markup accounts for 16-20% of overall GEO score (highest single weight)
 
-**AI Crawler Access:**
-- GPTBot (OpenAI), CCBot (Common Crawl), Claude-Web (Anthropic), PerplexityBot
-- Explicit robots.txt directives required - default allow ≠ indexed
-- User-agent specific rules impact training vs. real-time retrieval differently
+**AI Crawler Access (18% weight):**
+- Critical crawlers: GPTBot (OpenAI/ChatGPT), CCBot (Common Crawl), Claude-Web (Anthropic), PerplexityBot, Google-Extended (Gemini)
+- Explicit robots.txt directives required - default allow ≠ indexed for training
+- User-agent specific rules impact training data vs. real-time retrieval differently
+- Missing sitemap.xml declaration reduces discoverability by 40%
 
-**E-E-A-T for AI:**
-- Experience: First-hand accounts, case studies, original data
-- Expertise: Credentials in Schema, author bylines, institutional affiliations
-- Authoritativeness: Backlinks from .edu/.gov, citations in academic papers
-- Trustworthiness: HTTPS, privacy policy, contact info, update dates
+**E-E-A-T for AI (15-18% weight):**
+- Experience: First-hand accounts, case studies, original data, temporal references ("I tested", "In my 10 years")
+- Expertise: Credentials in Schema, author bylines, institutional affiliations, publication history
+- Authoritativeness: Backlinks from .edu/.gov, citations in academic papers, industry recognition
+- Trustworthiness: HTTPS, privacy policy, contact info, update dates, security headers
+- AI systems check E-E-A-T before citing - sites without clear signals get 60% fewer citations
 
-**Content Citation Factors:**
-- Factual density: Statistics, numbers, dates, named entities per 100 words
-- Source attribution: Inline citations, references, "according to X" patterns
-- Structural clarity: Headings, lists, tables - AI can extract clean snippets
-- Answer completeness: Directly answers "who, what, when, where, why, how"
+**Content Citation Factors (9-15% weight):**
+- Factual density: Statistics, numbers, dates, named entities per 100 words (target: 5+ data points per 100 words)
+- Source attribution: Inline citations, references, "according to X" patterns increase trust by 3x
+- Structural clarity: Headings, lists, tables - AI can extract clean snippets for answers
+- Answer completeness: Directly answers "who, what, when, where, why, how" - increases citation probability 4x
 - Uniqueness: Original insights AI can't synthesize from multiple generic sources
+- Content depth: 1000+ words preferred, comprehensive coverage beats shallow pages
 
 **Link Architecture:**
 - Internal linking = semantic relationship mapping for AI
@@ -284,14 +300,15 @@ Respond ONLY with valid JSON:
 }
 
 OUTPUT REQUIREMENTS:
-- 3-7 recommendations maximum
+- 3-7 recommendations maximum (focus on highest-impact actions)
 - Demonstrate deep GEO expertise in every sentence
-- Use precise technical terminology
-- Reference specific AI system behaviors
-- Show systemic thinking and interconnections
+- Use precise technical terminology (Schema types, HTTP headers, semantic HTML)
+- Reference specific AI system behaviors (how ChatGPT/Claude/Perplexity actually work)
+- Show systemic thinking and interconnections between issues
+- Prioritize by ROI: impact/effort ratio, considering the precision score breakdown
 - English language only
-- Pure JSON, no markdown`;
-  }
+- Pure JSON, no markdown, no code fences
+`;  }
 
   /**
    * Build user prompt with audit data
@@ -318,37 +335,50 @@ OUTPUT REQUIREMENTS:
       .sort((a, b) => b.score - a.score)
       .slice(0, 3);
 
-    return `Analyze the GEO audit results and generate recommendations + insights.
-
-URL: ${url}
-Overall Score: ${overallScore}/100
-
-DETAILED SCORES:
-${Object.entries(scores)
-  .map(([key, value]) => `- ${key}: ${value}/100`)
-  .join('\n')}
-
-TOP 3 WEAKEST AREAS:
-${weakestAreas.map((a) => `- ${a.name}: ${a.score}/100`).join('\n')}
-
-TOP 3 STRONGEST AREAS:
-${strongestAreas.map((a) => `- ${a.name}: ${a.score}/100`).join('\n')}
-
-CRITICAL ISSUES:
-${criticalIssues.length > 0 ? criticalIssues.map((i) => `- ${i}`).join('\n') : '- No critical issues'}
-
-STRENGTHS:
-${topStrengths.length > 0 ? topStrengths.map((s) => `- ${s}`).join('\n') : '- No obvious strengths'}
-
-TASK:
-Generate 3-7 specific, actionable recommendations prioritizing:
-1. Quick wins (fast improvements with high impact)
-2. Critical issues (if any)
-3. Strategic opportunities (schema, content, E-E-A-T)
-
-Also add 3 strategic insights at business level.
-
-Respond ONLY with valid JSON, no additional text.`;
+    let prompt = 'Analyze the GEO audit results and generate recommendations + insights.\n\n';
+    prompt += `URL: ${url}` + "\n";
+    prompt += `Overall Score: ${overallScore}/100` + "\n";
+    
+    if (request.preciseScore) {
+      prompt += `Precise Score: ${request.preciseScore.toFixed(3)}/100` + "\n";
+    }
+    
+    if (request.scoreBreakdown) {
+      prompt += '\nSCORE COMPONENT BREAKDOWN:\n';
+      prompt += `- Core (Schema + AI Access + E-E-A-T): ${request.scoreBreakdown.core.toFixed(1)}/100` + "\n";
+      prompt += `- Technical (SEO + Links + Meta + Structure): ${request.scoreBreakdown.technical.toFixed(1)}/100` + "\n";
+      prompt += `- Content (Quality + Citation + Performance): ${request.scoreBreakdown.content.toFixed(1)}/100` + "\n";
+    }
+    
+    prompt += '\nDETAILED SCORES:\n';
+    prompt += Object.entries(scores)
+      .map(([key, value]) => `- ${key}: ${value}/100`)
+      .join('\n');
+    
+    prompt += '\n\nTOP 3 WEAKEST AREAS:\n';
+    prompt += weakestAreas.map((a) => `- ${a.name}: ${a.score}/100`).join('\n');
+    
+    prompt += '\n\nTOP 3 STRONGEST AREAS:\n';
+    prompt += strongestAreas.map((a) => `- ${a.name}: ${a.score}/100`).join('\n');
+    
+    prompt += '\n\nCRITICAL ISSUES:\n';
+    prompt += criticalIssues.length > 0 ? criticalIssues.map((i) => `- ${i}`).join('\n') : '- No critical issues';
+    
+    prompt += '\n\nSTRENGTHS:\n';
+    prompt += topStrengths.length > 0 ? topStrengths.map((s) => `- ${s}`).join('\n') : '- No obvious strengths';
+    
+    prompt += '\n\nTASK:\n';
+    prompt += 'Generate 3-7 specific, actionable recommendations prioritizing:\n';
+    prompt += '1. Component weaknesses (analyze breakdown - which component drags overall score down?)\n';
+    prompt += '2. Quick wins (fast improvements with high ROI)\n';
+    prompt += '3. Critical issues (if any)\n';
+    prompt += '4. Strategic opportunities (schema, content, E-E-A-T)\n';
+    prompt += '\n';
+    prompt += 'Also add 3 strategic insights at business level considering the component breakdown.\n';
+    prompt += '\n';
+    prompt += 'Respond ONLY with valid JSON, no additional text.';
+    
+    return prompt;
   }
 
   /**

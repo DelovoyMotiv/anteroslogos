@@ -123,6 +123,8 @@ export class GeoMarketologAgent {
     return {
       url: auditResult.url,
       overallScore: auditResult.overallScore,
+      preciseScore: auditResult.preciseScore,
+      scoreBreakdown: auditResult.scoreBreakdown,
       scores: auditResult.scores,
       criticalIssues: criticalIssues.slice(0, 10), // Max 10 issues
       topStrengths: topStrengths.slice(0, 10), // Max 10 strengths
