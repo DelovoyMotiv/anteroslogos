@@ -221,7 +221,7 @@ export interface A2AAuditResult {
   // Metadata
   metadata: {
     processing_time_ms: number;
-    agent_used: string;
+    agent_used?: string; // Optional as agent may not always be detected
     depth: string;
     version: string;
   };

@@ -10,6 +10,7 @@ Live Site: https://anoteroslogos.com
 - Fully Responsive: Mobile-first design optimized for all devices
 - GEO Audit Tool: Production-grade website analysis with real-time monitoring and competitive intelligence
 - **AI-Powered Recommendations**: GEO Marketolog AI Agent generates expert-level, personalized recommendations using OpenRouter LLM
+- **A2A Protocol API**: Production-grade Agent2Agent JSON-RPC 2.0 endpoint for AI agent integration (Perplexity, ChatGPT, Claude)
 - Blog Platform: Expert GEO insights with markdown rendering and proper article structure
 - SEO and GEO Optimized:
   - Comprehensive meta tags (Open Graph, Twitter Cards, AI-specific meta)
@@ -39,6 +40,8 @@ Live Site: https://anoteroslogos.com
 - Tailwind CSS 3.4+ - Utility-first CSS framework with custom design tokens
 - Recharts 3.3 - Advanced data visualization for analytics
 - **OpenRouter API** - AI-powered recommendation engine with LLM integration
+- **Zod 3.x** - Runtime type validation for A2A Protocol
+- **@vercel/node** - Serverless function types for A2A endpoint
 - jsPDF 3.0.3 - PDF report generation
 - react-markdown - Markdown rendering for blog articles
 - remark-gfm - GitHub Flavored Markdown support
@@ -82,6 +85,9 @@ VITE_SITE_DESCRIPTION=Generative Engine Optimization Agency
 VITE_OPENROUTER_API_KEY=your_openrouter_api_key_here
 VITE_OPENROUTER_MODEL=minimax/minimax-m2:free
 # Alternative models: meta-llama/llama-3.2-3b-instruct:free, google/gemma-2-9b-it:free
+
+# A2A Protocol Configuration
+VITE_APP_URL=https://anoteroslogos.com  # Base URL for A2A endpoint discovery
 
 # API Configuration (when ready)
 # VITE_API_URL=https://api.yoursite.com
@@ -137,6 +143,16 @@ F:\air\
 │   │   ├── blogPosts.ts     # Blog articles database
 │   │   ├── geoKnowledgeBase.ts  # Knowledge base terms
 │   │   └── teamMembers.ts   # Team information
+│   ├── lib/                 # Core libraries
+│   │   └── a2a/             # A2A Protocol implementation
+│   │       ├── protocol.ts  # JSON-RPC 2.0 protocol (526 lines)
+│   │       ├── adapter.ts   # AI-friendly result conversion (455 lines)
+│   │       ├── rateLimiter.ts  # Token bucket rate limiting (264 lines)
+│   │       ├── queue.ts     # Priority job queue (467 lines)
+│   │       └── cache.ts     # TTL-based caching (478 lines)
+│   ├── api/                 # Serverless API endpoints
+│   │   └── a2a/
+│   │       └── index.ts     # A2A HTTP endpoint (435 lines)
 │   ├── utils/               # Utilities and services
 │   │   ├── ai/                     # AI Agent modules
 │   │   │   ├── openrouter.ts       # OpenRouter API client with LLM integration
@@ -404,6 +420,206 @@ npm prune
 - Markdown rendering with proper code highlighting
 - Minified and optimized assets
 - Gzip compression enabled on Vercel
+
+## A2A Protocol - Agent2Agent API
+
+Production-ready JSON-RPC 2.0 API endpoint for AI agent integration. Optimized for Perplexity, ChatGPT, Claude, Gemini, and other AI search agents.
+
+### Architecture
+
+**5 Core Components (2,361 lines):**
+
+1. **Protocol Layer** (`lib/a2a/protocol.ts` - 526 lines)
+   - JSON-RPC 2.0 implementation with Zod runtime validation
+   - 12 API methods: discover, capabilities, audit, batch, insights, ping, status
+   - AI agent detection (Perplexity, ChatGPT, Claude, Gemini, Grok)
+   - 4-tier rate limiting configs (free/basic/pro/enterprise)
+   - 10 custom error codes + JSON-RPC 2.0 standard codes
+
+2. **Adapter Layer** (`lib/a2a/adapter.ts` - 455 lines)
+   - Converts GEO AuditResult → AI-optimized A2AAuditResult format
+   - Semantic data extraction: entities, topics, keywords, industry detection
+   - Confidence scoring based on data completeness (0.5-0.95)
+   - Actionable insights generation (best practices, opportunities, benchmarks, predictions)
+   - Citation sources extraction from link analysis
+
+3. **HTTP API Endpoint** (`api/a2a/index.ts` - 435 lines)
+   - Vercel serverless function with Edge runtime compatibility
+   - Method routing with parameter validation
+   - API key authentication (format: `sk_{tier}_{32_chars}`)
+   - Rate limiting integration with X-RateLimit headers
+   - Response caching (1-hour TTL for audits)
+   - Full CORS support for cross-origin requests
+
+4. **Queue System** (`lib/a2a/queue.ts` - 467 lines)
+   - Priority-based job queue (high/normal/low)
+   - Progress tracking (0-100%)
+   - Automatic retry logic (max 3 attempts)
+   - Batch job support (max 100 URLs)
+   - Auto-cleanup (24-hour retention)
+   - Configurable concurrent worker support
+
+5. **Cache Layer** (`lib/a2a/cache.ts` - 478 lines)
+   - TTL-based caching with configurable expiration
+   - ETag support for HTTP 304 Not Modified responses
+   - LRU eviction strategy (100MB memory limit)
+   - Auto-cleanup every 5 minutes
+   - Cache warming support
+   - Express/Vercel middleware wrapper
+
+### Rate Limiting
+
+| Tier       | Req/Min | Req/Hour | Concurrent | Burst | Price      |
+|------------|---------|----------|------------|-------|------------|
+| Free       | 10      | 100      | 2          | 5     | $0         |
+| Basic      | 60      | 1,000    | 5          | 20    | $99/mo     |
+| Pro        | 300     | 10,000   | 20         | 100   | $299/mo    |
+| Enterprise | 1,000   | 50,000   | 100        | 500   | Custom     |
+
+### AI Agent Detection
+
+Automatic detection and optimization for:
+- **Perplexity AI** (search agent with real-time citations)
+- **ChatGPT** (OpenAI assistant with conversational capabilities)
+- **Claude** (Anthropic assistant with analysis focus)
+- **Google Gemini** (multimodal with search integration)
+- **Grok** (X-integrated search with real-time data)
+
+### Semantic Extraction
+
+**Entity Types:** Organization, Person, LocalBusiness, Article, Product, SoftwareApplication
+
+**Industry Detection:** E-commerce, Technology, Media & Publishing, Local Business, Education
+
+**Topics:** Structured Data, E-E-A-T, AI Optimization, Citations, Comprehensive Content
+
+**Keywords:** Extracted from URL paths + schema types (max 10)
+
+### API Methods
+
+**Discovery & Health:**
+- `a2a.discover` - Service metadata and capabilities
+- `a2a.capabilities` - Detailed API documentation
+- `a2a.ping` - Health check
+- `a2a.status` - Server status
+
+**GEO Audit:**
+- `geo.audit.request` - Single URL audit (cached 1 hour)
+- `geo.audit.batch` - Batch audit (max 100 URLs, 5 concurrent)
+- `geo.audit.status` - Job status tracking (planned)
+- `geo.audit.result` - Retrieve cached results (planned)
+
+**Insights (Planned):**
+- `geo.insights.global` - Global GEO trends
+- `geo.insights.industry` - Industry benchmarks
+- `geo.insights.domain` - Domain-specific analytics
+
+### Usage Example
+
+```bash
+# cURL Request
+curl -X POST https://anoteroslogos.com/api/a2a \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer sk_basic_your_32_character_api_key_here" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "geo.audit.request",
+    "params": { "url": "https://example.com" },
+    "id": 1
+  }'
+
+# Response (AI-Optimized Format)
+{
+  "jsonrpc": "2.0",
+  "result": {
+    "audit_id": "aud_1735891234_abc123",
+    "url": "https://example.com",
+    "status": "completed",
+    "overall_score": 85,
+    "grade": "Expert",
+    "confidence": 0.88,
+    "categories": { ... },
+    "findings": {
+      "critical": [],
+      "warnings": [...],
+      "recommendations": [...],
+      "opportunities": [...]
+    },
+    "semantic_data": {
+      "entity_type": "Organization",
+      "industry": "Technology",
+      "topics": ["Structured Data", "E-E-A-T"],
+      "keywords": [...],
+      "entities": [...]
+    },
+    "citations": {
+      "sources": [...],
+      "data_points": 45,
+      "factual_claims": 23,
+      "expert_quotes": 5
+    },
+    "insights": [
+      {
+        "type": "best_practice",
+        "title": "Strong Technical & Authority Foundation",
+        "description": "...",
+        "confidence": 0.88
+      }
+    ],
+    "metadata": {
+      "processing_time_ms": 3842,
+      "agent_used": "Perplexity AI",
+      "depth": "standard",
+      "version": "1.0.0"
+    }
+  },
+  "id": 1
+}
+```
+
+### Cache Strategy
+
+- **Audit Results:** 1 hour TTL
+- **Global Insights:** 24 hours TTL
+- **Industry Insights:** 12 hours TTL
+- **Domain Trends:** 6 hours TTL
+- **Max Size:** 100 MB with LRU eviction at 80% capacity
+
+### Production Features
+
+✅ **Type Safety:** Full TypeScript with Zod runtime validation
+✅ **Rate Limiting:** Token bucket algorithm with burst support
+✅ **Caching:** ETag-based HTTP 304 responses
+✅ **Error Handling:** JSON-RPC 2.0 compliant error codes
+✅ **Security:** API key format validation, CORS headers
+✅ **Monitoring:** Request logging, rate limit headers
+✅ **Scalability:** Serverless architecture, in-memory cache
+
+### Next Steps
+
+**Phase 2 - WebSocket Streaming (Planned):**
+- Real-time progress updates
+- Subscription management
+- WebSocket server endpoint
+
+**Phase 3 - Async Job Processing (Planned):**
+- Queue integration with audit engine
+- Job status tracking API
+- Webhook callbacks
+
+**Phase 4 - Advanced Insights (Planned):**
+- Global insights aggregation from database
+- Industry benchmarking with percentiles
+- Trend analysis endpoints
+
+**Phase 5 - Production Hardening (Planned):**
+- Replace in-memory storage with Redis
+- Distributed tracing (OpenTelemetry)
+- Monitoring & alerting (Sentry)
+- API key management UI
+- Developer portal
+
+---
 
 ## GEO Audit Tool
 

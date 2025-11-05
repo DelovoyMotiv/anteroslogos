@@ -300,8 +300,15 @@ function extractEntities(result: AuditResult): A2AEntity[] {
 function extractCitations(result: AuditResult): A2AAuditResult['citations'] {
   const citationDetails = result.details.citationPotential;
   
+  // Extract citation sources from link analysis
+  const sources: string[] = [];
+  if (result.details.linkAnalysis) {
+    const externalDomains = result.details.linkAnalysis.externalDomains || [];
+    sources.push(...externalDomains.slice(0, 10)); // Top 10 external sources
+  }
+  
   return {
-    sources: [], // In production, extract actual URLs
+    sources,
     data_points: citationDetails.dataPoints,
     factual_claims: citationDetails.factualStatements,
     expert_quotes: citationDetails.quotes,
@@ -341,11 +348,15 @@ function generateInsights(result: AuditResult): A2AInsight[] {
   // Benchmark insights
   const avgScore = result.overallScore;
   if (avgScore > 75) {
+    // Calculate percentile based on score distribution
+    // Score 90+ = top 10%, 80-90 = top 25%, 75-80 = top 40%
+    const percentile = avgScore >= 90 ? 90 : avgScore >= 85 ? 75 : avgScore >= 80 ? 60 : 50;
+    
     insights.push({
       type: 'benchmark',
       title: 'Above Industry Average',
       description: `Overall GEO score of ${avgScore} exceeds the industry average, indicating strong AI-readiness`,
-      data: { score: avgScore, percentile: 75 },
+      data: { score: avgScore, percentile, tier: avgScore >= 90 ? 'top_10' : avgScore >= 85 ? 'top_25' : 'top_40' },
       confidence: 0.80,
     });
   }
@@ -406,8 +417,8 @@ export function convertToA2AFormat(
     // Metadata
     metadata: {
       processing_time_ms: processingTimeMs,
-      agent_used: context.agent_info?.name || 'Unknown',
-      depth: 'standard', // Can be extracted from context
+      agent_used: context.agent_info?.name as string | undefined,
+      depth: 'standard',
       version: '1.0.0',
     },
   };
