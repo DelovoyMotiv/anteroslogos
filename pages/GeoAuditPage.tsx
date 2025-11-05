@@ -4,8 +4,9 @@ import { auditWebsite, type AuditResult } from '../utils/geoAuditEnhanced';
 import { Search, AlertCircle, CheckCircle, TrendingUp, Download, Share2, ExternalLink, Award, Target, Zap, TrendingDown, Minus, History, Shield, FileText } from 'lucide-react';
 import { saveAuditToHistory, compareWithPrevious, checkScoreDrop } from '../utils/auditHistory';
 import { validateAndSanitizeUrl, checkRateLimit, validateAuditResult } from '../utils/urlValidator';
-import { generatePDFReport } from '../utils/pdfReportGenerator';
-import { exportToCSV, exportToMarkdown, exportToHTML } from '../utils/exportFormats';
+// Dynamic imports for heavy libraries
+// import { generatePDFReport } from '../utils/pdfReportGenerator';
+// import { exportToCSV, exportToMarkdown, exportToHTML } from '../utils/exportFormats';
 import { analyzeAndGenerateAlerts, type Alert } from '../utils/monitoringAlerts';
 import { analyzeTrend, generatePerformanceInsights, type TrendAnalysis, type PerformanceInsights } from '../utils/advancedAnalytics';
 import { generateCompetitiveComparison, updateCompetitorData, type CompetitiveComparison } from '../utils/competitiveIntelligence';
@@ -18,7 +19,7 @@ import PriorityMatrix from '../components/charts/PriorityMatrix';
 import CategoryBarChart from '../components/charts/CategoryBarChart';
 import ExecutiveSummary from '../components/ExecutiveSummary';
 import SEOHead from '../components/SEOHead';
-import RealtimeMonitorPanel from '../components/RealtimeMonitorPanel';
+// Removed: RealtimeMonitorPanel (bundle optimization)
 
 const GeoAuditPage = () => {
   const navigate = useNavigate();
@@ -142,9 +143,10 @@ const GeoAuditPage = () => {
     linkElement.click();
   };
 
-  const downloadCSVReport = () => {
+  const downloadCSVReport = async () => {
     if (!result) return;
     try {
+      const { exportToCSV } = await import('../utils/exportFormats');
       exportToCSV(result);
     } catch (error) {
       console.error('Failed to export CSV:', error);
@@ -152,9 +154,10 @@ const GeoAuditPage = () => {
     }
   };
 
-  const downloadMarkdownReport = () => {
+  const downloadMarkdownReport = async () => {
     if (!result) return;
     try {
+      const { exportToMarkdown } = await import('../utils/exportFormats');
       exportToMarkdown(result);
     } catch (error) {
       console.error('Failed to export Markdown:', error);
@@ -162,9 +165,10 @@ const GeoAuditPage = () => {
     }
   };
 
-  const downloadHTMLReport = () => {
+  const downloadHTMLReport = async () => {
     if (!result) return;
     try {
+      const { exportToHTML } = await import('../utils/exportFormats');
       exportToHTML(result);
     } catch (error) {
       console.error('Failed to export HTML:', error);
@@ -175,6 +179,7 @@ const GeoAuditPage = () => {
   const downloadPDFReport = async () => {
     if (!result) return;
     try {
+      const { generatePDFReport } = await import('../utils/pdfReportGenerator');
       await generatePDFReport(result, {
         includeCharts: true,
         includeRecommendations: true,
@@ -1050,26 +1055,6 @@ const GeoAuditPage = () => {
                 </div>
               </div>
             )}
-
-            {/* Real-time GEO Monitor Section */}
-            <div className="mt-16 mb-12">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold mb-3">
-                  <span className="bg-gradient-to-r from-cyan-400 via-green-400 to-teal-400 bg-clip-text text-transparent">
-                  Real-time GEO Monitor
-                  </span>
-                </h2>
-                <p className="text-white/60 max-w-3xl mx-auto">
-                  Live monitoring of your GEO health and AI visibility. Track schema validation, crawler access, 
-                  uptime status, and more in real-time.
-                </p>
-              </div>
-
-              {/* Monitor Content */}
-              <div className="p-8 bg-white/5 border border-white/10 rounded-2xl">
-                <RealtimeMonitorPanel domain={new URL(result.url).hostname} />
-              </div>
-            </div>
 
             {/* CTA */}
             <div className="mt-12 p-6 bg-gradient-to-br from-brand-accent/10 to-transparent border border-brand-accent/30 rounded-xl text-center">
