@@ -42,7 +42,6 @@ const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick, onContactC
         { label: 'GEO Audit', onClick: () => navigate('/geo-audit'), isScroll: false, highlight: true },
         { label: 'Knowledge Base', onClick: () => navigate('/knowledge-base'), isScroll: false },
         { label: 'Blog', onClick: () => navigate('/blog'), isScroll: false },
-        { label: 'Investors', onClick: () => navigate('/investors'), isScroll: false },
     ];
 
     return (
