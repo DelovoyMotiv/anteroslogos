@@ -1,0 +1,81 @@
+{
+  "v": "1.1",
+  "p": ["a2a", "http"],
+  "u": "https://anoteroslogos.com/api/a2a",
+  "s": "geoaudit",
+  "a": {
+    "name": "Anóteros Lógos GEO Agent",
+    "description": "Generative Engine Optimization audit and analysis agent. Provides comprehensive GEO scoring, competitive intelligence, and AI visibility optimization recommendations.",
+    "version": "2.0.0",
+    "capabilities": [
+      "geo.audit.request",
+      "geo.audit.batch",
+      "geo.insights.global",
+      "a2a.discover",
+      "a2a.capabilities"
+    ],
+    "vendor": "Anóteros Lógos",
+    "homepage": "https://anoteroslogos.com",
+    "documentation": "https://anoteroslogos.com/knowledge-base",
+    "contact": "https://anoteroslogos.com/#contact"
+  },
+  "d": "anoteroslogos.com",
+  "e": "https://anoteroslogos.com/api/a2a",
+  "k": {
+    "alg": "Ed25519",
+    "use": "sig",
+    "kid": "anoteroslogos-2025-primary"
+  },
+  "i": {
+    "logo": "https://anoteroslogos.com/logo.svg",
+    "icon": "https://anoteroslogos.com/favicon.ico",
+    "color": "#3b82f6"
+  },
+  "metadata": {
+    "organization": "Anóteros Lógos",
+    "industry": "Generative Engine Optimization",
+    "established": "2025",
+    "specialization": [
+      "AI Search Optimization",
+      "Schema.org Architecture",
+      "E-E-A-T Signal Development",
+      "AI Crawler Optimization",
+      "Citation Probability Enhancement"
+    ],
+    "pricing": {
+      "free": {
+        "requests_per_minute": 10,
+        "requests_per_hour": 100
+      },
+      "basic": {
+        "monthly_price": 99,
+        "requests_per_minute": 60,
+        "requests_per_hour": 1000
+      },
+      "pro": {
+        "monthly_price": 299,
+        "requests_per_minute": 300,
+        "requests_per_hour": 10000
+      }
+    },
+    "protocols": {
+      "a2a": {
+        "version": "1.0.0",
+        "endpoint": "https://anoteroslogos.com/api/a2a",
+        "methods": [
+          "a2a.discover",
+          "a2a.capabilities",
+          "geo.audit.request",
+          "geo.audit.batch",
+          "a2a.ping",
+          "a2a.status"
+        ]
+      },
+      "http": {
+        "version": "1.1",
+        "endpoint": "https://anoteroslogos.com",
+        "methods": ["GET", "POST"]
+      }
+    }
+  }
+}

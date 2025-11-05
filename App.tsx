@@ -12,6 +12,7 @@ const Blog = lazy(() => import('./pages/Blog'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
 const AuthorPage = lazy(() => import('./pages/Author'));
 const InvestorRelationsPage = lazy(() => import('./pages/InvestorRelationsPage'));
+const AgentIdentityPage = lazy(() => import('./pages/AgentIdentityPage'));
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
 const CookiePolicyPage = lazy(() => import('./pages/CookiePolicyPage'));
 const NotFound = lazy(() => import('./components/NotFound'));
@@ -30,6 +31,7 @@ const App: React.FC = () => {
                         <Route path="/blog/:slug" element={<BlogPost />} />
                         <Route path="/author/:slug" element={<AuthorPage />} />
                         <Route path="/investors" element={<InvestorRelationsPage />} />
+                        <Route path="/agent-identity" element={<AgentIdentityPage />} />
                         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                         <Route path="/cookie-policy" element={<CookiePolicyPage />} />
                         <Route path="*" element={<NotFound />} />

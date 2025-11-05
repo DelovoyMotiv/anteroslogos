@@ -103,6 +103,14 @@
     <priority>0.9</priority>
   </url>
 
+  <!-- Agent Identity & Discovery (AID) Protocol -->
+  <url>
+    <loc>https://anoteroslogos.com/agent-identity</loc>
+    <lastmod>2025-01-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.95</priority>
+  </url>
+
   <!-- Blog Index -->
   <url>
     <loc>https://anoteroslogos.com/blog</loc>

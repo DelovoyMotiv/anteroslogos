@@ -53,6 +53,7 @@ const Footer: React.FC<FooterProps> = ({ onPhilosophyClick, onMethodClick, onCli
         { title: 'Connect', links: [
             { label: 'Contact', onClick: onContactClick },
             { label: 'Investors', onClick: () => window.location.href = '/investors' },
+            { label: 'Agent Identity', onClick: () => window.location.href = '/agent-identity', badge: 'AID' },
             { label: 'Careers', onClick: onContactClick, badge: 'Soon' },
             { label: 'Partner', onClick: onContactClick },
         ]},

@@ -122,6 +122,8 @@ F:\air\
 ├── pages/
 │   ├── HomePage.tsx
 │   ├── GeoAuditPage.tsx           # GEO Audit Tool with analytics
+│   ├── AgentIdentityPage.tsx     # AID protocol documentation (393 lines)
+│   ├── InvestorRelationsPage.tsx # Investment data (660 lines)
 │   ├── Blog.tsx
 │   ├── BlogPost.tsx
 │   ├── Author.tsx
@@ -155,7 +157,8 @@ F:\air\
 │   ├── manifest.json
 │   └── .well-known/
 │       ├── ai.txt
-│       └── security.txt
+│       ├── security.txt
+│       └── agent.json              # AID protocol discovery file
 ├── supabase/
 │   └── migrations/
 │       └── 001_initial_schema.sql
@@ -337,6 +340,77 @@ npm prune
 - Markdown rendering with proper code highlighting
 - Minified and optimized assets
 - Gzip compression enabled on Vercel
+
+## AID Protocol - Agent Identity & Discovery
+
+Implementation of the Agent Identity & Discovery protocol (AID v1.1) from agentcommunity.org. DNS-first approach for making AI agents discoverable across the agentic web ecosystem.
+
+### Protocol Overview
+
+**What is AID?**
+AID (Agent Identity & Discovery) is the DNS for AI agents. It solves the fundamental question: "Given a domain, where is its AI agent?" One TXT record makes an agent instantly discoverable.
+
+**Strategic Philosophy:**
+"Minimal, DNS-crystal clear mechanism of discoverability" - No registries, no configuration, no intermediaries. Just DNS.
+
+### Technical Implementation
+
+**1. DNS TXT Record** (`_agent.anoteroslogos.com`)
+```
+v=1.1;p=a2a,http;u=https://anoteroslogos.com/api/a2a;s=geoaudit;d=anoteroslogos.com
+```
+
+Single-letter aliases fit within 255-byte DNS limit:
+- `v=1.1` - AID protocol version 1.1
+- `p=a2a,http` - Supported protocols (A2A, HTTP)
+- `u=...` - Primary endpoint URL
+- `s=geoaudit` - Service identifier
+- `d=...` - Domain ownership verification
+
+**2. Well-Known Discovery** (`/.well-known/agent.json`)
+Fallback HTTPS discovery mechanism per RFC 8615:
+- Agent capabilities enumeration
+- Protocol version information
+- Ed25519 key metadata (RFC 9421)
+- Pricing and rate limit details
+- Organization metadata
+
+**3. Documentation Page** (`/agent-identity`)
+Public-facing page explaining:
+- AID protocol integration
+- DNS configuration instructions
+- Agent capabilities showcase
+- Discovery mechanisms
+- Security considerations
+- Market adoption metrics
+
+### Key Features
+
+- **DNS-First Discovery**: Single TXT record for global agent discovery
+- **Hybrid Fallback**: DNS primary, HTTPS well-known secondary
+- **Protocol-Agnostic**: Supports A2A, MCP, ANP, HTTP protocols
+- **Cryptographic Proof**: Ed25519 signatures (RFC 9421) for domain verification
+- **Zero Dependencies**: No external registries or platforms required
+- **Vercel Compatible**: Serverless-friendly static discovery file
+
+### Market Context
+
+- **Adoption**: 5,000+ domains (3 months post-v1.0)
+- **Standards Track**: IETF RFC discussion (expected 2026)
+- **Integration**: MCP, A2A, ANP servers
+- **Marketplace Support**: OpenAI Plugins, Claude, Vertex AI
+- **Specification**: agentcommunity.org v1.1 (October 2025)
+
+### Setup Instructions
+
+See `DNS_SETUP.md` for complete configuration guide including:
+- Cloudflare setup
+- Route 53 (AWS) setup
+- Google Cloud DNS setup
+- Verification methods
+- Troubleshooting
+
+---
 
 ## A2A Protocol - Agent2Agent API
 
