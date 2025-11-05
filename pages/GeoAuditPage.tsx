@@ -727,23 +727,23 @@ const GeoAuditPage = () => {
               </div>
             </div>
 
-            {/* Detailed Findings - Minimalist Grid */}
-            <div className="mb-16">
-              <h3 className="text-xl font-bold text-white mb-6 tracking-tight">Detailed Analysis</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10">
+            {/* Detailed Analysis - Compact Grid */}
+            <div className="mb-12">
+              <h3 className="text-xl font-bold text-white mb-4 tracking-tight">Detailed Analysis</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {Object.entries(result.details).map(([category, details]) => (
-                  <div key={category} className="space-y-4">
-                    <h4 className="text-sm font-bold text-white uppercase tracking-wider">
+                  <div key={category} className="p-3 bg-white/5 border border-white/10 rounded-lg space-y-3">
+                    <h4 className="text-xs font-bold text-white uppercase tracking-wide pb-2 border-b border-white/10">
                       {category.replace(/([A-Z])/g, ' $1').trim()}
                     </h4>
                     
                     {details.strengths.length > 0 && (
-                      <div className="space-y-2">
-                        <p className="text-xs text-green-400 font-semibold uppercase tracking-wider">Strengths</p>
-                        <ul className="space-y-2">
+                      <div className="space-y-1.5">
+                        <p className="text-[10px] text-green-400 font-bold uppercase tracking-wide">Strengths</p>
+                        <ul className="space-y-1.5">
                           {details.strengths.map((strength, i) => (
-                            <li key={i} className="text-xs text-white/60 flex items-start gap-2 leading-relaxed">
-                              <CheckCircle className="w-3.5 h-3.5 text-green-400 flex-shrink-0 mt-0.5" />
+                            <li key={i} className="text-[11px] text-white/60 flex items-start gap-1.5 leading-snug">
+                              <CheckCircle className="w-3 h-3 text-green-400 flex-shrink-0 mt-0.5" />
                               <span>{strength}</span>
                             </li>
                           ))}
@@ -752,12 +752,12 @@ const GeoAuditPage = () => {
                     )}
 
                     {details.issues.length > 0 && (
-                      <div className="space-y-2">
-                        <p className="text-xs text-orange-400 font-semibold uppercase tracking-wider">Issues</p>
-                        <ul className="space-y-2">
+                      <div className="space-y-1.5">
+                        <p className="text-[10px] text-orange-400 font-bold uppercase tracking-wide">Issues</p>
+                        <ul className="space-y-1.5">
                           {details.issues.map((issue, i) => (
-                            <li key={i} className="text-xs text-white/60 flex items-start gap-2 leading-relaxed">
-                              <AlertCircle className="w-3.5 h-3.5 text-orange-400 flex-shrink-0 mt-0.5" />
+                            <li key={i} className="text-[11px] text-white/60 flex items-start gap-1.5 leading-snug">
+                              <AlertCircle className="w-3 h-3 text-orange-400 flex-shrink-0 mt-0.5" />
                               <span>{issue}</span>
                             </li>
                           ))}
@@ -769,34 +769,34 @@ const GeoAuditPage = () => {
               </div>
             </div>
 
-            {/* Monitoring Alerts */}
+            {/* Monitoring Alerts - Compact */}
             {alerts.length > 0 && (
               <div className="mb-8">
-                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <AlertCircle className="w-6 h-6 text-red-400" />
+                <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
+                  <AlertCircle className="w-5 h-5 text-red-400" />
                   Monitoring Alerts ({alerts.length})
                 </h3>
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {alerts.slice(0, 5).map((alert) => (
                     <div 
                       key={alert.id} 
-                      className={`p-4 border rounded-xl ${
+                      className={`p-3 border rounded-lg ${
                         alert.severity === 'critical' ? 'bg-red-500/10 border-red-500/40' :
                         alert.severity === 'high' ? 'bg-orange-500/10 border-orange-500/40' :
                         alert.severity === 'medium' ? 'bg-yellow-500/10 border-yellow-500/40' :
                         'bg-blue-500/10 border-blue-500/40'
                       }`}
                     >
-                      <div className="flex items-start gap-3">
-                        <AlertCircle className={`w-5 h-5 flex-shrink-0 ${
+                      <div className="flex items-start gap-2">
+                        <AlertCircle className={`w-4 h-4 flex-shrink-0 mt-0.5 ${
                           alert.severity === 'critical' ? 'text-red-400' :
                           alert.severity === 'high' ? 'text-orange-400' :
                           alert.severity === 'medium' ? 'text-yellow-400' :
                           'text-blue-400'
                         }`} />
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className={`text-xs px-2 py-0.5 rounded-full uppercase font-bold ${
+                            <span className={`text-[10px] px-1.5 py-0.5 rounded uppercase font-bold ${
                               alert.severity === 'critical' ? 'bg-red-500/20 text-red-300' :
                               alert.severity === 'high' ? 'bg-orange-500/20 text-orange-300' :
                               alert.severity === 'medium' ? 'bg-yellow-500/20 text-yellow-300' :
@@ -804,12 +804,12 @@ const GeoAuditPage = () => {
                             }`}>
                               {alert.severity}
                             </span>
-                            <span className="text-xs text-white/40">{alert.category}</span>
+                            <span className="text-[10px] text-white/40">{alert.category}</span>
                           </div>
-                          <h4 className="font-bold mb-1">{alert.title}</h4>
-                          <p className="text-sm text-white/70 mb-2">{alert.message}</p>
+                          <h4 className="font-bold text-sm mb-1">{alert.title}</h4>
+                          <p className="text-xs text-white/70 mb-1.5 leading-snug">{alert.message}</p>
                           {alert.recommendation && (
-                            <p className="text-xs text-brand-accent"><span className="font-bold">Recommendation:</span> {alert.recommendation}</p>
+                            <p className="text-[11px] text-brand-accent"><span className="font-bold">Recommendation:</span> {alert.recommendation}</p>
                           )}
                         </div>
                       </div>
@@ -819,20 +819,20 @@ const GeoAuditPage = () => {
               </div>
             )}
 
-            {/* Advanced Analytics - Trends & Insights */}
+            {/* Performance Analytics - Compact */}
             {(trend || insights) && (
               <div className="mb-8">
-                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <TrendingUp className="w-6 h-6 text-brand-accent" />
+                <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-brand-accent" />
                   Performance Analytics
                 </h3>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                   {trend && (
-                    <div className="p-4 bg-white/5 border border-brand-secondary rounded-xl">
-                      <h4 className="font-bold mb-4 flex items-center gap-2">
+                    <div className="p-3 bg-white/5 border border-brand-secondary rounded-lg">
+                      <h4 className="font-bold text-sm mb-2 flex items-center gap-2">
                         <TrendingUp className="w-4 h-4 text-brand-accent" />
                         Trend Analysis
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded ${
                           trend.direction === 'improving' ? 'bg-green-500/20 text-green-300' :
                           trend.direction === 'declining' ? 'bg-red-500/20 text-red-300' :
                           'bg-gray-500/20 text-gray-300'
@@ -840,7 +840,7 @@ const GeoAuditPage = () => {
                           {trend.direction}
                         </span>
                       </h4>
-                      <div className="space-y-2 text-sm">
+                      <div className="space-y-1.5 text-xs">
                         <div className="flex justify-between">
                           <span className="text-white/60">Trend Slope:</span>
                           <span className="font-mono text-brand-accent">{trend.slope} pts/audit</span>
@@ -853,16 +853,16 @@ const GeoAuditPage = () => {
                           <span className="text-white/60">Volatility:</span>
                           <span className="font-mono">{trend.volatility}</span>
                         </div>
-                        <div className="pt-3 mt-3 border-t border-white/10">
-                          <p className="text-white/60 text-xs mb-2">Forecast:</p>
+                        <div className="pt-2 mt-2 border-t border-white/10">
+                          <p className="text-white/60 text-[10px] mb-1.5 font-semibold">Forecast:</p>
                           <div className="space-y-1">
                             <div className="flex justify-between">
-                              <span className="text-white/50 text-xs">7 days:</span>
-                              <span className="font-mono text-xs">{trend.forecast.next7Days}</span>
+                              <span className="text-white/50 text-[10px]">7 days:</span>
+                              <span className="font-mono text-[11px]">{trend.forecast.next7Days}</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-white/50 text-xs">30 days:</span>
-                              <span className="font-mono text-xs">{trend.forecast.next30Days}</span>
+                              <span className="text-white/50 text-[10px]">30 days:</span>
+                              <span className="font-mono text-[11px]">{trend.forecast.next30Days}</span>
                             </div>
                           </div>
                         </div>
@@ -870,12 +870,12 @@ const GeoAuditPage = () => {
                     </div>
                   )}
                   {insights && (
-                    <div className="p-4 bg-white/5 border border-brand-secondary rounded-xl">
-                      <h4 className="font-bold mb-4 flex items-center gap-2">
+                    <div className="p-3 bg-white/5 border border-brand-secondary rounded-lg">
+                      <h4 className="font-bold text-sm mb-2 flex items-center gap-2">
                         <Target className="w-4 h-4 text-brand-accent" />
                         Performance Insights
                       </h4>
-                      <div className="space-y-2 text-sm">
+                      <div className="space-y-1.5 text-xs">
                         <div className="flex justify-between">
                           <span className="text-white/60">Best Score:</span>
                           <span className="font-mono text-green-400">{insights.bestScore.score}</span>
@@ -901,8 +901,8 @@ const GeoAuditPage = () => {
                           <span className="font-mono">{insights.consistency}/100</span>
                         </div>
                         {insights.timeToReachTarget && (
-                          <div className="pt-3 mt-3 border-t border-white/10">
-                            <p className="text-brand-accent text-xs font-semibold">Target: {insights.timeToReachTarget} days to reach 90+ score</p>
+                          <div className="pt-2 mt-2 border-t border-white/10">
+                            <p className="text-brand-accent text-[10px] font-semibold">Target: {insights.timeToReachTarget} days to reach 90+ score</p>
                           </div>
                         )}
                       </div>
