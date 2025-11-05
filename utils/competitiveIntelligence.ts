@@ -320,8 +320,8 @@ export function generateCompetitiveComparison(
   const categoryBreakdown: Record<string, any> = {};
   
   categoryKeys.forEach(category => {
-    const scores = allSites.map(s => s.scores[category]);
-    const yourScore = yourResult.scores[category];
+    const scores = allSites.map(s => (s.scores as any)[category] || 0);
+    const yourScore = (yourResult.scores as any)[category] || 0;
     
     const sorted = [...scores].sort((a, b) => b - a);
     const yourRank = sorted.findIndex(s => s === yourScore) + 1;
@@ -438,7 +438,9 @@ export function compareWithIndustryBenchmark(
   const categoryDifferences: Record<string, number> = {};
   
   categoryKeys.forEach(category => {
-    categoryDifferences[category] = result.scores[category] - benchmark.categoryAverages[category];
+    const yourScore = (result.scores as any)[category] || 0;
+    const benchmarkScore = (benchmark.categoryAverages as any)[category] || 0;
+    categoryDifferences[category] = yourScore - benchmarkScore;
   });
   
   // Generate recommendations
@@ -535,7 +537,7 @@ export function getCompetitiveIntelligenceSummary(
   categoryKeys.forEach(category => {
     const competitorScores = competitors
       .filter(c => c.scores)
-      .map(c => c.scores![category]);
+      .map(c => (c.scores as any)![category] || 0);
     
     if (competitorScores.length > 0) {
       const avgCompetitor = competitorScores.reduce((a, b) => a + b, 0) / competitorScores.length;
@@ -609,6 +611,8 @@ function formatCategoryName(category: string): string {
     citationPotential: 'Citation Potential',
     technicalSEO: 'Technical SEO',
     linkAnalysis: 'Link Analysis',
+    aidAgent: 'AID Agent Discovery',
   };
   return names[category] || category;
 }
+

@@ -20,6 +20,7 @@ import CategoryBarChart from '../components/charts/CategoryBarChart';
 import ExecutiveSummary from '../components/ExecutiveSummary';
 import AIVisibilityScore, { calculateAIVisibilityScore } from '../components/AIVisibilityScore';
 import GEOHealthTracker from '../components/GEOHealthTracker';
+import AIDAgentStatus from '../components/AIDAgentStatus';
 import SEOHead from '../components/SEOHead';
 // Removed: RealtimeMonitorPanel (bundle optimization)
 
@@ -691,6 +692,16 @@ const GeoAuditPage = () => {
               currentScore={calculateAIVisibilityScore(result).overall} 
             />
 
+            {/* AID Agent Discovery - New Section */}
+            {result.details.aidAgent && (
+              <div className="mb-16">
+                <AIDAgentStatus 
+                  aidInfo={result.details.aidAgent} 
+                  score={result.scores.aidAgent} 
+                />
+              </div>
+            )}
+
             {/* Insights */}
             {result.insights && result.insights.length > 0 && (
               <div className="mb-16">
@@ -776,7 +787,9 @@ const GeoAuditPage = () => {
             <div className="mb-12">
               <h3 className="text-xl font-bold text-white mb-4 tracking-tight">Detailed Analysis</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {Object.entries(result.details).map(([category, details]) => (
+                {Object.entries(result.details)
+                  .filter(([category]) => category !== 'aidAgent') // AID has dedicated section
+                  .map(([category, details]: [string, any]) => (
                   <div key={category} className="p-3 bg-white/5 border border-white/10 rounded-lg space-y-3">
                     <h4 className="text-xs font-bold text-white uppercase tracking-wide pb-2 border-b border-white/10">
                       {category.replace(/([A-Z])/g, ' $1').trim()}
@@ -786,7 +799,7 @@ const GeoAuditPage = () => {
                       <div className="space-y-1.5">
                         <p className="text-[10px] text-green-400 font-bold uppercase tracking-wide">Strengths</p>
                         <ul className="space-y-1.5">
-                          {details.strengths.map((strength, i) => (
+                          {details.strengths.map((strength: string, i: number) => (
                             <li key={i} className="text-[11px] text-white/60 flex items-start gap-1.5 leading-snug">
                               <CheckCircle className="w-3 h-3 text-green-400 flex-shrink-0 mt-0.5" />
                               <span>{strength}</span>
@@ -800,7 +813,7 @@ const GeoAuditPage = () => {
                       <div className="space-y-1.5">
                         <p className="text-[10px] text-orange-400 font-bold uppercase tracking-wide">Issues</p>
                         <ul className="space-y-1.5">
-                          {details.issues.map((issue, i) => (
+                          {details.issues.map((issue: string, i: number) => (
                             <li key={i} className="text-[11px] text-white/60 flex items-start gap-1.5 leading-snug">
                               <AlertCircle className="w-3 h-3 text-orange-400 flex-shrink-0 mt-0.5" />
                               <span>{issue}</span>

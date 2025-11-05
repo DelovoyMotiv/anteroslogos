@@ -3,6 +3,8 @@
  * Advanced website analysis for Generative Engine Optimization
  */
 
+import type { AIDAgentInfo } from './aidDiscovery';
+
 // ==================== INTERFACES ====================
 
 export interface AuditResult {
@@ -28,6 +30,7 @@ export interface AuditResult {
     citationPotential: number;
     technicalSEO: number;
     linkAnalysis: number;
+    aidAgent: number; // AID protocol support score
   };
   details: {
     schemaMarkup: EnhancedSchemaDetails;
@@ -40,6 +43,7 @@ export interface AuditResult {
     citationPotential: CitationPotentialDetails;
     technicalSEO: TechnicalSEODetails;
     linkAnalysis: LinkAnalysisDetails;
+    aidAgent: AIDAgentInfo; // AID protocol detection details
   };
   recommendations: EnhancedRecommendation[];
   insights: string[];
@@ -293,6 +297,10 @@ export async function auditWebsite(
   
   onProgress?.('Checking AI crawler access...');
   const aiCrawlers = await auditAICrawlers(normalizedUrl);
+  
+  onProgress?.('Detecting AI agent support (AID protocol)...');
+  const { discoverAIDAgent, calculateAIDScore } = await import('./aidDiscovery');
+  const aidAgent = await discoverAIDAgent(normalizedUrl);
 
   // Calculate category scores
   const scores = {
@@ -306,6 +314,7 @@ export async function auditWebsite(
     citationPotential: calculateCitationPotentialScore(citationPotential),
     technicalSEO: calculateTechnicalSEOScore(technicalSEO),
     linkAnalysis: calculateLinkAnalysisScore(linkAnalysis),
+    aidAgent: calculateAIDScore(aidAgent),
   };
 
   // Advanced weighted scoring with dynamic weights based on content type
@@ -313,18 +322,24 @@ export async function auditWebsite(
   const grade = getGrade(scoreCalc.overall);
 
   // Generate default recommendations
-  const defaultRecommendations = generateEnhancedRecommendations({
-    schemaMarkup,
-    metaTags,
-    aiCrawlers,
-    eeat,
-    structure,
-    performance,
-    contentQuality,
-    citationPotential,
-    technicalSEO,
-    linkAnalysis,
-  }, scores);
+  const { generateAIDRecommendations } = await import('./aidDiscovery');
+  const aidRecommendations = generateAIDRecommendations(aidAgent, new URL(normalizedUrl).hostname);
+  
+  const defaultRecommendations = [
+    ...generateEnhancedRecommendations({
+      schemaMarkup,
+      metaTags,
+      aiCrawlers,
+      eeat,
+      structure,
+      performance,
+      contentQuality,
+      citationPotential,
+      technicalSEO,
+      linkAnalysis,
+    }, scores),
+    ...aidRecommendations
+  ];
 
   // Generate default insights
   const defaultInsights = generateInsights(scores, {
@@ -356,6 +371,7 @@ export async function auditWebsite(
       citationPotential,
       technicalSEO,
       linkAnalysis,
+      aidAgent,
     },
     recommendations: defaultRecommendations,
     insights: defaultInsights,
@@ -1833,31 +1849,36 @@ interface ScoreCalculation {
 
 function calculateOverallScore(scores: any, _schemaDetails: EnhancedSchemaDetails): ScoreCalculation {
   // Dynamic weighting based on content type
+  // Total must equal 1.00 (100%)
   const weights = {
-    schemaMarkup: 0.16,
-    aiCrawlers: 0.15,
-    eeat: 0.15,
-    technicalSEO: 0.13,
-    linkAnalysis: 0.12,
-    metaTags: 0.09,
-    contentQuality: 0.09,
-    structure: 0.06,
-    performance: 0.05,
-    citationPotential: 0.00,
+    schemaMarkup: 0.15,      // Schema.org markup (reduced from 0.16)
+    aiCrawlers: 0.14,        // AI crawler access (reduced from 0.15)
+    eeat: 0.14,              // E-E-A-T signals (reduced from 0.15)
+    technicalSEO: 0.12,      // Technical SEO (reduced from 0.13)
+    linkAnalysis: 0.11,      // Link structure (reduced from 0.12)
+    metaTags: 0.08,          // Meta tags (reduced from 0.09)
+    contentQuality: 0.08,    // Content quality (reduced from 0.09)
+    aidAgent: 0.08,          // AID protocol support (NEW - AI agent discovery)
+    structure: 0.06,         // HTML structure (unchanged)
+    performance: 0.04,       // Performance (reduced from 0.05)
+    citationPotential: 0.00, // Dynamic weight
   };
 
   // Adjust weights for content-heavy sites
   if (scores.contentQuality > 70) {
-    weights.contentQuality = 0.15;
+    weights.contentQuality = 0.14;
     weights.citationPotential = 0.10;
-    weights.schemaMarkup = 0.15;
+    weights.schemaMarkup = 0.14;
+    weights.aidAgent = 0.07; // Slightly reduce for content-focused sites
   }
 
   // Calculate component scores
+  // Core metrics: Schema, AI access, E-E-A-T, and AID agent support
   const coreScore = (
-    scores.schemaMarkup * 0.35 +
-    scores.aiCrawlers * 0.35 +
-    scores.eeat * 0.30
+    scores.schemaMarkup * 0.30 +
+    scores.aiCrawlers * 0.30 +
+    scores.eeat * 0.25 +
+    scores.aidAgent * 0.15
   );
 
   const technicalScore = (
@@ -1884,7 +1905,8 @@ function calculateOverallScore(scores: any, _schemaDetails: EnhancedSchemaDetail
     scores.contentQuality * weights.contentQuality +
     scores.citationPotential * weights.citationPotential +
     scores.technicalSEO * weights.technicalSEO +
-    scores.linkAnalysis * weights.linkAnalysis;
+    scores.linkAnalysis * weights.linkAnalysis +
+    scores.aidAgent * weights.aidAgent;
 
   // Return both rounded and precise scores
   return {

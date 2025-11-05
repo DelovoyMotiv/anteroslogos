@@ -106,28 +106,30 @@ export function exportToMarkdown(result: AuditResult): void {
   }
 
   md += `## Detailed Category Analysis\n\n`;
-  Object.entries(result.details).forEach(([category, details]) => {
-    const categoryName = category.replace(/([A-Z])/g, ' $1').trim();
-    const score = result.scores[category as keyof typeof result.scores];
-    
-    md += `### ${categoryName} (Score: ${score}/100)\n\n`;
-    
-    if (details.strengths && details.strengths.length > 0) {
-      md += `**✅ Strengths:**\n\n`;
-      details.strengths.forEach((strength) => {
-        md += `- ${strength}\n`;
-      });
-      md += `\n`;
-    }
+  Object.entries(result.details)
+    .filter(([category]) => category !== 'aidAgent') // AID has its own section
+    .forEach(([category, details]: [string, any]) => {
+      const categoryName = category.replace(/([A-Z])/g, ' $1').trim();
+      const score = result.scores[category as keyof typeof result.scores];
+      
+      md += `### ${categoryName} (Score: ${score}/100)\n\n`;
+      
+      if (details.strengths && details.strengths.length > 0) {
+        md += `**✅ Strengths:**\n\n`;
+        details.strengths.forEach((strength: string) => {
+          md += `- ${strength}\n`;
+        });
+        md += `\n`;
+      }
 
-    if (details.issues && details.issues.length > 0) {
-      md += `**⚠️ Issues:**\n\n`;
-      details.issues.forEach((issue) => {
-        md += `- ${issue}\n`;
-      });
-      md += `\n`;
-    }
-  });
+      if (details.issues && details.issues.length > 0) {
+        md += `**⚠️ Issues:**\n\n`;
+        details.issues.forEach((issue: string) => {
+          md += `- ${issue}\n`;
+        });
+        md += `\n`;
+      }
+    });
 
   md += `## Recommendations & Action Plan\n\n`;
 
