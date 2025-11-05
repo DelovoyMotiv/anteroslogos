@@ -234,32 +234,32 @@ const InvestorRelationsPage: React.FC = () => {
       <div className="min-h-screen bg-brand-bg text-brand-text">
         <Header />
         
-        <main className="pt-24 pb-16">
+        <main className="pt-20 sm:pt-24 pb-12">
           {/* Hero Section */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-            <div className="text-center mb-8">
-              <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/20 rounded-full px-4 py-2 mb-4">
-                <Award className="w-4 h-4 text-green-400" />
-                <span className="text-sm font-semibold text-green-400">Investment Rating: STRONG BUY</span>
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 sm:mb-16">
+            <div className="text-center mb-6 sm:mb-8">
+              <div className="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/20 rounded-full px-3 py-1.5 sm:px-4 sm:py-2 mb-4">
+                <Award className="w-3 h-3 sm:w-4 sm:h-4 text-green-400" />
+                <span className="text-xs sm:text-sm font-semibold text-green-400">Investment Rating: STRONG BUY</span>
                 <div className="flex gap-0.5 ml-2">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
                   ))}
                 </div>
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4">
                 Investor Relations
               </h1>
-              <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+              <p className="text-base sm:text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
                 Comprehensive investment analysis for pioneering Generative Engine Optimization agency
               </p>
-              <div className="mt-6 text-2xl font-bold text-brand-accent">
+              <div className="mt-4 sm:mt-6 text-xl sm:text-2xl font-bold text-brand-accent">
                 Valuation Target: $10-25M (Series A)
               </div>
             </div>
 
             {/* Key Metrics Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <MetricCard
                 icon={<TrendingUp className="w-6 h-6" />}
                 label="Market Momentum"
@@ -289,19 +289,19 @@ const InvestorRelationsPage: React.FC = () => {
           </section>
 
           {/* Market Size Analysis */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-            <div className="bg-white/5 border border-white/10 rounded-xl p-8">
-              <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
-                <Globe className="w-8 h-8 text-brand-accent" />
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 sm:mb-16">
+            <div className="bg-white/5 border border-white/10 rounded-xl p-4 sm:p-6 lg:p-8">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                <Globe className="w-6 h-6 sm:w-8 sm:h-8 text-brand-accent" />
                 Market Size Analysis
               </h2>
               
-              <div className="flex gap-4 mb-6">
+              <div className="flex flex-wrap gap-2 sm:gap-4 mb-4 sm:mb-6">
                 {(['tam', 'sam', 'som'] as const).map((segment) => (
                   <button
                     key={segment}
                     onClick={() => setSelectedSegment(segment)}
-                    className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                    className={`px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base font-semibold transition-all ${
                       selectedSegment === segment
                         ? 'bg-brand-accent text-white'
                         : 'bg-white/5 text-gray-400 hover:bg-white/10'
@@ -312,24 +312,24 @@ const InvestorRelationsPage: React.FC = () => {
                 ))}
               </div>
 
-              <div className="bg-white/5 border border-white/10 rounded-lg p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="text-2xl font-bold text-white mb-2">
+              <div className="bg-white/5 border border-white/10 rounded-lg p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-4">
+                  <div className="flex-1">
+                    <h3 className="text-xl sm:text-2xl font-bold text-white mb-1 sm:mb-2">
                       {marketSegments[selectedSegment].label}
                     </h3>
-                    <p className="text-gray-400">{marketSegments[selectedSegment].description}</p>
+                    <p className="text-sm sm:text-base text-gray-400">{marketSegments[selectedSegment].description}</p>
                   </div>
-                  <div className="text-4xl font-bold text-brand-accent">
+                  <div className="text-3xl sm:text-4xl font-bold text-brand-accent whitespace-nowrap">
                     {marketSegments[selectedSegment].value}
                   </div>
                 </div>
 
-                <div className="grid gap-4 mt-6">
+                <div className="grid gap-3 sm:gap-4 mt-4 sm:mt-6">
                   {marketSegments[selectedSegment].segments.map((segment, idx) => (
                     <div
                       key={idx}
-                      className="bg-white/5 border border-white/10 rounded-lg p-4 hover:bg-white/10 transition-all"
+                      className="bg-white/5 border border-white/10 rounded-lg p-3 sm:p-4 hover:bg-white/10 transition-all"
                     >
                       <div className="flex items-center justify-between">
                         <div>
@@ -353,52 +353,52 @@ const InvestorRelationsPage: React.FC = () => {
               </div>
 
               {/* Market Growth Visualization */}
-              <div className="mt-8 bg-white/5 border border-white/10 rounded-lg p-6">
-                <h3 className="text-xl font-bold text-white mb-4">Market Growth Projections (2024-2030)</h3>
+              <div className="mt-6 sm:mt-8 bg-white/5 border border-white/10 rounded-lg p-4 sm:p-6">
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">Market Growth Projections (2024-2030)</h3>
                 <MarketGrowthChart variant="area" />
               </div>
             </div>
           </section>
 
           {/* Revenue Model */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-            <div className="bg-white/5 border border-white/10 rounded-xl p-8">
-              <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
-                <DollarSign className="w-8 h-8 text-brand-accent" />
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 sm:mb-16">
+            <div className="bg-white/5 border border-white/10 rounded-xl p-4 sm:p-6 lg:p-8">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 text-brand-accent" />
                 Revenue Model & Unit Economics
               </h2>
 
-              <div className="grid md:grid-cols-3 gap-6 mb-8">
-                <div className="bg-white/5 border border-white/10 rounded-lg p-6">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                <div className="bg-white/5 border border-white/10 rounded-lg p-4 sm:p-6">
                   <div className="text-sm text-gray-400 mb-2">Average CLV</div>
                   <div className="text-3xl font-bold text-white mb-1">$40K-$75K</div>
                   <div className="text-xs text-gray-500">Over 18-24 months</div>
                 </div>
-                <div className="bg-white/5 border border-white/10 rounded-lg p-6">
-                  <div className="text-sm text-gray-400 mb-2">Customer Acquisition Cost</div>
-                  <div className="text-3xl font-bold text-white mb-1">$3K-$8K</div>
+                <div className="bg-white/5 border border-white/10 rounded-lg p-4 sm:p-6">
+                  <div className="text-xs sm:text-sm text-gray-400 mb-2">Customer Acquisition Cost</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-white mb-1">$3K-$8K</div>
                   <div className="text-xs text-gray-500">3-4 month payback</div>
                 </div>
-                <div className="bg-white/5 border border-white/10 rounded-lg p-6">
-                  <div className="text-sm text-gray-400 mb-2">CLV/CAC Ratio</div>
-                  <div className="text-3xl font-bold text-green-400 mb-1">5-9x</div>
+                <div className="bg-white/5 border border-white/10 rounded-lg p-4 sm:p-6">
+                  <div className="text-xs sm:text-sm text-gray-400 mb-2">CLV/CAC Ratio</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-green-400 mb-1">5-9x</div>
                   <div className="text-xs text-gray-500">Excellent unit economics</div>
                 </div>
               </div>
 
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {revenueStreams.map((stream, idx) => (
                   <div
                     key={idx}
-                    className="bg-white/5 border border-white/10 rounded-lg p-5 hover:bg-white/10 transition-all"
+                    className="bg-white/5 border border-white/10 rounded-lg p-4 sm:p-5 hover:bg-white/10 transition-all"
                   >
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h3 className="text-lg font-bold text-white mb-1">{stream.name}</h3>
-                        <p className="text-sm text-gray-400">{stream.structure}</p>
+                    <div className="flex flex-col sm:flex-row items-start justify-between gap-2 sm:gap-4 mb-2">
+                      <div className="flex-1">
+                        <h3 className="text-base sm:text-lg font-bold text-white mb-1">{stream.name}</h3>
+                        <p className="text-xs sm:text-sm text-gray-400">{stream.structure}</p>
                       </div>
-                      <div className="text-right">
-                        <div className="text-xl font-bold text-brand-accent">{stream.average}</div>
+                      <div className="text-left sm:text-right">
+                        <div className="text-lg sm:text-xl font-bold text-brand-accent">{stream.average}</div>
                         <div className="text-xs text-gray-500">{stream.duration}</div>
                       </div>
                     </div>
@@ -413,23 +413,23 @@ const InvestorRelationsPage: React.FC = () => {
           </section>
 
           {/* Competitive Landscape */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-            <div className="bg-white/5 border border-white/10 rounded-xl p-8">
-              <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
-                <Target className="w-8 h-8 text-brand-accent" />
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 sm:mb-16">
+            <div className="bg-white/5 border border-white/10 rounded-xl p-4 sm:p-6 lg:p-8">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                <Target className="w-6 h-6 sm:w-8 sm:h-8 text-brand-accent" />
                 Competitive Landscape
               </h2>
 
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {competitiveAnalysis.map((tier, idx) => (
                   <div
                     key={idx}
-                    className="bg-white/5 border border-white/10 rounded-lg p-6"
+                    className="bg-white/5 border border-white/10 rounded-lg p-4 sm:p-6"
                   >
-                    <div className="flex items-start justify-between mb-4">
-                      <div>
-                        <h3 className="text-xl font-bold text-white mb-1">{tier.tier}</h3>
-                        <p className="text-sm text-gray-400">{tier.players}</p>
+                    <div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4 mb-4">
+                      <div className="flex-1">
+                        <h3 className="text-lg sm:text-xl font-bold text-white mb-1">{tier.tier}</h3>
+                        <p className="text-xs sm:text-sm text-gray-400">{tier.players}</p>
                       </div>
                       <div
                         className={`px-3 py-1 rounded-full text-xs font-semibold ${
@@ -444,7 +444,7 @@ const InvestorRelationsPage: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-4">
+                    <div className="grid sm:grid-cols-2 gap-4">
                       <div>
                         <div className="text-xs font-semibold text-gray-500 mb-2 flex items-center gap-1">
                           <CheckCircle className="w-3 h-3 text-green-400" />
@@ -481,23 +481,23 @@ const InvestorRelationsPage: React.FC = () => {
           </section>
 
           {/* Risk Assessment */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-            <div className="bg-white/5 border border-white/10 rounded-xl p-8">
-              <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
-                <Shield className="w-8 h-8 text-brand-accent" />
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 sm:mb-16">
+            <div className="bg-white/5 border border-white/10 rounded-xl p-4 sm:p-6 lg:p-8">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-brand-accent" />
                 Risk Assessment & Mitigation
               </h2>
 
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {risks.map((risk, idx) => (
                   <div
                     key={idx}
-                    className="bg-white/5 border border-white/10 rounded-lg p-5 hover:bg-white/10 transition-all"
+                    className="bg-white/5 border border-white/10 rounded-lg p-4 sm:p-5 hover:bg-white/10 transition-all"
                   >
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <h3 className="text-lg font-bold text-white mb-1">{risk.risk}</h3>
-                        <div className="flex items-center gap-4 text-sm">
+                    <div className="flex flex-col sm:flex-row items-start justify-between gap-2 sm:gap-3 mb-3">
+                      <div className="flex-1">
+                        <h3 className="text-base sm:text-lg font-bold text-white mb-1">{risk.risk}</h3>
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-4 text-xs sm:text-sm">
                           <span className="text-gray-400">
                             Probability: <span className={risk.color}>{risk.probability}</span>
                           </span>
@@ -506,7 +506,7 @@ const InvestorRelationsPage: React.FC = () => {
                           </span>
                         </div>
                       </div>
-                      <AlertTriangle className={`w-6 h-6 ${risk.color}`} />
+                      <AlertTriangle className={`w-5 h-5 sm:w-6 sm:h-6 ${risk.color} flex-shrink-0`} />
                     </div>
                     <div className="bg-white/5 border border-white/10 rounded p-3">
                       <div className="text-xs font-semibold text-gray-500 mb-1">Mitigation Strategy</div>
@@ -519,18 +519,18 @@ const InvestorRelationsPage: React.FC = () => {
           </section>
 
           {/* SWOT Analysis */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-            <div className="bg-white/5 border border-white/10 rounded-xl p-8">
-              <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
-                <BarChart3 className="w-8 h-8 text-brand-accent" />
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 sm:mb-16">
+            <div className="bg-white/5 border border-white/10 rounded-xl p-4 sm:p-6 lg:p-8">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                <BarChart3 className="w-6 h-6 sm:w-8 sm:h-8 text-brand-accent" />
                 SWOT Analysis
               </h2>
 
-              <div className="grid md:grid-cols-2 gap-6">
+              <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
                 {/* Strengths */}
-                <div className="bg-green-500/5 border border-green-500/20 rounded-lg p-6">
-                  <h3 className="text-xl font-bold text-green-400 mb-4 flex items-center gap-2">
-                    <CheckCircle className="w-5 h-5" />
+                <div className="bg-green-500/5 border border-green-500/20 rounded-lg p-4 sm:p-6">
+                  <h3 className="text-lg sm:text-xl font-bold text-green-400 mb-3 sm:mb-4 flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                     Strengths
                   </h3>
                   <ul className="space-y-2">
@@ -544,9 +544,9 @@ const InvestorRelationsPage: React.FC = () => {
                 </div>
 
                 {/* Weaknesses */}
-                <div className="bg-red-500/5 border border-red-500/20 rounded-lg p-6">
-                  <h3 className="text-xl font-bold text-red-400 mb-4 flex items-center gap-2">
-                    <XCircle className="w-5 h-5" />
+                <div className="bg-red-500/5 border border-red-500/20 rounded-lg p-4 sm:p-6">
+                  <h3 className="text-lg sm:text-xl font-bold text-red-400 mb-3 sm:mb-4 flex items-center gap-2">
+                    <XCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                     Weaknesses
                   </h3>
                   <ul className="space-y-2">
@@ -560,9 +560,9 @@ const InvestorRelationsPage: React.FC = () => {
                 </div>
 
                 {/* Opportunities */}
-                <div className="bg-blue-500/5 border border-blue-500/20 rounded-lg p-6">
-                  <h3 className="text-xl font-bold text-blue-400 mb-4 flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5" />
+                <div className="bg-blue-500/5 border border-blue-500/20 rounded-lg p-4 sm:p-6">
+                  <h3 className="text-lg sm:text-xl font-bold text-blue-400 mb-3 sm:mb-4 flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5" />
                     Opportunities
                   </h3>
                   <ul className="space-y-2">
@@ -576,9 +576,9 @@ const InvestorRelationsPage: React.FC = () => {
                 </div>
 
                 {/* Threats */}
-                <div className="bg-orange-500/5 border border-orange-500/20 rounded-lg p-6">
-                  <h3 className="text-xl font-bold text-orange-400 mb-4 flex items-center gap-2">
-                    <AlertTriangle className="w-5 h-5" />
+                <div className="bg-orange-500/5 border border-orange-500/20 rounded-lg p-4 sm:p-6">
+                  <h3 className="text-lg sm:text-xl font-bold text-orange-400 mb-3 sm:mb-4 flex items-center gap-2">
+                    <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5" />
                     Threats
                   </h3>
                   <ul className="space-y-2">
@@ -595,34 +595,34 @@ const InvestorRelationsPage: React.FC = () => {
           </section>
 
           {/* Strategic Differentiators */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-            <div className="bg-gradient-to-br from-brand-accent/10 to-purple-600/10 border border-brand-accent/20 rounded-xl p-8">
-              <h2 className="text-3xl font-bold mb-6 flex items-center gap-3">
-                <Rocket className="w-8 h-8 text-brand-accent" />
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 sm:mb-16">
+            <div className="bg-gradient-to-br from-brand-accent/10 to-purple-600/10 border border-brand-accent/20 rounded-xl p-4 sm:p-6 lg:p-8">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                <Rocket className="w-6 h-6 sm:w-8 sm:h-8 text-brand-accent" />
                 Strategic Differentiators
               </h2>
 
-              <div className="grid md:grid-cols-3 gap-6">
-                <div className="bg-white/5 border border-white/10 rounded-lg p-6">
-                  <Lock className="w-8 h-8 text-brand-accent mb-3" />
-                  <h3 className="text-lg font-bold text-white mb-2">Proprietary IP</h3>
-                  <p className="text-sm text-gray-400">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <div className="bg-white/5 border border-white/10 rounded-lg p-4 sm:p-6">
+                  <Lock className="w-6 h-6 sm:w-8 sm:h-8 text-brand-accent mb-2 sm:mb-3" />
+                  <h3 className="text-base sm:text-lg font-bold text-white mb-2">Proprietary IP</h3>
+                  <p className="text-xs sm:text-sm text-gray-400">
                     "Nicosia Method" - proprietary framework for AI authority architecture that cannot be replicated by competitors
                   </p>
                 </div>
 
-                <div className="bg-white/5 border border-white/10 rounded-lg p-6">
-                  <Building2 className="w-8 h-8 text-brand-accent mb-3" />
-                  <h3 className="text-lg font-bold text-white mb-2">First-Mover Position</h3>
-                  <p className="text-sm text-gray-400">
+                <div className="bg-white/5 border border-white/10 rounded-lg p-4 sm:p-6">
+                  <Building2 className="w-6 h-6 sm:w-8 sm:h-8 text-brand-accent mb-2 sm:mb-3" />
+                  <h3 className="text-base sm:text-lg font-bold text-white mb-2">First-Mover Position</h3>
+                  <p className="text-xs sm:text-sm text-gray-400">
                     Pure-play GEO agency founded for the AI era, not a traditional SEO agency pivot
                   </p>
                 </div>
 
-                <div className="bg-white/5 border border-white/10 rounded-lg p-6">
-                  <Target className="w-8 h-8 text-brand-accent mb-3" />
-                  <h3 className="text-lg font-bold text-white mb-2">Perfect Timing</h3>
-                  <p className="text-sm text-gray-400">
+                <div className="bg-white/5 border border-white/10 rounded-lg p-4 sm:p-6">
+                  <Target className="w-6 h-6 sm:w-8 sm:h-8 text-brand-accent mb-2 sm:mb-3" />
+                  <h3 className="text-base sm:text-lg font-bold text-white mb-2">Perfect Timing</h3>
+                  <p className="text-xs sm:text-sm text-gray-400">
                     Market entry at inflection point of search transformation: 71% AI usage, 25-50% traffic shift predicted
                   </p>
                 </div>
@@ -631,27 +631,27 @@ const InvestorRelationsPage: React.FC = () => {
           </section>
 
           {/* CTA Section */}
-          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="bg-gradient-to-r from-brand-accent/20 to-purple-600/20 border border-brand-accent/30 rounded-xl p-8 text-center">
-              <h2 className="text-3xl font-bold mb-4">Investment Opportunity</h2>
-              <p className="text-lg text-gray-300 mb-6 max-w-2xl mx-auto">
+          <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 sm:mb-0">
+            <div className="bg-gradient-to-r from-brand-accent/20 to-purple-600/20 border border-brand-accent/30 rounded-xl p-6 sm:p-8 text-center">
+              <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">Investment Opportunity</h2>
+              <p className="text-sm sm:text-base lg:text-lg text-gray-300 mb-4 sm:mb-6 max-w-2xl mx-auto leading-relaxed">
                 Join us in architecting the future of brand authority in the AI age. 
                 Series A funding target: $10-25M for market expansion and platform development.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
                 <Link
                   to="/contact"
-                  className="inline-flex items-center justify-center gap-2 bg-brand-accent hover:bg-brand-accent/90 text-white px-8 py-4 rounded-lg font-semibold transition-all"
+                  className="inline-flex items-center justify-center gap-2 bg-brand-accent hover:bg-brand-accent/90 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-sm sm:text-base font-semibold transition-all"
                 >
-                  <Users className="w-5 h-5" />
+                  <Users className="w-4 h-4 sm:w-5 sm:h-5" />
                   Contact Investor Relations
-                  <ArrowRight className="w-5 h-5" />
+                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
                 </Link>
                 <a
                   href="/geo-audit"
-                  className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-8 py-4 rounded-lg font-semibold transition-all"
+                  className="inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-sm sm:text-base font-semibold transition-all"
                 >
-                  <BarChart3 className="w-5 h-5" />
+                  <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5" />
                   Try GEO Audit Tool
                 </a>
               </div>
