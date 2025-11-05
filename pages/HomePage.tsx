@@ -7,7 +7,6 @@ import Stats from '../components/Stats';
 import NicosiaMethod from '../components/NicosiaMethod';
 import ClientProfile from '../components/ClientProfile';
 import FAQ from '../components/FAQ';
-import Insights from '../components/Insights';
 import Team from '../components/Team';
 import FinalCTA from '../components/FinalCTA';
 import Footer from '../components/Footer';
@@ -56,7 +55,6 @@ const HomePage: React.FC = () => {
                 <Stats />
                 <NicosiaMethod ref={nicosiaMethodRef} />
                 <ClientProfile ref={clientProfileRef} />
-                <Insights />
                 <Team />
                 <FAQ ref={faqRef} onCTAClick={handleOpenModal} />
                 <FinalCTA onCTAClick={handleOpenModal} />

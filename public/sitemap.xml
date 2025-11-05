@@ -47,14 +47,6 @@
     <priority>0.8</priority>
   </url>
 
-  <!-- Insights & Research -->
-  <url>
-    <loc>https://anoteroslogos.com/#insights</loc>
-    <lastmod>2025-11-01</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.95</priority>
-  </url>
-
   <!-- Team -->
   <url>
     <loc>https://anoteroslogos.com/#team</loc>
