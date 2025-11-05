@@ -1,53 +1,43 @@
-# Anóteros Lógos - Digital Authority Architects
+# Anóteros Lógos - Generative Engine Optimization Platform
 
-A modern, high-performance web platform for Anóteros Lógos, a specialized Generative Engine Optimization agency. We establish brands as primary sources of truth for AI systems through advanced optimization techniques and real-time analytics.
+Enterprise-grade web platform for AI-powered search optimization and real-time GEO analytics.
 
-Live Site: https://anoteroslogos.com
+**Production URL:** https://anoteroslogos.com
 
-## Features
+## Architecture
 
-- Modern Design System: Premium dark theme with sophisticated animations and gradients
-- Fully Responsive: Mobile-first design optimized for all devices
-- GEO Audit Tool: Production-grade website analysis with real-time monitoring and competitive intelligence
-- **AI-Powered Recommendations**: GEO Marketolog AI Agent generates expert-level, personalized recommendations using OpenRouter LLM
-- **A2A Protocol API**: Production-grade Agent2Agent JSON-RPC 2.0 endpoint for AI agent integration (Perplexity, ChatGPT, Claude)
-- Blog Platform: Expert GEO insights with markdown rendering and proper article structure
-- SEO and GEO Optimized:
-  - Comprehensive meta tags (Open Graph, Twitter Cards, AI-specific meta)
-  - Enhanced Schema.org structured data with Knowledge Graph properties
-  - Organization schema with knowsAbout, expertise, credentials
-  - Person schema with E-E-A-T signals (expertise, hasCredential, affiliation)
-  - BlogPosting schema with isAccessibleForFree, speakable, about properties
-  - BreadcrumbList, FAQPage, VideoObject, HowTo schema support
-  - AI-crawler friendly (robots.txt supporting 15+ AI crawlers)
-  - Complete sitemap.xml with priority-based indexing
-  - Self-hosted fonts for optimal performance
-- Core Web Vitals Optimized:
-  - Route-based code splitting with React.lazy
-  - LCP under 2.5s, CLS under 0.1, INP under 200ms
-  - Web Vitals monitoring integrated
-- Accessible: WCAG 2.1 AA compliant with proper ARIA labels and semantic HTML
-- Type-Safe: Full TypeScript 5.8 implementation with strict mode
-- Knowledge Base: Comprehensive GEO glossary with 21+ industry terms
-- Author Profiles: Detailed E-E-A-T compliant author pages with credentials
+Modern React 19 SPA with TypeScript strict mode, serverless API architecture, and comprehensive monitoring capabilities.
 
-## Tech Stack
+### Core Stack
 
-- React 19.2 - UI library with concurrent rendering
-- TypeScript 5.8 - Type safety with strict mode
-- Vite 6.2 - Lightning-fast build tool and dev server
-- React Router 7.9.5 - Client-side routing with code splitting
-- Tailwind CSS 3.4+ - Utility-first CSS framework with custom design tokens
-- Recharts 3.3 - Advanced data visualization for analytics
-- **OpenRouter API** - AI-powered recommendation engine with LLM integration
-- **Zod 3.x** - Runtime type validation for A2A Protocol
-- **@vercel/node** - Serverless function types for A2A endpoint
-- jsPDF 3.0.3 - PDF report generation
-- react-markdown - Markdown rendering for blog articles
-- remark-gfm - GitHub Flavored Markdown support
-- web-vitals 5.1.0 - Core Web Vitals monitoring
-- Lucide React 0.552.0 - Modern icon library
-- ESLint 9+ - Code quality and consistency
+- **Frontend**: React 19.2, TypeScript 5.8, Vite 6.2
+- **Routing**: React Router 7.9.5 with lazy loading
+- **Styling**: Tailwind CSS 3.4+ with custom design system
+- **Data Visualization**: Recharts 3.3
+- **AI Integration**: OpenRouter API with LLM support
+- **Validation**: Zod 3.x for runtime type checking
+- **Deployment**: Vercel Edge Functions
+
+### Technical Capabilities
+
+**Performance:**
+- Route-based code splitting with React.lazy
+- LCP under 2.5s, CLS under 0.1, INP under 200ms
+- Total bundle: ~1.4 MB (~410 kB gzipped)
+- Build time: 13-15s in CI/CD
+
+**Security:**
+- WCAG 2.1 AA compliant
+- XSS and SQL injection prevention
+- SSRF protection with IP blocklisting
+- Rate limiting: 5 req/min, 20 req/hour
+
+**SEO & AI Optimization:**
+- Schema.org structured data (Organization, Person, Article, Product, Review, HowTo, FAQ)
+- Support for 15+ AI crawlers (GPTBot, Claude-Web, Perplexity, Google-Extended, Gemini)
+- Priority-based sitemap with AI discovery hints
+- Open Graph and Twitter Card meta tags
+
 
 ## Installation
 
@@ -101,158 +91,72 @@ VITE_APP_URL=https://anoteroslogos.com  # Base URL for A2A endpoint discovery
 
 ```
 F:\air\
-├── src/
-│   ├── components/          # React components
-│   │   ├── AnimatedSection.tsx
-│   │   ├── ClientProfile.tsx
-│   │   ├── CookieConsent.tsx
-│   │   ├── DigitalBackground.tsx
-│   │   ├── ExecutiveSummary.tsx    # Audit dashboard KPI cards
-│   │   ├── FAQ.tsx
-│   │   ├── FinalCTA.tsx
-│   │   ├── Footer.tsx
-│   │   ├── Header.tsx
-│   │   ├── Hero.tsx
-│   │   ├── Icons.tsx
-│   │   ├── Insights.tsx
-│   │   ├── Modal.tsx
-│   │   ├── NicosiaMethod.tsx
-│   │   ├── NLPInsights.tsx         # NLP content analysis display
-│   │   ├── Philosophy.tsx
-│   │   ├── SkeletonLoader.tsx      # Loading state animations
-│   │   ├── Stats.tsx
-│   │   ├── Team.tsx
-│   │   ├── TheShift.tsx
-│   │   ├── Tooltip.tsx             # Contextual help system
-│   │   └── charts/                 # Data visualization
-│   │       ├── CategoryBarChart.tsx
-│   │       ├── PriorityMatrix.tsx
-│   │       ├── ScoreRadarChart.tsx
-│   │       └── ScoreTrendChart.tsx
-│   ├── pages/               # Route pages (lazy-loaded)
-│   │   ├── HomePage.tsx     # Main landing page
-│   │   ├── GeoAuditPage.tsx # GEO Audit Tool with analytics
-│   │   ├── Blog.tsx         # Blog listing with categories
-│   │   ├── BlogPost.tsx     # Individual article page
-│   │   ├── Author.tsx       # Author profile with E-E-A-T
-│   │   ├── KnowledgeBasePage.tsx  # GEO glossary (21+ terms)
-│   │   ├── GeoVsSeoPage.tsx # Educational comparison
-│   │   ├── PrivacyPolicy.tsx
-│   │   └── CookiePolicy.tsx
-│   ├── data/                # Content and data
-│   │   ├── blogPosts.ts     # Blog articles database
-│   │   ├── geoKnowledgeBase.ts  # Knowledge base terms
-│   │   └── teamMembers.ts   # Team information
-│   ├── lib/                 # Core libraries
-│   │   └── a2a/             # A2A Protocol implementation
-│   │       ├── protocol.ts  # JSON-RPC 2.0 protocol (526 lines)
-│   │       ├── adapter.ts   # AI-friendly result conversion (455 lines)
-│   │       ├── rateLimiter.ts  # Token bucket rate limiting (264 lines)
-│   │       ├── queue.ts     # Priority job queue (467 lines)
-│   │       └── cache.ts     # TTL-based caching (478 lines)
-│   ├── api/                 # Serverless API endpoints
-│   │   └── a2a/
-│   │       └── index.ts     # A2A HTTP endpoint (435 lines)
-│   ├── utils/               # Utilities and services
-│   │   ├── ai/                     # AI Agent modules
-│   │   │   ├── openrouter.ts       # OpenRouter API client with LLM integration
-│   │   │   └── geoMarketologAgent.ts  # AI recommendation engine
-│   │   ├── advancedAnalytics.ts    # Trend analysis, regression, forecasting
-│   │   ├── advancedMetrics.ts      # Core Web Vitals, security audit
-│   │   ├── auditHistory.ts         # Historical performance tracking
-│   │   ├── competitiveIntelligence.ts  # Competitor analysis
-│   │   ├── geoAuditEnhanced.ts     # Main audit engine (2000+ lines, AI-integrated)
-│   │   ├── monitoringAlerts.ts     # Real-time alerts system
-│   │   ├── nlpContentAnalysis.ts   # Natural language processing
-│   │   ├── pdfReportGenerator.ts   # PDF export functionality
-│   │   ├── urlValidator.ts         # Security validation, rate limiting
-│   │   ├── schemas.ts       # Schema.org structured data
-│   │   └── analytics.ts     # Web vitals monitoring
-│   ├── App.tsx              # Main application with routing
-│   ├── main.tsx             # Application entry point
-│   ├── index.css            # Global styles, Tailwind, and custom fonts
-│   └── vite-env.d.ts        # Vite type definitions
-├── public/                  # Static assets
-│   ├── robots.txt           # AI and search crawler configuration (15+ crawlers)
-│   ├── sitemap.xml          # Priority-based site structure
-│   ├── favicon.svg          # Brand favicon
-│   ├── manifest.json        # Web app manifest
-│   └── privacy-policy.pdf   # Privacy policy document
-├── index.html               # Main HTML with enhanced structured data
-├── tailwind.config.js       # Tailwind with custom animations
-├── tsconfig.json            # TypeScript strict configuration
-├── vite.config.ts           # Vite with optimizations
-├── package.json             # Dependencies and scripts
-├── vercel.json              # Vercel deployment config
-└── README.md                # Project documentation
+├── api/
+│   └── a2a/
+│       └── index.ts                # A2A Protocol HTTP endpoint (435 lines)
+├── components/
+│   ├── charts/                     # Recharts visualizations
+│   │   ├── CategoryBarChart.tsx
+│   │   ├── PriorityMatrix.tsx
+│   │   ├── ScoreRadarChart.tsx
+│   │   └── ScoreTrendChart.tsx
+│   ├── AnalysisProgress.tsx
+│   ├── ExecutiveSummary.tsx
+│   ├── Header.tsx
+│   ├── Footer.tsx
+│   ├── Modal.tsx
+│   ├── RealtimeMonitorPanel.tsx
+│   └── SEOHead.tsx
+├── pages/
+│   ├── HomePage.tsx
+│   ├── GeoAuditPage.tsx           # GEO Audit Tool with analytics
+│   ├── Blog.tsx
+│   ├── BlogPost.tsx
+│   ├── Author.tsx
+│   └── KnowledgeBasePage.tsx
+├── lib/
+│   ├── a2a/                       # A2A Protocol (2361 lines)
+│   │   ├── protocol.ts            # JSON-RPC 2.0 (526 lines)
+│   │   ├── adapter.ts             # Result conversion (455 lines)
+│   │   ├── rateLimiter.ts         # Token bucket (264 lines)
+│   │   ├── queue.ts               # Priority queue (467 lines)
+│   │   └── cache.ts               # TTL cache (478 lines)
+│   └── supabase.ts
+├── utils/
+│   ├── ai/
+│   │   ├── openrouter.ts          # LLM integration
+│   │   ├── geoMarketologAgent.ts  # AI recommendations
+│   │   └── realtimeMonitor.ts
+│   ├── geoAuditEnhanced.ts        # Audit engine (2000+ lines)
+│   ├── advancedAnalytics.ts       # Trend analysis (418 lines)
+│   ├── monitoringAlerts.ts        # Alert system (574 lines)
+│   ├── competitiveIntelligence.ts # Benchmarking (614 lines)
+│   ├── nlpContentAnalysis.ts      # NLP analysis (531 lines)
+│   ├── pdfReportGenerator.ts      # PDF export (469 lines)
+│   └── urlValidator.ts            # Security validation (333 lines)
+├── data/
+│   ├── blogPosts.ts
+│   └── geoKnowledgeBase.ts
+├── public/
+│   ├── robots.txt
+│   ├── sitemap.xml
+│   ├── manifest.json
+│   └── .well-known/
+│       ├── ai.txt
+│       └── security.txt
+├── supabase/
+│   └── migrations/
+│       └── 001_initial_schema.sql
+├── App.tsx
+├── index.tsx
+├── index.html
+├── tailwind.config.js
+├── tsconfig.json
+├── vite.config.ts
+└── vercel.json
 ```
 
-## Component Overview
 
-### Pages (Route Components)
-- HomePage: Main landing page with all core sections
-- GeoAuditPage: Production-grade website analysis tool with real-time analytics
-- Blog: Article listing with category filters and featured posts
-- BlogPost: Individual article page with markdown rendering, reading progress, share functionality
-- Author: Author profile pages with credentials, expertise, publications
-- KnowledgeBasePage: Educational GEO glossary with 21+ industry terms and definitions
-- GeoVsSeoPage: Comprehensive comparison page explaining the evolution from SEO to GEO
-- PrivacyPolicy: Privacy policy and data handling information
-- CookiePolicy: Cookie usage and consent information
-
-### Core Sections (Home Page)
-- Hero: Main landing with animated CTA and value proposition
-- TheShift: Problem statement showcasing the SEO to GEO paradigm shift
-- Philosophy: Solution overview with Extract, Structure, Deploy framework
-- Stats: Social proof metrics with animated counters
-- NicosiaMethod: Detailed 3-phase process (Intelligence, Authority, Amplification)
-- ClientProfile: Target audience segments with hover states
-- Insights: Latest research and industry insights
-- Team: Team member profiles with expertise areas
-- FAQ: 12 comprehensive Q&A items with structured data
-- FinalCTA: High-conversion section with contact form modal
-
-### Utilities and Components
-- Header: Sticky navigation with smooth scroll and active states
-- Footer: Site footer with navigation links, social links, and legal info
-- Modal: Contact form with validation and accessibility features
-- AnimatedSection: Intersection Observer wrapper for scroll-triggered animations
-- DigitalBackground: Animated particle/grid background effect
-- CookieConsent: GDPR-compliant cookie consent banner
-- ExecutiveSummary: KPI dashboard with 4 primary and 8 secondary metrics
-- SkeletonLoader: Loading states with 6 variants and gradient animation
-- Tooltip: Context-aware help system with 4 positions and auto-adjustment
-- Charts: Radar, bar, trend, and priority matrix visualizations using Recharts
-
-## SEO and GEO Features
-
-### Meta Tags
-- Complete Open Graph tags for social sharing
-- Twitter Card support
-- Dynamic meta descriptions
-- Canonical URLs
-
-### Structured Data (Schema.org)
-- Organization schema with Knowledge Graph properties (knowsAbout, about, sameAs, founder)
-- Person schema with E-E-A-T signals (expertise, knowsAbout, hasCredential, affiliation)
-- BlogPosting schema with AI-optimized properties (isAccessibleForFree, speakable, about)
-- Article schema for knowledge base content
-- WebSite schema with search action
-- Service schema for GEO services
-- FAQPage schema with all questions and answers
-- BreadcrumbList for site navigation hierarchy
-- VideoObject schema prepared for multimodal content
-- HowTo schema for tutorial content
-
-### AI Crawler Support
-Configured in `robots.txt` for:
-- GPTBot (OpenAI)
-- ChatGPT-User
-- Claude-Web (Anthropic)
-- PerplexityBot
-- Google-Extended
-- Gemini (Google Bard)
-- And 10+ more AI crawlers
 
 ## Deployment
 
@@ -787,4 +691,4 @@ Total Project Scale:
 - Full TypeScript strict mode
 - AI-powered recommendation engine
 
-Built for the AI-first era with cutting-edge LLM integration
+Built for AI-first search with production-grade LLM integration and real-time analytics
