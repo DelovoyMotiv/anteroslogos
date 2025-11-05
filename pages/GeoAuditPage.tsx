@@ -18,6 +18,7 @@ import ScoreTrendChart from '../components/charts/ScoreTrendChart';
 import PriorityMatrix from '../components/charts/PriorityMatrix';
 import CategoryBarChart from '../components/charts/CategoryBarChart';
 import ExecutiveSummary from '../components/ExecutiveSummary';
+import AIVisibilityScore from '../components/AIVisibilityScore';
 import SEOHead from '../components/SEOHead';
 // Removed: RealtimeMonitorPanel (bundle optimization)
 
@@ -645,6 +646,9 @@ const GeoAuditPage = () => {
 
             {/* Executive Summary Dashboard */}
             <ExecutiveSummary result={result} />
+
+            {/* AI Visibility Index - Key Metric */}
+            <AIVisibilityScore result={result} />
 
             {/* Insights */}
             {result.insights && result.insights.length > 0 && (
