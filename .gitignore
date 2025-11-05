@@ -59,11 +59,12 @@ Thumbs.db
 # Vercel
 .vercel
 
-# Documentation (keep only README.md, LICENSE, CHANGELOG.md)
+# Documentation (keep only README.md, LICENSE, CHANGELOG.md, CONTRIBUTING.md)
 *.md
 !README.md
 !LICENSE.md
 !CHANGELOG.md
+!CONTRIBUTING.md
 docs/
 metadata.json
 
