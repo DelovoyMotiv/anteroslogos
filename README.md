@@ -109,16 +109,17 @@ F:\air\
 │   │   ├── PriorityMatrix.tsx
 │   │   ├── ScoreRadarChart.tsx
 │   │   └── ScoreTrendChart.tsx
-│   ├── AIVisibilityScore.tsx       # AI citation probability metric (253 lines)
-│   ├── GEOHealthTracker.tsx        # Daily monitoring with forecasts (398 lines)
-│   ├── AnalysisProgress.tsx        # Progress tracking (220 lines)
-│   ├── ExecutiveSummary.tsx        # Dashboard summary (271 lines)
-│   ├── NLPInsights.tsx             # NLP analysis display (362 lines)
-│   ├── Header.tsx                  # Navigation (142 lines)
-│   ├── Footer.tsx                  # Footer with links (210 lines)
-│   ├── Modal.tsx                   # Contact form (222 lines)
-│   ├── SEOHead.tsx                 # Meta tags manager (130 lines)
-│   └── [28 more components]        # Total 30 components
+|   ├── AIVisibilityScore.tsx       # AI citation probability metric (253 lines)
+|   ├── AIDAgentStatus.tsx          # AID protocol visualization (253 lines)
+|   ├── GEOHealthTracker.tsx        # Daily monitoring with forecasts (398 lines)
+|   ├── AnalysisProgress.tsx        # Progress tracking (220 lines)
+|   ├── ExecutiveSummary.tsx        # Dashboard summary (271 lines)
+|   ├── NLPInsights.tsx             # NLP analysis display (362 lines)
+|   ├── Header.tsx                  # Navigation (142 lines)
+|   ├── Footer.tsx                  # Footer with links (210 lines)
+|   ├── Modal.tsx                   # Contact form (222 lines)
+|   ├── SEOHead.tsx                 # Meta tags manager (130 lines)
+|   └── [28 more components]        # Total 32 components
 ├── pages/
 │   ├── HomePage.tsx
 │   ├── GeoAuditPage.tsx           # GEO Audit Tool with analytics
@@ -137,17 +138,18 @@ F:\air\
 │   │   └── cache.ts               # TTL cache (478 lines)
 │   └── supabase.ts
 ├── utils/
-│   ├── ai/
-│   │   ├── openrouter.ts          # LLM integration (466 lines)
-│   │   └── geoMarketologAgent.ts  # AI recommendations (166 lines)
-│   ├── geoAuditEnhanced.ts        # Audit engine with precision scoring (2100+ lines)
-│   ├── advancedAnalytics.ts       # Trend analysis (418 lines)
-│   ├── monitoringAlerts.ts        # Alert system (574 lines)
-│   ├── competitiveIntelligence.ts # Benchmarking (614 lines)
-│   ├── nlpContentAnalysis.ts      # NLP analysis (531 lines)
-│   ├── pdfReportGenerator.ts      # PDF export (469 lines)
-│   ├── urlValidator.ts            # Security validation with retry (333 lines)
-│   └── auditHistory.ts            # LocalStorage audit management
+|   ├── ai/
+|   │   ├── openrouter.ts          # LLM integration (466 lines)
+|   │   └── geoMarketologAgent.ts  # AI recommendations (166 lines)
+|   ├── geoAuditEnhanced.ts        # Audit engine with precision scoring (2100+ lines)
+|   ├── aidDiscovery.ts            # AID protocol detection (559 lines)
+|   ├── advancedAnalytics.ts       # Trend analysis (418 lines)
+|   ├── monitoringAlerts.ts        # Alert system (574 lines)
+|   ├── competitiveIntelligence.ts # Benchmarking (614 lines)
+|   ├── nlpContentAnalysis.ts      # NLP analysis (531 lines)
+|   ├── pdfReportGenerator.ts      # PDF export (469 lines)
+|   ├── urlValidator.ts            # Security validation with retry (333 lines)
+|   └── auditHistory.ts            # LocalStorage audit management
 ├── data/
 │   ├── blogPosts.ts
 │   └── geoKnowledgeBase.ts
@@ -704,22 +706,26 @@ Production-ready website analysis platform with advanced analytics capabilities 
 
 ### Core Analysis Engine (geoAuditEnhanced.ts - 2100+ lines)
 
-Analyzes 10 key categories with high-precision weighted scoring:
-- Schema Markup (16%): Detects 16+ schema types including Organization, Person, Article, Product, Review, HowTo, FAQ, LocalBusiness
-- AI Crawlers (15%): Validates robots.txt for GPTBot, Claude-Web, Perplexity, Google-Extended, Gemini
-- E-E-A-T (15%): Experience, Expertise, Authoritativeness, Trust signals
-- Technical SEO (13%): HTTPS, canonicals, redirects, broken links
-- Link Analysis (12%): Internal/external link quality, anchor text analysis
-- Meta Tags (9%): Title, description, Open Graph, Twitter Cards
-- Content Quality (9%): Word count, readability, semantic structure
+Analyzes 11 key categories with high-precision weighted scoring:
+- Schema Markup (15%): Detects 16+ schema types including Organization, Person, Article, Product, Review, HowTo, FAQ, LocalBusiness
+- AI Crawlers (14%): Validates robots.txt for GPTBot, Claude-Web, Perplexity, Google-Extended, Gemini
+- E-E-A-T (14%): Experience, Expertise, Authoritativeness, Trust signals
+- Technical SEO (12%): HTTPS, canonicals, redirects, broken links
+- Link Analysis (11%): Internal/external link quality, anchor text analysis
+- Meta Tags (8%): Title, description, Open Graph, Twitter Cards
+- Content Quality (8%): Word count, readability, semantic structure
+- AID Agent Discovery (8%): DNS TXT and HTTPS well-known agent detection
 - Structure (6%): HTML5 semantics, heading hierarchy
-- Performance (5%): HTML size, script optimization, lazy loading
+- Performance (4%): HTML size, script optimization, lazy loading
 - Citation Potential (custom): Factual statements, data points, quotes
 
 **Precision Scoring System:**
 - Overall score calculated to 3 decimals (e.g., 54.649)
-- Component breakdown: Core (35%), Technical (25%), Content (40%)
-- Weighted aggregation of all 10 category scores
+- Component breakdown:
+  - Core (35%): Schema + AI Crawlers + E-E-A-T + AID Agent (15%)
+  - Technical (25%): SEO + Links + Meta + Structure
+  - Content (40%): Quality + Citation + Performance
+- Weighted aggregation of all 11 category scores
 - Backward compatible with rounded integer scores
 
 Grade System: Authority (96-100), Expert (86-95), Advanced (71-85), Intermediate (41-70), Beginner (0-40)
@@ -774,6 +780,67 @@ Features:
 - User-Agent header: "GEO-Audit/2.0 (+https://anoteroslogos.com)"
 - Context-aware error messages with retry suggestions
 - 95%+ first-attempt success rate
+
+### AID Agent Discovery Integration (aidDiscovery.ts - 559 lines)
+
+Production-ready detection of AI agent support via AID (Agent Identity & Discovery) protocol v1.1:
+
+**Detection Methods:**
+- DNS TXT lookup via Google Public DNS (DoH): `_agent.{domain}` TXT record parsing
+- HTTPS well-known fallback: `/.well-known/agent.json` endpoint check
+- Hybrid approach: Primary DNS (5s timeout), fallback HTTPS (10s timeout)
+- Discovery status: both, dns-only, https-only, or none
+
+**AID Protocol v1.1 Support:**
+- Single-letter field parsing (v=version, p=protocols, u=endpoint, s=service, d=domain)
+- Protocol detection: A2A, MCP, ANP, HTTP
+- Agent metadata extraction: name, description, version, capabilities, vendor
+- Organization metadata: industry, specialization, established date
+- Pricing tier detection: free/basic/pro with rate limits
+- Ed25519 key metadata (RFC 9421) for signature verification
+
+**Scoring Algorithm (0-100):**
+- Base detection: 40 points
+- Discovery method: 20 points (both), 15 (DNS), 10 (HTTPS)
+- Protocol support: 15 points (5 per protocol, max 3)
+- Metadata completeness: 15 points (name, description, capabilities, vendor, docs)
+- Valid endpoint: 10 points
+- Error penalty: -5 points per error (max -20)
+
+**Recommendations Generator:**
+- No AID: "Implement AID Protocol" (high priority, strategic effort)
+- DNS-only: "Add HTTPS well-known endpoint" (medium priority, quick-win)
+- HTTPS-only: "Add DNS TXT record" (medium priority, quick-win)
+- Missing capabilities: "Document agent capabilities" (low priority)
+- Missing documentation: "Add documentation URL" (low priority)
+- Configuration errors: "Fix AID configuration" (high priority)
+
+**UI Component (AIDAgentStatus.tsx - 253 lines):**
+- Detection status with icon (CheckCircle/XCircle/AlertTriangle)
+- Discovery method badges (DNS + HTTPS, DNS Only, HTTPS Only, None)
+- Agent name and description display
+- Discovery method status grid (green/gray cards)
+- Supported protocols (A2A, MCP, HTTP badges)
+- Agent capabilities list (up to 6 shown, +N more)
+- Agent endpoint in code block
+- Organization and industry metadata
+- Errors/warnings display (red/yellow cards)
+- Educational info box with link to `/agent-identity`
+- Integrated in GEO Audit results below Health Tracker
+
+**Integration Points:**
+- Audit flow: `auditWebsite()` calls `discoverAIDAgent()` after AI crawlers check
+- Score weight: 8% of overall score, 15% of Core metrics
+- Result storage: `AuditResult.details.aidAgent` (AIDAgentInfo)
+- Recommendations: Merged with main recommendation list
+- Export: Filtered from generic details loop (has dedicated section)
+
+**Technical Implementation:**
+- DNS Resolution: Real queries via `dns.google/resolve` API (DoH)
+- HTTPS Fetch: Standard fetch with User-Agent header
+- Error Handling: Graceful degradation, warnings instead of failures
+- TypeScript: Full type safety with AIDAgentInfo interface
+- Production-Ready: No mocks, real DNS/HTTP requests, comprehensive validation
 
 ### Additional Modules
 
@@ -847,16 +914,18 @@ Proprietary - Copyright 2025 Anóteros Lógos. All rights reserved.
 
 For technical support or customization requests, contact the development team.
 
-## Recent Updates (2025)
+## Key Features
 
-**Major Features:**
-- ✅ **Investor Relations Page** - comprehensive investment analysis with TAM/SAM/SOM, SWOT, competitive landscape
-- ✅ AI Visibility Index - unified AI citation probability metric
-- ✅ GEO Health Tracker - daily monitoring with historical trends and forecasts
-- ✅ High-Precision Scoring - 3-decimal accuracy with component breakdown
-- ✅ Enhanced AI System Prompt - precision score understanding and component analysis
-- ✅ URL Validation Improvements - retry mechanism, better error handling
-- ✅ Dashboard UI Optimization - AAA-level compact design with 40-50% more data density
+**Core Capabilities:**
+- **AID Agent Discovery** - DNS TXT and HTTPS well-known detection with real-time DNS-over-HTTPS queries
+- **Investor Relations Page** - comprehensive investment analysis with TAM/SAM/SOM, SWOT, competitive landscape
+- **AI Visibility Index** - unified AI citation probability metric (0-100%)
+- **GEO Health Tracker** - daily monitoring with historical trends and 7/30-day forecasts
+- **High-Precision Scoring** - 3-decimal accuracy with Core/Technical/Content breakdown
+- **11-Category Audit** - including Schema, AI Crawlers, E-E-A-T, AID Discovery, Technical SEO, Links, Meta, Content, Structure, Performance, Citation
+- **Enhanced AI System Prompt** - precision score understanding and component analysis
+- **URL Validation** - retry mechanism with exponential backoff and improved error handling
+- **Dashboard UI** - AAA-level compact design with 40-50% more data density
 
 **Performance Optimizations:**
 - ⚡ GeoAudit bundle reduced from 877KB → 510KB (42% reduction)
@@ -878,12 +947,14 @@ Comprehensive investment analysis page at `/investors` featuring:
 All data sourced from real investment analysis report - no mock data.
 
 Total Project Scale:
-- **8000+ lines** of production code
-- **13 major utility modules** (including AI Agent)
-- **31+ React components** (including AI Visibility, Health Tracker, Market Growth Chart)
-- **9 route pages** with lazy loading (including Investor Relations)
+- **9000+ lines** of production code
+- **14 major utility modules** (including AI Agent, AID Discovery)
+- **32+ React components** (including AI Visibility, Health Tracker, AID Status, Market Growth Chart)
+- **10 route pages** with lazy loading (including Investor Relations, Agent Identity)
+- **11 audit categories** with 8% weight for AID agent detection
 - **Full TypeScript strict mode** with Zod validation
 - **AI-powered recommendation engine** with enhanced precision scoring
 - **LocalStorage-based history** for audit tracking and trends
+- **AID protocol v1.1** integration with DNS-over-HTTPS detection
 
 Built for AI-first search with production-grade LLM integration, real-time analytics, and enterprise-level precision scoring
