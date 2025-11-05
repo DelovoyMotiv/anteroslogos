@@ -515,72 +515,95 @@ const GeoAuditPage = () => {
       {result && (
         <section className="py-8 px-4 lg:px-6">
           <div className="max-w-[1800px] mx-auto">
-            {/* Overall Score - Minimalist Header */}
-            <div className="mb-12 py-6">
-              <div className="flex flex-col lg:flex-row items-center lg:items-center justify-between gap-6">
-                {/* Left: Title + Domain */}
-                <div className="flex flex-col items-center lg:items-start gap-1 flex-shrink-0">
-                  <h2 className="text-2xl font-bold text-white tracking-tight">Overall GEO Score</h2>
-                  <p className="text-sm text-white/40 break-all max-w-[280px] text-center lg:text-left">
-                    {new URL(result.url).hostname}
-                  </p>
-                </div>
-                
-                {/* Center: Score Display + Grade */}
-                <div className="flex items-center gap-6 flex-shrink-0">
-                  <div className="text-center">
-                    <div className={`text-7xl font-bold leading-none tabular-nums ${getScoreColor(result.overallScore)}`} style={{
-                      textShadow: `0 0 40px ${getScoreColor(result.overallScore).includes('green') ? '#34d39960' : getScoreColor(result.overallScore).includes('yellow') ? '#fbbf2460' : getScoreColor(result.overallScore).includes('red') ? '#f8717160' : '#60a5fa60'}`
-                    }}>
-                      {result.overallScore}
+            {/* Overall Score - Professional Display */}
+            <div className="mb-10">
+              <div className="flex flex-col lg:flex-row items-start justify-between gap-6">
+                {/* Left: Main Score with Precision */}
+                <div className="flex-1">
+                  <h2 className="text-lg font-bold text-white/60 tracking-tight mb-3 uppercase text-xs">Overall GEO Score</h2>
+                  <div className="flex items-end gap-3 mb-4">
+                    {/* Main Score */}
+                    <div className="flex items-baseline gap-1">
+                      <span className={`text-6xl font-bold leading-none tabular-nums ${getScoreColor(result.overallScore)}`} style={{
+                        textShadow: `0 0 30px ${getScoreColor(result.overallScore).includes('green') ? '#34d39950' : getScoreColor(result.overallScore).includes('yellow') ? '#fbbf2450' : getScoreColor(result.overallScore).includes('red') ? '#f8717150' : '#60a5fa50'}`
+                      }}>
+                        {result.preciseScore?.toFixed(3) || result.overallScore}
+                      </span>
+                      <span className="text-white/30 text-lg font-light mb-1">/ 100</span>
                     </div>
-                    <div className="text-white/30 text-xs mt-1 font-light">/ 100</div>
+                    
+                    {/* Grade Badge */}
+                    {result.grade && (
+                      <div className="flex flex-col gap-0.5 mb-1">
+                        <Award className={`w-6 h-6 ${
+                          result.grade === 'Authority' ? 'text-purple-400' :
+                          result.grade === 'Expert' ? 'text-green-400' :
+                          result.grade === 'Advanced' ? 'text-blue-400' :
+                          result.grade === 'Intermediate' ? 'text-yellow-400' :
+                          'text-gray-400'
+                        }`} />
+                        <span className={`text-[9px] font-bold uppercase tracking-wider ${
+                          result.grade === 'Authority' ? 'text-purple-400' :
+                          result.grade === 'Expert' ? 'text-green-400' :
+                          result.grade === 'Advanced' ? 'text-blue-400' :
+                          result.grade === 'Intermediate' ? 'text-yellow-400' :
+                          'text-gray-400'
+                        }`}>
+                          {result.grade}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {/* Score Change */}
+                    {comparison?.changes && (
+                      <div className="flex items-center gap-1.5 mb-1">
+                        {comparison.changes.overallScore > 0 ? (
+                          <>
+                            <TrendingUp className="w-5 h-5 text-green-400" />
+                            <span className="text-green-400 font-bold text-base tabular-nums">+{comparison.changes.overallScore}</span>
+                          </>
+                        ) : comparison.changes.overallScore < 0 ? (
+                          <>
+                            <TrendingDown className="w-5 h-5 text-red-400" />
+                            <span className="text-red-400 font-bold text-base tabular-nums">{comparison.changes.overallScore}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Minus className="w-5 h-5 text-gray-400" />
+                            <span className="text-gray-400 text-base tabular-nums">0</span>
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
                   
-                  {/* Grade Badge */}
-                  {result.grade && (
-                    <div className="flex flex-col items-center gap-1">
-                      <Award className={`w-8 h-8 ${
-                        result.grade === 'Authority' ? 'text-purple-400' :
-                        result.grade === 'Expert' ? 'text-green-400' :
-                        result.grade === 'Advanced' ? 'text-blue-400' :
-                        result.grade === 'Intermediate' ? 'text-yellow-400' :
-                        'text-gray-400'
-                      }`} />
-                      <span className={`text-xs font-semibold uppercase tracking-wider ${
-                        result.grade === 'Authority' ? 'text-purple-400' :
-                        result.grade === 'Expert' ? 'text-green-400' :
-                        result.grade === 'Advanced' ? 'text-blue-400' :
-                        result.grade === 'Intermediate' ? 'text-yellow-400' :
-                        'text-gray-400'
-                      }`}>
-                        {result.grade}
-                      </span>
+                  {/* Score Breakdown - Compact */}
+                  {result.scoreBreakdown && (
+                    <div className="grid grid-cols-3 gap-3 max-w-md">
+                      <div className="p-2 bg-white/5 border border-white/10 rounded">
+                        <div className="text-[9px] text-white/40 uppercase tracking-wide font-semibold mb-1">Core</div>
+                        <div className={`text-lg font-bold tabular-nums ${getScoreColor(result.scoreBreakdown.core)}`}>
+                          {result.scoreBreakdown.core.toFixed(1)}
+                        </div>
+                      </div>
+                      <div className="p-2 bg-white/5 border border-white/10 rounded">
+                        <div className="text-[9px] text-white/40 uppercase tracking-wide font-semibold mb-1">Technical</div>
+                        <div className={`text-lg font-bold tabular-nums ${getScoreColor(result.scoreBreakdown.technical)}`}>
+                          {result.scoreBreakdown.technical.toFixed(1)}
+                        </div>
+                      </div>
+                      <div className="p-2 bg-white/5 border border-white/10 rounded">
+                        <div className="text-[9px] text-white/40 uppercase tracking-wide font-semibold mb-1">Content</div>
+                        <div className={`text-lg font-bold tabular-nums ${getScoreColor(result.scoreBreakdown.content)}`}>
+                          {result.scoreBreakdown.content.toFixed(1)}
+                        </div>
+                      </div>
                     </div>
                   )}
                   
-                  {/* Score Change Indicator */}
-                  {comparison?.changes && (
-                    <div className="flex flex-col items-center justify-center gap-1">
-                      {comparison.changes.overallScore > 0 ? (
-                        <>
-                          <TrendingUp className="w-6 h-6 text-green-400" />
-                          <span className="text-green-400 font-bold text-lg tabular-nums">+{comparison.changes.overallScore}</span>
-                        </>
-                      ) : comparison.changes.overallScore < 0 ? (
-                        <>
-                          <TrendingDown className="w-6 h-6 text-red-400" />
-                          <span className="text-red-400 font-bold text-lg tabular-nums">{comparison.changes.overallScore}</span>
-                        </>
-                      ) : (
-                        <>
-                          <Minus className="w-6 h-6 text-gray-400" />
-                          <span className="text-gray-400 text-lg font-medium tabular-nums">0</span>
-                        </>
-                      )}
-                      <span className="text-white/30 text-xs">vs prev</span>
-                    </div>
-                  )}
+                  <p className="text-[10px] text-white/30 mt-3 font-mono">
+                    {new URL(result.url).hostname} • Analyzed {new Date(result.timestamp).toLocaleString()}
+                  </p>
                 </div>
                 
                 {/* Right: Export & Share Buttons */}

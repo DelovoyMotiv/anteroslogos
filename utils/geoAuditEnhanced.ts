@@ -8,8 +8,15 @@
 export interface AuditResult {
   url: string;
   timestamp: string;
-  overallScore: number;
+  overallScore: number; // Keep for backward compatibility
+  preciseScore: number; // High-precision score with 3 decimals
   grade: 'Authority' | 'Expert' | 'Advanced' | 'Intermediate' | 'Beginner';
+  scoreBreakdown?: { // Detailed breakdown of score components
+    core: number; // Core metrics (Schema, AI, E-E-A-T)
+    technical: number; // Technical implementation
+    content: number; // Content quality
+    weighted: number; // Final weighted score
+  };
   scores: {
     schemaMarkup: number;
     metaTags: number;
@@ -302,8 +309,8 @@ export async function auditWebsite(
   };
 
   // Advanced weighted scoring with dynamic weights based on content type
-  const overallScore = calculateOverallScore(scores, schemaMarkup);
-  const grade = getGrade(overallScore);
+  const scoreCalc = calculateOverallScore(scores, schemaMarkup);
+  const grade = getGrade(scoreCalc.overall);
 
   // Generate default recommendations
   const defaultRecommendations = generateEnhancedRecommendations({
@@ -329,12 +336,14 @@ export async function auditWebsite(
     linkAnalysis,
   });
 
-  // Create base result
+  // Create base result with HIGH-PRECISION scores
   const baseResult: AuditResult = {
     url: normalizedUrl,
     timestamp: new Date().toISOString(),
-    overallScore,
+    overallScore: scoreCalc.overall,
+    preciseScore: scoreCalc.precise,
     grade,
+    scoreBreakdown: scoreCalc.breakdown,
     scores,
     details: {
       schemaMarkup,
@@ -1811,7 +1820,18 @@ function calculateLinkAnalysisScore(details: LinkAnalysisDetails): number {
   return Math.max(0, Math.min(100, score));
 }
 
-function calculateOverallScore(scores: any, _schemaDetails: EnhancedSchemaDetails): number {
+interface ScoreCalculation {
+  overall: number; // Rounded for display
+  precise: number; // High-precision (3 decimals)
+  breakdown: {
+    core: number; // Core GEO metrics
+    technical: number; // Technical implementation
+    content: number; // Content quality
+    weighted: number; // Final weighted
+  };
+}
+
+function calculateOverallScore(scores: any, _schemaDetails: EnhancedSchemaDetails): ScoreCalculation {
   // Dynamic weighting based on content type
   const weights = {
     schemaMarkup: 0.16,
@@ -1833,7 +1853,28 @@ function calculateOverallScore(scores: any, _schemaDetails: EnhancedSchemaDetail
     weights.schemaMarkup = 0.15;
   }
 
-  const overall = 
+  // Calculate component scores
+  const coreScore = (
+    scores.schemaMarkup * 0.35 +
+    scores.aiCrawlers * 0.35 +
+    scores.eeat * 0.30
+  );
+
+  const technicalScore = (
+    scores.technicalSEO * 0.40 +
+    scores.linkAnalysis * 0.30 +
+    scores.metaTags * 0.20 +
+    scores.structure * 0.10
+  );
+
+  const contentScore = (
+    scores.contentQuality * 0.60 +
+    scores.citationPotential * 0.25 +
+    scores.performance * 0.15
+  );
+
+  // Calculate weighted overall with HIGH PRECISION
+  const weightedScore = 
     scores.schemaMarkup * weights.schemaMarkup +
     scores.metaTags * weights.metaTags +
     scores.aiCrawlers * weights.aiCrawlers +
@@ -1845,7 +1886,17 @@ function calculateOverallScore(scores: any, _schemaDetails: EnhancedSchemaDetail
     scores.technicalSEO * weights.technicalSEO +
     scores.linkAnalysis * weights.linkAnalysis;
 
-  return Math.round(overall);
+  // Return both rounded and precise scores
+  return {
+    overall: Math.round(weightedScore),
+    precise: Number(weightedScore.toFixed(3)),
+    breakdown: {
+      core: Number(coreScore.toFixed(3)),
+      technical: Number(technicalScore.toFixed(3)),
+      content: Number(contentScore.toFixed(3)),
+      weighted: Number(weightedScore.toFixed(3)),
+    },
+  };
 }
 
 function getGrade(score: number): 'Authority' | 'Expert' | 'Advanced' | 'Intermediate' | 'Beginner' {
