@@ -47,11 +47,12 @@ const Footer: React.FC<FooterProps> = ({ onPhilosophyClick, onMethodClick, onCli
         { title: 'Resources', links: [
             { label: 'Insights', onClick: () => document.getElementById('insights')?.scrollIntoView({ behavior: 'smooth' }) },
             { label: 'Glossary', onClick: () => document.getElementById('glossary')?.scrollIntoView({ behavior: 'smooth' }) },
-            { label: 'Team', onClick: () => document.getElementById('team')?.scrollIntoView({ behavior: 'smooth' }) },
+            { label: 'GEO Audit', onClick: () => window.location.href = '/geo-audit' },
             { label: 'FAQ', onClick: onFAQClick },
         ]},
         { title: 'Connect', links: [
             { label: 'Contact', onClick: onContactClick },
+            { label: 'Investors', onClick: () => window.location.href = '/investors' },
             { label: 'Careers', onClick: onContactClick, badge: 'Soon' },
             { label: 'Partner', onClick: onContactClick },
         ]},

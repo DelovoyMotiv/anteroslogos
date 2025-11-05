@@ -95,6 +95,14 @@
     <priority>1.0</priority>
   </url>
 
+  <!-- Investor Relations - Market Analysis -->
+  <url>
+    <loc>https://anoteroslogos.com/investors</loc>
+    <lastmod>2025-11-05</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
   <!-- Blog Index -->
   <url>
     <loc>https://anoteroslogos.com/blog</loc>
