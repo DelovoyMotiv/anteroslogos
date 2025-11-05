@@ -61,18 +61,31 @@ function anonymizeDomain(domain: string): string {
 }
 
 /**
- * Detect schema types from findings
+ * Map grade from new format to database format
+ */
+function mapGradeToDatabase(grade: 'Authority' | 'Expert' | 'Advanced' | 'Intermediate' | 'Beginner'): 'A+' | 'A' | 'B' | 'C' | 'D' | 'F' {
+  const gradeMap: Record<string, 'A+' | 'A' | 'B' | 'C' | 'D' | 'F'> = {
+    'Authority': 'A+',
+    'Expert': 'A',
+    'Advanced': 'B',
+    'Intermediate': 'C',
+    'Beginner': 'D',
+  };
+  return gradeMap[grade] || 'F';
+}
+
+/**
+ * Detect schema types from new AuditResult structure
  */
 function detectSchemaTypes(result: AuditResult) {
-  const schemaData = result.categoryDetails.find(c => c.category === 'Schema Markup');
-  const schemaText = JSON.stringify(schemaData?.details || {}).toLowerCase();
+  const schemaDetails = result.details.schemaMarkup;
   
   return {
-    has_organization_schema: schemaText.includes('organization'),
-    has_person_schema: schemaText.includes('person'),
-    has_article_schema: schemaText.includes('article'),
-    has_breadcrumb_schema: schemaText.includes('breadcrumb'),
-    has_author_markup: schemaText.includes('author'),
+    has_organization_schema: schemaDetails.schemas.Organization || false,
+    has_person_schema: schemaDetails.schemas.Person || false,
+    has_article_schema: schemaDetails.schemas.Article || schemaDetails.schemas.BlogPosting || false,
+    has_breadcrumb_schema: schemaDetails.schemas.BreadcrumbList || false,
+    has_author_markup: schemaDetails.schemas.Person || false,
   };
 }
 
@@ -80,16 +93,14 @@ function detectSchemaTypes(result: AuditResult) {
  * Detect E-E-A-T signals
  */
 function detectEEATSignals(result: AuditResult): boolean {
-  const eeatData = result.categoryDetails.find(c => c.category === 'E-E-A-T');
-  return (eeatData?.score || 0) > 50;
+  return result.scores.eeat > 50;
 }
 
 /**
  * Check if robots.txt allows AI crawlers
  */
 function checkAICrawlerSupport(result: AuditResult): boolean {
-  const crawlerData = result.categoryDetails.find(c => c.category === 'AI Crawlers');
-  return (crawlerData?.score || 0) > 70;
+  return result.scores.aiCrawlers > 70;
 }
 
 /**
@@ -100,11 +111,8 @@ function convertToDbFormat(result: AuditResult, userId: string | null): AuditIns
   const domain = extractDomain(result.url);
   const schemaTypes = detectSchemaTypes(result);
   
-  // Extract detailed findings by category
-  const categoryMap: Record<string, any> = {};
-  result.categoryDetails.forEach(cat => {
-    categoryMap[cat.category] = cat.details;
-  });
+  // Use new details structure
+  const details = result.details;
   
   return {
     user_id: userId,
@@ -113,7 +121,7 @@ function convertToDbFormat(result: AuditResult, userId: string | null): AuditIns
     domain,
     timestamp: result.timestamp,
     overall_score: result.overallScore,
-    grade: result.grade,
+    grade: mapGradeToDatabase(result.grade),
     
     // Category scores
     score_schema_markup: result.scores.schemaMarkup,
@@ -128,20 +136,20 @@ function convertToDbFormat(result: AuditResult, userId: string | null): AuditIns
     score_link_analysis: result.scores.linkAnalysis || 0,
     
     // Detailed findings
-    schema_findings: categoryMap['Schema Markup'] || {},
-    meta_findings: categoryMap['Meta Tags'] || {},
-    crawler_findings: categoryMap['AI Crawlers'] || {},
-    eeat_findings: categoryMap['E-E-A-T'] || {},
-    structure_findings: categoryMap['Structure'] || {},
-    performance_findings: categoryMap['Performance'] || {},
-    content_findings: categoryMap['Content Quality'] || {},
-    citation_findings: categoryMap['Citation Potential'] || {},
-    technical_findings: categoryMap['Technical SEO'] || {},
-    link_findings: categoryMap['Link Analysis'] || {},
+    schema_findings: details.schemaMarkup as any,
+    meta_findings: details.metaTags as any,
+    crawler_findings: details.aiCrawlers as any,
+    eeat_findings: details.eeat as any,
+    structure_findings: details.structure as any,
+    performance_findings: details.performance as any,
+    content_findings: details.contentQuality as any,
+    citation_findings: details.citationPotential as any,
+    technical_findings: details.technicalSEO as any,
+    link_findings: details.linkAnalysis as any,
     
-    // AI recommendations
-    ai_recommendations: result.recommendations || [],
-    priority_actions: result.recommendations?.slice(0, 5) || [],
+    // AI recommendations (serialize to JSON)
+    ai_recommendations: JSON.stringify(result.recommendations || []) as any,
+    priority_actions: JSON.stringify(result.recommendations?.slice(0, 5) || []) as any,
     
     // Feature flags
     ...schemaTypes,
@@ -171,7 +179,7 @@ export async function saveAuditToCloud(result: AuditResult): Promise<{ success: 
     // Insert to Supabase
     const { data, error } = await supabase
       .from('audits')
-      .insert(auditData)
+      .insert(auditData as any)
       .select()
       .single();
     
@@ -184,12 +192,12 @@ export async function saveAuditToCloud(result: AuditResult): Promise<{ success: 
       return { success: false, error };
     }
     
-    console.log('✅ Audit saved to Supabase:', data.id);
+    console.log('✅ Audit saved to Supabase:', (data as any)?.id);
     
     // Also save to localStorage for offline access
     saveToLocalStorage(result);
     
-    return { success: true, id: data.id };
+    return { success: true, id: (data as any)?.id };
     
   } catch (error) {
     console.error('Error saving audit:', error);
@@ -273,7 +281,7 @@ export async function getCloudUrlHistory(url: string): Promise<AuditRow[]> {
  */
 export async function deleteCloudAudit(auditId: string): Promise<{ success: boolean; error?: any }> {
   try {
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('audits')
       .update({ deleted_at: new Date().toISOString() })
       .eq('id', auditId);
@@ -296,7 +304,7 @@ export async function deleteCloudAudit(auditId: string): Promise<{ success: bool
  */
 export async function updateAuditPublicStatus(auditId: string, isPublic: boolean): Promise<{ success: boolean; error?: any }> {
   try {
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('audits')
       .update({ is_public: isPublic })
       .eq('id', auditId);
@@ -449,7 +457,7 @@ export async function syncLocalStorageToCloud(): Promise<{ synced: number; error
           domain: extractDomain(item.url),
           timestamp: item.timestamp,
           overall_score: item.overallScore,
-          grade: item.grade,
+          grade: mapGradeToDatabase(item.grade),
           score_schema_markup: item.scores?.schemaMarkup || 0,
           score_meta_tags: item.scores?.metaTags || 0,
           score_ai_crawlers: item.scores?.aiCrawlers || 0,
@@ -457,7 +465,7 @@ export async function syncLocalStorageToCloud(): Promise<{ synced: number; error
           score_structure: item.scores?.structure || 0,
           score_performance: item.scores?.performance || 0,
           score_content_quality: item.scores?.contentQuality || 0,
-        });
+        } as any);
       
       if (error) {
         errors++;
