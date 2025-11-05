@@ -17,7 +17,7 @@ interface VisibilityFactor {
  * Calculate AI Visibility Score - probability of AI citation (0-100)
  * Based on key factors that AI systems use for source selection
  */
-function calculateAIVisibilityScore(result: AuditResult): {
+export function calculateAIVisibilityScore(result: AuditResult): {
   overall: number;
   factors: VisibilityFactor[];
 } {

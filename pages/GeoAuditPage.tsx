@@ -18,7 +18,8 @@ import ScoreTrendChart from '../components/charts/ScoreTrendChart';
 import PriorityMatrix from '../components/charts/PriorityMatrix';
 import CategoryBarChart from '../components/charts/CategoryBarChart';
 import ExecutiveSummary from '../components/ExecutiveSummary';
-import AIVisibilityScore from '../components/AIVisibilityScore';
+import AIVisibilityScore, { calculateAIVisibilityScore } from '../components/AIVisibilityScore';
+import GEOHealthTracker from '../components/GEOHealthTracker';
 import SEOHead from '../components/SEOHead';
 // Removed: RealtimeMonitorPanel (bundle optimization)
 
@@ -649,6 +650,12 @@ const GeoAuditPage = () => {
 
             {/* AI Visibility Index - Key Metric */}
             <AIVisibilityScore result={result} />
+
+            {/* GEO Health Tracker - Daily Monitoring */}
+            <GEOHealthTracker 
+              url={result.url} 
+              currentScore={calculateAIVisibilityScore(result).overall} 
+            />
 
             {/* Insights */}
             {result.insights && result.insights.length > 0 && (
