@@ -684,38 +684,38 @@ const GeoAuditPage = () => {
               </div>
             </div>
 
-            {/* Score Breakdown - Minimalist Grid */}
-            <div className="mb-16">
-              <div className="flex items-center justify-between mb-6">
+            {/* Score Breakdown - Compact Dashboard Grid */}
+            <div className="mb-12">
+              <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-bold text-white tracking-tight">Score Breakdown</h3>
                 {comparison?.previous && (
-                  <div className="flex items-center gap-2 text-xs text-white/40">
+                  <div className="flex items-center gap-1.5 text-[10px] text-white/40">
                     <History className="w-3 h-3" />
                     <span>vs. {new Date(comparison.previous.timestamp).toLocaleDateString()}</span>
                   </div>
                 )}
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8">
+              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                 {Object.entries(result.scores).map(([key, score]) => {
                   const change = comparison?.changes?.[key as keyof typeof comparison.changes] || 0;
                   return (
-                  <div key={key} className="space-y-3">
-                    <div className="flex items-baseline justify-between">
-                      <h4 className="text-xs text-white/40 uppercase tracking-wider font-medium">
+                  <div key={key} className="p-3 bg-white/5 border border-white/10 rounded-lg hover:border-brand-accent/30 transition-all space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <h4 className="text-[10px] text-white/40 uppercase tracking-wide font-medium leading-tight">
                         {key.replace(/([A-Z])/g, ' $1').trim()}
                       </h4>
                       {change !== 0 && (
-                        <span className={`text-xs font-semibold tabular-nums ${
-                          change > 0 ? 'text-green-400' : 'text-red-400'
+                        <span className={`text-[10px] font-bold tabular-nums px-1 py-0.5 rounded ${
+                          change > 0 ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'
                         }`}>
                           {change > 0 ? '+' : ''}{change}
                         </span>
                       )}
                     </div>
-                    <div className={`text-4xl font-bold tabular-nums ${getScoreColor(score)}`}>
+                    <div className={`text-3xl font-bold tabular-nums ${getScoreColor(score)}`}>
                       {score}
                     </div>
-                    <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                    <div className="h-1 bg-white/10 rounded-full overflow-hidden">
                       <div 
                         className={`h-full bg-gradient-to-r ${getScoreGradient(score)} transition-all duration-1000`}
                         style={{ width: `${score}%` }}
