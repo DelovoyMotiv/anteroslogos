@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LoadingSpinner from './components/LoadingSpinner';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { IOSInstallPrompt } from './components/IOSInstallPrompt';
 
 // Lazy load all route components for optimal bundle splitting
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -37,6 +38,7 @@ const App: React.FC = () => {
                         <Route path="*" element={<NotFound />} />
                     </Routes>
                 </Suspense>
+                <IOSInstallPrompt />
             </Router>
         </ErrorBoundary>
     );
