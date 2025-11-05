@@ -173,6 +173,11 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
 }
 
 /**
+ * Alias for A2A compatibility
+ */
+export const performGeoAudit = auditWebsite;
+
+/**
  * Normalize URL to ensure proper format
  */
 function normalizeUrl(url: string): string {

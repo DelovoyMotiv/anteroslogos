@@ -147,7 +147,7 @@ export class A2ARateLimiter {
   /**
    * Calculate reset time
    */
-  private getResetTime(now: number, config: A2ARateLimitConfig): number {
+  private getResetTime(now: number, _config: A2ARateLimitConfig): number {
     return now + (60 * 1000); // 1 minute from now
   }
   
@@ -247,3 +247,18 @@ export async function withRateLimit<T>(
  * Global rate limiter instance
  */
 export const globalRateLimiter = new A2ARateLimiter();
+
+/**
+ * Convenience function for checking rate limit
+ */
+export async function checkRateLimit(apiKey: string, tier: string): Promise<RateLimitResult & { limit: number }> {
+  // Set config based on tier if not already set
+  const config = RATE_LIMITS[tier] || RATE_LIMITS.free;
+  globalRateLimiter.setConfig(apiKey, config);
+  
+  const result = await globalRateLimiter.checkLimit(apiKey);
+  return {
+    ...result,
+    limit: config.requests_per_minute,
+  };
+}

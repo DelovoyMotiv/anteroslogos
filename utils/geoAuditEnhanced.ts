@@ -388,6 +388,11 @@ export async function auditWebsite(
   return baseResult;
 }
 
+/**
+ * Alias for A2A compatibility
+ */
+export const performGeoAudit = auditWebsite;
+
 // ==================== UTILITY FUNCTIONS ====================
 
 function normalizeUrl(url: string): string {

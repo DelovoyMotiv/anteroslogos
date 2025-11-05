@@ -51,7 +51,7 @@ export enum A2AMethod {
 export const A2ARequestSchema = z.object({
   jsonrpc: z.literal('2.0'),
   method: z.nativeEnum(A2AMethod),
-  params: z.record(z.any()).optional(),
+  params: z.record(z.string(), z.any()).optional(),
   id: z.union([z.string(), z.number()]).optional(),
 });
 
@@ -85,8 +85,8 @@ export const AuditRequestParamsSchema = z.object({
     timeout: z.number().min(5000).max(300000).default(60000), // 5s - 5min
     priority: z.enum(['low', 'normal', 'high']).default('normal'),
     callback_url: z.string().url().optional(),
-  }).optional().default({}),
-  metadata: z.record(z.any()).optional(),
+  }).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
 });
 
 export type AuditRequestParams = z.infer<typeof AuditRequestParamsSchema>;
@@ -101,7 +101,7 @@ export const BatchAuditParamsSchema = z.object({
     parallel: z.boolean().default(true),
     max_concurrent: z.number().min(1).max(10).default(5),
     fail_fast: z.boolean().default(false),
-  }).optional().default({}),
+  }).optional(),
 });
 
 export type BatchAuditParams = z.infer<typeof BatchAuditParamsSchema>;
@@ -111,7 +111,7 @@ export type BatchAuditParams = z.infer<typeof BatchAuditParamsSchema>;
  */
 export const SubscribeParamsSchema = z.object({
   event: z.enum(['audit.progress', 'audit.complete', 'insights.update']),
-  filter: z.record(z.any()).optional(),
+  filter: z.record(z.string(), z.any()).optional(),
 });
 
 export type SubscribeParams = z.infer<typeof SubscribeParamsSchema>;
@@ -291,6 +291,9 @@ export enum A2AErrorCode {
   NOT_FOUND = -32009,
 }
 
+// Alias for backward compatibility
+export const ERROR_CODES = A2AErrorCode;
+
 export class A2AError extends Error {
   constructor(
     public code: A2AErrorCode,
@@ -440,9 +443,10 @@ export interface A2AContext {
   agent_info?: A2AAgentInfo;
   user_id?: string;
   api_key?: string;
-  rate_limit_tier: string;
+  tier: string;
   metadata?: Record<string, any>;
-  timestamp: Date;
+  timestamp: string;
+  ip_address?: string;
 }
 
 // =====================================================
@@ -468,11 +472,17 @@ export function createA2AResponse(
  */
 export function createA2AErrorResponse(
   id: string | number | null,
-  error: A2AError
+  code: number,
+  message: string,
+  data?: any
 ): A2AResponse {
   return {
     jsonrpc: '2.0',
-    error: error.toJSON(),
+    error: {
+      code,
+      message,
+      data,
+    },
     id,
   };
 }
@@ -480,33 +490,20 @@ export function createA2AErrorResponse(
 /**
  * Validate incoming request
  */
-export function validateA2ARequest(data: unknown): A2ARequest {
+export function validateA2ARequest(data: unknown): { valid: boolean; request?: A2ARequest; errors?: any } {
   try {
-    return A2ARequestSchema.parse(data);
+    const request = A2ARequestSchema.parse(data);
+    return { valid: true, request };
   } catch (error) {
-    throw new A2AError(
-      A2AErrorCode.INVALID_REQUEST,
-      'Invalid JSON-RPC 2.0 request format',
-      error
-    );
+    return { valid: false, errors: error };
   }
 }
 
 /**
- * Detect agent from User-Agent or custom headers
+ * Detect agent from User-Agent string
  */
-export function detectAgent(userAgent: string, headers: Record<string, string>): A2AAgentInfo | null {
+export function detectAgent(userAgent: string): A2AAgentInfo | null {
   const ua = userAgent.toLowerCase();
-  const agentHeader = headers['x-agent-name']?.toLowerCase();
-  
-  // Check custom header first
-  if (agentHeader) {
-    for (const [key, agent] of Object.entries(KNOWN_AGENTS)) {
-      if (agentHeader.includes(key)) {
-        return agent;
-      }
-    }
-  }
   
   // Check User-Agent
   for (const [key, agent] of Object.entries(KNOWN_AGENTS)) {
