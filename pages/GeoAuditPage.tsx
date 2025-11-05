@@ -527,7 +527,7 @@ const GeoAuditPage = () => {
                       <span className={`text-6xl font-bold leading-none tabular-nums ${getScoreColor(result.overallScore)}`} style={{
                         textShadow: `0 0 30px ${getScoreColor(result.overallScore).includes('green') ? '#34d39950' : getScoreColor(result.overallScore).includes('yellow') ? '#fbbf2450' : getScoreColor(result.overallScore).includes('red') ? '#f8717150' : '#60a5fa50'}`
                       }}>
-                        {result.preciseScore?.toFixed(3) || result.overallScore}
+                        {result.preciseScore ? result.preciseScore.toFixed(3) : result.overallScore.toFixed(3)}
                       </span>
                       <span className="text-white/30 text-lg font-light mb-1">/ 100</span>
                     </div>
@@ -578,24 +578,24 @@ const GeoAuditPage = () => {
                   </div>
                   
                   {/* Score Breakdown - Compact */}
-                  {result.scoreBreakdown && (
+                  {result.scoreBreakdown && typeof result.scoreBreakdown === 'object' && (
                     <div className="grid grid-cols-3 gap-3 max-w-md">
                       <div className="p-2 bg-white/5 border border-white/10 rounded">
                         <div className="text-[9px] text-white/40 uppercase tracking-wide font-semibold mb-1">Core</div>
-                        <div className={`text-lg font-bold tabular-nums ${getScoreColor(result.scoreBreakdown.core)}`}>
-                          {result.scoreBreakdown.core.toFixed(1)}
+                        <div className={`text-lg font-bold tabular-nums ${getScoreColor(result.scoreBreakdown.core || 0)}`}>
+                          {(result.scoreBreakdown.core || 0).toFixed(1)}
                         </div>
                       </div>
                       <div className="p-2 bg-white/5 border border-white/10 rounded">
                         <div className="text-[9px] text-white/40 uppercase tracking-wide font-semibold mb-1">Technical</div>
-                        <div className={`text-lg font-bold tabular-nums ${getScoreColor(result.scoreBreakdown.technical)}`}>
-                          {result.scoreBreakdown.technical.toFixed(1)}
+                        <div className={`text-lg font-bold tabular-nums ${getScoreColor(result.scoreBreakdown.technical || 0)}`}>
+                          {(result.scoreBreakdown.technical || 0).toFixed(1)}
                         </div>
                       </div>
                       <div className="p-2 bg-white/5 border border-white/10 rounded">
                         <div className="text-[9px] text-white/40 uppercase tracking-wide font-semibold mb-1">Content</div>
-                        <div className={`text-lg font-bold tabular-nums ${getScoreColor(result.scoreBreakdown.content)}`}>
-                          {result.scoreBreakdown.content.toFixed(1)}
+                        <div className={`text-lg font-bold tabular-nums ${getScoreColor(result.scoreBreakdown.content || 0)}`}>
+                          {(result.scoreBreakdown.content || 0).toFixed(1)}
                         </div>
                       </div>
                     </div>
