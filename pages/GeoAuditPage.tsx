@@ -692,16 +692,6 @@ const GeoAuditPage = () => {
               currentScore={calculateAIVisibilityScore(result).overall} 
             />
 
-            {/* AID Agent Discovery - New Section */}
-            {result.details.aidAgent && (
-              <div className="mb-16">
-                <AIDAgentStatus 
-                  aidInfo={result.details.aidAgent} 
-                  score={result.scores.aidAgent} 
-                />
-              </div>
-            )}
-
             {/* Insights */}
             {result.insights && result.insights.length > 0 && (
               <div className="mb-16">
@@ -1111,6 +1101,16 @@ const GeoAuditPage = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* AID Agent Discovery - Compact Section at Bottom */}
+            {result.details.aidAgent && (
+              <div className="mb-8">
+                <AIDAgentStatus 
+                  aidInfo={result.details.aidAgent} 
+                  score={result.scores.aidAgent} 
+                />
               </div>
             )}
 

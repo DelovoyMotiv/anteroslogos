@@ -23,12 +23,12 @@ const AIDAgentStatus = ({ aidInfo, score }: AIDAgentStatusProps) => {
 
   const getStatusIcon = () => {
     if (!aidInfo.detected) {
-      return <XCircle className="w-6 h-6 text-red-500" />;
+      return <XCircle className="w-4 h-4 text-red-400" />;
     }
     if (aidInfo.errors.length > 0) {
-      return <AlertTriangle className="w-6 h-6 text-yellow-500" />;
+      return <AlertTriangle className="w-4 h-4 text-yellow-400" />;
     }
-    return <CheckCircle className="w-6 h-6 text-green-500" />;
+    return <CheckCircle className="w-4 h-4 text-green-400" />;
   };
 
   const getStatusText = () => {
@@ -51,34 +51,34 @@ const AIDAgentStatus = ({ aidInfo, score }: AIDAgentStatusProps) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <Bot className="w-8 h-8 text-blue-500" />
+    <div className="bg-white/5 border border-brand-secondary rounded-lg p-4">
+      {/* Header - Compact */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Bot className="w-5 h-5 text-brand-accent" />
           <div>
-            <h3 className="text-xl font-bold text-gray-900">AI Agent Discovery (AID)</h3>
-            <p className="text-sm text-gray-500">Agent Identity & Discovery Protocol v1.1</p>
+            <h3 className="text-sm font-bold text-white">AI Agent Discovery (AID)</h3>
+            <p className="text-[10px] text-white/50">Protocol v1.1</p>
           </div>
         </div>
         
-        <div className={`flex items-center gap-3 px-4 py-2 rounded-lg border ${getScoreBg(score)}`}>
-          <span className={`text-2xl font-bold ${getScoreColor(score)}`}>{score}</span>
-          <span className="text-sm text-gray-600">/100</span>
+        <div className={`flex items-center gap-2 px-3 py-1 rounded border ${getScoreBg(score)}`}>
+          <span className={`text-lg font-bold ${getScoreColor(score)}`}>{score}</span>
+          <span className="text-[10px] text-white/40">/100</span>
         </div>
       </div>
 
-      {/* Status Card */}
-      <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg p-4 mb-6">
+      {/* Status Card - Compact */}
+      <div className="bg-white/5 border border-white/10 rounded p-3 mb-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {getStatusIcon()}
             <div>
-              <div className="font-semibold text-gray-900">{getStatusText()}</div>
-              <div className="text-sm text-gray-600">
+              <div className="font-semibold text-white text-xs">{getStatusText()}</div>
+              <div className="text-[10px] text-white/50">
                 {aidInfo.detected 
-                  ? `Version ${aidInfo.version || 'Unknown'}`
-                  : 'No AI agent found via DNS or HTTPS'}
+                  ? `v${aidInfo.version || '?'}`
+                  : 'Not found'}
               </div>
             </div>
           </div>
@@ -88,56 +88,56 @@ const AIDAgentStatus = ({ aidInfo, score }: AIDAgentStatusProps) => {
 
       {/* Agent Details - Only show if detected */}
       {aidInfo.detected && (
-        <div className="space-y-4 mb-6">
-          {/* Agent Name & Description */}
+        <div className="space-y-3 mb-4">
+          {/* Agent Name & Description - Compact */}
           {aidInfo.agentName && (
-            <div className="border-l-4 border-blue-500 pl-4">
-              <div className="font-semibold text-gray-900">{aidInfo.agentName}</div>
+            <div className="border-l-2 border-brand-accent pl-2">
+              <div className="font-semibold text-white text-xs">{aidInfo.agentName}</div>
               {aidInfo.agentDescription && (
-                <div className="text-sm text-gray-600 mt-1">{aidInfo.agentDescription}</div>
+                <div className="text-[10px] text-white/60 mt-0.5">{aidInfo.agentDescription}</div>
               )}
             </div>
           )}
 
-          {/* Discovery Methods */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className={`p-3 rounded-lg border ${aidInfo.discoveryMethod === 'both' || aidInfo.discoveryMethod === 'dns' ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
-              <div className="flex items-center gap-2 mb-1">
-                <Globe className={`w-4 h-4 ${aidInfo.discoveryMethod === 'both' || aidInfo.discoveryMethod === 'dns' ? 'text-green-600' : 'text-gray-400'}`} />
-                <span className="text-sm font-medium">DNS TXT Record</span>
+          {/* Discovery Methods - Compact Grid */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className={`p-2 rounded border ${aidInfo.discoveryMethod === 'both' || aidInfo.discoveryMethod === 'dns' ? 'bg-green-500/10 border-green-500/30' : 'bg-white/5 border-white/10'}`}>
+              <div className="flex items-center gap-1 mb-0.5">
+                <Globe className={`w-3 h-3 ${aidInfo.discoveryMethod === 'both' || aidInfo.discoveryMethod === 'dns' ? 'text-green-400' : 'text-white/40'}`} />
+                <span className="text-[10px] font-medium text-white">DNS TXT</span>
               </div>
-              <div className="text-xs text-gray-600">
+              <div className="text-[9px] text-white/50">
                 {aidInfo.discoveryMethod === 'both' || aidInfo.discoveryMethod === 'dns' 
                   ? `✓ _agent.${aidInfo.domain || 'domain'}` 
-                  : '✗ Not configured'}
+                  : '✗ Missing'}
               </div>
             </div>
 
-            <div className={`p-3 rounded-lg border ${aidInfo.discoveryMethod === 'both' || aidInfo.discoveryMethod === 'https' ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
-              <div className="flex items-center gap-2 mb-1">
-                <FileJson className={`w-4 h-4 ${aidInfo.discoveryMethod === 'both' || aidInfo.discoveryMethod === 'https' ? 'text-green-600' : 'text-gray-400'}`} />
-                <span className="text-sm font-medium">HTTPS Well-Known</span>
+            <div className={`p-2 rounded border ${aidInfo.discoveryMethod === 'both' || aidInfo.discoveryMethod === 'https' ? 'bg-green-500/10 border-green-500/30' : 'bg-white/5 border-white/10'}`}>
+              <div className="flex items-center gap-1 mb-0.5">
+                <FileJson className={`w-3 h-3 ${aidInfo.discoveryMethod === 'both' || aidInfo.discoveryMethod === 'https' ? 'text-green-400' : 'text-white/40'}`} />
+                <span className="text-[10px] font-medium text-white">HTTPS</span>
               </div>
-              <div className="text-xs text-gray-600">
+              <div className="text-[9px] text-white/50">
                 {aidInfo.discoveryMethod === 'both' || aidInfo.discoveryMethod === 'https' 
-                  ? '✓ /.well-known/agent.json' 
-                  : '✗ Not found'}
+                  ? '✓ /.well-known' 
+                  : '✗ Missing'}
               </div>
             </div>
           </div>
 
-          {/* Protocols */}
+          {/* Protocols - Compact */}
           {aidInfo.protocols && aidInfo.protocols.length > 0 && (
             <div>
-              <div className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                <Network className="w-4 h-4" />
-                Supported Protocols
+              <div className="text-[10px] font-medium text-white/60 mb-1 flex items-center gap-1">
+                <Network className="w-3 h-3" />
+                Protocols
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1">
                 {aidInfo.protocols.map((protocol) => (
                   <span
                     key={protocol}
-                    className="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium uppercase"
+                    className="text-[9px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded font-medium uppercase"
                   >
                     {protocol}
                   </span>
@@ -146,102 +146,108 @@ const AIDAgentStatus = ({ aidInfo, score }: AIDAgentStatusProps) => {
             </div>
           )}
 
-          {/* Capabilities */}
+          {/* Capabilities - Compact, limit to 4 */}
           {aidInfo.capabilities && aidInfo.capabilities.length > 0 && (
             <div>
-              <div className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-                <Zap className="w-4 h-4" />
-                Agent Capabilities
+              <div className="text-[10px] font-medium text-white/60 mb-1 flex items-center gap-1">
+                <Zap className="w-3 h-3" />
+                Capabilities
               </div>
-              <div className="flex flex-wrap gap-2">
-                {aidInfo.capabilities.slice(0, 6).map((capability) => (
+              <div className="flex flex-wrap gap-1">
+                {aidInfo.capabilities.slice(0, 4).map((capability) => (
                   <span
                     key={capability}
-                    className="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded font-mono"
+                    className="text-[9px] bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded font-mono"
                   >
                     {capability}
                   </span>
                 ))}
-                {aidInfo.capabilities.length > 6 && (
-                  <span className="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded">
-                    +{aidInfo.capabilities.length - 6} more
+                {aidInfo.capabilities.length > 4 && (
+                  <span className="text-[9px] bg-white/10 text-white/50 px-2 py-0.5 rounded">
+                    +{aidInfo.capabilities.length - 4}
                   </span>
                 )}
               </div>
             </div>
           )}
 
-          {/* Endpoint */}
+          {/* Endpoint - Compact */}
           {aidInfo.endpoint && (
-            <div className="bg-gray-900 rounded-lg p-3">
-              <div className="text-xs text-gray-400 mb-1">Agent Endpoint</div>
-              <div className="text-sm font-mono text-green-400 break-all">{aidInfo.endpoint}</div>
+            <div className="bg-slate-900 rounded p-2">
+              <div className="text-[9px] text-white/40 mb-0.5">Endpoint</div>
+              <div className="text-[10px] font-mono text-green-400 break-all">{aidInfo.endpoint}</div>
             </div>
           )}
 
-          {/* Organization Info */}
-          {aidInfo.metadata?.organization && (
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Organization:</span>
-              <span className="font-medium text-gray-900">{aidInfo.metadata.organization}</span>
-            </div>
-          )}
-
-          {aidInfo.metadata?.industry && (
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Industry:</span>
-              <span className="font-medium text-gray-900">{aidInfo.metadata.industry}</span>
-            </div>
-          )}
+          {/* Organization Info - Compact */}
+          <div className="flex items-center gap-3 text-[10px]">
+            {aidInfo.metadata?.organization && (
+              <div>
+                <span className="text-white/50">Org:</span>
+                <span className="font-medium text-white ml-1">{aidInfo.metadata.organization}</span>
+              </div>
+            )}
+            {aidInfo.metadata?.industry && (
+              <div>
+                <span className="text-white/50">Industry:</span>
+                <span className="font-medium text-white ml-1">{aidInfo.metadata.industry}</span>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
-      {/* Errors */}
+      {/* Errors - Compact */}
       {aidInfo.errors.length > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-          <div className="flex items-center gap-2 mb-2">
-            <XCircle className="w-5 h-5 text-red-600" />
-            <span className="font-semibold text-red-900">Issues Detected</span>
+        <div className="bg-red-500/10 border border-red-500/30 rounded p-2 mb-3">
+          <div className="flex items-center gap-1 mb-1">
+            <XCircle className="w-3 h-3 text-red-400" />
+            <span className="font-semibold text-red-400 text-[10px]">Issues</span>
           </div>
-          <ul className="space-y-1">
-            {aidInfo.errors.map((error, index) => (
-              <li key={index} className="text-sm text-red-700">• {error}</li>
+          <ul className="space-y-0.5">
+            {aidInfo.errors.slice(0, 2).map((error, index) => (
+              <li key={index} className="text-[10px] text-red-300">• {error}</li>
             ))}
+            {aidInfo.errors.length > 2 && (
+              <li className="text-[9px] text-red-400/70">+{aidInfo.errors.length - 2} more</li>
+            )}
           </ul>
         </div>
       )}
 
-      {/* Warnings */}
+      {/* Warnings - Compact */}
       {aidInfo.warnings.length > 0 && !aidInfo.errors.length && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
-          <div className="flex items-center gap-2 mb-2">
-            <AlertTriangle className="w-5 h-5 text-yellow-600" />
-            <span className="font-semibold text-yellow-900">Warnings</span>
+        <div className="bg-yellow-500/10 border border-yellow-500/30 rounded p-2 mb-3">
+          <div className="flex items-center gap-1 mb-1">
+            <AlertTriangle className="w-3 h-3 text-yellow-400" />
+            <span className="font-semibold text-yellow-400 text-[10px]">Warnings</span>
           </div>
-          <ul className="space-y-1">
-            {aidInfo.warnings.slice(0, 3).map((warning, index) => (
-              <li key={index} className="text-sm text-yellow-700">• {warning}</li>
+          <ul className="space-y-0.5">
+            {aidInfo.warnings.slice(0, 2).map((warning, index) => (
+              <li key={index} className="text-[10px] text-yellow-300">• {warning}</li>
             ))}
+            {aidInfo.warnings.length > 2 && (
+              <li className="text-[9px] text-yellow-400/70">+{aidInfo.warnings.length - 2} more</li>
+            )}
           </ul>
         </div>
       )}
 
-      {/* Info Section - Always Show */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div className="text-sm text-blue-900">
-          <strong>What is AID?</strong> The Agent Identity & Discovery protocol makes your services discoverable 
-          by AI agents across the agentic web ecosystem (ChatGPT, Claude, Perplexity, Gemini agents). 
-          It's the DNS for AI agents - one TXT record makes your agent visible to 5,000+ registered domains.
+      {/* Info Section - Compact */}
+      <div className="bg-blue-500/10 border border-blue-500/30 rounded p-2">
+        <div className="text-[10px] text-white/70">
+          <strong className="text-blue-400">AID Protocol:</strong> Makes your services discoverable 
+          by AI agents (ChatGPT, Claude, Perplexity). One TXT record = visibility to 5,000+ domains.
         </div>
         {!aidInfo.detected && (
-          <div className="mt-3 pt-3 border-t border-blue-200">
+          <div className="mt-2 pt-2 border-t border-blue-500/20">
             <a 
               href="/agent-identity" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-sm font-medium text-blue-600 hover:text-blue-700 underline"
+              className="text-[10px] font-medium text-brand-accent hover:text-blue-400 underline"
             >
-              Learn how to implement AID protocol →
+              Implement AID →
             </a>
           </div>
         )}

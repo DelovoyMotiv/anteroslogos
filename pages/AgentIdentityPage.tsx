@@ -116,28 +116,28 @@ const AgentIdentityPage = () => {
         onContactClick={() => window.location.href = '/#contact'}
       />
 
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 pt-20 sm:pt-24 pb-12 sm:pb-16">
+      <div className="min-h-screen bg-brand-bg text-brand-text pt-20 sm:pt-24 pb-12 sm:pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           {/* Breadcrumbs */}
-          <nav className="flex items-center gap-2 text-sm text-slate-600 mb-6" aria-label="Breadcrumb">
-            <a href="/" className="hover:text-blue-600 transition-colors">Home</a>
+          <nav className="flex items-center gap-2 text-sm text-white/60 mb-6" aria-label="Breadcrumb">
+            <a href="/" className="hover:text-brand-accent transition-colors">Home</a>
             <ChevronRight className="w-4 h-4" />
-            <span className="text-slate-900 font-medium">Agent Identity</span>
+            <span className="text-white font-medium">Agent Identity</span>
           </nav>
           
           {/* Hero Section */}
           <div className="text-center mb-12 sm:mb-16">
-            <div className="inline-flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-xs sm:text-sm font-medium mb-4 sm:mb-6">
+            <div className="inline-flex items-center gap-2 bg-brand-accent/10 border border-brand-accent/20 px-4 py-2 rounded-full text-xs sm:text-sm font-medium mb-4 sm:mb-6 text-brand-accent">
               <Bot className="w-3 h-3 sm:w-4 sm:h-4" />
               <span>AID v1.1 Protocol Implemented</span>
             </div>
             
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 mb-4 sm:mb-6">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
               Agent Identity & Discovery
             </h1>
             
-            <p className="text-base sm:text-lg lg:text-xl text-slate-600 max-w-3xl mx-auto mb-6 sm:mb-8">
+            <p className="text-base sm:text-lg lg:text-xl text-white/70 max-w-3xl mx-auto mb-6 sm:mb-8">
               DNS-first approach for AI agent identification. One TXT record makes our agent instantly discoverable across the agentic web ecosystem.
             </p>
 
@@ -145,7 +145,7 @@ const AgentIdentityPage = () => {
               <a 
                 href="/.well-known/agent.json" 
                 target="_blank"
-                className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base"
+                className="inline-flex items-center gap-2 bg-brand-accent text-white px-6 py-3 rounded-lg hover:bg-blue-500 transition-colors text-sm sm:text-base"
               >
                 <FileJson className="w-4 h-4 sm:w-5 sm:h-5" />
                 View Agent Identity
@@ -154,7 +154,7 @@ const AgentIdentityPage = () => {
                 href="https://github.com/agentcommunity/aid-protocol" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-slate-700 text-white px-6 py-3 rounded-lg hover:bg-slate-800 transition-colors text-sm sm:text-base"
+                className="inline-flex items-center gap-2 bg-brand-secondary text-white px-6 py-3 rounded-lg hover:bg-white/10 transition-colors text-sm sm:text-base"
               >
                 <Code className="w-4 h-4 sm:w-5 sm:h-5" />
                 AID Specification
@@ -163,39 +163,39 @@ const AgentIdentityPage = () => {
           </div>
 
           {/* Protocol Overview */}
-          <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 mb-8 sm:mb-12">
+          <div className="bg-white/5 border border-brand-secondary rounded-xl p-6 sm:p-8 mb-8 sm:mb-12">
             <div className="flex items-center gap-3 mb-6">
-              <Network className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900">
+              <Network className="w-6 h-6 sm:w-8 sm:h-8 text-brand-accent" />
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">
                 Protocol Overview
               </h2>
             </div>
 
-            <p className="text-sm sm:text-base text-slate-700 mb-6 leading-relaxed">
+            <p className="text-sm sm:text-base text-white/70 mb-6 leading-relaxed">
               AID (Agent Identity & Discovery) is a DNS-based protocol for agent identification. Developed by agentcommunity.org, it solves the fundamental question: "Given a domain, where is its AI agent?"
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 sm:p-6 rounded-lg">
-                <Globe className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600 mb-3" />
-                <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-2">DNS-First</h3>
-                <p className="text-xs sm:text-sm text-slate-600">
+              <div className="bg-white/5 border border-white/10 p-4 sm:p-6 rounded-lg hover:border-brand-accent/30 transition-colors">
+                <Globe className="w-6 h-6 sm:w-8 sm:h-8 text-brand-accent mb-3" />
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-2">DNS-First</h3>
+                <p className="text-xs sm:text-sm text-white/60">
                   Single TXT record at _agent.domain makes agent instantly discoverable
                 </p>
               </div>
 
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 sm:p-6 rounded-lg">
-                <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-green-600 mb-3" />
-                <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-2">Cryptographic Proof</h3>
-                <p className="text-xs sm:text-sm text-slate-600">
+              <div className="bg-white/5 border border-white/10 p-4 sm:p-6 rounded-lg hover:border-green-500/30 transition-colors">
+                <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-green-400 mb-3" />
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-2">Cryptographic Proof</h3>
+                <p className="text-xs sm:text-sm text-white/60">
                   Ed25519 signatures (RFC 9421) verify domain ownership
                 </p>
               </div>
 
-              <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 sm:p-6 rounded-lg">
-                <Database className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600 mb-3" />
-                <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-2">Protocol-Agnostic</h3>
-                <p className="text-xs sm:text-sm text-slate-600">
+              <div className="bg-white/5 border border-white/10 p-4 sm:p-6 rounded-lg hover:border-purple-500/30 transition-colors">
+                <Database className="w-6 h-6 sm:w-8 sm:h-8 text-purple-400 mb-3" />
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-2">Protocol-Agnostic</h3>
+                <p className="text-xs sm:text-sm text-white/60">
                   Supports A2A, MCP, ANP, HTTP and future protocols
                 </p>
               </div>
@@ -203,15 +203,15 @@ const AgentIdentityPage = () => {
           </div>
 
           {/* DNS Configuration */}
-          <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 mb-8 sm:mb-12">
+          <div className="bg-white/5 border border-brand-secondary rounded-xl p-6 sm:p-8 mb-8 sm:mb-12">
             <div className="flex items-center gap-3 mb-6">
-              <Terminal className="w-6 h-6 sm:w-8 sm:h-8 text-slate-700" />
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900">
+              <Terminal className="w-6 h-6 sm:w-8 sm:h-8 text-brand-accent" />
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">
                 DNS TXT Record
               </h2>
             </div>
 
-            <p className="text-sm sm:text-base text-slate-700 mb-6">
+            <p className="text-sm sm:text-base text-white/70 mb-6">
               Our agent is discoverable via a single TXT record. Single-letter aliases fit within the 255-byte DNS limit.
             </p>
 
@@ -242,88 +242,88 @@ const AgentIdentityPage = () => {
             </div>
 
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
-              <div className="bg-blue-50 p-3 sm:p-4 rounded-lg">
-                <span className="font-mono text-xs sm:text-sm font-semibold text-blue-700">v=1.1</span>
-                <p className="text-xs text-slate-600 mt-1">Protocol version</p>
+              <div className="bg-white/5 border border-blue-500/30 p-3 sm:p-4 rounded-lg">
+                <span className="font-mono text-xs sm:text-sm font-semibold text-blue-400">v=1.1</span>
+                <p className="text-xs text-white/60 mt-1">Protocol version</p>
               </div>
-              <div className="bg-green-50 p-3 sm:p-4 rounded-lg">
-                <span className="font-mono text-xs sm:text-sm font-semibold text-green-700">p=a2a,http</span>
-                <p className="text-xs text-slate-600 mt-1">Supported protocols</p>
+              <div className="bg-white/5 border border-green-500/30 p-3 sm:p-4 rounded-lg">
+                <span className="font-mono text-xs sm:text-sm font-semibold text-green-400">p=a2a,http</span>
+                <p className="text-xs text-white/60 mt-1">Supported protocols</p>
               </div>
-              <div className="bg-purple-50 p-3 sm:p-4 rounded-lg">
-                <span className="font-mono text-xs sm:text-sm font-semibold text-purple-700">u=...</span>
-                <p className="text-xs text-slate-600 mt-1">Endpoint URL</p>
+              <div className="bg-white/5 border border-purple-500/30 p-3 sm:p-4 rounded-lg">
+                <span className="font-mono text-xs sm:text-sm font-semibold text-purple-400">u=...</span>
+                <p className="text-xs text-white/60 mt-1">Endpoint URL</p>
               </div>
-              <div className="bg-orange-50 p-3 sm:p-4 rounded-lg">
-                <span className="font-mono text-xs sm:text-sm font-semibold text-orange-700">s=geoaudit</span>
-                <p className="text-xs text-slate-600 mt-1">Service identifier</p>
+              <div className="bg-white/5 border border-orange-500/30 p-3 sm:p-4 rounded-lg">
+                <span className="font-mono text-xs sm:text-sm font-semibold text-orange-400">s=geoaudit</span>
+                <p className="text-xs text-white/60 mt-1">Service identifier</p>
               </div>
-              <div className="bg-pink-50 p-3 sm:p-4 rounded-lg">
-                <span className="font-mono text-xs sm:text-sm font-semibold text-pink-700">d=...</span>
-                <p className="text-xs text-slate-600 mt-1">Domain ownership</p>
+              <div className="bg-white/5 border border-pink-500/30 p-3 sm:p-4 rounded-lg">
+                <span className="font-mono text-xs sm:text-sm font-semibold text-pink-400">d=...</span>
+                <p className="text-xs text-white/60 mt-1">Domain ownership</p>
               </div>
             </div>
           </div>
 
           {/* Agent Capabilities */}
-          <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 mb-8 sm:mb-12">
+          <div className="bg-white/5 border border-brand-secondary rounded-xl p-6 sm:p-8 mb-8 sm:mb-12">
             <div className="flex items-center gap-3 mb-6">
-              <Bot className="w-6 h-6 sm:w-8 sm:h-8 text-indigo-600" />
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900">
+              <Bot className="w-6 h-6 sm:w-8 sm:h-8 text-brand-accent" />
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">
                 Agent Capabilities
               </h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-              <div className="border border-slate-200 rounded-lg p-4 sm:p-6">
-                <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-4">Core Operations</h3>
+              <div className="border border-white/10 rounded-lg p-4 sm:p-6 bg-white/5">
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-4">Core Operations</h3>
                 <ul className="space-y-3">
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 mt-0.5 flex-shrink-0" />
                     <div>
-                      <span className="font-mono text-xs sm:text-sm text-slate-700">geo.audit.request</span>
-                      <p className="text-xs text-slate-600">Single URL GEO audit</p>
+                      <span className="font-mono text-xs sm:text-sm text-white">geo.audit.request</span>
+                      <p className="text-xs text-white/60">Single URL GEO audit</p>
                     </div>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 mt-0.5 flex-shrink-0" />
                     <div>
-                      <span className="font-mono text-xs sm:text-sm text-slate-700">geo.audit.batch</span>
-                      <p className="text-xs text-slate-600">Batch processing support</p>
+                      <span className="font-mono text-xs sm:text-sm text-white">geo.audit.batch</span>
+                      <p className="text-xs text-white/60">Batch processing support</p>
                     </div>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 mt-0.5 flex-shrink-0" />
                     <div>
-                      <span className="font-mono text-xs sm:text-sm text-slate-700">geo.insights.global</span>
-                      <p className="text-xs text-slate-600">Market intelligence</p>
+                      <span className="font-mono text-xs sm:text-sm text-white">geo.insights.global</span>
+                      <p className="text-xs text-white/60">Market intelligence</p>
                     </div>
                   </li>
                 </ul>
               </div>
 
-              <div className="border border-slate-200 rounded-lg p-4 sm:p-6">
-                <h3 className="text-base sm:text-lg font-semibold text-slate-900 mb-4">Discovery & Status</h3>
+              <div className="border border-white/10 rounded-lg p-4 sm:p-6 bg-white/5">
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-4">Discovery & Status</h3>
                 <ul className="space-y-3">
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 mt-0.5 flex-shrink-0" />
                     <div>
-                      <span className="font-mono text-xs sm:text-sm text-slate-700">a2a.discover</span>
-                      <p className="text-xs text-slate-600">Agent discovery protocol</p>
+                      <span className="font-mono text-xs sm:text-sm text-white">a2a.discover</span>
+                      <p className="text-xs text-white/60">Agent discovery protocol</p>
                     </div>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 mt-0.5 flex-shrink-0" />
                     <div>
-                      <span className="font-mono text-xs sm:text-sm text-slate-700">a2a.capabilities</span>
-                      <p className="text-xs text-slate-600">Capability enumeration</p>
+                      <span className="font-mono text-xs sm:text-sm text-white">a2a.capabilities</span>
+                      <p className="text-xs text-white/60">Capability enumeration</p>
                     </div>
                   </li>
                   <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-green-400 mt-0.5 flex-shrink-0" />
                     <div>
-                      <span className="font-mono text-xs sm:text-sm text-slate-700">a2a.status</span>
-                      <p className="text-xs text-slate-600">Health monitoring</p>
+                      <span className="font-mono text-xs sm:text-sm text-white">a2a.status</span>
+                      <p className="text-xs text-white/60">Health monitoring</p>
                     </div>
                   </li>
                 </ul>
@@ -332,49 +332,49 @@ const AgentIdentityPage = () => {
           </div>
 
           {/* Discovery Mechanisms */}
-          <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 mb-8 sm:mb-12">
+          <div className="bg-white/5 border border-brand-secondary rounded-xl p-6 sm:p-8 mb-8 sm:mb-12">
             <div className="flex items-center gap-3 mb-6">
-              <Search className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" />
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900">
+              <Search className="w-6 h-6 sm:w-8 sm:h-8 text-brand-accent" />
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">
                 Discovery Mechanisms
               </h2>
             </div>
 
-            <p className="text-sm sm:text-base text-slate-700 mb-6">
+            <p className="text-sm sm:text-base text-white/70 mb-6">
               AID uses a hybrid approach with DNS as primary and HTTPS well-known as fallback.
             </p>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-lg">
+              <div className="bg-white/5 border border-blue-500/30 p-6 rounded-lg hover:border-blue-500/50 transition-colors">
                 <div className="flex items-center gap-2 mb-4">
-                  <div className="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                  <div className="bg-brand-accent text-white px-3 py-1 rounded-full text-xs font-semibold">
                     Primary
                   </div>
-                  <h3 className="text-base sm:text-lg font-semibold text-slate-900">DNS TXT Record</h3>
+                  <h3 className="text-base sm:text-lg font-semibold text-white">DNS TXT Record</h3>
                 </div>
                 <div className="bg-slate-900 rounded p-4 mb-4">
                   <code className="text-xs sm:text-sm text-green-400 font-mono break-all">
                     dig _agent.anoteroslogos.com TXT
                   </code>
                 </div>
-                <p className="text-xs sm:text-sm text-slate-600">
+                <p className="text-xs sm:text-sm text-white/60">
                   Fast, distributed lookup via global DNS infrastructure. Response time under 50ms.
                 </p>
               </div>
 
-              <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-lg">
+              <div className="bg-white/5 border border-green-500/30 p-6 rounded-lg hover:border-green-500/50 transition-colors">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="bg-green-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
                     Fallback
                   </div>
-                  <h3 className="text-base sm:text-lg font-semibold text-slate-900">HTTPS Well-Known</h3>
+                  <h3 className="text-base sm:text-lg font-semibold text-white">HTTPS Well-Known</h3>
                 </div>
                 <div className="bg-slate-900 rounded p-4 mb-4">
                   <code className="text-xs sm:text-sm text-green-400 font-mono break-all">
                     GET /.well-known/agent.json
                   </code>
                 </div>
-                <p className="text-xs sm:text-sm text-slate-600">
+                <p className="text-xs sm:text-sm text-white/60">
                   RFC 8615 compliant well-known URI. Automatic fallback if DNS lookup fails.
                 </p>
               </div>
@@ -382,46 +382,46 @@ const AgentIdentityPage = () => {
           </div>
 
           {/* Security & Verification */}
-          <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 mb-8 sm:mb-12">
+          <div className="bg-white/5 border border-brand-secondary rounded-xl p-6 sm:p-8 mb-8 sm:mb-12">
             <div className="flex items-center gap-3 mb-6">
-              <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" />
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900">
+              <Shield className="w-6 h-6 sm:w-8 sm:h-8 text-green-400" />
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">
                 Security & Verification
               </h2>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-              <div className="border-l-4 border-blue-600 pl-4">
-                <h3 className="text-sm sm:text-base font-semibold text-slate-900 mb-2">DNS Control</h3>
-                <p className="text-xs sm:text-sm text-slate-600">
+              <div className="border-l-4 border-brand-accent pl-4">
+                <h3 className="text-sm sm:text-base font-semibold text-white mb-2">DNS Control</h3>
+                <p className="text-xs sm:text-sm text-white/60">
                   Ability to set TXT records proves domain ownership and administrative access.
                 </p>
               </div>
 
-              <div className="border-l-4 border-green-600 pl-4">
-                <h3 className="text-sm sm:text-base font-semibold text-slate-900 mb-2">TLS Certificate</h3>
-                <p className="text-xs sm:text-sm text-slate-600">
+              <div className="border-l-4 border-green-500 pl-4">
+                <h3 className="text-sm sm:text-base font-semibold text-white mb-2">TLS Certificate</h3>
+                <p className="text-xs sm:text-sm text-white/60">
                   Valid SSL/TLS certificate verifies HTTPS endpoint authenticity and encryption.
                 </p>
               </div>
 
-              <div className="border-l-4 border-purple-600 pl-4">
-                <h3 className="text-sm sm:text-base font-semibold text-slate-900 mb-2">Ed25519 Signatures</h3>
-                <p className="text-xs sm:text-sm text-slate-600">
+              <div className="border-l-4 border-purple-500 pl-4">
+                <h3 className="text-sm sm:text-base font-semibold text-white mb-2">Ed25519 Signatures</h3>
+                <p className="text-xs sm:text-sm text-white/60">
                   RFC 9421 HTTP Message Signatures provide cryptographic proof for requests.
                 </p>
               </div>
             </div>
 
-            <div className="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-xs sm:text-sm text-yellow-800">
+            <div className="mt-6 bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+              <p className="text-xs sm:text-sm text-yellow-300">
                 <strong>Note:</strong> Ed25519 signature implementation requires backend key management. Key ID is declared but verification is not yet implemented in this version.
               </p>
             </div>
           </div>
 
           {/* Market Adoption */}
-          <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-xl shadow-lg p-6 sm:p-8 mb-8 sm:mb-12 text-white">
+          <div className="bg-gradient-to-br from-brand-accent/20 via-purple-600/20 to-pink-600/20 border border-brand-accent/30 rounded-xl p-6 sm:p-8 mb-8 sm:mb-12 text-white">
             <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-6">Market Adoption</h2>
             
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
@@ -444,65 +444,65 @@ const AgentIdentityPage = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-4">
+              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-4">
                 <h3 className="font-semibold mb-2 text-sm sm:text-base">Protocol Integration</h3>
-                <p className="text-xs sm:text-sm text-indigo-100">MCP, A2A, ANP servers</p>
+                <p className="text-xs sm:text-sm text-white/70">MCP, A2A, ANP servers</p>
               </div>
-              <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-4">
+              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-4">
                 <h3 className="font-semibold mb-2 text-sm sm:text-base">Marketplace Support</h3>
-                <p className="text-xs sm:text-sm text-indigo-100">OpenAI, Claude, Vertex AI</p>
+                <p className="text-xs sm:text-sm text-white/70">OpenAI, Claude, Vertex AI</p>
               </div>
-              <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-4">
+              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg p-4">
                 <h3 className="font-semibold mb-2 text-sm sm:text-base">Standards Track</h3>
-                <p className="text-xs sm:text-sm text-indigo-100">IETF RFC discussion</p>
+                <p className="text-xs sm:text-sm text-white/70">IETF RFC discussion</p>
               </div>
             </div>
           </div>
 
           {/* Quick Start Guide */}
-          <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl shadow-lg p-6 sm:p-8 mb-8 sm:mb-12 border-2 border-emerald-200">
+          <div className="bg-white/5 border-2 border-emerald-500/30 rounded-xl p-6 sm:p-8 mb-8 sm:mb-12">
             <div className="flex items-center gap-3 mb-6">
-              <Zap className="w-6 h-6 sm:w-8 sm:h-8 text-emerald-600" />
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900">
+              <Zap className="w-6 h-6 sm:w-8 sm:h-8 text-emerald-400" />
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">
                 Quick Start Guide
               </h2>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white rounded-lg p-5 shadow-sm">
+              <div className="bg-white/5 border border-white/10 rounded-lg p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm">1</div>
-                  <h3 className="font-semibold text-slate-900">Create agent.json</h3>
+                  <h3 className="font-semibold text-white">Create agent.json</h3>
                 </div>
-                <p className="text-sm text-slate-600 mb-2">Add to <code className="bg-slate-100 px-2 py-0.5 rounded text-xs font-mono">public/.well-known/agent.json</code></p>
-                <p className="text-xs text-slate-500">Include version, protocols, endpoint, capabilities</p>
+                <p className="text-sm text-white/70 mb-2">Add to <code className="bg-slate-900 px-2 py-0.5 rounded text-xs font-mono text-green-400">public/.well-known/agent.json</code></p>
+                <p className="text-xs text-white/50">Include version, protocols, endpoint, capabilities</p>
               </div>
               
-              <div className="bg-white rounded-lg p-5 shadow-sm">
+              <div className="bg-white/5 border border-white/10 rounded-lg p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm">2</div>
-                  <h3 className="font-semibold text-slate-900">Add DNS TXT Record</h3>
+                  <h3 className="font-semibold text-white">Add DNS TXT Record</h3>
                 </div>
-                <p className="text-sm text-slate-600 mb-2">At <code className="bg-slate-100 px-2 py-0.5 rounded text-xs font-mono">_agent.yourdomain.com</code></p>
-                <p className="text-xs text-slate-500">Use compact format: v=1.1;p=a2a,http;u=...</p>
+                <p className="text-sm text-white/70 mb-2">At <code className="bg-slate-900 px-2 py-0.5 rounded text-xs font-mono text-green-400">_agent.yourdomain.com</code></p>
+                <p className="text-xs text-white/50">Use compact format: v=1.1;p=a2a,http;u=...</p>
               </div>
               
-              <div className="bg-white rounded-lg p-5 shadow-sm">
+              <div className="bg-white/5 border border-white/10 rounded-lg p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm">3</div>
-                  <h3 className="font-semibold text-slate-900">Configure CORS</h3>
+                  <h3 className="font-semibold text-white">Configure CORS</h3>
                 </div>
-                <p className="text-sm text-slate-600 mb-2">Enable cross-origin access</p>
-                <p className="text-xs text-slate-500">Add Access-Control-Allow-Origin: * header</p>
+                <p className="text-sm text-white/70 mb-2">Enable cross-origin access</p>
+                <p className="text-xs text-white/50">Add Access-Control-Allow-Origin: * header</p>
               </div>
               
-              <div className="bg-white rounded-lg p-5 shadow-sm">
+              <div className="bg-white/5 border border-white/10 rounded-lg p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm">4</div>
-                  <h3 className="font-semibold text-slate-900">Verify Setup</h3>
+                  <h3 className="font-semibold text-white">Verify Setup</h3>
                 </div>
-                <p className="text-sm text-slate-600 mb-2">Test DNS and HTTPS endpoints</p>
-                <p className="text-xs text-slate-500">Use dig command or online DNS tools</p>
+                <p className="text-sm text-white/70 mb-2">Test DNS and HTTPS endpoints</p>
+                <p className="text-xs text-white/50">Use dig command or online DNS tools</p>
               </div>
             </div>
             
@@ -519,7 +519,7 @@ const AgentIdentityPage = () => {
                 href="https://github.com/agentcommunity/aid-protocol"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-white text-emerald-700 px-5 py-2.5 rounded-lg hover:bg-emerald-50 transition-colors text-sm font-medium border-2 border-emerald-600"
+                className="inline-flex items-center gap-2 bg-white/10 text-emerald-400 px-5 py-2.5 rounded-lg hover:bg-white/15 transition-colors text-sm font-medium border-2 border-emerald-500/50"
               >
                 <BookOpen className="w-4 h-4" />
                 Full Documentation
@@ -528,24 +528,24 @@ const AgentIdentityPage = () => {
           </div>
           
           {/* CTA Section */}
-          <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 text-center">
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 mb-4">
+          <div className="bg-white/5 border border-brand-secondary rounded-xl p-6 sm:p-8 text-center">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-4">
               Test AID Discovery on Your Domain
             </h2>
-            <p className="text-sm sm:text-base text-slate-600 max-w-2xl mx-auto mb-6 sm:mb-8">
+            <p className="text-sm sm:text-base text-white/70 max-w-2xl mx-auto mb-6 sm:mb-8">
               Use our GEO Audit tool to check if your domain has AID protocol configured. Get instant feedback on DNS TXT records, HTTPS endpoints, and agent metadata completeness.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
               <a 
                 href="/geo-audit" 
-                className="inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base font-medium shadow-lg hover:shadow-xl"
+                className="inline-flex items-center justify-center gap-2 bg-brand-accent text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-blue-500 transition-colors text-sm sm:text-base font-medium shadow-lg hover:shadow-xl"
               >
                 Test Your Domain
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </a>
               <a 
                 href="/knowledge-base" 
-                className="inline-flex items-center justify-center gap-2 bg-slate-100 text-slate-900 px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-slate-200 transition-colors text-sm sm:text-base font-medium"
+                className="inline-flex items-center justify-center gap-2 bg-white/10 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg hover:bg-white/15 transition-colors text-sm sm:text-base font-medium border border-white/20"
               >
                 <BookOpen className="w-4 h-4 sm:w-5 sm:h-5" />
                 Learn More
