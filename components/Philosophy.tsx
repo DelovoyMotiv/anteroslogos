@@ -172,9 +172,9 @@ const Philosophy = forwardRef<HTMLElement>((_props, ref) => {
                                     <div className="text-xs font-mono uppercase tracking-widest text-brand-accent/60 mb-2">
                                         {feature.subtitle}
                                     </div>
-                                    <h4 className="text-2xl font-display font-bold mb-3 text-white group-hover:text-brand-accent transition-colors duration-300">
+                                    <h3 className="text-2xl font-display font-bold mb-3 text-white group-hover:text-brand-accent transition-colors duration-300">
                                         {feature.title}
-                                    </h4>
+                                    </h3>
                                     <p className="text-sm text-white/60 group-hover:text-white/80 leading-relaxed mb-4 transition-colors duration-300">
                                         {feature.description}
                                     </p>

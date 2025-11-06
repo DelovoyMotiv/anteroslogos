@@ -87,10 +87,10 @@ const Stats: React.FC = () => {
             <div className="max-w-7xl mx-auto px-6 relative z-10">
                 <AnimatedSection>
                     <div className="text-center mb-20">
-                        <h3 className="font-mono text-sm tracking-widest uppercase text-brand-accent mb-6">
-                            The Impact
-                        </h3>
                         <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold">
+                            <span className="block font-mono text-sm tracking-widest uppercase text-brand-accent mb-6">
+                                The Impact
+                            </span>
                             Defining the Future of{' '}
                             <span className="text-brand-accent">Digital Authority</span>
                         </h2>
