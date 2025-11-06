@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AnimatedSection from './AnimatedSection';
+import GeoAnalysisForm from './GeoAnalysisForm';
 
 interface HeroProps {
     onScrollClick: () => void;
@@ -8,6 +9,16 @@ interface HeroProps {
 
 const Hero: React.FC<HeroProps> = ({ onScrollClick }) => {
     const navigate = useNavigate();
+    const [url, setUrl] = useState('');
+    
+    const handleAnalyze = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (url.trim()) {
+            // Navigate to GEO Audit page with URL as query parameter
+            const encodedUrl = encodeURIComponent(url.trim());
+            navigate(`/geo-audit?url=${encodedUrl}`);
+        }
+    };
     
     return (
     <section 
@@ -57,30 +68,14 @@ const Hero: React.FC<HeroProps> = ({ onScrollClick }) => {
                 </p>
             </AnimatedSection>
             <AnimatedSection delay={400}>
-                <div className="mt-10 sm:mt-12 md:mt-14 lg:mt-16 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-5 px-4" role="group" aria-label="Call to action buttons">
-                    <button 
-                        onClick={() => navigate('/geo-audit')} 
-                        aria-label="Test your GEO score - Free analysis tool"
-                        className="group relative w-full sm:w-auto font-semibold text-base sm:text-lg bg-brand-accent hover:bg-blue-500 text-white py-4 sm:py-5 px-10 sm:px-14 rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:shadow-brand-accent/40 overflow-hidden active:scale-100"
-                    >
-                        <span className="relative z-10 flex items-center justify-center gap-2">
-                            Test Your GEO Score
-                            <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                            </svg>
-                        </span>
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
-                    </button>
-                    <button 
-                        onClick={onScrollClick}
-                        aria-label="Learn more about Anóteros Lógos and GEO"
-                        className="w-full sm:w-auto font-medium text-base sm:text-lg text-white/90 hover:text-white transition-all duration-300 flex items-center justify-center gap-2 group px-8 sm:px-10 py-4 sm:py-5 rounded-full border border-white/20 hover:border-white/40 hover:bg-white/5 backdrop-blur-sm active:bg-white/10"
-                    >
-                        <span>Learn More</span>
-                        <svg className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                        </svg>
-                    </button>
+                <div className="mt-10 sm:mt-12 md:mt-14 lg:mt-16 px-4">
+                    <GeoAnalysisForm
+                        url={url}
+                        onUrlChange={setUrl}
+                        onSubmit={handleAnalyze}
+                        isAnalyzing={false}
+                        compact={true}
+                    />
                 </div>
             </AnimatedSection>
             

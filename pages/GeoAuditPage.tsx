@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { auditWebsite, type AuditResult } from '../utils/geoAuditEnhanced';
-import { Search, AlertCircle, CheckCircle, TrendingUp, Download, Share2, ExternalLink, Award, Target, Zap, TrendingDown, Minus, History, Shield, FileText } from 'lucide-react';
+import { AlertCircle, CheckCircle, TrendingUp, Download, Share2, ExternalLink, Award, Target, Zap, TrendingDown, Minus, History, Shield, FileText } from 'lucide-react';
 import { saveAuditToHistory, compareWithPrevious, checkScoreDrop } from '../utils/auditHistory';
 import { validateAndSanitizeUrl, checkRateLimit, validateAuditResult } from '../utils/urlValidator';
 // Dynamic imports for heavy libraries
@@ -22,10 +22,12 @@ import AIVisibilityScore, { calculateAIVisibilityScore } from '../components/AIV
 import GEOHealthTracker from '../components/GEOHealthTracker';
 import AIDAgentStatus from '../components/AIDAgentStatus';
 import SEOHead from '../components/SEOHead';
+import GeoAnalysisForm from '../components/GeoAnalysisForm';
 // Removed: RealtimeMonitorPanel (bundle optimization)
 
 const GeoAuditPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [url, setUrl] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AuditResult | null>(null);
@@ -36,6 +38,21 @@ const GeoAuditPage = () => {
   const [trend, setTrend] = useState<TrendAnalysis | null>(null);
   const [insights, setInsights] = useState<PerformanceInsights | null>(null);
   const [competitive, setCompetitive] = useState<CompetitiveComparison | null>(null);
+
+  // Check for URL in query parameters on mount
+  useEffect(() => {
+    const urlParam = searchParams.get('url');
+    if (urlParam) {
+      setUrl(urlParam);
+      // Auto-trigger analysis if URL is provided
+      const form = document.querySelector('form');
+      if (form) {
+        setTimeout(() => {
+          form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+        }, 100);
+      }
+    }
+  }, [searchParams]);
 
   const handleAnalyze = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -407,79 +424,14 @@ const GeoAuditPage = () => {
           </p>
 
           {/* Analysis Form */}
-          <form onSubmit={handleAnalyze} className="max-w-2xl mx-auto mb-8">
-            {/* Desktop: Input with button inside */}
-            <div className="hidden lg:block relative">
-              <input
-                type="text"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="Enter your website URL (e.g., example.com)"
-                className="w-full px-6 py-5 pr-40 bg-white/5 border-2 border-brand-secondary focus:border-brand-accent rounded-xl text-lg focus:outline-none transition-colors"
-                disabled={isAnalyzing}
-                autoComplete="off"
-                autoCorrect="off"
-                autoCapitalize="off"
-                spellCheck="false"
-                maxLength={2048}
-                pattern="[^<>{}[\]|;`]*"
-                title="Enter a valid website URL"
-              />
-              <button
-                type="submit"
-                disabled={isAnalyzing}
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-brand-accent hover:bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
-              >
-                {isAnalyzing ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Analyzing...</span>
-                  </>
-                ) : (
-                  <>
-                    <Search className="w-4 h-4" />
-                    <span>Analyze</span>
-                  </>
-                )}
-              </button>
-            </div>
-            
-            {/* Mobile: Stacked input and button */}
-            <div className="lg:hidden space-y-4">
-              <input
-                type="text"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="Enter URL (e.g., example.com)"
-                className="w-full px-6 py-4 bg-white/5 border-2 border-brand-secondary focus:border-brand-accent rounded-xl text-base focus:outline-none transition-colors"
-                disabled={isAnalyzing}
-                autoComplete="off"
-                autoCorrect="off"
-                autoCapitalize="off"
-                spellCheck="false"
-                maxLength={2048}
-                pattern="[^<>{}[\]|;`]*"
-                title="Enter a valid website URL"
-              />
-              <button
-                type="submit"
-                disabled={isAnalyzing}
-                className="w-full bg-brand-accent hover:bg-blue-500 text-white px-6 py-4 rounded-xl font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {isAnalyzing ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Analyzing Your Site...</span>
-                  </>
-                ) : (
-                  <>
-                    <Search className="w-5 h-5" />
-                    <span>Analyze Website</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
+          <div className="mb-8">
+            <GeoAnalysisForm
+              url={url}
+              onUrlChange={setUrl}
+              onSubmit={handleAnalyze}
+              isAnalyzing={isAnalyzing}
+            />
+          </div>
 
           {error && (
             <div className="max-w-2xl mx-auto p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 flex items-center gap-3">
