@@ -187,7 +187,7 @@ const PrivacyPolicy: React.FC = () => {
                                 <li><strong className="text-brand-text">Withdraw Consent:</strong> Withdraw your consent at any time (without affecting prior lawful processing)</li>
                             </ul>
                             <p className="leading-relaxed mt-4">
-                                To exercise any of these rights, please contact us at <a href="mailto:privacy@anoteroslogos.com" className="text-brand-accent hover:underline">privacy@anoteroslogos.com</a>. We will respond to your request within the timeframe required by applicable law.
+                                To exercise any of these rights, please contact us at <a href="mailto:Peitho@anoteroslogos.com" className="text-brand-accent hover:underline">Peitho@anoteroslogos.com</a>. We will respond to your request within the timeframe required by applicable law.
                             </p>
                         </div>
                     </AnimatedSection>
@@ -235,8 +235,7 @@ const PrivacyPolicy: React.FC = () => {
                             </p>
                             <div className="bg-brand-secondary/30 border border-brand-text/10 rounded-xl p-6 space-y-2">
                                 <p className="text-brand-text"><strong>Anóteros Lógos</strong></p>
-                                <p>Email: <a href="mailto:privacy@anoteroslogos.com" className="text-brand-accent hover:underline">privacy@anoteroslogos.com</a></p>
-                                <p>General Inquiries: <a href="mailto:contact@anoteroslogos.com" className="text-brand-accent hover:underline">contact@anoteroslogos.com</a></p>
+                                <p>Email: <a href="mailto:Peitho@anoteroslogos.com" className="text-brand-accent hover:underline">Peitho@anoteroslogos.com</a></p>
                             </div>
                             <p className="leading-relaxed mt-4">
                                 If you are located in the EEA, UK, or Switzerland, you also have the right to lodge a complaint with your local data protection authority.

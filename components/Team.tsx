@@ -20,7 +20,7 @@ const Team: React.FC = () => {
                 "GEO Strategy"
             ],
             description: "Leading the strategic vision and marketing direction of Anóteros Lógos. Nadezhda brings expertise in brand architecture and digital authority positioning, ensuring clients achieve meaningful presence in AI-driven ecosystems.",
-            email: "nadezhda@anoteroslogos.com"
+            email: "Peitho@anoteroslogos.com"
         },
         {
             name: "Viktor Svetolesov",
@@ -32,7 +32,7 @@ const Team: React.FC = () => {
                 "Technical Implementation"
             ],
             description: "Driving the technical innovation behind The Nicosia Method™. Viktor architects the systems and infrastructure that transform brand expertise into machine-readable authority for AI systems.",
-            email: "viktor@anoteroslogos.com"
+            email: "Peitho@anoteroslogos.com"
         }
     ];
 

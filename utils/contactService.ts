@@ -128,7 +128,7 @@ export async function submitContactForm(data: ContactFormData): Promise<ContactF
     storeContactLocally(data);
     
     console.log('Contact form data stored locally. Please configure a contact form service.');
-    console.log('To send via email, use: mailto:contact@anoteroslogos.com?subject=Contact%20Request');
+    console.log('To send via email, use: mailto:Peitho@anoteroslogos.com?subject=Contact%20Request');
     
     return {
       success: true,

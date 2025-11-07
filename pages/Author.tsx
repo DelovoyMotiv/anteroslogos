@@ -64,7 +64,7 @@ const AUTHORS: Record<string, AuthorProfile> = {
     ],
     social: {
       linkedin: 'https://linkedin.com/in/nadezhda-nikolaeva',
-      email: 'nadezhda@anoteroslogos.com'
+      email: 'Peitho@anoteroslogos.com'
     }
   },
   // Alias for backward compatibility
@@ -79,7 +79,7 @@ const AUTHORS: Record<string, AuthorProfile> = {
     achievements: [],
     publications: [],
     social: {
-      email: 'nadezhda@anoteroslogos.com'
+      email: 'Peitho@anoteroslogos.com'
     }
   }
 };

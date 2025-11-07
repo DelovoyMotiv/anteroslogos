@@ -302,7 +302,7 @@ export const NADEZHDA_NIKOLAEVA: AuthorData = {
     name: "Anóteros Lógos",
     url: "https://anoteroslogos.com"
   },
-  email: "nadezhda@anoteroslogos.com"
+  email: "Peitho@anoteroslogos.com"
 };
 
 /**

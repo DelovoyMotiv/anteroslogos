@@ -371,7 +371,7 @@ export function exportToHTML(result: AuditResult): void {
         <div class="footer">
             <h3>Need Expert Implementation Support?</h3>
             <p style="margin: 15px 0;">Our GEO specialists can implement these recommendations and<br>maximize your visibility in AI-powered search platforms.</p>
-            <p><strong>contact@anoteroslogos.com</strong> | <strong>https://anoteroslogos.com</strong></p>
+            <p><strong>Peitho@anoteroslogos.com</strong> | <strong>https://anoteroslogos.com</strong></p>
         </div>
     </div>
 </body>

@@ -4,7 +4,7 @@
 
     Organization: Anóteros Lógos Research Team
     Role: GEO Strategy & Implementation
-    Contact: contact [at] anoteroslogos.com
+    Contact: peitho [at] anoteroslogos.com
     Location: Global
     Social: x.com/anoteroslogos
     LinkedIn: linkedin.com/company/anoteroslogos
@@ -68,7 +68,7 @@
     
 # CONTACT
 
-    General inquiries: contact@anoteroslogos.com
+    General inquiries: Peitho@anoteroslogos.com
     Website: https://anoteroslogos.com
     
     For technical issues, security concerns, or partnership opportunities,

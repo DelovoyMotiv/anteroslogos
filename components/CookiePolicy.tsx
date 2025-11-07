@@ -285,8 +285,7 @@ const CookiePolicy: React.FC = () => {
                             </p>
                             <div className="bg-brand-secondary/30 border border-brand-text/10 rounded-xl p-6 space-y-2">
                                 <p className="text-brand-text"><strong>Anóteros Lógos</strong></p>
-                                <p>Email: <a href="mailto:privacy@anoteroslogos.com" className="text-brand-accent hover:underline">privacy@anoteroslogos.com</a></p>
-                                <p>General Inquiries: <a href="mailto:contact@anoteroslogos.com" className="text-brand-accent hover:underline">contact@anoteroslogos.com</a></p>
+                                <p>Email: <a href="mailto:Peitho@anoteroslogos.com" className="text-brand-accent hover:underline">Peitho@anoteroslogos.com</a></p>
                             </div>
                         </div>
                     </AnimatedSection>

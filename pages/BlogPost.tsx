@@ -43,7 +43,7 @@ export default function BlogPost() {
           image: NADEZHDA_AUTHOR.image ? `https://anoteroslogos.com${NADEZHDA_AUTHOR.image}` : undefined,
           jobTitle: 'Co-founder & CEO Marketing',
           description: NADEZHDA_AUTHOR.bio,
-          email: 'nadezhda@anoteroslogos.com',
+          email: 'Peitho@anoteroslogos.com',
           expertise: ['Strategic Marketing', 'Brand Development', 'GEO Strategy', 'Digital Authority'],
           knowsAbout: ['Generative Engine Optimization', 'Brand Architecture', 'AI Marketing', 'E-E-A-T Signals'],
           affiliation: {
