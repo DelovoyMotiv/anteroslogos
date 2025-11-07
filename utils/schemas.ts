@@ -368,7 +368,3 @@ export function generateHowToSchema(howto: HowToData) {
   };
 }
 
-/**
- * Default author - Mostafa ElBermawy (alias for backward compatibility)
- */
-export const MOSTAFA_ELBERMAWY: AuthorData = NADEZHDA_NIKOLAEVA;

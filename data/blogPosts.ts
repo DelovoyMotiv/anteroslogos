@@ -45,9 +45,6 @@ export const NADEZHDA_AUTHOR: BlogAuthor = {
   bio: 'Co-founder & CEO Marketing at Anóteros Lógos. Leading strategic vision and marketing direction with expertise in brand architecture and digital authority positioning.'
 };
 
-// Alias for backward compatibility
-export const MOSTAFA_AUTHOR = NADEZHDA_AUTHOR;
-
 // Blog Posts Database
 export const BLOG_POSTS: BlogPost[] = [
   {

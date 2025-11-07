@@ -66,21 +66,6 @@ const AUTHORS: Record<string, AuthorProfile> = {
       linkedin: 'https://linkedin.com/in/nadezhda-nikolaeva',
       email: 'Peitho@anoteroslogos.com'
     }
-  },
-  // Alias for backward compatibility
-  'mostafa-elbermawy': {
-    name: 'Nadezhda Nikolaeva',
-    slug: 'nadezhda-nikolaeva',
-    jobTitle: 'Co-founder & CEO Marketing',
-    bio: 'Leading the strategic vision and marketing direction of Anóteros Lógos.',
-    longBio: ['Redirecting to Nadezhda Nikolaeva profile...'],
-    image: '/images/authors/nadezhda-nikolaeva.jpg',
-    expertise: ['Strategic Marketing', 'GEO Strategy'],
-    achievements: [],
-    publications: [],
-    social: {
-      email: 'Peitho@anoteroslogos.com'
-    }
   }
 };
 
