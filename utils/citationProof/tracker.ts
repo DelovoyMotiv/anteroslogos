@@ -67,6 +67,104 @@ export const CitationStatsSchema = z.object({
 
 export type CitationStats = z.infer<typeof CitationStatsSchema>;
 
+// ==================== HELPER FUNCTIONS ====================
+
+/**
+ * Detect citations in AI response text
+ */
+export function detectCitations(
+  response: string,
+  domain: string,
+  platform: CitationSource
+): Omit<Citation, 'id'>[] {
+  const citations: Omit<Citation, 'id'>[] = [];
+  
+  // Pattern 1: Direct domain mentions
+  const domainRegex = new RegExp(`\\b${domain.replace('.', '\\.')}\\b`, 'gi');
+  const domainMatches = response.match(domainRegex);
+  
+  if (domainMatches && domainMatches.length > 0) {
+    citations.push({
+      source: platform,
+      query: '',
+      response: response,
+      confidence: 0.9,
+      timestamp: new Date().toISOString(),
+      context: response.substring(0, 200),
+    });
+  }
+  
+  // Pattern 2: "According to" patterns
+  const accordingPattern = /according to ([^,\.]+)/gi;
+  let match;
+  while ((match = accordingPattern.exec(response)) !== null) {
+    const source = match[1];
+    if (source.toLowerCase().includes(domain.toLowerCase().replace(/\.[^.]+$/, ''))) {
+      citations.push({
+        source: platform,
+        query: '',
+        response: response,
+        confidence: 0.85,
+        timestamp: new Date().toISOString(),
+        context: match[0],
+      });
+    }
+  }
+  
+  // Pattern 3: "Based on" patterns
+  const basedOnPattern = /based on ([^,\.]+)/gi;
+  while ((match = basedOnPattern.exec(response)) !== null) {
+    const source = match[1];
+    if (source.toLowerCase().includes(domain.toLowerCase().replace(/\.[^.]+$/, ''))) {
+      citations.push({
+        source: platform,
+        query: '',
+        response: response,
+        confidence: 0.8,
+        timestamp: new Date().toISOString(),
+        context: match[0],
+      });
+    }
+  }
+  
+  return citations;
+}
+
+/**
+ * Calculate ROI for citations
+ */
+export function calculateCitationROI(
+  citations: (Citation | Omit<Citation, 'id'>)[]
+): {
+  totalCitations: number;
+  estimatedReach: number;
+  estimatedValue: number;
+  avgConfidence: number;
+  roi: number;
+} {
+  const avgViewsPerResponse = 100; // Conservative estimate
+  const cpmRate = 10; // $10 CPM
+  const estimatedReach = citations.length * avgViewsPerResponse;
+  const estimatedValue = (estimatedReach / 1000) * cpmRate;
+  
+  const avgConfidence = citations.length > 0
+    ? citations.reduce((sum, c) => sum + c.confidence, 0) / citations.length
+    : 0;
+  
+  // ROI calculation (assuming $0 cost for organic citations)
+  // ROI = (Value - Cost) / Cost * 100
+  // Since cost is $0, we use value as the metric
+  const roi = estimatedValue;
+  
+  return {
+    totalCitations: citations.length,
+    estimatedReach,
+    estimatedValue,
+    avgConfidence,
+    roi,
+  };
+}
+
 // ==================== CITATION TRACKER ====================
 
 export class CitationTracker {

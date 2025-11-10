@@ -22,6 +22,7 @@
     "express": "^5.1.0",
     "html2canvas": "^1.4.1",
     "ioredis": "^5.8.2",
+    "isolated-vm": "^5.0.4",
     "jsonwebtoken": "^9.0.2",
     "jspdf": "^3.0.3",
     "lucide-react": "^0.552.0",
