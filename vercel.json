@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/api/gold-standard/:path*", "destination": "/api/goldStandard" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "headers": [
