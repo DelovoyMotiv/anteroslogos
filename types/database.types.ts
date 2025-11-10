@@ -15,6 +15,46 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      knowledge_graphs: {
+        Row: import('./goldStandard.types').KnowledgeGraphRow;
+        Insert: import('./goldStandard.types').KnowledgeGraphInsert;
+        Update: Partial<import('./goldStandard.types').KnowledgeGraphInsert>;
+      };
+      citations: {
+        Row: import('./goldStandard.types').CitationRow;
+        Insert: import('./goldStandard.types').CitationInsert;
+        Update: Partial<import('./goldStandard.types').CitationInsert>;
+      };
+      learning_analyses: {
+        Row: import('./goldStandard.types').LearningAnalysisRow;
+        Insert: import('./goldStandard.types').LearningAnalysisInsert;
+        Update: Partial<import('./goldStandard.types').LearningAnalysisInsert>;
+      };
+      global_entities: {
+        Row: import('./goldStandard.types').GlobalEntityRow;
+        Insert: import('./goldStandard.types').GlobalEntityInsert;
+        Update: Partial<import('./goldStandard.types').GlobalEntityInsert>;
+      };
+      global_relationships: {
+        Row: import('./goldStandard.types').GlobalRelationshipRow;
+        Insert: import('./goldStandard.types').GlobalRelationshipInsert;
+        Update: Partial<import('./goldStandard.types').GlobalRelationshipInsert>;
+      };
+      network_effects: {
+        Row: import('./goldStandard.types').NetworkEffectRow;
+        Insert: import('./goldStandard.types').NetworkEffectInsert;
+        Update: Partial<import('./goldStandard.types').NetworkEffectInsert>;
+      };
+      sync_operations: {
+        Row: import('./goldStandard.types').SyncOperationRow;
+        Insert: import('./goldStandard.types').SyncOperationInsert;
+        Update: Partial<import('./goldStandard.types').SyncOperationInsert>;
+      };
+      citation_predictions: {
+        Row: import('./goldStandard.types').CitationPredictionRow;
+        Insert: import('./goldStandard.types').CitationPredictionInsert;
+        Update: Partial<import('./goldStandard.types').CitationPredictionInsert>;
+      };
       profiles: {
         Row: {
           id: string
