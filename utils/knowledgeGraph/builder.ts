@@ -132,6 +132,31 @@ const PATTERNS = {
 };
 
 /**
+ * Stop words and false positive filters
+ */
+const STOP_WORDS = new Set([
+  'The', 'This', 'That', 'These', 'Those', 'When', 'Where', 'What', 'Why', 'How',
+  'First', 'Second', 'Third', 'Last', 'Next', 'Previous', 'Some', 'Many', 'Most',
+  'All', 'Both', 'Each', 'Every', 'Other', 'Another', 'Such', 'More', 'Less',
+]);
+
+/**
+ * Common organization keywords for URL extraction
+ */
+const ORG_DOMAIN_KEYWORDS = new Map([
+  ['google', 'google.com'],
+  ['facebook', 'facebook.com'],
+  ['meta', 'meta.com'],
+  ['microsoft', 'microsoft.com'],
+  ['apple', 'apple.com'],
+  ['amazon', 'amazon.com'],
+  ['netflix', 'netflix.com'],
+  ['tesla', 'tesla.com'],
+  ['twitter', 'twitter.com'],
+  ['linkedin', 'linkedin.com'],
+]);
+
+/**
  * Claim patterns (factual statements)
  */
 const CLAIM_INDICATORS = [
@@ -289,21 +314,32 @@ export class KnowledgeGraphBuilder {
 
   /**
    * Extract relationships between entities
+   * Optimized with entity index for O(n) performance
    */
   private async extractRelationships(text: string, timestamp: string): Promise<void> {
     const entitiesList = Array.from(this.entities.values());
-    
-    // Simple co-occurrence based relationships
     const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 20);
     
-    for (const sentence of sentences) {
-      const entitiesInSentence = entitiesList.filter(e => 
-        sentence.includes(e.name)
-      );
+    // Build entity index for faster lookup: Map<sentence_index, Entity[]>
+    const sentenceEntityMap = new Map<number, Entity[]>();
+    
+    sentences.forEach((sentence, idx) => {
+      const entitiesInSentence = entitiesList.filter(e => sentence.includes(e.name));
+      if (entitiesInSentence.length >= 2) {
+        sentenceEntityMap.set(idx, entitiesInSentence);
+      }
+    });
 
-      // Create relationships between entities that co-occur
-      for (let i = 0; i < entitiesInSentence.length; i++) {
-        for (let j = i + 1; j < entitiesInSentence.length; j++) {
+    // Process only sentences with 2+ entities (optimization)
+    for (const [idx, entitiesInSentence] of sentenceEntityMap.entries()) {
+      const sentence = sentences[idx];
+      
+      // Limit relationship pairs to prevent explosion (max 10 relationships per sentence)
+      const maxPairs = Math.min(10, entitiesInSentence.length * (entitiesInSentence.length - 1) / 2);
+      let pairCount = 0;
+      
+      for (let i = 0; i < entitiesInSentence.length && pairCount < maxPairs; i++) {
+        for (let j = i + 1; j < entitiesInSentence.length && pairCount < maxPairs; j++) {
           const source = entitiesInSentence[i];
           const target = entitiesInSentence[j];
           
@@ -316,16 +352,40 @@ export class KnowledgeGraphBuilder {
               type: relType,
               source: source.id,
               target: target.id,
-              confidence: 0.6,
-              context: sentence,
+              confidence: this.calculateRelationshipConfidence(relType, sentence),
+              context: sentence.substring(0, 200),
               extractedAt: timestamp,
             };
             
             this.relationships.set(relationship.id, relationship);
+            pairCount++;
           }
         }
       }
     }
+  }
+  
+  /**
+   * Calculate relationship confidence based on type and context quality
+   */
+  private calculateRelationshipConfidence(type: RelationshipType, context: string): number {
+    let confidence = 0.5; // Base confidence
+    
+    // Higher confidence for specific relationship types
+    if (type === 'worksFor' || type === 'owns' || type === 'creates') {
+      confidence = 0.75;
+    } else if (type === 'measures' || type === 'proves') {
+      confidence = 0.8;
+    } else if (type === 'relatedTo') {
+      confidence = 0.5;
+    }
+    
+    // Boost confidence if context has strong indicators
+    if (/\b(?:according to|confirmed|verified|official)\b/i.test(context)) {
+      confidence = Math.min(0.95, confidence + 0.15);
+    }
+    
+    return confidence;
   }
 
   /**
@@ -399,45 +459,89 @@ export class KnowledgeGraphBuilder {
 
   /**
    * Infer relationship type based on entity types and context
+   * Uses semantic keyword patterns for relationship detection
    */
   private inferRelationshipType(
     source: Entity,
     target: Entity,
     context: string
   ): RelationshipType | null {
+    const lowerContext = context.toLowerCase();
+    
     // Person -> Organization
     if (source.type === 'Person' && target.type === 'Organization') {
-      if (/\b(?:CEO|founder|works at|employed by)\b/i.test(context)) {
+      if (/\b(?:CEO|founder|co-founder|president|director|chairman|executive)\b/i.test(context)) {
         return 'worksFor';
+      }
+      if (/\b(?:works at|works for|employed by|employee of|joined|hired by)\b/i.test(context)) {
+        return 'worksFor';
+      }
+      if (/\b(?:owns|founded|established|started)\b/i.test(context)) {
+        return 'owns';
+      }
+    }
+
+    // Organization -> Organization
+    if (source.type === 'Organization' && target.type === 'Organization') {
+      if (/\b(?:acquired|bought|purchased|merger|acquisition)\b/i.test(context)) {
+        return 'owns';
+      }
+      if (/\b(?:partnership|partners with|collaboration|works with)\b/i.test(context)) {
+        return 'relatedTo';
       }
     }
 
     // Organization -> Product
     if (source.type === 'Organization' && target.type === 'Product') {
-      if (/\b(?:creates|develops|builds|launches)\b/i.test(context)) {
+      if (/\b(?:creates|develops|builds|launches|releases|produces|manufactures)\b/i.test(context)) {
         return 'creates';
+      }
+      if (/\b(?:owns|proprietary|trademark)\b/i.test(context)) {
+        return 'owns';
+      }
+    }
+
+    // Metric -> Entity (proves/measures)
+    if (source.type === 'Metric' || target.type === 'Metric') {
+      if (/\b(?:shows|demonstrates|proves|indicates|measures)\b/i.test(context)) {
+        return 'measures';
       }
     }
 
     // Concept -> Concept
     if (source.type === 'Concept' && target.type === 'Concept') {
+      if (/\b(?:contradicts|opposes|conflicts with|challenges)\b/i.test(context)) {
+        return 'contradicts';
+      }
+      if (/\b(?:supports|validates|confirms|proves)\b/i.test(context)) {
+        return 'supports';
+      }
+      if (/\b(?:cites|references|mentions|quotes)\b/i.test(context)) {
+        return 'cites';
+      }
       return 'relatedTo';
     }
 
-    // Default: related
-    return 'relatedTo';
+    // Default: related (but only if entities are actually related in context)
+    if (lowerContext.includes('and') || lowerContext.includes('with') || lowerContext.includes('related')) {
+      return 'relatedTo';
+    }
+    
+    return null;
   }
 
   /**
    * Validate organization name
    */
   private isValidOrganization(name: string): boolean {
-    // Filter out common false positives
-    const blacklist = ['The', 'This', 'That', 'These', 'Those', 'When', 'Where', 'What', 'Why', 'How'];
-    if (blacklist.includes(name)) return false;
+    // Filter out stop words
+    if (STOP_WORDS.has(name)) return false;
+    
+    // Filter out common article + noun patterns
+    if (/^(The|A|An)\s+[A-Z][a-z]+$/.test(name)) return false;
     
     // Must be 2+ words or have company suffix
-    return name.split(/\s+/).length >= 2 || /Inc|LLC|Corp|Ltd|Group/i.test(name);
+    return name.split(/\s+/).length >= 2 || /Inc|LLC|Corp|Ltd|Group|AG|GmbH/i.test(name);
   }
 
   /**
@@ -482,17 +586,35 @@ export class KnowledgeGraphBuilder {
   }
 
   /**
-   * Guess URL from organization name
+   * Extract URL from organization name using known patterns
+   * Returns undefined if no reliable URL can be determined
    */
   private guessUrl(name: string): string | undefined {
     const normalized = name.toLowerCase()
-      .replace(/\s+inc\.?$/, '')
-      .replace(/\s+llc\.?$/, '')
-      .replace(/\s+corp\.?$/, '')
-      .replace(/\s+ltd\.?$/, '')
+      .replace(/\s+inc\.?$/i, '')
+      .replace(/\s+llc\.?$/i, '')
+      .replace(/\s+corp(oration)?\.?$/i, '')
+      .replace(/\s+ltd\.?$/i, '')
+      .replace(/\s+limited$/i, '')
+      .replace(/\s+group$/i, '')
+      .replace(/\s+ag$/i, '')
+      .replace(/\s+gmbh$/i, '')
       .replace(/\s+/g, '');
     
-    return `https://${normalized}.com`;
+    // Check against known organizations
+    if (ORG_DOMAIN_KEYWORDS.has(normalized)) {
+      return `https://${ORG_DOMAIN_KEYWORDS.get(normalized)}`;
+    }
+    
+    // Only return URL for single-word organizations with known TLDs
+    // This prevents generating fictional URLs for multi-word organizations
+    if (!normalized.includes(' ') && normalized.length > 2) {
+      // Only for well-known pattern: CompanyName -> companyname.com
+      // But return undefined to avoid false URLs - let syndication handle it
+      return undefined;
+    }
+    
+    return undefined;
   }
 
   /**
