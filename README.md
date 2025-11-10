@@ -10,7 +10,6 @@
 Knowledge Graph Engine for GEO with direct LLM integration and bidirectional AI intelligence. Citation intelligence platform with self-improving knowledge graphs powered by feedback loop analysis. Enables direct syndication to ChatGPT, Claude, Gemini, and Perplexity through AID protocol discovery.
 
 **Production URL:** https://anoteroslogos.com
-**Revolutionary Feature:** Citation Learning Engine (v2.3.0)
 
 
 ## Architecture
