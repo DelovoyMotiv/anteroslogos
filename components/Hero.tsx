@@ -59,10 +59,11 @@ const Hero: React.FC<HeroProps> = ({ onScrollClick }) => {
                     className="mt-6 sm:mt-8 text-base sm:text-lg md:text-xl lg:text-2xl text-white/70 max-w-4xl mx-auto leading-relaxed px-4"
                     itemProp="description"
                 >
-                    Millions are asking AI for answers.{' '}
-                    <span className="text-white font-semibold">We make sure they hear about you</span>.{' '}
-                    Your expertise, embedded directly into{' '}
-                    <span className="text-brand-accent font-semibold">ChatGPT, Claude, and Perplexity</span>.
+                    Our <span className="text-white font-semibold">Knowledge Graph Engine for GEO</span> transforms your expertise into{' '}
+                    <span className="text-brand-accent font-semibold">AI knowledge infrastructure</span>.{' '}
+                    <span className="text-white font-semibold">Direct LLM integration</span> with{' '}
+                    <span className="text-brand-accent font-semibold">ChatGPT, Claude, and Perplexity</span>{' '}
+                    - not content marketing, but citation intelligence.
                 </p>
             </AnimatedSection>
             <AnimatedSection delay={400}>

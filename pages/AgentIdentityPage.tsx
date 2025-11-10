@@ -33,9 +33,9 @@ const AgentIdentityPage = () => {
   return (
     <>
       <SEOHead
-        title="Agent Identity & Discovery (AID Protocol v1.1) - DNS-Based AI Agent Discovery | Anóteros Lógos"
-        description="Production AID v1.1 implementation with DNS TXT and HTTPS well-known discovery. Enable AI agents (ChatGPT, Claude, Perplexity) to find your services via single TXT record. RFC 8615 compliant, Ed25519 signatures, A2A/MCP/ANP protocol support."
-        keywords="AID protocol v1.1, agent discovery, DNS TXT agent, AI agent identity, A2A protocol, agent-to-agent, MCP protocol, ANP protocol, agent marketplace, AI agent discovery, agent registry, agentcommunity.org, RFC 8615, Ed25519 signatures, DNS-over-HTTPS"
+        title="AID Protocol Discovery | Direct LLM Integration | AI Platform Syndication | Anóteros Lógos"
+        description="AID protocol discovery with direct LLM integration for ChatGPT, Claude, Gemini, and Perplexity. AI platform syndication infrastructure—DNS-first agent discovery, RFC 8615 compliant, Ed25519 signatures, A2A/MCP/ANP protocol support."
+        keywords="AID protocol discovery, direct LLM integration, AI platform syndication, OpenAI integration, Claude API integration, Perplexity source optimization, AI agent identity, A2A protocol, agent-to-agent, MCP protocol, ANP protocol, DNS TXT agent, agent discovery, RFC 8615, Ed25519 signatures"
         type="article"
         url="https://anoteroslogos.com/agent-identity"
       />
@@ -134,11 +134,11 @@ const AgentIdentityPage = () => {
             </div>
             
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
-              Agent Identity & Discovery
+              AID Protocol Discovery & Direct LLM Integration
             </h1>
             
             <p className="text-base sm:text-lg lg:text-xl text-white/70 max-w-3xl mx-auto mb-6 sm:mb-8">
-              DNS-first approach for AI agent identification. One TXT record makes our agent instantly discoverable across the agentic web ecosystem.
+              AI platform syndication infrastructure with direct LLM integration. AID protocol enables instant discovery across ChatGPT, Claude, Gemini, and Perplexity via DNS-first architecture.
             </p>
 
             <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
@@ -467,10 +467,10 @@ const AgentIdentityPage = () => {
                 <span>Infrastructure Thesis</span>
               </div>
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">
-                From GEO Tool to DNS for AI
+                From GEO Tool to AI Infrastructure Layer
               </h2>
               <p className="text-sm sm:text-base text-white/70 max-w-3xl mx-auto">
-                Anóteros Lógos is evolving beyond a GEO platform into the foundational infrastructure layer for AI agent discovery and interaction—analogous to how DNS became the internet's addressing infrastructure.
+                Anóteros Lógos provides direct LLM integration infrastructure with AI platform syndication. AID protocol enables DNS-based discovery—becoming the foundational layer for AI agent interaction, analogous to how DNS became the internet's addressing infrastructure.
               </p>
             </div>
 
@@ -515,11 +515,11 @@ const AgentIdentityPage = () => {
                 <div className="space-y-3 text-sm text-white/70">
                   <div className="flex items-start gap-2">
                     <CheckCircle2 className="w-4 h-4 text-green-400 mt-1 flex-shrink-0" />
-                    <span>AID Protocol enables agent discovery via DNS</span>
+                    <span>Direct LLM integration (OpenAI, Claude, Gemini, Perplexity)</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <CheckCircle2 className="w-4 h-4 text-green-400 mt-1 flex-shrink-0" />
-                    <span>Becoming infrastructure for AI agent ecosystem</span>
+                    <span>AI platform syndication infrastructure layer</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <CheckCircle2 className="w-4 h-4 text-green-400 mt-1 flex-shrink-0" />

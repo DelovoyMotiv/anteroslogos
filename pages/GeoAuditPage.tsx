@@ -384,13 +384,13 @@ const GeoAuditPage = () => {
   return (
     <div className="min-h-screen bg-brand-bg text-brand-text">
       <SEOHead
-        title="Free GEO Score Calculator | AI-Ready Website Analysis | Anóteros Lógos"
-        description="Instantly analyze your website's readiness for AI-powered search engines like ChatGPT, Gemini, and Perplexity. Get a comprehensive GEO score with actionable recommendations. Free tool from the GEO experts at Anóteros Lógos."
+        title="GEO SaaS Platform | Generative Engine Optimization Platform | Anóteros Lógos"
+        description="Enterprise generative engine optimization platform with citation tracking ROI. GEO SaaS solution for AI visibility management—analyze, optimize, and track your brand's citations across ChatGPT, Claude, Gemini, and Perplexity."
         url="https://anoteroslogos.com/geo-audit"
         type="website"
         image="https://anoteroslogos.com/images/geo-audit-og.jpg"
-        imageAlt="GEO Score Calculator - Free AI-Ready Website Analysis Tool"
-        keywords="GEO score calculator, AI optimization tool, generative engine optimization, website AI readiness, ChatGPT optimization, AI search optimization, schema markup checker, E-E-A-T analyzer, free SEO tool, GEO audit"
+        imageAlt="GEO SaaS Platform - Enterprise Citation Intelligence Platform"
+        keywords="generative engine optimization platform, GEO SaaS, citation tracking ROI, AI authority syndication, GEO platform, citation intelligence, enterprise AI visibility management, GEO score calculator, AI optimization tool"
         author="Anóteros Lógos"
         modifiedTime="2025-11-05T00:00:00+00:00"
         schema={pageSchema}
@@ -416,12 +416,12 @@ const GeoAuditPage = () => {
 
           <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
             <span className="bg-gradient-to-r from-white via-brand-accent to-white bg-clip-text text-transparent">
-              GEO Score Calculator
+              Generative Engine Optimization Platform
             </span>
           </h1>
 
           <p className="text-lg md:text-xl text-white/70 mb-12 max-w-2xl mx-auto">
-            Instantly analyze your website's readiness for AI-powered search. Get a comprehensive GEO score with actionable recommendations.
+            Enterprise GEO SaaS platform with citation tracking ROI. Analyze, optimize, and measure your brand's AI visibility across ChatGPT, Claude, Gemini, and Perplexity.
           </p>
 
           {/* Analysis Form */}

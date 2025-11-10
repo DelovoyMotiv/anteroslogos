@@ -98,14 +98,14 @@ const Philosophy = forwardRef<HTMLElement>((_props, ref) => {
                             className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/70 leading-relaxed"
                             itemProp="description"
                         >
-                            We transform your expertise into{' '}
+                            Our <span className="text-brand-accent font-semibold">citation intelligence platform</span> transforms your expertise into{' '}
                             <span className="text-white font-semibold relative inline-block">
                                 structured knowledge
                                 <span className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/30 to-transparent"></span>
                             </span>
                             {' '}that AI systems{' '}
-                            <span className="text-brand-accent font-semibold">trust and cite</span>. Instead of chasing rankings, we make your brand the{' '}
-                            <span className="text-white font-semibold">answer</span>{' '}- embedded directly into ChatGPT, Claude, and Perplexity responses.
+                            <span className="text-brand-accent font-semibold">trust and cite</span>.{' '}
+                            <span className="text-white font-semibold">AI platform syndication</span> across ChatGPT, Claude, and Perplexity - not rankings, but authority.
                         </p>
                         
                         {/* Premium callout for key value prop */}
