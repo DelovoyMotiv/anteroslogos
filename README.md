@@ -1,15 +1,16 @@
-# Anóteros Lógos - Generative Engine Optimization Platform
+# Anóteros Lógos - AI Knowledge Infrastructure Platform
 
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.2.0-blue.svg)](CHANGELOG.md)
 [![Node](https://img.shields.io/badge/node-20.x-brightgreen.svg)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19.2-61dafb.svg)](https://react.dev)
 [![Build](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/DelovoyMotiv/anteroslogos/actions)
 
-Enterprise-grade AI knowledge infrastructure platform. Transform content into native AI sources through automated knowledge graphs, direct platform integration, and citation tracking with measurable ROI.
+Knowledge Graph Engine for GEO with direct LLM integration. Citation intelligence platform for AI knowledge infrastructure. Enables direct syndication to ChatGPT, Claude, Gemini, and Perplexity through AID protocol discovery.
 
 **Production URL:** https://anoteroslogos.com
+**Status:** Active infrastructure layer positioning, zero-competition SEO keyword strategy implemented
 
 ## Architecture
 
@@ -22,9 +23,10 @@ Modern React 19 SPA with TypeScript strict mode, serverless API architecture, an
 - **Styling**: Tailwind CSS 3.4+ with custom design system
 - **Data Visualization**: Recharts 3.3
 - **AI Integration**: OpenRouter API with LLM support (MiniMax M2, Llama 3.2, Gemma 2)
+- **Direct LLM Integration**: OpenAI, Anthropic Claude, Perplexity, Google Gemini
 - **PDF Generation**: jsPDF for professional audit reports
 - **Validation**: Zod 3.x for runtime type checking
-- **Deployment**: Vercel Edge Functions
+- **Deployment**: Vercel Edge Functions with GitHub Actions
 
 ### Technical Capabilities
 
@@ -43,10 +45,12 @@ Modern React 19 SPA with TypeScript strict mode, serverless API architecture, an
 - Rate limiting: 5 req/min, 20 req/hour
 
 **SEO & AI Optimization:**
-- Schema.org structured data (Organization, Person, Article, Product, Review, HowTo, FAQ)
-- Support for 15+ AI crawlers (GPTBot, Claude-Web, Perplexity, Google-Extended, Gemini)
+- Schema.org structured data (Organization, Person, Article, Product, Review, HowTo, FAQ, SoftwareApplication)
+- Support for 20+ AI crawlers (GPTBot, Claude-Web, ClaudeBot, Perplexity, Google-Extended, Gemini)
 - Priority-based sitemap with AI discovery hints
 - Open Graph and Twitter Card meta tags
+- Zero-competition keyword strategy: Knowledge Graph Engine for GEO, AI knowledge infrastructure, Direct LLM integration, Citation intelligence platform, AID protocol discovery, AI platform syndication
+- Platform/Infrastructure positioning (not agency positioning)
 
 
 ## Installation
@@ -117,16 +121,19 @@ F:\air\
 |   ├── AnalysisProgress.tsx        # Progress tracking (220 lines)
 |   ├── ExecutiveSummary.tsx        # Dashboard summary (271 lines)
 |   ├── NLPInsights.tsx             # NLP analysis display (362 lines)
+|   ├── PulseLine.tsx               # Organic animated pulse visual (150 lines)
+|   ├── Hero.tsx                    # Homepage hero with Tier 1 keywords (165 lines)
+|   ├── Philosophy.tsx              # Brand philosophy section (147 lines)
 |   ├── Header.tsx                  # Navigation (142 lines)
 |   ├── Footer.tsx                  # Footer with links (210 lines)
 |   ├── Modal.tsx                   # Contact form (222 lines)
 |   ├── SEOHead.tsx                 # Meta tags manager (130 lines)
-|   └── [28 more components]        # Total 33 components
+|   └── [25 more components]        # Total 33 components
 ├── pages/
-│   ├── HomePage.tsx
-│   ├── GeoAuditPage.tsx           # GEO Audit Tool with analytics
-│   ├── AgentIdentityPage.tsx     # AID protocol documentation (393 lines)
-│   ├── InvestorRelationsPage.tsx # Investment data (660 lines)
+│   ├── HomePage.tsx               # Platform positioning with Tier 1 keywords
+│   ├── GeoAuditPage.tsx           # GEO SaaS Platform with citation tracking ROI (1950+ lines)
+│   ├── AgentIdentityPage.tsx     # AID protocol + Direct LLM integration (750+ lines)
+│   ├── InvestorRelationsPage.tsx # Infrastructure thesis, TAM expansion roadmap (660 lines)
 │   ├── Blog.tsx
 │   ├── BlogPost.tsx
 │   ├── Author.tsx
@@ -1050,18 +1057,20 @@ For technical support or customization requests, contact the development team.
 ## Key Features
 
 **Core Capabilities:**
-- **Knowledge Graph Engine** - automated entity extraction, AI platform syndication, citation tracking with ROI measurement
-- **AID Agent Discovery** - DNS TXT and HTTPS well-known detection with real-time DNS-over-HTTPS queries
-- **AI Native Syndication** - direct integration with OpenAI, Claude, Perplexity, Gemini, Meta via official APIs
-- **Citation Proof Engine** - real-time tracking across AI platforms with competitive benchmarking and ROI calculation
-- **Investor Relations Page** - comprehensive investment analysis with TAM/SAM/SOM, SWOT, competitive landscape
-- **AI Visibility Index** - unified AI citation probability metric (0-100%)
-- **GEO Health Tracker** - daily monitoring with historical trends and 7/30-day forecasts
-- **High-Precision Scoring** - 3-decimal accuracy with Core/Technical/Content breakdown
-- **11-Category Audit** - including Schema, AI Crawlers, E-E-A-T, AID Discovery, Technical SEO, Links, Meta, Content, Structure, Performance, Citation
-- **Enhanced AI System Prompt** - precision score understanding and component analysis
-- **URL Validation** - retry mechanism with exponential backoff and improved error handling
-- **Dashboard UI** - AAA-level compact design with 40-50% more data density
+- **Knowledge Graph Engine for GEO** - automated entity extraction (10 types), relationship mapping (10 types), claim detection with evidence validation, temporal context tracking, JSON-LD export with Schema.org compatibility
+- **Direct LLM Integration Infrastructure** - OpenAI Assistants API v2 with Vector Store, Anthropic Claude tool definitions, Perplexity source submission, Google Gemini grounding, Meta Llama Index RAG integration, cost tracking per platform
+- **Citation Intelligence Platform** - real-time citation detection across ChatGPT, Claude, Perplexity, Gemini, Grok with pattern matching algorithm, confidence scoring, competitive share of voice, citation velocity tracking, ROI calculation with estimated reach and CPM-based value
+- **AID Protocol Discovery** - DNS TXT and HTTPS well-known detection with real-time DNS-over-HTTPS queries via Google Public DNS, hybrid fallback approach (primary DNS 5s, secondary HTTPS 10s), protocol detection (A2A, MCP, ANP, HTTP), agent metadata extraction, scoring algorithm (0-100)
+- **AI Platform Syndication** - direct integration via official APIs, not content optimization, measurable ROI with CFO-friendly metrics, network effects across client knowledge graphs, platform agnostic approach
+- **GEO SaaS Platform** - enterprise generative engine optimization platform with citation tracking ROI, AI visibility management, analyze/optimize/track workflow
+- **Infrastructure Thesis Positioning** - DNS analogy (DNS 1983 vs Anoteros 2023), 4-phase evolution roadmap (Phase 1: $2-3B TAM, Phase 2: $5-7B, Phase 3: $15-30B, Phase 4: $100B+), network effects visualization, Verisign $1.8B comparison, ecosystem vision
+- **AI Visibility Index** - unified AI citation probability metric (0-100%) with 5 weighted factors (AI Access 25%, Authority 20%, Structure 20%, Content 20%, Technical 15%)
+- **GEO Health Tracker** - daily monitoring with 30-day sparkline, daily delta tracking, streak system, 7/30-day forecasts using linear regression, localStorage persistence
+- **High-Precision Scoring** - 3-decimal accuracy (e.g., 54.649/100) with Core/Technical/Content breakdown, professional display with tabular-nums and glow effects
+- **11-Category Audit** - Schema Markup (15%), AI Crawlers (14%), E-E-A-T (14%), Technical SEO (12%), Link Analysis (11%), Meta Tags (8%), Content Quality (8%), AID Agent Discovery (8%), Structure (6%), Performance (4%), Citation Potential
+- **Enhanced AI System Prompt** - high-precision scoring documentation, component breakdown understanding, updated weight percentages, ROI prioritization, recommendations aligned with component weaknesses
+- **URL Validation with Retry** - exponential backoff (2 retries: 1s, 2s), request timeouts (10s direct, 15s proxy), AbortController, minimum 100 character validation, trailing slash preserved, context-aware error messages
+- **Dashboard UI** - AAA-level compact design with 40-50% more data density, micro-typography (text-[9px]-text-[11px]), 3-4-5 column grids, hover effects
 
 **Performance Optimizations:**
 - GeoAudit bundle reduced from 877KB to 510KB (42% reduction)
@@ -1070,16 +1079,19 @@ For technical support or customization requests, contact the development team.
 - Knowledge Graph module integrated with minimal bundle impact (11KB increase)
 
 Total Project Scale:
-- **12,000+ lines** of production code (2,722 lines added in Knowledge Graph Engine)
-- **17 major utility modules** (including AI Agent, AID Discovery, Knowledge Graph Builder, Citation Tracker)
-- **33+ React components** (including AI Visibility, Health Tracker, AID Status, Knowledge Graph Dashboard)
-- **10 route pages** with lazy loading (including Investor Relations, Agent Identity)
-- **11 audit categories** with 8% weight for AID agent detection
-- **Full TypeScript strict mode** with Zod validation
-- **AI-powered recommendation engine** with enhanced precision scoring
-- **Knowledge Graph Engine** with direct AI platform syndication (OpenAI, Claude, Perplexity, Gemini, Meta)
-- **Citation Proof Engine** with measurable ROI tracking and competitive analysis
-- **LocalStorage-based history** for audit tracking and trends
-- **AID protocol v1.1** integration with DNS-over-HTTPS detection
+- **12,500+ lines** of production code (2,722 lines in Knowledge Graph Engine, 2,361 lines in A2A Protocol)
+- **18 major utility modules** (geoAuditEnhanced 2100+ lines, aidDiscovery 559 lines, knowledgeGraph builder 618 lines, citationProof tracker 465 lines, aiSyndication 558 lines, nlpContentAnalysis 531 lines, and 12 more)
+- **33+ React components** (AIVisibilityScore, GEOHealthTracker, AIDAgentStatus, KnowledgeGraphDashboard, PulseLine, Hero, Philosophy, ExecutiveSummary, and 25 more)
+- **10 route pages** with lazy loading (HomePage, GeoAuditPage 1950+ lines, AgentIdentityPage 750+ lines, InvestorRelationsPage 660 lines, Blog, KnowledgeBase, and 4 more)
+- **11 audit categories** with precision weighting (Schema 15%, AI Crawlers 14%, E-E-A-T 14%, Technical SEO 12%, Links 11%, Meta 8%, Content 8%, AID Discovery 8%, Structure 6%, Performance 4%, Citation)
+- **Full TypeScript strict mode** with Zod 3.x runtime validation
+- **AI-powered recommendation engine** with MiniMax M2/Llama 3.2/Gemma 2 via OpenRouter, enhanced system prompt for precision scoring
+- **Knowledge Graph Engine** with direct AI platform syndication (OpenAI Assistants API v2, Claude tool definitions, Perplexity submission, Gemini grounding, Meta Llama RAG)
+- **Citation Proof Engine** with real-time detection across 5 AI platforms, pattern matching with confidence scoring, competitive analysis, ROI calculation
+- **A2A Protocol JSON-RPC 2.0** API with 12 methods, 4-tier rate limiting, queue system, cache layer with ETag support
+- **AID protocol v1.1** integration with DNS-over-HTTPS detection, hybrid DNS/HTTPS fallback, protocol detection (A2A, MCP, ANP, HTTP)
+- **LocalStorage-based history** for audit tracking, trend analysis, 7/30-day forecasting
+- **Zero-competition SEO strategy** with Tier 1/Tier 2 keywords: Knowledge Graph Engine for GEO, AI knowledge infrastructure, Direct LLM integration, Citation intelligence platform, AID protocol discovery, AI platform syndication, GEO SaaS, Citation tracking ROI
+- **Infrastructure layer positioning** as DNS for AI, not agency positioning, TAM expansion from $2-3B to $100B+ through 4-phase roadmap
 
-Built for AI-first search with production-grade LLM integration, real-time analytics, enterprise-level precision scoring, and revolutionary knowledge graph infrastructure that transforms clients into native AI sources
+Built as AI knowledge infrastructure platform with direct LLM integration, citation intelligence, AID protocol discovery, and AI platform syndication. Transforms brands into native AI sources through automated knowledge graphs and official API integration with ChatGPT, Claude, Gemini, and Perplexity.
