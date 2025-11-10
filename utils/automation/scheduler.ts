@@ -219,25 +219,6 @@ export class AutomationScheduler {
         
         for (const effect of effects) {
           await goldStandardPersistence.saveNetworkEffect(effect);
-          
-          const entityUpdate = {
-            global_entity_id: '',
-            canonical_name: effect.affected_entities[0] || '',
-            entity_type: 'Concept',
-            referenced_by_domains: effect.contributing_domains,
-            total_references: effect.evidence_count,
-            merged_description: '',
-            confidence_score: effect.confidence_boost,
-            authority_score: effect.authority_boost,
-            total_citations: 0,
-            citation_platforms: [],
-            variants: [],
-            first_seen: new Date().toISOString(),
-            last_updated: new Date().toISOString(),
-            connected_global_entities: [],
-            relationship_count: 0,
-          };
-          
         }
 
         console.log(`Processed ${effects.length} network effects for ${graph.domain}`);

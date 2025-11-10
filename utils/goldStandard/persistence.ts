@@ -46,10 +46,10 @@ export class GoldStandardPersistence {
   async saveKnowledgeGraph(graph: KnowledgeGraph): Promise<string> {
     const userId = await this.ensureUserId();
 
-    const existingKg = await this.getCurrentKG(userId, graph.domain);
+    const existingKg: { id: string; version: number } | null = await this.getCurrentKG(userId, graph.domain);
     
     if (existingKg) {
-      await supabase
+      await (supabase as any)
         .from('knowledge_graphs')
         .update({ is_current: false })
         .eq('id', existingKg.id);
@@ -69,12 +69,12 @@ export class GoldStandardPersistence {
       entity_count: graph.entities.length,
       relationship_count: graph.relationships.length,
       claim_count: graph.claims.length,
-      learning_version: graph.metadata.learning_version || 0,
-      last_learning_update: graph.metadata.last_learning_update || null,
-      total_learning_updates: graph.metadata.total_learning_updates || 0,
+      learning_version: (graph.metadata as any).learning_version || 0,
+      last_learning_update: (graph.metadata as any).last_learning_update || null,
+      total_learning_updates: (graph.metadata as any).total_learning_updates || 0,
     };
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('knowledge_graphs')
       .insert(insert)
       .select()
@@ -87,7 +87,7 @@ export class GoldStandardPersistence {
   async loadKnowledgeGraph(domain: string): Promise<KnowledgeGraph | null> {
     const userId = await this.ensureUserId();
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('knowledge_graphs')
       .select('*')
       .eq('user_id', userId)
@@ -126,7 +126,7 @@ export class GoldStandardPersistence {
   async saveCitation(citation: Citation, kgDomain: string): Promise<void> {
     const userId = await this.ensureUserId();
 
-    const kg = await this.getCurrentKG(userId, kgDomain);
+    const kg: { id: string; version: number } | null = await this.getCurrentKG(userId, kgDomain);
     if (!kg) {
       console.warn(`No KG found for domain ${kgDomain}, citation not linked`);
     }
@@ -147,7 +147,7 @@ export class GoldStandardPersistence {
       metadata: citation.metadata as any || {},
     };
 
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('citations')
       .insert(insert);
 
@@ -167,9 +167,9 @@ export class GoldStandardPersistence {
       .order('timestamp', { ascending: false });
 
     if (kgDomain) {
-      const kg = await this.getCurrentKG(userId, kgDomain);
+      const kg: { id: string; version: number } | null = await this.getCurrentKG(userId, kgDomain);
       if (kg) {
-        query = query.eq('knowledge_graph_id', kg.id);
+        query = (query as any).eq('knowledge_graph_id', kg.id);
       } else {
         return [];
       }
@@ -179,7 +179,7 @@ export class GoldStandardPersistence {
 
     if (error) throw error;
 
-    return data.map(row => ({
+    return (data as any[]).map((row: any) => ({
       id: row.citation_id,
       source: row.source,
       query: row.query,
@@ -199,7 +199,7 @@ export class GoldStandardPersistence {
     analysis: LearningAnalysis
   ): Promise<void> {
     const userId = await this.ensureUserId();
-    const kg = await this.getCurrentKG(userId, kgDomain);
+    const kg: { id: string; version: number } | null = await this.getCurrentKG(userId, kgDomain);
     if (!kg) throw new Error(`No KG found for domain ${kgDomain}`);
 
     const insert: LearningAnalysisInsert = {
@@ -215,7 +215,7 @@ export class GoldStandardPersistence {
       learning_insights: analysis.learning_insights as any,
     };
 
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('learning_analyses')
       .insert(insert);
 
@@ -226,7 +226,7 @@ export class GoldStandardPersistence {
     analysisId: string,
     appliedUpdateCount: number
   ): Promise<void> {
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('learning_analyses')
       .update({
         updates_applied: true,
@@ -239,14 +239,14 @@ export class GoldStandardPersistence {
   }
 
   async saveGlobalEntity(entity: GlobalEntity): Promise<void> {
-    const { data: existing } = await supabase
+    const { data: existing } = await (supabase as any)
       .from('global_entities')
       .select('id')
       .eq('normalized_name', entity.canonical_name.toLowerCase())
       .single();
 
     if (existing) {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('global_entities')
         .update({
           referenced_by_domains: entity.referenced_by_domains,
@@ -277,7 +277,7 @@ export class GoldStandardPersistence {
         variants: entity.variants as any,
       };
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('global_entities')
         .insert(insert);
 
@@ -286,7 +286,7 @@ export class GoldStandardPersistence {
   }
 
   async loadGlobalEntity(normalizedName: string): Promise<GlobalEntity | null> {
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('global_entities')
       .select('*')
       .eq('normalized_name', normalizedName)
@@ -297,20 +297,21 @@ export class GoldStandardPersistence {
       throw error;
     }
 
+    const result: any = data;
     return {
-      global_entity_id: data.id,
-      canonical_name: data.canonical_name,
-      entity_type: data.entity_type,
-      referenced_by_domains: data.referenced_by_domains,
-      total_references: data.total_references,
-      merged_description: data.merged_description || '',
-      confidence_score: data.confidence_score,
-      authority_score: data.authority_score,
-      variants: data.variants as any,
-      total_citations: data.total_citations,
-      citation_platforms: data.citation_platforms,
-      first_seen: data.first_seen,
-      last_updated: data.last_updated,
+      global_entity_id: result.id,
+      canonical_name: result.canonical_name,
+      entity_type: result.entity_type,
+      referenced_by_domains: result.referenced_by_domains,
+      total_references: result.total_references,
+      merged_description: result.merged_description || '',
+      confidence_score: result.confidence_score,
+      authority_score: result.authority_score,
+      variants: result.variants as any,
+      total_citations: result.total_citations,
+      citation_platforms: result.citation_platforms,
+      first_seen: result.first_seen,
+      last_updated: result.last_updated,
       connected_global_entities: [],
       relationship_count: 0,
     };
@@ -328,7 +329,7 @@ export class GoldStandardPersistence {
       contributing_domains: effect.contributing_domains,
     };
 
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('network_effects')
       .insert(insert);
 
@@ -349,7 +350,7 @@ export class GoldStandardPersistence {
       total_duration_ms: operation.total_duration_ms || null,
     };
 
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('sync_operations')
       .insert(insert);
 
@@ -361,7 +362,7 @@ export class GoldStandardPersistence {
     prediction: CitationPrediction
   ): Promise<void> {
     const userId = await this.ensureUserId();
-    const kg = await this.getCurrentKG(userId, kgDomain);
+    const kg: { id: string; version: number } | null = await this.getCurrentKG(userId, kgDomain);
     if (!kg) throw new Error(`No KG found for domain ${kgDomain}`);
 
     const insert: CitationPredictionInsert = {
@@ -377,7 +378,7 @@ export class GoldStandardPersistence {
       time_to_citation_optimistic: prediction.time_to_citation.optimistic,
     };
 
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('citation_predictions')
       .insert(insert);
 
@@ -389,7 +390,7 @@ export class GoldStandardPersistence {
     actualCitations: number,
     actualTimeToCitation?: number
   ): Promise<void> {
-    const { data: prediction, error: fetchError } = await supabase
+    const { data: prediction, error: fetchError } = await (supabase as any)
       .from('citation_predictions')
       .select('*')
       .eq('id', predictionId)
@@ -397,11 +398,12 @@ export class GoldStandardPersistence {
 
     if (fetchError) throw fetchError;
 
+    const pred: any = prediction;
     const accuracy = actualCitations > 0
-      ? Math.min(1, prediction.overall_probability / (actualCitations * 100))
+      ? Math.min(1, pred.overall_probability / (actualCitations * 100))
       : 0;
 
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('citation_predictions')
       .update({
         actual_citations_received: actualCitations,
@@ -413,8 +415,8 @@ export class GoldStandardPersistence {
     if (error) throw error;
   }
 
-  private async getCurrentKG(userId: string, domain: string) {
-    const { data } = await supabase
+  private async getCurrentKG(userId: string, domain: string): Promise<{ id: string; version: number } | null> {
+    const { data } = await (supabase as any)
       .from('knowledge_graphs')
       .select('id, version')
       .eq('user_id', userId)
