@@ -227,6 +227,16 @@ function extractTopics(result: AuditResult): string[] {
 }
 
 /**
+ * Extract author name from page content
+ */
+function extractAuthorName(_url: string): string | null {
+  // This would be called with HTML content in production
+  // For now, return null to use fallback logic
+  // TODO: Integrate with geoAuditEnhanced to pass HTML content
+  return null;
+}
+
+/**
  * Extract keywords from URL and meta tags
  */
 function extractKeywords(result: AuditResult): string[] {
@@ -264,10 +274,13 @@ function extractEntities(result: AuditResult): A2AEntity[] {
   
   // Person entity (if author detected)
   if (result.details.eeat.hasAuthorInfo) {
+    // Extract author name from HTML if available
+    const authorName = extractAuthorName(result.url);
+    
     entities.push({
       type: 'Person',
-      name: 'Author', // In production, extract actual name
-      confidence: 0.70,
+      name: authorName || new URL(result.url).hostname.replace('www.', '').split('.')[0],
+      confidence: authorName ? 0.85 : 0.60,
     });
   }
   
