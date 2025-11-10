@@ -5,6 +5,18 @@
 
 import type { AIDAgentInfo } from './aidDiscovery';
 import type { KnowledgeGraph } from './knowledgeGraph/builder';
+import {
+  getDefaultSchemaDetails,
+  getDefaultMetaTagsDetails,
+  getDefaultAICrawlersDetails,
+  getDefaultEEATDetails,
+  getDefaultStructureDetails,
+  getDefaultPerformanceDetails,
+  getDefaultContentQualityDetails,
+  getDefaultCitationPotentialDetails,
+  getDefaultTechnicalSEODetails,
+  getDefaultLinkAnalysisDetails,
+} from './geoAuditDefaults';
 
 // ==================== INTERFACES ====================
 
@@ -269,40 +281,101 @@ export async function auditWebsite(
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlContent, 'text/html');
 
-  // Run all audits
-  onProgress?.('Analyzing schema markup...');
-  const schemaMarkup = auditSchemaMarkup(doc);
+  // Run all audits with error handling
+  let schemaMarkup, metaTags, structure, performance, eeat, technicalSEO, contentQuality, citationPotential, linkAnalysis, aiCrawlers, aidAgent;
   
-  onProgress?.('Analyzing meta tags...');
-  const metaTags = auditMetaTags(doc);
+  try {
+    onProgress?.('Analyzing schema markup...');
+    schemaMarkup = auditSchemaMarkup(doc);
+  } catch (error) {
+    console.error('Schema markup audit failed:', error);
+    schemaMarkup = getDefaultSchemaDetails();
+  }
   
-  onProgress?.('Analyzing structure...');
-  const structure = auditStructure(doc);
+  try {
+    onProgress?.('Analyzing meta tags...');
+    metaTags = auditMetaTags(doc);
+  } catch (error) {
+    console.error('Meta tags audit failed:', error);
+    metaTags = getDefaultMetaTagsDetails();
+  }
   
-  onProgress?.('Analyzing performance...');
-  const performance = auditPerformance(htmlContent, doc);
+  try {
+    onProgress?.('Analyzing structure...');
+    structure = auditStructure(doc);
+  } catch (error) {
+    console.error('Structure audit failed:', error);
+    structure = getDefaultStructureDetails();
+  }
   
-  onProgress?.('Analyzing E-E-A-T signals...');
-  const eeat = auditEnhancedEEAT(doc, htmlContent);
+  try {
+    onProgress?.('Analyzing performance...');
+    performance = auditPerformance(htmlContent, doc);
+  } catch (error) {
+    console.error('Performance audit failed:', error);
+    performance = getDefaultPerformanceDetails();
+  }
   
-  onProgress?.('Analyzing technical GEO...');
-  const technicalSEO = await auditTechnicalSEO(doc, normalizedUrl);
+  try {
+    onProgress?.('Analyzing E-E-A-T signals...');
+    eeat = auditEnhancedEEAT(doc, htmlContent);
+  } catch (error) {
+    console.error('E-E-A-T audit failed:', error);
+    eeat = getDefaultEEATDetails();
+  }
   
-  onProgress?.('Analyzing content quality...');
-  const contentQuality = auditContentQuality(doc, htmlContent);
+  try {
+    onProgress?.('Analyzing technical GEO...');
+    technicalSEO = await auditTechnicalSEO(doc, normalizedUrl);
+  } catch (error) {
+    console.error('Technical SEO audit failed:', error);
+    technicalSEO = getDefaultTechnicalSEODetails();
+  }
   
-  onProgress?.('Analyzing citation potential...');
-  const citationPotential = auditCitationPotential(doc, htmlContent);
+  try {
+    onProgress?.('Analyzing content quality...');
+    contentQuality = auditContentQuality(doc, htmlContent);
+  } catch (error) {
+    console.error('Content quality audit failed:', error);
+    contentQuality = getDefaultContentQualityDetails();
+  }
   
-  onProgress?.('Analyzing link structure...');
-  const linkAnalysis = auditLinkAnalysis(doc, normalizedUrl);
+  try {
+    onProgress?.('Analyzing citation potential...');
+    citationPotential = auditCitationPotential(doc, htmlContent);
+  } catch (error) {
+    console.error('Citation potential audit failed:', error);
+    citationPotential = getDefaultCitationPotentialDetails();
+  }
   
-  onProgress?.('Checking AI crawler access...');
-  const aiCrawlers = await auditAICrawlers(normalizedUrl);
+  try {
+    onProgress?.('Analyzing link structure...');
+    linkAnalysis = auditLinkAnalysis(doc, normalizedUrl);
+  } catch (error) {
+    console.error('Link analysis audit failed:', error);
+    linkAnalysis = getDefaultLinkAnalysisDetails();
+  }
   
-  onProgress?.('Detecting AI agent support (AID protocol)...');
-  const { discoverAIDAgent, calculateAIDScore } = await import('./aidDiscovery');
-  const aidAgent = await discoverAIDAgent(normalizedUrl);
+  try {
+    onProgress?.('Checking AI crawler access...');
+    aiCrawlers = await auditAICrawlers(normalizedUrl);
+  } catch (error) {
+    console.error('AI crawlers audit failed:', error);
+    aiCrawlers = getDefaultAICrawlersDetails();
+  }
+  
+  try {
+    onProgress?.('Detecting AI agent support (AID protocol)...');
+    const { discoverAIDAgent } = await import('./aidDiscovery');
+    aidAgent = await discoverAIDAgent(normalizedUrl);
+  } catch (error) {
+    console.error('AID agent discovery failed:', error);
+    const { getDefaultAIDAgent } = await import('./aidDiscovery');
+    aidAgent = getDefaultAIDAgent();
+  }
+  
+  // Import calculateAIDScore separately
+  const { calculateAIDScore } = await import('./aidDiscovery');
 
   // Calculate category scores
   const scores = {
@@ -475,42 +548,59 @@ async function fetchHTML(url: string): Promise<string> {
     console.log(`Direct fetch failed (${errorMsg}), using proxy...`);
   }
 
-  // Fallback to proxy with timeout and retry
+  // Multiple proxy options for reliability
+  const proxies = [
+    (url: string) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+    (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    (url: string) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+  ];
+  
   const maxRetries = 2;
   let lastError: Error | null = null;
   
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout for proxy
-      
-      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-      const response = await fetch(proxyUrl, {
-        signal: controller.signal,
-      });
-      
-      clearTimeout(timeoutId);
-      
-      if (!response.ok) {
-        throw new Error(`Proxy returned status ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      if (!data.contents || data.contents.length < 100) {
-        throw new Error('Proxy returned empty or invalid content');
-      }
-      
-      console.log(`✓ Proxy fetch successful (attempt ${attempt})`);
-      return data.contents;
-      
-    } catch (error) {
-      lastError = error instanceof Error ? error : new Error('Unknown error');
-      console.warn(`Proxy attempt ${attempt}/${maxRetries} failed:`, lastError.message);
-      
-      // Wait before retry (exponential backoff)
-      if (attempt < maxRetries) {
-        await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+  for (const proxyFn of proxies) {
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+        
+        const proxyUrl = proxyFn(url);
+        const response = await fetch(proxyUrl, {
+          signal: controller.signal,
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+          throw new Error(`Proxy returned status ${response.status}`);
+        }
+        
+        // Different proxies return different formats
+        const contentType = response.headers.get('content-type') || '';
+        let html: string;
+        
+        if (contentType.includes('application/json')) {
+          const data = await response.json();
+          html = data.contents || data.content || data.data || '';
+        } else {
+          html = await response.text();
+        }
+        
+        if (!html || html.length < 100) {
+          throw new Error('Proxy returned empty or invalid content');
+        }
+        
+        console.log(`✓ Proxy fetch successful (${proxyUrl.split('?')[0]}, attempt ${attempt})`);
+        return html;
+        
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error('Unknown error');
+        console.warn(`Proxy attempt ${attempt}/${maxRetries} failed:`, lastError.message);
+        
+        // Wait before retry (exponential backoff)
+        if (attempt < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+        }
       }
     }
   }
@@ -662,7 +752,14 @@ function auditContentQuality(doc: Document, _html: string): ContentQualityDetail
   const allLinks = doc.querySelectorAll('a[href]');
   const internalLinks = Array.from(allLinks).filter(a => {
     const href = a.getAttribute('href') || '';
-    return href.startsWith('/') || href.startsWith('#') || href.includes(window.location.hostname);
+    // Check relative links or same-domain links (safe for all contexts)
+    try {
+      const currentDomain = typeof window !== 'undefined' ? window.location.hostname : new URL(doc.baseURI || 'https://example.com').hostname;
+      return href.startsWith('/') || href.startsWith('#') || href.includes(currentDomain);
+    } catch {
+      // Fallback: assume relative links are internal
+      return href.startsWith('/') || href.startsWith('#');
+    }
   }).length;
   const externalLinks = allLinks.length - internalLinks;
   const linkRatio = wordCount > 0 ? (allLinks.length / wordCount) * 100 : 0;

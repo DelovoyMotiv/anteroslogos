@@ -557,3 +557,15 @@ HTTPS Well-Known (/.well-known/agent.json):
 
   return recommendations;
 }
+
+/**
+ * Get default AID agent info for fallback when discovery fails
+ */
+export function getDefaultAIDAgent(): AIDAgentInfo {
+  return {
+    detected: false,
+    discoveryMethod: 'none',
+    errors: ['AID agent discovery failed - unable to check protocol support'],
+    warnings: [],
+  };
+}
