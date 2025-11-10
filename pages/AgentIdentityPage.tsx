@@ -459,6 +459,186 @@ const AgentIdentityPage = () => {
             </div>
           </div>
 
+          {/* Infrastructure Thesis: DNS for AI */}
+          <div className="bg-gradient-to-br from-indigo-900/40 via-purple-900/40 to-blue-900/40 border border-indigo-500/30 rounded-xl p-6 sm:p-8 lg:p-10 mb-8 sm:mb-12">
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center gap-2 bg-indigo-500/20 border border-indigo-500/30 px-4 py-2 rounded-full text-xs sm:text-sm font-medium mb-4 text-indigo-300">
+                <Network className="w-4 h-4" />
+                <span>Infrastructure Thesis</span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">
+                From GEO Tool to DNS for AI
+              </h2>
+              <p className="text-sm sm:text-base text-white/70 max-w-3xl mx-auto">
+                Anóteros Lógos is evolving beyond a GEO platform into the foundational infrastructure layer for AI agent discovery and interaction—analogous to how DNS became the internet's addressing infrastructure.
+              </p>
+            </div>
+
+            {/* DNS Analogy */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+              <div className="bg-white/5 border border-white/10 rounded-lg p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <Globe className="w-8 h-8 text-blue-400" />
+                  <div>
+                    <h3 className="text-lg font-bold text-white">DNS (1983)</h3>
+                    <p className="text-xs text-white/50">The Internet Foundation</p>
+                  </div>
+                </div>
+                <div className="space-y-3 text-sm text-white/70">
+                  <div className="flex items-start gap-2">
+                    <ArrowRight className="w-4 h-4 text-blue-400 mt-1 flex-shrink-0" />
+                    <span>Started as simple name resolution tool</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <ArrowRight className="w-4 h-4 text-blue-400 mt-1 flex-shrink-0" />
+                    <span>Became critical infrastructure for entire internet</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <ArrowRight className="w-4 h-4 text-blue-400 mt-1 flex-shrink-0" />
+                    <span>Created $50B+ ecosystem (Verisign $1.8B market cap)</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <ArrowRight className="w-4 h-4 text-blue-400 mt-1 flex-shrink-0" />
+                    <span>De-facto standard with compounding network effects</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-indigo-600/20 to-purple-600/20 border-2 border-indigo-500/50 rounded-lg p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <Bot className="w-8 h-8 text-indigo-400" />
+                  <div>
+                    <h3 className="text-lg font-bold text-white">Anóteros (2023)</h3>
+                    <p className="text-xs text-indigo-300">AI Agent Infrastructure</p>
+                  </div>
+                </div>
+                <div className="space-y-3 text-sm text-white/70">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-green-400 mt-1 flex-shrink-0" />
+                    <span>AID Protocol enables agent discovery via DNS</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-green-400 mt-1 flex-shrink-0" />
+                    <span>Becoming infrastructure for AI agent ecosystem</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-green-400 mt-1 flex-shrink-0" />
+                    <span>Potential $100B+ TAM as ecosystem matures</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="w-4 h-4 text-green-400 mt-1 flex-shrink-0" />
+                    <span>First-mover advantage with 5,000+ domains in 3 months</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Evolution Roadmap */}
+            <div className="mb-8">
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-6 text-center">Evolution Roadmap</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-white/5 border-l-4 border-blue-500 p-5 rounded-lg">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-2xl font-bold text-blue-400">Phase 1</span>
+                    <span className="text-xs font-mono bg-blue-500/20 text-blue-300 px-2 py-1 rounded">2024</span>
+                  </div>
+                  <h4 className="font-semibold text-white mb-2 text-sm">GEO Tool + Free Calculator</h4>
+                  <p className="text-xs text-white/60 mb-3">Establish market presence with GEO Score Calculator and auditing platform</p>
+                  <div className="text-xl font-bold text-blue-400">$2-3B</div>
+                  <p className="text-xs text-white/50">TAM</p>
+                </div>
+
+                <div className="bg-white/5 border-l-4 border-indigo-500 p-5 rounded-lg">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-2xl font-bold text-indigo-400">Phase 2</span>
+                    <span className="text-xs font-mono bg-indigo-500/20 text-indigo-300 px-2 py-1 rounded">2025-2026</span>
+                  </div>
+                  <h4 className="font-semibold text-white mb-2 text-sm">AID Protocol Registry</h4>
+                  <p className="text-xs text-white/60 mb-3">Become de-facto registry for agent discovery, expand beyond GEO</p>
+                  <div className="text-xl font-bold text-indigo-400">$5-7B</div>
+                  <p className="text-xs text-white/50">TAM</p>
+                </div>
+
+                <div className="bg-white/5 border-l-4 border-purple-500 p-5 rounded-lg">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-2xl font-bold text-purple-400">Phase 3</span>
+                    <span className="text-xs font-mono bg-purple-500/20 text-purple-300 px-2 py-1 rounded">2027-2028</span>
+                  </div>
+                  <h4 className="font-semibold text-white mb-2 text-sm">Agent-to-Agent Platform</h4>
+                  <p className="text-xs text-white/60 mb-3">Enable agent discovery and interaction across entire AI ecosystem</p>
+                  <div className="text-xl font-bold text-purple-400">$15-30B</div>
+                  <p className="text-xs text-white/50">TAM</p>
+                </div>
+
+                <div className="bg-gradient-to-br from-purple-600/20 to-pink-600/20 border-l-4 border-pink-500 p-5 rounded-lg">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-2xl font-bold text-pink-400">Phase 4</span>
+                    <span className="text-xs font-mono bg-pink-500/20 text-pink-300 px-2 py-1 rounded">2029+</span>
+                  </div>
+                  <h4 className="font-semibold text-white mb-2 text-sm">Infrastructure Standard</h4>
+                  <p className="text-xs text-white/60 mb-3">De-facto standard for all AI agent infrastructure globally</p>
+                  <div className="text-xl font-bold text-pink-400">$100B+</div>
+                  <p className="text-xs text-white/50">TAM</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Network Effects */}
+            <div className="bg-white/5 border border-white/10 rounded-lg p-6">
+              <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                <Network className="w-6 h-6 text-indigo-400" />
+                Compounding Network Effects
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <div className="inline-flex items-center gap-2 bg-blue-500/20 px-3 py-1 rounded-full text-xs font-semibold text-blue-300 mb-3">
+                    1st Order
+                  </div>
+                  <ul className="space-y-2 text-sm text-white/70">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                      <span>Each optimized brand proves ROI for next customer</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                      <span>Each integrated AI agent increases AID Protocol usage</span>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <div className="inline-flex items-center gap-2 bg-indigo-500/20 px-3 py-1 rounded-full text-xs font-semibold text-indigo-300 mb-3">
+                    2nd Order
+                  </div>
+                  <ul className="space-y-2 text-sm text-white/70">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-indigo-400 mt-0.5 flex-shrink-0" />
+                      <span>Ecosystem tools emerge: CMS plugins, API wrappers, CLI tools</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-indigo-400 mt-0.5 flex-shrink-0" />
+                      <span>Professional services market: "AID Protocol Consultants"</span>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <div className="inline-flex items-center gap-2 bg-purple-500/20 px-3 py-1 rounded-full text-xs font-semibold text-purple-300 mb-3">
+                    3rd Order
+                  </div>
+                  <ul className="space-y-2 text-sm text-white/70">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" />
+                      <span>Becomes de-facto standard like DNS for internet</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" />
+                      <span>Recurring revenue model: 10-20% of AI agent discovery payments</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Quick Start Guide */}
           <div className="bg-white/5 border-2 border-emerald-500/30 rounded-xl p-6 sm:p-8 mb-8 sm:mb-12">
             <div className="flex items-center gap-3 mb-6">
