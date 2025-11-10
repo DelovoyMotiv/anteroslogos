@@ -1,15 +1,16 @@
 # Anóteros Lógos - AI Knowledge Infrastructure Platform
 
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.2.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.3.0-blue.svg)](CHANGELOG.md)
 [![Node](https://img.shields.io/badge/node-20.x-brightgreen.svg)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19.2-61dafb.svg)](https://react.dev)
 [![Build](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/DelovoyMotiv/anteroslogos/actions)
 
-Knowledge Graph Engine for GEO with direct LLM integration. Citation intelligence platform for AI knowledge infrastructure. Enables direct syndication to ChatGPT, Claude, Gemini, and Perplexity through AID protocol discovery.
+Knowledge Graph Engine for GEO with direct LLM integration and bidirectional AI intelligence. Citation intelligence platform with self-improving knowledge graphs powered by feedback loop analysis. Enables direct syndication to ChatGPT, Claude, Gemini, and Perplexity through AID protocol discovery.
 
 **Production URL:** https://anoteroslogos.com
+**Revolutionary Feature:** Citation Learning Engine (v2.3.0)
 
 
 ## Architecture
@@ -118,6 +119,7 @@ F:\air\
 |   ├── AIDAgentStatus.tsx          # AID protocol visualization (253 lines)
 |   ├── GEOHealthTracker.tsx        # Daily monitoring with forecasts (398 lines)
 |   ├── KnowledgeGraphDashboard.tsx # Knowledge Graph visualization (356 lines)
+|   ├── CitationLearningDashboard.tsx # Citation Learning UI (420 lines)
 |   ├── AnalysisProgress.tsx        # Progress tracking (220 lines)
 |   ├── ExecutiveSummary.tsx        # Dashboard summary (271 lines)
 |   ├── NLPInsights.tsx             # NLP analysis display (362 lines)
@@ -156,6 +158,8 @@ F:\air\
 |   │   └── builder.ts             # Knowledge graph extraction (618 lines)
 |   ├── citationProof/
 |   │   └── tracker.ts             # Citation tracking and ROI (465 lines)
+|   ├── citationLearning/
+|   │   └── feedbackEngine.ts      # Bidirectional AI intelligence (705 lines)
 |   ├── geoAuditEnhanced.ts        # Audit engine with precision scoring (2100+ lines)
 |   ├── aidDiscovery.ts            # AID protocol detection (559 lines)
 |   ├── advancedAnalytics.ts       # Trend analysis (418 lines)
@@ -180,6 +184,7 @@ F:\air\
 │   └── migrations/
 │       └── 001_initial_schema.sql
 ├── KNOWLEDGE_GRAPH_ENGINE.md       # Knowledge Graph documentation (450 lines)
+├── CITATION_LEARNING_ENGINE.md     # Citation Learning documentation (417 lines)
 ├── App.tsx
 ├── index.tsx
 ├── index.html
@@ -1056,6 +1061,9 @@ For technical support or customization requests, contact the development team.
 
 ## Key Features
 
+**Revolutionary Innovation:**
+- **Citation Learning Engine** - bidirectional AI intelligence system that learns from how AI platforms use syndicated knowledge and automatically optimizes knowledge graphs for maximum citation probability. First and only GEO platform with self-improving knowledge graphs powered by real citation data. Query pattern detection, confidence signal extraction, entity performance metrics (0-100 optimization score), citation probability prediction (5-factor model), auto-generated optimization actions (8 action types with priority levels and impact estimates)
+
 **Core Capabilities:**
 - **Knowledge Graph Engine for GEO** - automated entity extraction (10 types), relationship mapping (10 types), claim detection with evidence validation, temporal context tracking, JSON-LD export with Schema.org compatibility
 - **Direct LLM Integration Infrastructure** - OpenAI Assistants API v2 with Vector Store, Anthropic Claude tool definitions, Perplexity source submission, Google Gemini grounding, Meta Llama Index RAG integration, cost tracking per platform
@@ -1079,19 +1087,20 @@ For technical support or customization requests, contact the development team.
 - Knowledge Graph module integrated with minimal bundle impact (11KB increase)
 
 Total Project Scale:
-- **12,500+ lines** of production code (2,722 lines in Knowledge Graph Engine, 2,361 lines in A2A Protocol)
-- **18 major utility modules** (geoAuditEnhanced 2100+ lines, aidDiscovery 559 lines, knowledgeGraph builder 618 lines, citationProof tracker 465 lines, aiSyndication 558 lines, nlpContentAnalysis 531 lines, and 12 more)
-- **33+ React components** (AIVisibilityScore, GEOHealthTracker, AIDAgentStatus, KnowledgeGraphDashboard, PulseLine, Hero, Philosophy, ExecutiveSummary, and 25 more)
+- **13,700+ lines** of production code (2,722 lines in Knowledge Graph Engine, 2,361 lines in A2A Protocol, 1,125 lines in Citation Learning Engine)
+- **19 major utility modules** (geoAuditEnhanced 2100+ lines, citationLearning/feedbackEngine 705 lines, knowledgeGraph builder 618 lines, aidDiscovery 559 lines, aiSyndication 558 lines, nlpContentAnalysis 531 lines, citationProof tracker 465 lines, and 12 more)
+- **34+ React components** (CitationLearningDashboard, AIVisibilityScore, GEOHealthTracker, AIDAgentStatus, KnowledgeGraphDashboard, PulseLine, Hero, Philosophy, ExecutiveSummary, and 25 more)
 - **10 route pages** with lazy loading (HomePage, GeoAuditPage 1950+ lines, AgentIdentityPage 750+ lines, InvestorRelationsPage 660 lines, Blog, KnowledgeBase, and 4 more)
 - **11 audit categories** with precision weighting (Schema 15%, AI Crawlers 14%, E-E-A-T 14%, Technical SEO 12%, Links 11%, Meta 8%, Content 8%, AID Discovery 8%, Structure 6%, Performance 4%, Citation)
 - **Full TypeScript strict mode** with Zod 3.x runtime validation
 - **AI-powered recommendation engine** with MiniMax M2/Llama 3.2/Gemma 2 via OpenRouter, enhanced system prompt for precision scoring
 - **Knowledge Graph Engine** with direct AI platform syndication (OpenAI Assistants API v2, Claude tool definitions, Perplexity submission, Gemini grounding, Meta Llama RAG)
 - **Citation Proof Engine** with real-time detection across 5 AI platforms, pattern matching with confidence scoring, competitive analysis, ROI calculation
+- **Citation Learning Engine** with bidirectional AI intelligence (query pattern detection, confidence signal extraction, entity performance scoring, citation probability prediction with 5-factor model, auto-optimization actions with 8 types)
 - **A2A Protocol JSON-RPC 2.0** API with 12 methods, 4-tier rate limiting, queue system, cache layer with ETag support
 - **AID protocol v1.1** integration with DNS-over-HTTPS detection, hybrid DNS/HTTPS fallback, protocol detection (A2A, MCP, ANP, HTTP)
 - **LocalStorage-based history** for audit tracking, trend analysis, 7/30-day forecasting
 - **Zero-competition SEO strategy** with Tier 1/Tier 2 keywords: Knowledge Graph Engine for GEO, AI knowledge infrastructure, Direct LLM integration, Citation intelligence platform, AID protocol discovery, AI platform syndication, GEO SaaS, Citation tracking ROI
 - **Infrastructure layer positioning** as DNS for AI, not agency positioning, TAM expansion from $2-3B to $100B+ through 4-phase roadmap
 
-Built as AI knowledge infrastructure platform with direct LLM integration, citation intelligence, AID protocol discovery, and AI platform syndication. Transforms brands into native AI sources through automated knowledge graphs and official API integration with ChatGPT, Claude, Gemini, and Perplexity.
+Built as AI knowledge infrastructure platform with direct LLM integration, citation intelligence, AID protocol discovery, AI platform syndication, and revolutionary bidirectional learning engine. Transforms brands into native AI sources through self-improving knowledge graphs that learn from real citation behavior and automatically optimize for maximum AI citation probability.
