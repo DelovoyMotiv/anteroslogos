@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AnimatedSection from './AnimatedSection';
 import GeoAnalysisForm from './GeoAnalysisForm';
+import PulseLine from './PulseLine';
 
 interface HeroProps {
     onScrollClick: () => void;
@@ -35,15 +36,12 @@ const Hero: React.FC<HeroProps> = ({ onScrollClick }) => {
         
         <div className="relative z-10 w-full max-w-6xl mx-auto">
             <AnimatedSection>
-                {/* Overline badge */}
-                <div className="flex justify-center mb-6 sm:mb-8">
-                    <div className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-brand-accent/10 border border-brand-accent/30 rounded-full backdrop-blur-sm hover:border-brand-accent/50 hover:bg-brand-accent/15 transition-all duration-300">
-                        <div className="w-2 h-2 bg-brand-accent rounded-full animate-pulse"></div>
-                        <span className="text-xs sm:text-sm font-medium text-brand-accent tracking-wide">Generative Engine Optimization</span>
-                    </div>
+                {/* Pulse Line - feeling the internet's pulse in real-time */}
+                <div className="mb-6 sm:mb-8">
+                    <PulseLine />
                 </div>
                 
-                <h1 
+                <h1
                     className="font-display font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl leading-[1.05] mb-0 tracking-tight px-2"
                     itemProp="headline"
                 >
