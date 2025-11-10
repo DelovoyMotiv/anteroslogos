@@ -16,6 +16,8 @@ import { checkRateLimit } from '../../lib/a2a/rateLimiter';
 import { convertToA2AFormat } from '../../lib/a2a/adapter';
 import { performGeoAudit } from '../../utils/geoAuditEnhanced';
 import { getCachedAuditResult, cacheAuditResult } from '../../lib/a2a/cache';
+import { validateApiKey as validateRegisteredApiKey, recordAgentActivity, getAgentByApiKey } from '../../lib/a2a/agentRegistry';
+import { createRequestTracer, logger, perfMonitor, formatApiKey } from '../../lib/a2a/logger';
 
 // =====================================================
 // CORS & HEADERS
@@ -47,36 +49,55 @@ function extractApiKey(req: VercelRequest): string | null {
 }
 
 /**
- * Authenticate request - Production-ready with proper validation
- * TODO: Integrate with Supabase API keys table when ready
+ * Authenticate request - Production-ready with Agent Registry validation
  */
-function authenticateRequest(apiKey: string | null): { valid: boolean; tier: string } {
+function authenticateRequest(apiKey: string | null): { 
+  valid: boolean; 
+  tier: string;
+  agentId?: string;
+  reason?: string;
+} {
   if (!apiKey) {
-    return { valid: false, tier: 'free' };
+    return { valid: false, tier: 'free', reason: 'No API key provided' };
   }
   
-  // Production: Validate API key format
-  // Format: sk_{tier}_{random_32_chars}
+  // Validate API key format first
   const apiKeyRegex = /^sk_(free|basic|pro|enterprise)_[a-zA-Z0-9]{32}$/;
   
   if (!apiKeyRegex.test(apiKey)) {
-    return { valid: false, tier: 'free' };
+    logger.logSecurity('Invalid API key format', 'medium', {
+      api_key_prefix: formatApiKey(apiKey),
+    });
+    return { valid: false, tier: 'free', reason: 'Invalid API key format' };
   }
   
-  // Extract tier from API key
-  const match = apiKey.match(/^sk_(free|basic|pro|enterprise)_/);
-  const tier = match ? match[1] : 'free';
+  // Check Agent Registry
+  const validation = validateRegisteredApiKey(apiKey);
   
-  // TODO: Verify key exists in database and is not revoked
-  // const { data, error } = await supabase
-  //   .from('api_keys')
-  //   .select('tier, is_active')
-  //   .eq('key', apiKey)
-  //   .single();
-  // if (error || !data?.is_active) return { valid: false, tier: 'free' };
-  // return { valid: true, tier: data.tier };
+  if (!validation.valid) {
+    logger.logSecurity(`Authentication failed: ${validation.reason}`, 'medium', {
+      api_key_prefix: formatApiKey(apiKey),
+      reason: validation.reason,
+    });
+    return { 
+      valid: false, 
+      tier: validation.agent?.rate_limit_tier || 'free',
+      reason: validation.reason 
+    };
+  }
   
-  return { valid: true, tier };
+  // Valid authentication
+  logger.debug('Authentication successful', {
+    agent_id: validation.agent!.id,
+    agent_name: validation.agent!.name,
+    tier: validation.agent!.rate_limit_tier,
+  });
+  
+  return { 
+    valid: true, 
+    tier: validation.agent!.rate_limit_tier,
+    agentId: validation.agent!.id,
+  };
 }
 
 // =====================================================
@@ -335,6 +356,18 @@ async function routeMethod(method: string, params: any, context: A2AContext): Pr
 // =====================================================
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const requestId = `req_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+  const ipAddress = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress;
+  const userAgent = req.headers['user-agent'] || '';
+  
+  // Create request tracer
+  const tracer = createRequestTracer(requestId, {
+    method: req.method,
+    url: req.url,
+    ip_address: ipAddress,
+    user_agent: userAgent,
+  });
+  
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return res.status(200).json({ ok: true });
@@ -342,6 +375,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   
   // Only accept POST
   if (req.method !== 'POST') {
+    tracer.complete(405);
     return res.status(405).json(
       createA2AErrorResponse(
         null,
@@ -353,19 +387,48 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
   
   try {
+    tracer.checkpoint('start_processing');
+    
     // Extract API key
     const apiKey = extractApiKey(req);
     
     // Authenticate
     const auth = authenticateRequest(apiKey);
     
+    if (!auth.valid) {
+      tracer.complete(401);
+      return res.status(401).json(
+        createA2AErrorResponse(
+          null,
+          ERROR_CODES.AUTHENTICATION_REQUIRED,
+          auth.reason || 'Authentication failed',
+          { reason: auth.reason }
+        )
+      );
+    }
+    
+    tracer.updateContext({
+      agent_id: auth.agentId,
+      api_key_prefix: apiKey ? formatApiKey(apiKey) : undefined,
+      tier: auth.tier,
+    });
+    
+    tracer.checkpoint('auth_complete');
+    
     // Rate limiting
     const rateLimitResult = await checkRateLimit(apiKey || 'anonymous', auth.tier);
+    
+    logger.logRateLimit(
+      rateLimitResult.allowed ? 'allowed' : 'blocked',
+      tracer.getContext()
+    );
     
     if (!rateLimitResult.allowed) {
       res.setHeader('X-RateLimit-Limit', rateLimitResult.limit);
       res.setHeader('X-RateLimit-Remaining', rateLimitResult.remaining);
       res.setHeader('X-RateLimit-Reset', rateLimitResult.resetAt);
+      
+      tracer.complete(429);
       
       return res.status(429).json(
         createA2AErrorResponse(
@@ -410,13 +473,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       ip_address: (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress,
     };
     
+    tracer.checkpoint('routing_request');
+    
     // Route to handler
     const result = await routeMethod(request.method, request.params || {}, context);
+    
+    // Record agent activity
+    if (auth.agentId) {
+      const processingTime = Date.now() - tracer['startTime'];
+      recordAgentActivity(auth.agentId, {
+        ip_address: ipAddress,
+        user_agent: userAgent,
+        response_time_ms: processingTime,
+        success: true,
+      });
+      perfMonitor.record('request_duration_ms', processingTime);
+    }
     
     // Set rate limit headers
     res.setHeader('X-RateLimit-Limit', rateLimitResult.limit);
     res.setHeader('X-RateLimit-Remaining', rateLimitResult.remaining);
     res.setHeader('X-RateLimit-Reset', rateLimitResult.resetAt);
+    
+    tracer.complete(200);
     
     // Return response
     return res.status(200).json(
@@ -424,7 +503,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     );
     
   } catch (error: any) {
-    console.error('A2A API Error:', error);
+    logger.error('A2A API Error', tracer.getContext(), error);
+    
+    // Record failed activity
+    const apiKey = extractApiKey(req);
+    if (apiKey) {
+      const agent = getAgentByApiKey(apiKey);
+      if (agent) {
+        const processingTime = Date.now() - tracer['startTime'];
+        recordAgentActivity(agent.id, {
+          ip_address: ipAddress,
+          user_agent: userAgent,
+          response_time_ms: processingTime,
+          success: false,
+        });
+      }
+    }
+    
+    tracer.fail(error);
     
     // If error is already an A2A error response, return it
     if (error.jsonrpc === '2.0' && error.error) {
