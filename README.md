@@ -1,7 +1,7 @@
 # Anóteros Lógos - AI Knowledge Infrastructure Platform
 
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.3.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.4.0-blue.svg)](CHANGELOG.md)
 [![Node](https://img.shields.io/badge/node-20.x-brightgreen.svg)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19.2-61dafb.svg)](https://react.dev)
@@ -107,7 +107,7 @@ VITE_APP_URL=https://anoteroslogos.com  # Base URL for A2A endpoint discovery
 F:\air\
 ├── api/
 │   └── a2a/
-│       └── index.ts                # A2A Protocol HTTP endpoint (435 lines)
+│       └── index.ts                # A2A Protocol HTTP endpoint (490 lines)
 ├── components/
 │   ├── charts/                     # Recharts visualizations
 │   │   ├── CategoryBarChart.tsx
@@ -140,12 +140,14 @@ F:\air\
 │   ├── Author.tsx
 │   └── KnowledgeBasePage.tsx
 ├── lib/
-│   ├── a2a/                       # A2A Protocol (2361 lines)
+│   ├── a2a/                       # A2A Protocol (3889 lines)
 │   │   ├── protocol.ts            # JSON-RPC 2.0 (526 lines)
 │   │   ├── adapter.ts             # Result conversion (455 lines)
 │   │   ├── rateLimiter.ts         # Token bucket (264 lines)
 │   │   ├── queue.ts               # Priority queue (467 lines)
-│   │   └── cache.ts               # TTL cache (478 lines)
+│   │   ├── cache.ts               # TTL cache (478 lines)
+│   │   ├── agentRegistry.ts       # Agent management (442 lines)
+│   │   └── logger.ts              # Structured logging (486 lines)
 │   ├── aiSyndication/
 │   │   └── index.ts               # AI platform integration (558 lines)
 │   └── supabase.ts
@@ -440,7 +442,7 @@ Production-ready JSON-RPC 2.0 API endpoint for AI agent integration. Optimized f
 
 ### Architecture
 
-**5 Core Components (2,361 lines):**
+**7 Core Components (3,889 lines):**
 
 1. **Protocol Layer** (`lib/a2a/protocol.ts` - 526 lines)
    - JSON-RPC 2.0 implementation with Zod runtime validation
@@ -456,13 +458,19 @@ Production-ready JSON-RPC 2.0 API endpoint for AI agent integration. Optimized f
    - Actionable insights generation (best practices, opportunities, benchmarks, predictions)
    - Citation sources extraction from link analysis
 
-3. **HTTP API Endpoint** (`api/a2a/index.ts` - 435 lines)
+3. **HTTP API Endpoint** (`api/a2a/index.ts` - 490 lines)
    - Vercel serverless function with Edge runtime compatibility
    - Method routing with parameter validation
-   - API key authentication (format: `sk_{tier}_{32_chars}`)
+   - Production authentication via Agent Registry (validates API key format + database lookup)
+   - Agent status validation (not banned, not inactive, trust score >= 20)
    - Rate limiting integration with X-RateLimit headers
    - Response caching (1-hour TTL for audits)
    - Full CORS support for cross-origin requests
+   - Request tracing with unique request IDs
+   - Performance metrics recording (request duration, memory usage)
+   - Automatic agent activity tracking on success/failure
+   - Security logging for authentication failures
+   - Structured error logging with stack traces
 
 4. **Queue System** (`lib/a2a/queue.ts` - 467 lines)
    - Priority-based job queue (high/normal/low)
@@ -479,6 +487,27 @@ Production-ready JSON-RPC 2.0 API endpoint for AI agent integration. Optimized f
    - Auto-cleanup every 5 minutes
    - Cache warming support
    - Express/Vercel middleware wrapper
+
+6. **Agent Registry** (`lib/a2a/agentRegistry.ts` - 442 lines)
+   - Centralized agent management system
+   - API key generation and validation (format: `sk_{tier}_{32_chars}`)
+   - Trust Score system (0-100) based on agent behavior
+   - Agent status management (active, inactive, banned, pending_verification)
+   - Activity tracking: total_requests, failed_requests, avg_response_time_ms, error_rate
+   - Performance metrics with automatic trust score updates
+   - Agent metadata: IP addresses, user agents, uptime percentage
+   - Indexed lookups by API key and name for O(1) retrieval
+
+7. **Structured Logger** (`lib/a2a/logger.ts` - 486 lines)
+   - JSON structured logging compatible with DataDog, CloudWatch
+   - Log levels: debug, info, warn, error, fatal
+   - RequestTracer with checkpoint tracking and performance monitoring
+   - PerformanceMonitor with p50/p95/p99 percentile metrics
+   - Automatic sensitive data masking for security
+   - Security event logging with severity levels (low, medium, high, critical)
+   - Audit execution logging with status tracking
+   - Rate limit event logging with allowed/blocked tracking
+   - Agent activity logging for observability
 
 ### Rate Limiting
 
@@ -604,9 +633,11 @@ curl -X POST https://anoteroslogos.com/api/a2a \
 ✅ **Rate Limiting:** Token bucket algorithm with burst support
 ✅ **Caching:** ETag-based HTTP 304 responses
 ✅ **Error Handling:** JSON-RPC 2.0 compliant error codes
-✅ **Security:** API key format validation, CORS headers
-✅ **Monitoring:** Request logging, rate limit headers
-✅ **Scalability:** Serverless architecture, in-memory cache
+✅ **Security:** API key format validation, CORS headers, trust score enforcement
+✅ **Authentication:** Agent Registry with status validation and trust scoring
+✅ **Observability:** Structured logging with request tracing and performance metrics
+✅ **Monitoring:** Request logging, rate limit headers, agent activity tracking
+✅ **Scalability:** Serverless architecture, in-memory cache with LRU eviction
 
 ### Next Steps
 
@@ -625,12 +656,17 @@ curl -X POST https://anoteroslogos.com/api/a2a \
 - Industry benchmarking with percentiles
 - Trend analysis endpoints
 
-**Phase 5 - Production Hardening (Planned):**
-- Replace in-memory storage with Redis
-- Distributed tracing (OpenTelemetry)
-- Monitoring & alerting (Sentry)
-- API key management UI
-- Developer portal
+**Phase 5 - Production Hardening (In Progress):**
+- ✅ Enterprise Agent Registry system
+- ✅ Structured logging with request tracing
+- ✅ Production authentication with trust scoring
+- ✅ Performance monitoring with p50/p95/p99 metrics
+- ✅ Security event logging with severity levels
+- ⏳ Replace in-memory storage with Redis
+- ⏳ Distributed tracing (OpenTelemetry)
+- ⏳ Monitoring & alerting (Sentry)
+- ⏳ API key management UI
+- ⏳ Developer portal
 
 ---
 
@@ -1086,8 +1122,8 @@ For technical support or customization requests, contact the development team.
 - Knowledge Graph module integrated with minimal bundle impact (11KB increase)
 
 Total Project Scale:
-- **13,700+ lines** of production code (2,722 lines in Knowledge Graph Engine, 2,361 lines in A2A Protocol, 1,125 lines in Citation Learning Engine)
-- **19 major utility modules** (geoAuditEnhanced 2100+ lines, citationLearning/feedbackEngine 705 lines, knowledgeGraph builder 618 lines, aidDiscovery 559 lines, aiSyndication 558 lines, nlpContentAnalysis 531 lines, citationProof tracker 465 lines, and 12 more)
+- **15,200+ lines** of production code (2,722 lines in Knowledge Graph Engine, 3,889 lines in A2A Protocol, 1,125 lines in Citation Learning Engine)
+- **21 major utility modules** (geoAuditEnhanced 2100+ lines, citationLearning/feedbackEngine 705 lines, knowledgeGraph builder 618 lines, aidDiscovery 559 lines, aiSyndication 558 lines, nlpContentAnalysis 531 lines, a2a/logger 486 lines, citationProof tracker 465 lines, a2a/agentRegistry 442 lines, and 12 more)
 - **34+ React components** (CitationLearningDashboard, AIVisibilityScore, GEOHealthTracker, AIDAgentStatus, KnowledgeGraphDashboard, PulseLine, Hero, Philosophy, ExecutiveSummary, and 25 more)
 - **10 route pages** with lazy loading (HomePage, GeoAuditPage 1950+ lines, AgentIdentityPage 750+ lines, InvestorRelationsPage 660 lines, Blog, KnowledgeBase, and 4 more)
 - **11 audit categories** with precision weighting (Schema 15%, AI Crawlers 14%, E-E-A-T 14%, Technical SEO 12%, Links 11%, Meta 8%, Content 8%, AID Discovery 8%, Structure 6%, Performance 4%, Citation)
@@ -1096,7 +1132,7 @@ Total Project Scale:
 - **Knowledge Graph Engine** with direct AI platform syndication (OpenAI Assistants API v2, Claude tool definitions, Perplexity submission, Gemini grounding, Meta Llama RAG)
 - **Citation Proof Engine** with real-time detection across 5 AI platforms, pattern matching with confidence scoring, competitive analysis, ROI calculation
 - **Citation Learning Engine** with bidirectional AI intelligence (query pattern detection, confidence signal extraction, entity performance scoring, citation probability prediction with 5-factor model, auto-optimization actions with 8 types)
-- **A2A Protocol JSON-RPC 2.0** API with 12 methods, 4-tier rate limiting, queue system, cache layer with ETag support
+- **A2A Protocol JSON-RPC 2.0** API with 12 methods, 4-tier rate limiting, Agent Registry system, structured logging with request tracing, performance monitoring (p50/p95/p99), queue system, cache layer with ETag support
 - **AID protocol v1.1** integration with DNS-over-HTTPS detection, hybrid DNS/HTTPS fallback, protocol detection (A2A, MCP, ANP, HTTP)
 - **LocalStorage-based history** for audit tracking, trend analysis, 7/30-day forecasting
 - **Zero-competition SEO strategy** with Tier 1/Tier 2 keywords: Knowledge Graph Engine for GEO, AI knowledge infrastructure, Direct LLM integration, Citation intelligence platform, AID protocol discovery, AI platform syndication, GEO SaaS, Citation tracking ROI
