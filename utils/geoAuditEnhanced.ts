@@ -4,6 +4,7 @@
  */
 
 import type { AIDAgentInfo } from './aidDiscovery';
+import type { KnowledgeGraph } from './knowledgeGraph/builder';
 
 // ==================== INTERFACES ====================
 
@@ -47,6 +48,7 @@ export interface AuditResult {
   };
   recommendations: EnhancedRecommendation[];
   insights: string[];
+  knowledgeGraph?: KnowledgeGraph; // Knowledge Graph extraction (optional)
 }
 
 export interface EnhancedSchemaDetails {
@@ -376,6 +378,21 @@ export async function auditWebsite(
     recommendations: defaultRecommendations,
     insights: defaultInsights,
   };
+
+  // === KNOWLEDGE GRAPH EXTRACTION ===
+  // Extract knowledge graph from content
+  try {
+    onProgress?.('Building knowledge graph...');
+    const { KnowledgeGraphBuilder } = await import('./knowledgeGraph/builder');
+    const domain = new URL(normalizedUrl).hostname;
+    const builder = new KnowledgeGraphBuilder(domain);
+    const knowledgeGraph = await builder.buildFromHTML(htmlContent, normalizedUrl);
+    baseResult.knowledgeGraph = knowledgeGraph;
+    console.log(`✓ Knowledge Graph built: ${knowledgeGraph.entities.length} entities, ${knowledgeGraph.relationships.length} relationships, ${knowledgeGraph.claims.length} claims`);
+  } catch (error) {
+    console.warn('Knowledge Graph extraction failed:', error);
+    // Continue without knowledge graph
+  }
 
   // === AI AGENT ENHANCEMENT ===
   // If AI is enabled, enhance recommendations with GEO Marketolog AI Agent
