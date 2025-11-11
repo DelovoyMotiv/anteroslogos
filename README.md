@@ -141,7 +141,7 @@ F:\air\
 │   ├── Author.tsx
 │   └── KnowledgeBasePage.tsx
 ├── lib/
-│   ├── a2a/                       # A2A Protocol (7768 lines)
+│   ├── a2a/                       # A2A Protocol (10,464 lines)
 │   │   ├── protocol.ts            # JSON-RPC 2.0 (526 lines)
 │   │   ├── adapter.ts             # Result conversion (455 lines)
 │   │   ├── rateLimiter.ts         # Token bucket (264 lines)
@@ -149,6 +149,11 @@ F:\air\
 │   │   ├── cache.ts               # TTL cache (478 lines)
 │   │   ├── agentRegistry.ts       # Agent management (442 lines)
 │   │   ├── logger.ts              # Structured logging (486 lines)
+│   │   ├── websocketServer.ts     # Real-time streaming (568 lines)
+│   │   ├── supabaseStorage.ts     # Production persistence (668 lines)
+│   │   ├── ed25519Signatures.ts   # RFC 9421 HTTP signatures (705 lines)
+│   │   ├── ed25519KeyStorage.ts   # Key management (423 lines)
+│   │   ├── redisAdapter.ts        # Redis persistence (500 lines)
 │   │   ├── mcpAdapter.ts          # MCP code execution mode (597 lines)
 │   │   ├── mcpClient.ts           # A2A tool router (327 lines)
 │   │   └── mcpSandbox.ts          # isolated-vm sandbox (362 lines)
@@ -192,6 +197,8 @@ F:\air\
 ├── data/
 │   ├── blogPosts.ts
 │   └── geoKnowledgeBase.ts
+├── scripts/
+│   └── ed25519KeyManager.ts       # Ed25519 CLI key manager (398 lines)
 ├── public/
 │   ├── robots.txt
 │   ├── sitemap.xml
@@ -462,11 +469,11 @@ See `DNS_SETUP.md` for complete configuration guide including:
 
 ## A2A Protocol - Agent2Agent API
 
-Production-ready JSON-RPC 2.0 API endpoint for AI agent integration. Optimized for Perplexity, ChatGPT, Claude, Gemini, and other AI search agents.
+Production-ready JSON-RPC 2.0 API endpoint for AI agent integration with Ed25519 cryptographic signatures, WebSocket streaming, and Supabase persistence. Optimized for Perplexity, ChatGPT, Claude, Gemini, and other AI search agents.
 
 ### Architecture
 
-**10 Core Components (7,768 lines):**
+**16 Core Components (10,464 lines):**
 
 1. **Protocol Layer** (`lib/a2a/protocol.ts` - 526 lines)
    - JSON-RPC 2.0 implementation with Zod runtime validation
@@ -562,6 +569,74 @@ Production-ready JSON-RPC 2.0 API endpoint for AI agent integration. Optimized f
     - Real token savings calculation during execution
     - Tool definition progressive disclosure
 
+11. **WebSocket Streaming** (`lib/a2a/websocketServer.ts` - 568 lines)
+    - Real-time audit progress streaming via WebSocket connections
+    - Authentication via API key with automatic agent validation
+    - Heartbeat mechanism (60s connection timeout, 30s check interval)
+    - Subscription-based event broadcasting: `audit:progress`, `audit:complete`, `audit:error`
+    - Connection management with graceful shutdown handling
+    - Per-connection audit job tracking (max 100 active jobs per connection)
+    - Integration with queue system for progress event emission
+    - Express server wrapper with upgrade handler
+    - Error isolation: connection failures don't crash server
+    - Structured logging for all WebSocket lifecycle events
+
+12. **Supabase Persistence** (`lib/a2a/supabaseStorage.ts` - 668 lines)
+    - Production database persistence layer for PostgreSQL via Supabase
+    - **SupabaseAgentStorage**: agent registry with indexes on api_key, domain, status
+    - **SupabaseRateLimitStorage**: distributed rate limiting state with token bucket algorithm
+    - **SupabaseQueueStorage**: job queue persistence with priority, retry, batch support
+    - **SupabaseAuditCache**: cached audit results with TTL, ETag, domain indexes
+    - Complete SQL migration script for schema creation
+    - Database indexes for performance: api_key, domain, status, priority, expires
+    - Foreign key constraints ensuring referential integrity
+    - Automatic timestamp tracking (created_at, updated_at)
+    - Batch operations support for high-throughput scenarios
+
+13. **Ed25519 Signatures** (`lib/a2a/ed25519Signatures.ts` - 705 lines)
+    - RFC 9421 HTTP Message Signatures implementation
+    - Ed25519 cryptographic signature generation and verification
+    - Web Crypto API integration for key pair generation
+    - Signature base string construction: `@method`, `@target-uri`, `@authority`, `content-digest`, `content-type`
+    - Content digest calculation using SHA-256 with base64 encoding
+    - Timestamp validation: created timestamp within 5 minutes (300s), future tolerance 60s
+    - Domain ownership proof via key ID format: `domain-YYYY-MM-DD`
+    - In-memory key store with expiration and revocation support
+    - Express/Vercel middleware for automatic request signature verification
+    - Signature header parsing and formatting per RFC 9421 spec
+    - Key export to PEM format (PKCS#8 for private keys)
+
+14. **Ed25519 Key Storage** (`lib/a2a/ed25519KeyStorage.ts` - 423 lines)
+    - Supabase database persistence for Ed25519 key pairs
+    - Database tables: `a2a_ed25519_keys`, `a2a_key_audit_log`
+    - Key storage with revocation and expiration tracking (default 90 days)
+    - Audit trail for all key operations: created, used, revoked, expired
+    - Key rotation function with automatic old key revocation
+    - Detection of keys expiring soon (30-day threshold)
+    - Automatic cleanup of expired keys from database
+    - Foreign key constraint to `a2a_agents` table ensuring agent existence
+    - Composite index on (domain, revoked, expires) for fast lookups
+    - IP address and user agent tracking in audit log
+
+15. **Redis Adapter** (`lib/a2a/redisAdapter.ts` - 500 lines)
+    - Redis-backed persistence implementation
+    - Distributed rate limiting with sliding window algorithm
+    - Session management with TTL expiration
+    - Job queue operations with atomic operations
+    - Cache layer with Redis GET/SET/DEL
+
+16. **Ed25519 Key Manager CLI** (`scripts/ed25519KeyManager.ts` - 398 lines)
+    - Command-line interface for Ed25519 key lifecycle management
+    - **generate**: Create new Ed25519 key pairs for domain
+    - **rotate**: Rotate keys with automatic old key revocation
+    - **revoke**: Revoke compromised keys with reason tracking
+    - **list**: Display all keys for domain with status
+    - **audit**: Show audit log history for specific key
+    - **expiring**: Check for keys expiring within N days
+    - Full help documentation with usage examples
+    - Integration with Supabase storage layer
+    - Support for custom expiration periods during generation
+
 ### Rate Limiting
 
 | Tier       | Req/Min | Req/Hour | Concurrent | Burst | Price      |
@@ -590,6 +665,145 @@ Automatic detection and optimization for:
 
 **Keywords:** Extracted from URL paths + schema types (max 10)
 
+### Ed25519 Cryptographic Signatures (RFC 9421)
+
+**Purpose:** Domain ownership proof and request authentication
+
+**Implementation:**
+- Ed25519 elliptic curve cryptography (32-byte keys)
+- Web Crypto API for key generation (`crypto.subtle.generateKey`)
+- Signature components: `@method`, `@target-uri`, `@authority`, `content-digest`, `content-type`
+- Content digest: `SHA-256` with base64 encoding, format `sha-256=:digest:`
+- Timestamp validation: 5-minute window (300s), future tolerance 60s
+- Key ID format: `domain-YYYY-MM-DD` (e.g., `anoteroslogos.com-2025-04-15`)
+
+**Key Management Workflow:**
+
+1. **Generation:**
+   ```bash
+   npx tsx scripts/ed25519KeyManager.ts generate --domain anoteroslogos.com --expires-in-days 90
+   ```
+   Generates Ed25519 key pair, stores in Supabase, returns key ID and public key.
+
+2. **Rotation:**
+   ```bash
+   npx tsx scripts/ed25519KeyManager.ts rotate --domain anoteroslogos.com
+   ```
+   Creates new key, revokes old key with reason "Key rotation".
+
+3. **Revocation:**
+   ```bash
+   npx tsx scripts/ed25519KeyManager.ts revoke --key-id anoteroslogos.com-2025-04-15 --reason "Key compromised"
+   ```
+   Marks key as revoked, records in audit log.
+
+4. **Monitoring:**
+   ```bash
+   npx tsx scripts/ed25519KeyManager.ts expiring --domain anoteroslogos.com --days 30
+   ```
+   Lists keys expiring within 30 days.
+
+**Database Schema:**
+- **Table:** `a2a_ed25519_keys`
+  - Columns: `id` (UUID), `domain`, `key_id`, `public_key`, `private_key_encrypted`, `created_at`, `expires`, `revoked`
+  - Indexes: `domain`, `revoked`, `expires`, composite `(domain, revoked, expires)`
+- **Table:** `a2a_key_audit_log`
+  - Columns: `id` (UUID), `key_id`, `action`, `performed_by`, `ip_address`, `user_agent`, `metadata`, `timestamp`
+  - Actions: `created`, `used`, `revoked`, `expired`
+
+**Signature Verification:**
+- Middleware: `verifyEd25519Signature(keyStore, options)` for Express/Vercel
+- Automatic signature header parsing and validation
+- Rejects requests with expired/revoked keys
+- Integration with agent registry for domain validation
+
+**Security Features:**
+- Private keys stored encrypted in database
+- Audit log tracks all key operations with IP and user agent
+- Automatic expiration enforcement (default 90 days)
+- Revocation support with reason tracking
+- Foreign key constraint to `a2a_agents` table
+
+### WebSocket Real-Time Streaming
+
+**Endpoint:** `wss://anoteroslogos.com/api/a2a/ws`
+
+**Authentication:**
+```json
+{
+  "type": "authenticate",
+  "apiKey": "sk_pro_abc123..."
+}
+```
+
+**Events:**
+- `audit:progress` - Job progress updates (0-100%)
+- `audit:complete` - Audit finished with full results
+- `audit:error` - Audit failed with error details
+
+**Example Client:**
+```typescript
+const ws = new WebSocket('wss://anoteroslogos.com/api/a2a/ws');
+
+ws.on('open', () => {
+  ws.send(JSON.stringify({ type: 'authenticate', apiKey: 'sk_pro_...' }));
+  ws.send(JSON.stringify({ type: 'subscribe', channels: ['audit:*'] }));
+});
+
+ws.on('message', (data) => {
+  const event = JSON.parse(data);
+  if (event.type === 'audit:progress') {
+    console.log(`Progress: ${event.data.progress}%`);
+  }
+});
+```
+
+**Connection Lifecycle:**
+- Heartbeat every 30s (client sends ping, server responds pong)
+- Connection timeout: 60s of inactivity
+- Automatic cleanup on disconnect
+- Max 100 active audit jobs per connection
+
+### Supabase Production Persistence
+
+**Database Tables:**
+
+1. **a2a_agents** - Agent registry
+   - Columns: `id`, `api_key`, `name`, `domain`, `tier`, `status`, `trust_score`, `total_requests`, `failed_requests`, `created_at`, `last_active_at`
+   - Indexes: `api_key` (unique), `domain`, `status`
+
+2. **a2a_rate_limits** - Rate limiting state
+   - Columns: `id`, `api_key`, `tokens`, `last_refill`, `updated_at`
+   - Index: `api_key` (unique)
+
+3. **a2a_audit_jobs** - Job queue
+   - Columns: `id`, `url`, `priority`, `status`, `progress`, `retries`, `created_at`, `updated_at`, `completed_at`
+   - Indexes: `status`, `priority`, composite `(status, priority)`
+
+4. **a2a_batch_jobs** - Batch operations
+   - Columns: `id`, `api_key`, `urls`, `priority`, `progress`, `completed_count`, `failed_count`, `status`, `created_at`
+   - Index: `api_key`
+
+5. **a2a_audit_cache** - Cached results
+   - Columns: `id`, `url`, `domain`, `result`, `etag`, `created_at`, `expires_at`
+   - Indexes: `url` (unique), `domain`, `expires_at`, composite `(domain, expires_at)`
+
+6. **a2a_ed25519_keys** - Ed25519 key pairs
+7. **a2a_key_audit_log** - Key operation audit trail
+
+**Migration:**
+```sql
+-- Complete SQL migration script included in lib/a2a/supabaseStorage.ts
+-- Run via Supabase dashboard SQL editor or CLI
+```
+
+**Configuration:**
+```bash
+# Environment variables
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
+
 ### API Methods
 
 **Discovery & Health:**
@@ -601,8 +815,8 @@ Automatic detection and optimization for:
 **GEO Audit:**
 - `geo.audit.request` - Single URL audit (cached 1 hour)
 - `geo.audit.batch` - Batch audit (max 100 URLs, 5 concurrent)
-- `geo.audit.status` - Job status tracking (planned)
-- `geo.audit.result` - Retrieve cached results (planned)
+- `geo.audit.status` - Job status tracking (via WebSocket streaming)
+- `geo.audit.result` - Retrieve cached results (Supabase persistence)
 
 **Insights (Planned):**
 - `geo.insights.global` - Global GEO trends
