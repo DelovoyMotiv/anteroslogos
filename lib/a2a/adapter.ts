@@ -229,7 +229,7 @@ function extractTopics(result: AuditResult): string[] {
 /**
  * Extract author name from page content
  */
-function extractAuthorName(_url: string): string | null {
+function extractAuthorName(): string | null {
   // This would be called with HTML content in production
   // For now, return null to use fallback logic
   // TODO: Integrate with geoAuditEnhanced to pass HTML content
@@ -248,8 +248,8 @@ function extractKeywords(result: AuditResult): string[] {
   
   // Add schema types as keywords
   Object.entries(result.details.schemaMarkup.schemas)
-    .filter(([_, hasIt]) => hasIt)
-    .forEach(([type, _]) => keywords.push(type.replace(/([A-Z])/g, ' $1').trim()));
+    .filter(([, hasIt]) => hasIt)
+    .forEach(([type]) => keywords.push(type.replace(/([A-Z])/g, ' $1').trim()));
   
   // Deduplicate and normalize
   return [...new Set(keywords)]
@@ -275,7 +275,7 @@ function extractEntities(result: AuditResult): A2AEntity[] {
   // Person entity (if author detected)
   if (result.details.eeat.hasAuthorInfo) {
     // Extract author name from HTML if available
-    const authorName = extractAuthorName(result.url);
+    const authorName = extractAuthorName();
     
     entities.push({
       type: 'Person',
@@ -286,8 +286,8 @@ function extractEntities(result: AuditResult): A2AEntity[] {
   
   // Add more entities based on schema types
   const schemaTypes = Object.entries(result.details.schemaMarkup.schemas)
-    .filter(([_, hasIt]) => hasIt)
-    .map(([type, _]) => type)
+    .filter(([, hasIt]) => hasIt)
+    .map(([type]) => type)
     .slice(0, 5);
   
   schemaTypes.forEach(type => {
