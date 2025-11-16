@@ -161,7 +161,7 @@ export interface MarketIntelligence {
 export class CompetitiveIntelligenceMonitor {
   private competitors: Map<string, CompetitorProfile> = new Map();
   private threats: Map<string, CompetitiveThreat> = new Map();
-  // @ts-expect-error - ourDomain may be used in future for domain-specific logic
+  // ourDomain may be used in future for domain-specific logic
   constructor(private ourDomain: string) {}
   
   /**
