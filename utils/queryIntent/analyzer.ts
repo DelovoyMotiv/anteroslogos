@@ -173,22 +173,18 @@ export class QueryIntentAnalyzer {
     
     // Calculate platform probabilities
     const platformProbabilities = this.calculatePlatformProbabilities(
-      primary_intent,
-      features,
-      historicalCitations
+      primary_intent
     );
     
     // Generate recommendations
     const recommendations = this.generateRecommendations(
-      query,
       contentMatch,
-      citation_probability,
-      ourGraph
+      citation_probability
     );
     
     // Historical context
     const { similar_queries_cited, similar_queries_missed, learning_sample_size } =
-      this.getHistoricalContext(query, features, historicalCitations);
+      this.getHistoricalContext(features, historicalCitations);
     
     const analysis: QueryAnalysis = {
       query,
@@ -254,7 +250,7 @@ export class QueryIntentAnalyzer {
     
     // Specificity
     const specificity_score = this.calculateSpecificity(query, words);
-    const ambiguity_score = this.calculateAmbiguity(query, words);
+    const ambiguity_score = this.calculateAmbiguity(words);
     
     // Complexity
     const compound_query = (query.match(/\?/g) || []).length > 1 || query.includes(' and ');
@@ -539,9 +535,7 @@ export class QueryIntentAnalyzer {
    * Calculate platform-specific probabilities
    */
   private calculatePlatformProbabilities(
-    intent: QueryIntent,
-    _features: QueryFeatures,
-    _historicalCitations: Citation[]
+    intent: QueryIntent
   ): QueryAnalysis['platform_probabilities'] {
     // Platform preferences based on intent
     const platformPreferences: Record<string, Record<QueryIntent, number>> = {
@@ -645,10 +639,8 @@ export class QueryIntentAnalyzer {
    * Generate optimization recommendations
    */
   private generateRecommendations(
-    _query: string,
     contentMatch: QueryAnalysis['content_match'],
-    citationProbability: number,
-    _graph: KnowledgeGraph
+    citationProbability: number
   ): QueryAnalysis['recommendations'] {
     const recommendations = [];
     
@@ -699,7 +691,6 @@ export class QueryIntentAnalyzer {
    * Get historical context for similar queries
    */
   private getHistoricalContext(
-    _query: string,
     features: QueryFeatures,
     historicalCitations: Citation[]
   ): {
@@ -773,7 +764,7 @@ export class QueryIntentAnalyzer {
     return Math.min(1, score);
   }
   
-  private calculateAmbiguity(_query: string, words: string[]): number {
+  private calculateAmbiguity(words: string[]): number {
     // Ambiguous queries use pronouns, vague terms, no specifics
     let score = 0;
     
@@ -812,9 +803,7 @@ export class QueryIntentAnalyzer {
    * CRITICAL: Closes the learning loop
    */
   async recordCitationResult(
-    query: string,
-    _wasCited: boolean,
-    _platform: string
+    query: string
   ): Promise<void> {
     // Update pattern statistics
     const analysis = this.historicalData.get(query);

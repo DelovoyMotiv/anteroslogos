@@ -425,7 +425,7 @@ export class PerformanceMonitor {
   getAllStats(): Record<string, ReturnType<typeof this.getStats>> {
     const stats: Record<string, ReturnType<typeof this.getStats>> = {};
     
-    for (const [name, _values] of this.metrics.entries()) {
+    for (const [name] of this.metrics.entries()) {
       stats[name] = this.getStats(name);
     }
     

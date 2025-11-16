@@ -204,7 +204,7 @@ export class KnowledgeGraphBuilder {
     await this.extractRelationships(text, timestamp);
 
     // Extract claims
-    await this.extractClaims(text, sourceUrl, timestamp);
+    await this.extractClaims(text, sourceUrl);
 
     return this.toKnowledgeGraph();
   }
@@ -391,7 +391,7 @@ export class KnowledgeGraphBuilder {
   /**
    * Extract claims (factual statements with evidence)
    */
-  private async extractClaims(text: string, sourceUrl: string, _timestamp: string): Promise<void> {
+  private async extractClaims(text: string, sourceUrl: string): Promise<void> {
     const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 20);
 
     for (const sentence of sentences) {

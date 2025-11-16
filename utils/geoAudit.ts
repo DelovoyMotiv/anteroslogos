@@ -107,7 +107,7 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
   let htmlContent: string;
   try {
     htmlContent = await fetchHTML(normalizedUrl);
-  } catch (error) {
+  } catch {
     throw new Error('Failed to fetch website. Please check the URL and try again.');
   }
 
@@ -273,8 +273,8 @@ function auditMetaTags(doc: Document): MetaTagsDetails {
   const twitterCard = doc.querySelector('meta[name="twitter:card"]');
   const canonical = doc.querySelector('link[rel="canonical"]');
 
-  const hasTitle = !!title && title.textContent!!.trim().length > 0;
-  const hasDescription = !!description && description.getAttribute('content')!!.length > 0;
+  const hasTitle = !!title && title.textContent!.trim().length > 0;
+  const hasDescription = !!description && description.getAttribute('content')!.length > 0;
   const hasOGTags = !!ogTitle && !!ogDescription;
   const hasTwitterCard = !!twitterCard;
   const hasCanonical = !!canonical;

@@ -43,6 +43,7 @@ export function createRedisClient(): RedisClient {
   if (redisUrl) {
     // Production: Use real Redis
     try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const Redis = require('ioredis');
       const client = new Redis(redisUrl, {
         retryStrategy: (times: number) => {
@@ -63,7 +64,7 @@ export function createRedisClient(): RedisClient {
       });
       
       return client;
-    } catch (error) {
+    } catch {
       console.warn('Redis module not found, using in-memory fallback');
       return createMockRedisClient();
     }

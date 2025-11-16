@@ -131,7 +131,7 @@ export function validateAndSanitizeUrl(input: string): ValidationResult {
   let urlObject: URL;
   try {
     urlObject = new URL(sanitized);
-  } catch (error) {
+  } catch {
     return {
       isValid: false,
       error: 'Invalid URL format',

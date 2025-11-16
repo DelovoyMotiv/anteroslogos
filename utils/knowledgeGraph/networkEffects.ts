@@ -140,7 +140,7 @@ export class CrossClientNetworkEffectsEngine {
     const existingGlobalIds = this.entityNameIndex.get(normalizedName) || [];
     
     let globalEntity: GlobalEntity;
-    let isNewGlobalEntity = existingGlobalIds.length === 0;
+    const isNewGlobalEntity = existingGlobalIds.length === 0;
     let networkEffect: NetworkEffect | null = null;
     
     if (isNewGlobalEntity) {

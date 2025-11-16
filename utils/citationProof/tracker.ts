@@ -95,7 +95,7 @@ export function detectCitations(
   }
   
   // Pattern 2: "According to" patterns
-  const accordingPattern = /according to ([^,\.]+)/gi;
+  const accordingPattern = /according to ([^,.]+)/gi;
   let match;
   while ((match = accordingPattern.exec(response)) !== null) {
     const source = match[1];
@@ -112,7 +112,7 @@ export function detectCitations(
   }
   
   // Pattern 3: "Based on" patterns
-  const basedOnPattern = /based on ([^,\.]+)/gi;
+  const basedOnPattern = /based on ([^,.]+)/gi;
   while ((match = basedOnPattern.exec(response)) !== null) {
     const source = match[1];
     if (source.toLowerCase().includes(domain.toLowerCase().replace(/\.[^.]+$/, ''))) {
@@ -186,7 +186,7 @@ export class CitationTracker {
     };
 
     this.citations.set(fullCitation.id, fullCitation);
-    this.persistCitation(fullCitation);
+    this.persistCitation();
 
     return fullCitation;
   }
@@ -447,7 +447,7 @@ export class CitationTracker {
   /**
    * Persist citation to localStorage
    */
-  private persistCitation(_citation: Citation): void {
+  private persistCitation(): void {
     if (typeof window === 'undefined') return;
 
     try {
@@ -485,7 +485,7 @@ export class CitationDetector {
   /**
    * Detect if AI response contains citation
    */
-  detectCitation(response: string, _query: string): {
+  detectCitation(response: string): {
     isCitation: boolean;
     confidence: number;
     citedEntities: string[];

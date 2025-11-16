@@ -274,7 +274,7 @@ export async function auditWebsite(
   try {
     onProgress?.('Fetching website content...');
     htmlContent = await fetchHTML(normalizedUrl);
-  } catch (error) {
+  } catch {
     throw new Error('Failed to fetch website. Please check the URL and try again.');
   }
 
@@ -334,7 +334,7 @@ export async function auditWebsite(
   
   try {
     onProgress?.('Analyzing content quality...');
-    contentQuality = auditContentQuality(doc, htmlContent);
+    contentQuality = auditContentQuality(doc);
   } catch (error) {
     console.error('Content quality audit failed:', error);
     contentQuality = getDefaultContentQualityDetails();
@@ -393,7 +393,7 @@ export async function auditWebsite(
   };
 
   // Advanced weighted scoring with dynamic weights based on content type
-  const scoreCalc = calculateOverallScore(scores, schemaMarkup);
+  const scoreCalc = calculateOverallScore(scores);
   const grade = getGrade(scoreCalc.overall);
 
   // Generate default recommendations
@@ -721,7 +721,7 @@ function checkSchemaType(schemas: any[], types: string | string[]): boolean {
   });
 }
 
-function auditContentQuality(doc: Document, _html: string): ContentQualityDetails {
+function auditContentQuality(doc: Document): ContentQualityDetails {
   const bodyText = doc.body?.textContent || '';
   const words = bodyText.trim().split(/\s+/).filter(w => w.length > 0);
   const wordCount = words.length;
@@ -1961,7 +1961,7 @@ interface ScoreCalculation {
   };
 }
 
-function calculateOverallScore(scores: any, _schemaDetails: EnhancedSchemaDetails): ScoreCalculation {
+function calculateOverallScore(scores: any): ScoreCalculation {
   // Dynamic weighting based on content type
   // Total must equal 1.00 (100%)
   const weights = {

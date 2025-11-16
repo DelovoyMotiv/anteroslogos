@@ -312,7 +312,7 @@ function extractEntities(text: string): {
   };
 }
 
-function classifyContentType(text: string, _keywords: string[]): {
+function classifyContentType(text: string): {
   type: 'informational' | 'commercial' | 'navigational' | 'transactional' | 'mixed';
   intent: string[];
 } {
@@ -331,7 +331,7 @@ function classifyContentType(text: string, _keywords: string[]): {
   };
   
   const maxScore = Math.max(...Object.values(scores));
-  const dominantTypes = Object.entries(scores).filter(([_, score]) => score === maxScore && score > 0);
+  const dominantTypes = Object.entries(scores).filter(([, score]) => score === maxScore && score > 0);
   
   const type: 'informational' | 'commercial' | 'navigational' | 'transactional' | 'mixed' = 
     dominantTypes.length > 1 ? 'mixed' : 
@@ -395,7 +395,7 @@ export function analyzeNLPContent(text: string, htmlContent: string): NLPContent
   const contextualCoherence = Math.min(topicCohesion + (topicDiversity / 2), 100);
   
   // Content type classification
-  const { type: contentType, intent: contentIntent } = classifyContentType(text, primaryKeywords.map(kw => kw.word));
+  const { type: contentType, intent: contentIntent } = classifyContentType(text);
   
   // Target audience detection
   const targetAudience: 'general' | 'technical' | 'professional' | 'academic' = 

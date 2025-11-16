@@ -121,11 +121,11 @@ class FeatureExtractor {
       isolated_entities: structureFeatures.isolatedEntityCount,
       
       // Domain authority features (10 dimensions)
-      domain_age_estimate: this.estimateDomainAge(graph.domain),
+      domain_age_estimate: this.estimateDomainAge(),
       source_url_count: graph.metadata.sourceUrls.length,
       external_references: this.countExternalReferences(graph),
-      schema_completeness: this.calculateSchemaCompleteness(graph),
-      content_freshness: this.calculateContentFreshness(graph),
+      schema_completeness: this.calculateSchemaCompleteness(),
+      content_freshness: this.calculateContentFreshness(),
       
       // Total: 70 features
     };
@@ -270,7 +270,7 @@ class FeatureExtractor {
     let totalCoefficient = 0;
     let nodeCount = 0;
     
-    for (const [_node, neighbors] of adjacencyList.entries()) {
+    for (const neighbors of adjacencyList.values()) {
       if (neighbors.size < 2) continue;
       
       let connectedPairs = 0;
@@ -303,11 +303,11 @@ class FeatureExtractor {
     const avgDegree = Array.from(degreeMap.values()).reduce((a, b) => a + b, 0) / degreeMap.size;
     
     return Array.from(degreeMap.entries())
-      .filter(([_, degree]) => degree > avgDegree * 2)
-      .map(([node, _]) => node);
+      .filter(([, degree]) => degree > avgDegree * 2)
+      .map(([node]) => node);
   }
   
-  private estimateDomainAge(_domain: string): number {
+  private estimateDomainAge(): number {
     // In production, query WHOIS or domain age API
     // For now, return normalized estimate
     return 0.5; // 0-1 normalized
@@ -319,12 +319,12 @@ class FeatureExtractor {
     }, 0);
   }
   
-  private calculateSchemaCompleteness(_graph: KnowledgeGraph): number {
+  private calculateSchemaCompleteness(): number {
     // In production, analyze Schema.org compliance
     return 0.7; // 0-1 normalized
   }
   
-  private calculateContentFreshness(_graph: KnowledgeGraph): number {
+  private calculateContentFreshness(): number {
     // In production, analyze publication dates
     return 0.8; // 0-1 normalized
   }
@@ -396,11 +396,11 @@ export class CitationPredictionEngine {
     
     // Calculate platform-specific predictions
     const platformPredictions = {
-      perplexity: await this.predictPerplexity(features, graph),
-      chatgpt: await this.predictChatGPT(features, graph),
-      claude: await this.predictClaude(features, graph),
-      gemini: await this.predictGemini(features, graph),
-      meta: await this.predictMeta(features, graph),
+      perplexity: await this.predictPerplexity(features),
+      chatgpt: await this.predictChatGPT(features),
+      claude: await this.predictClaude(features),
+      gemini: await this.predictGemini(features),
+      meta: await this.predictMeta(features),
     };
     
     // Calculate overall probability (weighted average)
@@ -430,7 +430,7 @@ export class CitationPredictionEngine {
   /**
    * Perplexity prediction - focuses on citation markers and factual content
    */
-  private async predictPerplexity(features: FeatureVector, _graph: KnowledgeGraph): Promise<PlatformPrediction> {
+  private async predictPerplexity(features: FeatureVector): Promise<PlatformPrediction> {
     // Perplexity heavily weights citations and factual claims
     const citationScore = (features.claims_with_evidence / Math.max(1, features.claim_count)) * 100;
     const factualScore = (features.quantitative_claims / Math.max(1, features.claim_count)) * 100;
@@ -476,7 +476,7 @@ export class CitationPredictionEngine {
   /**
    * ChatGPT prediction - focuses on entity diversity and relationships
    */
-  private async predictChatGPT(features: FeatureVector, _graph: KnowledgeGraph): Promise<PlatformPrediction> {
+  private async predictChatGPT(features: FeatureVector): Promise<PlatformPrediction> {
     const entityDiversityScore = features.entity_diversity * 100;
     const relationshipScore = Math.min(100, (features.relationship_count / features.entity_count) * 50);
     const contentDepthScore = Math.min(100, (features.entity_count / 30) * 100);
@@ -507,7 +507,7 @@ export class CitationPredictionEngine {
   /**
    * Claude prediction - focuses on claim quality and evidence
    */
-  private async predictClaude(features: FeatureVector, _graph: KnowledgeGraph): Promise<PlatformPrediction> {
+  private async predictClaude(features: FeatureVector): Promise<PlatformPrediction> {
     const claimQualityScore = features.avg_claim_confidence * 100;
     const evidenceScore = (features.claims_with_evidence / Math.max(1, features.claim_count)) * 100;
     const verificationScore = (features.verified_claims / Math.max(1, features.claim_count)) * 100;
@@ -536,7 +536,7 @@ export class CitationPredictionEngine {
   /**
    * Gemini prediction - focuses on structure and comprehensiveness
    */
-  private async predictGemini(features: FeatureVector, _graph: KnowledgeGraph): Promise<PlatformPrediction> {
+  private async predictGemini(features: FeatureVector): Promise<PlatformPrediction> {
     const structureScore = (1 - features.isolated_entities / Math.max(1, features.entity_count)) * 100;
     const comprehensivenessScore = Math.min(100, ((features.entity_count + features.claim_count) / 50) * 100);
     const qualityScore = (features.high_confidence_entities / Math.max(1, features.entity_count)) * 100;
@@ -565,7 +565,7 @@ export class CitationPredictionEngine {
   /**
    * Meta prediction - focuses on relationships and temporal context
    */
-  private async predictMeta(features: FeatureVector, _graph: KnowledgeGraph): Promise<PlatformPrediction> {
+  private async predictMeta(features: FeatureVector): Promise<PlatformPrediction> {
     const relationshipScore = Math.min(100, (features.relationship_count / 30) * 100);
     const temporalScore = (features.temporal_claims / Math.max(1, features.claim_count)) * 100;
     const diversityScore = features.relationship_diversity * 100;

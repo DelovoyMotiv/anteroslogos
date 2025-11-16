@@ -63,7 +63,7 @@ export class A2ARateLimiter {
       return {
         allowed: true,
         remaining: Math.floor(bucket.tokens),
-        resetAt: this.getResetTime(now, config),
+        resetAt: this.getResetTime(now),
       };
     }
     
@@ -75,7 +75,7 @@ export class A2ARateLimiter {
     return {
       allowed: false,
       remaining: 0,
-      resetAt: this.getResetTime(now, config),
+      resetAt: this.getResetTime(now),
       retryAfter,
     };
   }
@@ -147,7 +147,7 @@ export class A2ARateLimiter {
   /**
    * Calculate reset time
    */
-  private getResetTime(now: number, _config: A2ARateLimitConfig): number {
+  private getResetTime(now: number): number {
     return now + (60 * 1000); // 1 minute from now
   }
   

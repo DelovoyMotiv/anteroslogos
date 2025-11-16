@@ -454,8 +454,8 @@ export function compareWithIndustryBenchmark(
   
   // Find biggest gaps
   const gaps = Object.entries(categoryDifferences)
-    .filter(([_, diff]) => diff < -5)
-    .sort(([_, a], [__, b]) => a - b)
+    .filter(([, diff]) => diff < -5)
+    .sort(([, a], [, b]) => a - b)
     .slice(0, 3);
   
   if (gaps.length > 0) {
@@ -467,8 +467,8 @@ export function compareWithIndustryBenchmark(
   
   // Find strengths
   const strengths = Object.entries(categoryDifferences)
-    .filter(([_, diff]) => diff > 10)
-    .sort(([_, a], [__, b]) => b - a)
+    .filter(([, diff]) => diff > 10)
+    .sort(([, a], [, b]) => b - a)
     .slice(0, 2);
   
   if (strengths.length > 0) {
@@ -507,7 +507,6 @@ export function getIndustryBenchmark(industry: string): IndustryBenchmark | unde
  * Get competitive intelligence summary
  */
 export function getCompetitiveIntelligenceSummary(
-  _yourUrl: string,
   yourResult: AuditResult
 ): {
   totalCompetitors: number;

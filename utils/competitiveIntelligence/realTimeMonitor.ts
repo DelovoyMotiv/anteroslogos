@@ -161,7 +161,7 @@ export interface MarketIntelligence {
 export class CompetitiveIntelligenceMonitor {
   private competitors: Map<string, CompetitorProfile> = new Map();
   private threats: Map<string, CompetitiveThreat> = new Map();
-  // @ts-ignore - ourDomain may be used in future for domain-specific logic
+  // @ts-expect-error - ourDomain may be used in future for domain-specific logic
   constructor(private ourDomain: string) {}
   
   /**
@@ -219,17 +219,17 @@ export class CompetitiveIntelligenceMonitor {
     if (!competitor) return;
     
     // Simulate fetching competitor's KG (in production, use web scraping + AI analysis)
-    const competitorKG = await this.fetchCompetitorKnowledgeGraph(competitor.domain);
+    const competitorKG = await this.fetchCompetitorKnowledgeGraph();
     
     if (competitorKG) {
       // Analyze content strategy
       competitor.content_strategy = {
-        primary_topics: this.extractPrimaryTopics(competitorKG),
+        primary_topics: this.extractPrimaryTopics(),
         entity_types_used: this.getEntityTypes(competitorKG),
         avg_entities_per_graph: competitorKG.entities.length,
         avg_claims_per_graph: competitorKG.claims.length,
         relationship_density: competitorKG.relationships.length / Math.max(1, competitorKG.entities.length),
-        update_frequency: this.estimateUpdateFrequency(competitorKG),
+        update_frequency: this.estimateUpdateFrequency(),
       };
       
       // Identify their competitive advantages
@@ -255,7 +255,7 @@ export class CompetitiveIntelligenceMonitor {
     }
     
     // Check if we could have won this citation
-    const shouldHaveWon = this.shouldWeHaveWon(query, ourGraph, citedCompetitor);
+    const shouldHaveWon = this.shouldWeHaveWon(query, ourGraph);
     
     if (!shouldHaveWon.yes) {
       return null; // We didn't have relevant content
@@ -265,7 +265,7 @@ export class CompetitiveIntelligenceMonitor {
     const threat: CompetitiveThreat = {
       id: this.generateId('threat'),
       detected_at: new Date().toISOString(),
-      severity: this.calculateThreatSeverity(query, platform, citedCompetitor),
+      severity: this.calculateThreatSeverity(query, citedCompetitor),
       threat_type: 'citation_loss',
       competitor: citedCompetitor,
       details: {
@@ -277,7 +277,7 @@ export class CompetitiveIntelligenceMonitor {
         estimated_lost_value: 1.0, // $1 CPM
       },
       root_causes: this.analyzeRootCauses(query, ourGraph, citedCompetitor, aiResponse, platform),
-      recommended_actions: this.generateCounterStrategy(query, ourGraph, citedCompetitor),
+      recommended_actions: this.generateCounterStrategy(ourGraph, citedCompetitor),
       status: 'detected',
     };
     
@@ -366,7 +366,6 @@ export class CompetitiveIntelligenceMonitor {
    * Generate counter-strategy to win back citations
    */
   private generateCounterStrategy(
-    query: string,
     ourGraph: KnowledgeGraph,
     competitor: CompetitorProfile
   ): Array<{
@@ -380,7 +379,7 @@ export class CompetitiveIntelligenceMonitor {
     const actions = [];
     
     // Action 1: Add missing entities
-    const missingEntities = this.identifyMissingEntities(query, ourGraph, competitor);
+    const missingEntities = this.identifyMissingEntities(ourGraph, competitor);
     if (missingEntities.length > 0) {
       actions.push({
         action_type: 'entity_enhancement' as const,
@@ -477,7 +476,7 @@ export class CompetitiveIntelligenceMonitor {
       our_citations: periodCitations.length,
       competitor_citations: competitorCitations,
       our_market_share: ourMarketShare,
-      market_share_trend: this.calculateMarketShareTrend(ourMarketShare),
+      market_share_trend: this.calculateMarketShareTrend(),
       our_rank: this.calculateOurRank(ourMarketShare),
       total_competitors: this.competitors.size,
       rank_change_7d: 0, // Calculate from historical data
@@ -487,7 +486,7 @@ export class CompetitiveIntelligenceMonitor {
       active_threats: activeThreats,
       threats_resolved_this_period: 0,
       avg_threat_resolution_time_hours: 24,
-      opportunities: this.identifyOpportunities(periodCitations, Array.from(this.competitors.values())),
+      opportunities: this.identifyOpportunities(periodCitations),
     };
   }
   
@@ -499,13 +498,13 @@ export class CompetitiveIntelligenceMonitor {
     return `${prefix}_${Date.now()}_${Math.random().toString(36).substring(7)}`;
   }
   
-  private async fetchCompetitorKnowledgeGraph(_domain: string): Promise<KnowledgeGraph | null> {
+  private async fetchCompetitorKnowledgeGraph(): Promise<KnowledgeGraph | null> {
     // Production: Web scraping + AI analysis of competitor content
     // For now, return mock structure
     return null;
   }
   
-  private extractPrimaryTopics(_kg: KnowledgeGraph): string[] {
+  private extractPrimaryTopics(): string[] {
     // Extract from entities and claims
     return [];
   }
@@ -514,7 +513,7 @@ export class CompetitiveIntelligenceMonitor {
     return [...new Set(kg.entities.map(e => e.type))];
   }
   
-  private estimateUpdateFrequency(_kg: KnowledgeGraph): string {
+  private estimateUpdateFrequency(): string {
     // Analyze metadata timestamps
     return 'weekly';
   }
@@ -549,8 +548,7 @@ export class CompetitiveIntelligenceMonitor {
   
   private shouldWeHaveWon(
     query: string,
-    ourGraph: KnowledgeGraph,
-    _competitor: CompetitorProfile
+    ourGraph: KnowledgeGraph
   ): { yes: boolean; ourRank: number } {
     // Check if we have relevant entities
     const queryEntities = this.extractEntitiesFromQuery(query);
@@ -583,7 +581,6 @@ export class CompetitiveIntelligenceMonitor {
   
   private calculateThreatSeverity(
     query: string,
-    _platform: string,
     competitor: CompetitorProfile
   ): 'critical' | 'high' | 'medium' | 'low' {
     // High-value query + strong competitor = critical
@@ -609,7 +606,6 @@ export class CompetitiveIntelligenceMonitor {
   }
   
   private identifyMissingEntities(
-    _query: string,
     ourGraph: KnowledgeGraph,
     competitor: CompetitorProfile
   ): string[] {
@@ -627,7 +623,7 @@ export class CompetitiveIntelligenceMonitor {
     return Math.round(ourCount / 0.15);
   }
   
-  private calculateMarketShareTrend(_currentShare: number): 'increasing' | 'stable' | 'decreasing' {
+  private calculateMarketShareTrend(): 'increasing' | 'stable' | 'decreasing' {
     // Compare to historical - for now return stable
     return 'stable';
   }
@@ -656,8 +652,7 @@ export class CompetitiveIntelligenceMonitor {
   }
   
   private identifyOpportunities(
-    citations: Citation[],
-    _competitors: CompetitorProfile[]
+    citations: Citation[]
   ): Array<{
     type: 'content_gap' | 'platform_expansion' | 'entity_type' | 'topic_expansion';
     description: string;

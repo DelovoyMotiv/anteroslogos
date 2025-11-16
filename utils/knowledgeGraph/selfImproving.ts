@@ -130,8 +130,7 @@ export class SelfImprovingKnowledgeGraph {
       highValueEntities,
       highValueRelationships,
       validatedClaims,
-      domainCitations,
-      learningMetrics
+      citations
     );
     
     // Calculate performance metrics
@@ -196,7 +195,7 @@ export class SelfImprovingKnowledgeGraph {
           
         case 'structure_optimization':
           // Restructure graph based on citation patterns
-          this.optimizeGraphStructure(updatedGraph, update);
+          this.optimizeGraphStructure();
           break;
       }
     }
@@ -426,8 +425,7 @@ export class SelfImprovingKnowledgeGraph {
     highValueEntities: any[],
     highValueRelationships: any[],
     validatedClaims: any[],
-    citations: Citation[],
-    _learningMetrics?: any
+    citations: Citation[]
   ): KnowledgeGraphUpdate[] {
     const updates: KnowledgeGraphUpdate[] = [];
     
@@ -609,7 +607,7 @@ export class SelfImprovingKnowledgeGraph {
     } as Entity);
   }
   
-  private optimizeGraphStructure(_graph: KnowledgeGraph, _update: KnowledgeGraphUpdate): void {
+  private optimizeGraphStructure(): void {
     // Future: Implement graph structure optimization
     // - Remove low-confidence isolated entities
     // - Merge duplicate entities

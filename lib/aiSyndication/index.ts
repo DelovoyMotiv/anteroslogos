@@ -53,7 +53,7 @@ export type SyndicationResult = z.infer<typeof SyndicationResultSchema>;
 export class AISyndicationManager {
   private apiKeys: Map<Platform, string> = new Map();
 
-  constructor(_config: SyndicationConfig) {
+  constructor() {
     this.loadAPIKeys();
   }
 
@@ -99,13 +99,13 @@ export class AISyndicationManager {
         case 'openai':
           return await this.syndicateToOpenAI(graph, apiKey);
         case 'anthropic':
-          return await this.syndicateToAnthropic(graph, apiKey);
+          return await this.syndicateToAnthropic(graph);
         case 'perplexity':
-          return await this.syndicateToPerplexity(graph, apiKey);
+          return await this.syndicateToPerplexity(graph);
         case 'google':
-          return await this.syndicateToGoogle(graph, apiKey);
+          return await this.syndicateToGoogle(graph);
         case 'meta':
-          return await this.syndicateToMeta(graph, apiKey);
+          return await this.syndicateToMeta(graph);
         default:
           throw new Error(`Unsupported platform: ${platform}`);
       }
@@ -194,7 +194,7 @@ export class AISyndicationManager {
           relationshipsSynced: graph.relationships.length,
           claimsSynced: graph.claims.length,
           apiCalls,
-          costUSD: this.estimateCost('openai', apiCalls, graph.entities.length),
+          costUSD: this.estimateCost('openai', apiCalls),
         },
       };
     } catch (error) {
@@ -437,8 +437,7 @@ export class AISyndicationManager {
    * Uses Claude's tool use for structured knowledge access
    */
   private async syndicateToAnthropic(
-    graph: KnowledgeGraph,
-    _apiKey: string
+    graph: KnowledgeGraph
   ): Promise<SyndicationResult> {
     // Anthropic doesn't have a direct knowledge base API yet
     // We create a tool definition that can be used with Claude
@@ -466,8 +465,7 @@ export class AISyndicationManager {
    * Uses Perplexity's source submission API
    */
   private async syndicateToPerplexity(
-    graph: KnowledgeGraph,
-    _apiKey: string
+    graph: KnowledgeGraph
   ): Promise<SyndicationResult> {
     // Perplexity accepts structured sources through their API
     // We submit the knowledge graph as a citable source
@@ -495,8 +493,7 @@ export class AISyndicationManager {
    * Uses Gemini's grounding with Google Search
    */
   private async syndicateToGoogle(
-    graph: KnowledgeGraph,
-    _apiKey: string
+    graph: KnowledgeGraph
   ): Promise<SyndicationResult> {
     // Google Gemini can use grounding with web search
     // We ensure our knowledge graph is accessible via web
@@ -524,8 +521,7 @@ export class AISyndicationManager {
    * Uses Llama Index for RAG integration
    */
   private async syndicateToMeta(
-    graph: KnowledgeGraph,
-    _apiKey: string
+    graph: KnowledgeGraph
   ): Promise<SyndicationResult> {
     // Meta Llama can be integrated through Llama Index
     // This creates a vector index of the knowledge graph
@@ -574,7 +570,7 @@ export class AISyndicationManager {
   /**
    * Estimate cost for syndication
    */
-  private estimateCost(platform: Platform, apiCalls: number, _entityCount: number): number {
+  private estimateCost(platform: Platform, apiCalls: number): number {
     const costPerCall: Record<Platform, number> = {
       openai: 0.01,    // $0.01 per API call (approximate)
       anthropic: 0.008,
@@ -615,12 +611,9 @@ export const DEFAULT_SYNDICATION_CONFIG: SyndicationConfig = {
 
 let syndicationManagerInstance: AISyndicationManager | null = null;
 
-export function getSyndicationManager(config?: Partial<SyndicationConfig>): AISyndicationManager {
+export function getSyndicationManager(): AISyndicationManager {
   if (!syndicationManagerInstance) {
-    syndicationManagerInstance = new AISyndicationManager({
-      ...DEFAULT_SYNDICATION_CONFIG,
-      ...config,
-    });
+    syndicationManagerInstance = new AISyndicationManager();
   }
   return syndicationManagerInstance;
 }

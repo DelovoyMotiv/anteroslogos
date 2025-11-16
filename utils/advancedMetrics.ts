@@ -196,9 +196,9 @@ export async function auditCoreWebVitals(
   const totalRequests = scripts.length + styles.length + images.length;
 
   // Estimate sizes
-  let javascriptSize = 0;
-  let cssSize = 0;
-  let imageSize = 0;
+  const javascriptSize = 0;
+  const cssSize = 0;
+  const imageSize = 0;
 
   // Check optimizations
   const hasHTTP2 = true; // Would need real server check
@@ -216,12 +216,12 @@ export async function auditCoreWebVitals(
   );
 
   // Simulate Core Web Vitals (in production, would use Lighthouse API or real measurements)
-  let lcp = totalPageSize > 500000 ? 3500 : totalPageSize > 200000 ? 2200 : 1800;
-  let fid = scripts.length > 20 ? 150 : scripts.length > 10 ? 80 : 50;
-  let cls = Array.from(images).some(img => !img.hasAttribute('width') || !img.hasAttribute('height')) ? 0.15 : 0.05;
-  let fcp = totalPageSize > 300000 ? 2000 : 1500;
-  let ttfb = 300;
-  let tti = lcp + 500;
+  const lcp = totalPageSize > 500000 ? 3500 : totalPageSize > 200000 ? 2200 : 1800;
+  const fid = scripts.length > 20 ? 150 : scripts.length > 10 ? 80 : 50;
+  const cls = Array.from(images).some(img => !img.hasAttribute('width') || !img.hasAttribute('height')) ? 0.15 : 0.05;
+  const fcp = totalPageSize > 300000 ? 2000 : 1500;
+  const ttfb = 300;
+  const tti = lcp + 500;
 
   // Grade Web Vitals
   const lcpGrade = lcp <= 2500 ? 'good' : lcp <= 4000 ? 'needs-improvement' : 'poor';
