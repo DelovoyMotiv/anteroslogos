@@ -26,7 +26,7 @@
       ]
     },
     {
-      "source": "/(.*)\.html",
+      "source": "/(.*)\\.html",
       "headers": [
         {
           "key": "X-Content-Type-Options",
@@ -81,15 +81,6 @@
         {
           "key": "X-Robots-Tag",
           "value": "all"
-        }
-      ]
-    },
-    {
-      "source": "/:path*\\.(jpg|jpeg|png|gif|svg|webp|ico)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=86400, must-revalidate"
         }
       ]
     }
