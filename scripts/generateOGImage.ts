@@ -105,7 +105,11 @@ async function generateOGImage(config: OGImageConfig): Promise<void> {
   try {
     await sharp(svgBuffer)
       .resize(config.width, config.height)
-      .jpeg({ quality: 95, mozjpeg: true })
+      .jpeg({ 
+        quality: 95, 
+        progressive: false,  // Baseline JPEG for Twitter/Telegram compatibility
+        chromaSubsampling: '4:4:4'  // Better quality for social media
+      })
       .toFile(outputPath);
 
     const stats = fs.statSync(outputPath);
