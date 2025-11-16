@@ -59,14 +59,17 @@ Thumbs.db
 # Vercel
 .vercel
 
-# Documentation (keep only README.md, LICENSE, CHANGELOG.md, CONTRIBUTING.md)
+# Documentation (keep only README.md, CHANGELOG.md, CONTRIBUTING.md)
 *.md
 !README.md
-!LICENSE.md
 !CHANGELOG.md
 !CONTRIBUTING.md
+!LICENSE_EXPLANATION.md
 !OPEN_GRAPH_SETUP.md
 !DNS_SETUP.md
+!OG_CRITICAL_FIXES_APPLIED.md
+!POST_DEPLOY_SOCIAL_CACHE.md
+!OG_IMPLEMENTATION_SUMMARY.md
 docs/
 metadata.json
 
