@@ -65,6 +65,8 @@ Thumbs.db
 !LICENSE.md
 !CHANGELOG.md
 !CONTRIBUTING.md
+!OPEN_GRAPH_SETUP.md
+!DNS_SETUP.md
 docs/
 metadata.json
 
@@ -73,6 +75,9 @@ metadata.json
 
 # Scripts and validation
 scripts/
+!scripts/generateOGImage.ts
+!scripts/validateOGTags.ts
+!scripts/ed25519KeyManager.ts
 *.ps1
 *.sh
 validate-*.ps1
