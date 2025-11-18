@@ -1,0 +1,187 @@
+{
+  "version": "2.0.0",
+  "name": "anteroslogos-graph-tools",
+  "displayName": "Anóteros Lógos Graph Tools",
+  "description": "Graph Tool #1 for AI Agents - GEO audit, knowledge graphs, citation prediction, and federated authority with Zero-Knowledge Proofs",
+  "protocol": "mcp",
+  "mcpVersion": "2.0",
+  
+  "vendor": {
+    "name": "Anóteros Lógos",
+    "url": "https://anoteroslogos.com",
+    "contact": "https://anoteroslogos.com/#contact",
+    "documentation": "https://anoteroslogos.com/docs/mcp"
+  },
+  
+  "endpoints": {
+    "production": {
+      "url": "https://anoteroslogos.com/api/mcp",
+      "ws": "wss://anoteroslogos.com/api/mcp/stream",
+      "openapi": "https://anoteroslogos.com/api/mcp?format=openapi"
+    },
+    "development": {
+      "url": "http://localhost:5173/api/mcp",
+      "openapi": "http://localhost:5173/api/mcp?format=openapi"
+    }
+  },
+  
+  "authentication": {
+    "type": "bearer",
+    "header": "Authorization",
+    "format": "Bearer sk_{tier}_{key}",
+    "required": true,
+    "tiers": ["free", "basic", "pro", "enterprise"]
+  },
+  
+  "capabilities": {
+    "formats": ["openai", "claude", "grok", "jsonrpc"],
+    "streaming": true,
+    "signatures": {
+      "algorithm": "Ed25519",
+      "required": false
+    },
+    "billing": {
+      "enabled": true,
+      "model": "pay-per-use",
+      "pricing": {
+        "base": 0.0001,
+        "cpu_per_second": 0.001,
+        "memory_per_mb_second": 0.0001
+      }
+    }
+  },
+  
+  "tools": [
+    {
+      "name": "auditSite",
+      "category": "geo-audit",
+      "description": "Comprehensive GEO audit for AI visibility analysis",
+      "unique": false
+    },
+    {
+      "name": "getGraph",
+      "category": "knowledge-graph",
+      "description": "Build knowledge graph with entities and relationships",
+      "unique": false
+    },
+    {
+      "name": "predictCitation",
+      "category": "citation-analysis",
+      "description": "Predict citation probability across AI platforms",
+      "unique": false
+    },
+    {
+      "name": "synthesizeNode",
+      "category": "content-optimization",
+      "description": "Generate content recommendations for AI visibility",
+      "unique": false
+    },
+    {
+      "name": "causal_citation_trace",
+      "category": "advanced-analytics",
+      "description": "Trace exact causal path explaining why LLM would cite site",
+      "unique": true,
+      "novelty": "Only tool providing causal reasoning chains for citation decisions"
+    },
+    {
+      "name": "predictive_synthesis",
+      "category": "advanced-analytics",
+      "description": "Synthesize content plan to achieve specific visibility increase",
+      "unique": true,
+      "novelty": "First tool to predict exact visibility impact with confidence scores"
+    },
+    {
+      "name": "federated_authority_boost",
+      "category": "zkp-authority",
+      "description": "Generate ZKP proof of federated authority participation",
+      "unique": true,
+      "novelty": "Only tool using Zero-Knowledge Proofs for authority verification without revealing private data"
+    }
+  ],
+  
+  "rateLimits": {
+    "free": {
+      "requests_per_minute": 10,
+      "requests_per_hour": 100,
+      "concurrent": 2
+    },
+    "basic": {
+      "requests_per_minute": 60,
+      "requests_per_hour": 1000,
+      "concurrent": 5
+    },
+    "pro": {
+      "requests_per_minute": 300,
+      "requests_per_hour": 10000,
+      "concurrent": 20
+    },
+    "enterprise": {
+      "requests_per_minute": 1000,
+      "requests_per_hour": 50000,
+      "concurrent": 100
+    }
+  },
+  
+  "integrations": {
+    "openai": {
+      "compatible": true,
+      "tested_versions": ["gpt-4o", "gpt-4-turbo"],
+      "function_calling": true
+    },
+    "claude": {
+      "compatible": true,
+      "tested_versions": ["claude-3-7-sonnet", "claude-3-5-sonnet"],
+      "tool_use": true
+    },
+    "grok": {
+      "compatible": true,
+      "tested_versions": ["grok-3"],
+      "function_calling": true
+    },
+    "langchain": {
+      "compatible": true,
+      "integration_type": "tool"
+    },
+    "langgraph": {
+      "compatible": true,
+      "integration_type": "node"
+    },
+    "crewai": {
+      "compatible": true,
+      "integration_type": "tool"
+    },
+    "autogen": {
+      "compatible": true,
+      "integration_type": "function"
+    }
+  },
+  
+  "schemas": {
+    "openai": "https://anoteroslogos.com/api/mcp?format=openai",
+    "claude": "https://anoteroslogos.com/api/mcp?format=claude",
+    "grok": "https://anoteroslogos.com/api/mcp?format=grok",
+    "openapi": "https://anoteroslogos.com/api/mcp?format=openapi"
+  },
+  
+  "security": {
+    "https": true,
+    "ed25519_signatures": true,
+    "rate_limiting": true,
+    "api_key_rotation": true,
+    "audit_logging": true
+  },
+  
+  "compliance": {
+    "gdpr": true,
+    "ccpa": true,
+    "soc2": "in_progress"
+  },
+  
+  "metadata": {
+    "established": "2025",
+    "last_updated": "2025-01-18",
+    "status": "production",
+    "uptime_target": "99.9%",
+    "support": "https://anoteroslogos.com/#contact"
+  }
+}

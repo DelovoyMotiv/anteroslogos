@@ -1,0 +1,250 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "auditSite",
+      "description": "Perform comprehensive GEO audit on a website to analyze AI visibility and optimization",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Website URL to audit (must be valid HTTP/HTTPS URL)"
+          },
+          "useAI": {
+            "type": "boolean",
+            "description": "Enable AI-powered deep analysis (slower but more comprehensive)"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "examples": [
+        {
+          "input": {
+            "url": "https://example.com",
+            "useAI": false
+          },
+          "output": {
+            "geoScore": 78.5,
+            "grade": "B+",
+            "issues": [],
+            "recommendations": []
+          }
+        }
+      ]
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "getGraph",
+      "description": "Build knowledge graph from website content, extracting entities, relationships, and claims",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Website URL to analyze"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "predictCitation",
+      "description": "Predict likelihood of website being cited by AI platforms (ChatGPT, Perplexity, Claude, etc.)",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Website URL to analyze"
+          },
+          "platform": {
+            "type": "string",
+            "description": "Target AI platform",
+            "enum": [
+              "ChatGPT",
+              "Claude",
+              "Perplexity",
+              "Gemini",
+              "Grok",
+              "all"
+            ]
+          }
+        },
+        "required": [
+          "url"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "synthesizeNode",
+      "description": "Generate optimized content recommendations to improve AI visibility",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Website URL to optimize"
+          },
+          "targetKeywords": {
+            "type": "array",
+            "description": "Target keywords to optimize for"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "causal_citation_trace",
+      "description": "Trace exact causal path in knowledge graph explaining why LLM would cite this site",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Website URL to trace"
+          },
+          "query": {
+            "type": "string",
+            "description": "User query that might trigger citation"
+          }
+        },
+        "required": [
+          "url",
+          "query"
+        ]
+      },
+      "examples": [
+        {
+          "input": {
+            "url": "https://example.com/ai-guide",
+            "query": "best practices for AI optimization"
+          },
+          "output": {
+            "path": [
+              {
+                "node": "content_authority",
+                "weight": 0.85
+              },
+              {
+                "node": "schema_completeness",
+                "weight": 0.92
+              },
+              {
+                "node": "citation_network",
+                "weight": 0.78
+              }
+            ],
+            "citationProbability": 0.856,
+            "reasoningChain": "Site has high E-E-A-T → Complete schema markup → Referenced by authoritative sources"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "predictive_synthesis",
+      "description": "Synthesize new content recommendations that will increase visibility by X%",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Website URL"
+          },
+          "targetIncrease": {
+            "type": "number",
+            "description": "Target visibility increase percentage (e.g., 25 for +25%)"
+          }
+        },
+        "required": [
+          "url",
+          "targetIncrease"
+        ]
+      },
+      "examples": [
+        {
+          "input": {
+            "url": "https://example.com",
+            "targetIncrease": 30
+          },
+          "output": {
+            "recommendedChanges": [
+              {
+                "type": "schema_addition",
+                "schema": "FAQPage",
+                "impact": "+12% visibility",
+                "effort": "moderate"
+              },
+              {
+                "type": "content_gap",
+                "topic": "AI implementation guide",
+                "impact": "+18% visibility",
+                "effort": "complex"
+              }
+            ],
+            "totalPredictedIncrease": 30,
+            "confidence": 0.87
+          }
+        }
+      ]
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "federated_authority_boost",
+      "description": "Generate ZKP (Zero-Knowledge Proof) that site participates in federated authority graph",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Website URL"
+          },
+          "includePrivateData": {
+            "type": "boolean",
+            "description": "Include private metrics in proof (without revealing values)"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "examples": [
+        {
+          "input": {
+            "url": "https://example.com",
+            "includePrivateData": true
+          },
+          "output": {
+            "proof": "zkp_proof_0x...",
+            "authorityScore": "hidden",
+            "participatesInNetwork": true,
+            "verifiable": true,
+            "expiresAt": "2025-12-31T00:00:00Z"
+          }
+        }
+      ]
+    }
+  }
+]

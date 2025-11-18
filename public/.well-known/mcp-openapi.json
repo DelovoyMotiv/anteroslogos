@@ -1,0 +1,602 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Anóteros Lógos Graph Tools API",
+    "version": "2.0.0",
+    "description": "Graph Tool #1 for AI Agents - GEO audit, knowledge graphs, citation prediction, and federated authority",
+    "contact": {
+      "name": "Anóteros Lógos",
+      "url": "https://anoteroslogos.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://anoteroslogos.com/api/mcp",
+      "description": "Production MCP Server"
+    },
+    {
+      "url": "http://localhost:5173/api/mcp",
+      "description": "Local Development"
+    }
+  ],
+  "paths": {
+    "/tools/auditSite": {
+      "post": {
+        "operationId": "auditSite",
+        "summary": "Perform comprehensive GEO audit on a website to analyze AI visibility and optimization",
+        "tags": [
+          "Graph Tools"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "Website URL to audit (must be valid HTTP/HTTPS URL)"
+                  },
+                  "useAI": {
+                    "type": "boolean",
+                    "description": "Enable AI-powered deep analysis (slower but more comprehensive)"
+                  }
+                },
+                "required": [
+                  "url"
+                ]
+              },
+              "examples": {
+                "default": {
+                  "value": {
+                    "url": "https://example.com",
+                    "useAI": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "GEO audit results with score, issues, and recommendations"
+                },
+                "examples": {
+                  "default": {
+                    "value": {
+                      "geoScore": 78.5,
+                      "grade": "B+",
+                      "issues": [],
+                      "recommendations": []
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/tools/getGraph": {
+      "post": {
+        "operationId": "getGraph",
+        "summary": "Build knowledge graph from website content, extracting entities, relationships, and claims",
+        "tags": [
+          "Graph Tools"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "Website URL to analyze"
+                  }
+                },
+                "required": [
+                  "url"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "Knowledge graph with entities, relationships, and claims"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/tools/predictCitation": {
+      "post": {
+        "operationId": "predictCitation",
+        "summary": "Predict likelihood of website being cited by AI platforms (ChatGPT, Perplexity, Claude, etc.)",
+        "tags": [
+          "Graph Tools"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "Website URL to analyze"
+                  },
+                  "platform": {
+                    "type": "string",
+                    "description": "Target AI platform",
+                    "enum": [
+                      "ChatGPT",
+                      "Claude",
+                      "Perplexity",
+                      "Gemini",
+                      "Grok",
+                      "all"
+                    ]
+                  }
+                },
+                "required": [
+                  "url"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "Citation probability scores by platform"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/tools/synthesizeNode": {
+      "post": {
+        "operationId": "synthesizeNode",
+        "summary": "Generate optimized content recommendations to improve AI visibility",
+        "tags": [
+          "Graph Tools"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "Website URL to optimize"
+                  },
+                  "targetKeywords": {
+                    "type": "array",
+                    "description": "Target keywords to optimize for",
+                    "items": {
+                      "type": "string",
+                      "description": "Target keyword"
+                    }
+                  }
+                },
+                "required": [
+                  "url"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "Content optimization recommendations"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/tools/causal_citation_trace": {
+      "post": {
+        "operationId": "causal_citation_trace",
+        "summary": "Trace exact causal path in knowledge graph explaining why LLM would cite this site",
+        "tags": [
+          "Graph Tools"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "Website URL to trace"
+                  },
+                  "query": {
+                    "type": "string",
+                    "description": "User query that might trigger citation"
+                  }
+                },
+                "required": [
+                  "url",
+                  "query"
+                ]
+              },
+              "examples": {
+                "default": {
+                  "value": {
+                    "url": "https://example.com/ai-guide",
+                    "query": "best practices for AI optimization"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "Causal graph path with reasoning nodes and edge weights"
+                },
+                "examples": {
+                  "default": {
+                    "value": {
+                      "path": [
+                        {
+                          "node": "content_authority",
+                          "weight": 0.85
+                        },
+                        {
+                          "node": "schema_completeness",
+                          "weight": 0.92
+                        },
+                        {
+                          "node": "citation_network",
+                          "weight": 0.78
+                        }
+                      ],
+                      "citationProbability": 0.856,
+                      "reasoningChain": "Site has high E-E-A-T → Complete schema markup → Referenced by authoritative sources"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/tools/predictive_synthesis": {
+      "post": {
+        "operationId": "predictive_synthesis",
+        "summary": "Synthesize new content recommendations that will increase visibility by X%",
+        "tags": [
+          "Graph Tools"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "Website URL"
+                  },
+                  "targetIncrease": {
+                    "type": "number",
+                    "description": "Target visibility increase percentage (e.g., 25 for +25%)"
+                  }
+                },
+                "required": [
+                  "url",
+                  "targetIncrease"
+                ]
+              },
+              "examples": {
+                "default": {
+                  "value": {
+                    "url": "https://example.com",
+                    "targetIncrease": 30
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "Synthesized content plan with predicted impact"
+                },
+                "examples": {
+                  "default": {
+                    "value": {
+                      "recommendedChanges": [
+                        {
+                          "type": "schema_addition",
+                          "schema": "FAQPage",
+                          "impact": "+12% visibility",
+                          "effort": "moderate"
+                        },
+                        {
+                          "type": "content_gap",
+                          "topic": "AI implementation guide",
+                          "impact": "+18% visibility",
+                          "effort": "complex"
+                        }
+                      ],
+                      "totalPredictedIncrease": 30,
+                      "confidence": 0.87
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/tools/federated_authority_boost": {
+      "post": {
+        "operationId": "federated_authority_boost",
+        "summary": "Generate ZKP (Zero-Knowledge Proof) that site participates in federated authority graph",
+        "tags": [
+          "Graph Tools"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "url": {
+                    "type": "string",
+                    "description": "Website URL"
+                  },
+                  "includePrivateData": {
+                    "type": "boolean",
+                    "description": "Include private metrics in proof (without revealing values)"
+                  }
+                },
+                "required": [
+                  "url"
+                ]
+              },
+              "examples": {
+                "default": {
+                  "value": {
+                    "url": "https://example.com",
+                    "includePrivateData": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "description": "ZKP proof of authority participation"
+                },
+                "examples": {
+                  "default": {
+                    "value": {
+                      "proof": "zkp_proof_0x...",
+                      "authorityScore": "hidden",
+                      "participatesInNetwork": true,
+                      "verifiable": true,
+                      "expiresAt": "2025-12-31T00:00:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "429": {
+            "description": "Rate limit exceeded"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "API Key",
+        "description": "API key authentication (format: sk_tier_xxxxx)"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "number"
+              },
+              "message": {
+                "type": "string"
+              },
+              "data": {
+                "type": "object"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Graph Tools",
+      "description": "Knowledge graph and GEO audit tools"
+    }
+  ]
+}

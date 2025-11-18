@@ -1,0 +1,173 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "auditSite",
+      "description": "Perform comprehensive GEO audit on a website to analyze AI visibility and optimization",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Website URL to audit (must be valid HTTP/HTTPS URL)"
+          },
+          "useAI": {
+            "type": "boolean",
+            "description": "Enable AI-powered deep analysis (slower but more comprehensive)"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "getGraph",
+      "description": "Build knowledge graph from website content, extracting entities, relationships, and claims",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Website URL to analyze"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "predictCitation",
+      "description": "Predict likelihood of website being cited by AI platforms (ChatGPT, Perplexity, Claude, etc.)",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Website URL to analyze"
+          },
+          "platform": {
+            "type": "string",
+            "description": "Target AI platform",
+            "enum": [
+              "ChatGPT",
+              "Claude",
+              "Perplexity",
+              "Gemini",
+              "Grok",
+              "all"
+            ]
+          }
+        },
+        "required": [
+          "url"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "synthesizeNode",
+      "description": "Generate optimized content recommendations to improve AI visibility",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Website URL to optimize"
+          },
+          "targetKeywords": {
+            "type": "array",
+            "description": "Target keywords to optimize for",
+            "items": {
+              "type": "string",
+              "description": "Target keyword"
+            }
+          }
+        },
+        "required": [
+          "url"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "causal_citation_trace",
+      "description": "Trace exact causal path in knowledge graph explaining why LLM would cite this site",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Website URL to trace"
+          },
+          "query": {
+            "type": "string",
+            "description": "User query that might trigger citation"
+          }
+        },
+        "required": [
+          "url",
+          "query"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "predictive_synthesis",
+      "description": "Synthesize new content recommendations that will increase visibility by X%",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Website URL"
+          },
+          "targetIncrease": {
+            "type": "number",
+            "description": "Target visibility increase percentage (e.g., 25 for +25%)"
+          }
+        },
+        "required": [
+          "url",
+          "targetIncrease"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "federated_authority_boost",
+      "description": "Generate ZKP (Zero-Knowledge Proof) that site participates in federated authority graph",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Website URL"
+          },
+          "includePrivateData": {
+            "type": "boolean",
+            "description": "Include private metrics in proof (without revealing values)"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      }
+    }
+  }
+]

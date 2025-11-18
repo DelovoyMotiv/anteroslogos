@@ -1,0 +1,148 @@
+[
+  {
+    "name": "auditSite",
+    "description": "Perform comprehensive GEO audit on a website to analyze AI visibility and optimization",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "Website URL to audit (must be valid HTTP/HTTPS URL)"
+        },
+        "useAI": {
+          "type": "boolean",
+          "description": "Enable AI-powered deep analysis (slower but more comprehensive)"
+        }
+      },
+      "required": [
+        "url"
+      ]
+    }
+  },
+  {
+    "name": "getGraph",
+    "description": "Build knowledge graph from website content, extracting entities, relationships, and claims",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "Website URL to analyze"
+        }
+      },
+      "required": [
+        "url"
+      ]
+    }
+  },
+  {
+    "name": "predictCitation",
+    "description": "Predict likelihood of website being cited by AI platforms (ChatGPT, Perplexity, Claude, etc.)",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "Website URL to analyze"
+        },
+        "platform": {
+          "type": "string",
+          "description": "Target AI platform",
+          "enum": [
+            "ChatGPT",
+            "Claude",
+            "Perplexity",
+            "Gemini",
+            "Grok",
+            "all"
+          ]
+        }
+      },
+      "required": [
+        "url"
+      ]
+    }
+  },
+  {
+    "name": "synthesizeNode",
+    "description": "Generate optimized content recommendations to improve AI visibility",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "Website URL to optimize"
+        },
+        "targetKeywords": {
+          "type": "array",
+          "description": "Target keywords to optimize for"
+        }
+      },
+      "required": [
+        "url"
+      ]
+    }
+  },
+  {
+    "name": "causal_citation_trace",
+    "description": "Trace exact causal path in knowledge graph explaining why LLM would cite this site",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "Website URL to trace"
+        },
+        "query": {
+          "type": "string",
+          "description": "User query that might trigger citation"
+        }
+      },
+      "required": [
+        "url",
+        "query"
+      ]
+    }
+  },
+  {
+    "name": "predictive_synthesis",
+    "description": "Synthesize new content recommendations that will increase visibility by X%",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "Website URL"
+        },
+        "targetIncrease": {
+          "type": "number",
+          "description": "Target visibility increase percentage (e.g., 25 for +25%)"
+        }
+      },
+      "required": [
+        "url",
+        "targetIncrease"
+      ]
+    }
+  },
+  {
+    "name": "federated_authority_boost",
+    "description": "Generate ZKP (Zero-Knowledge Proof) that site participates in federated authority graph",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "Website URL"
+        },
+        "includePrivateData": {
+          "type": "boolean",
+          "description": "Include private metrics in proof (without revealing values)"
+        }
+      },
+      "required": [
+        "url"
+      ]
+    }
+  }
+]
