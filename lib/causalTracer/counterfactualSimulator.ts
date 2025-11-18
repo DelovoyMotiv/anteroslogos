@@ -21,8 +21,9 @@ import type {
   TracerConfig,
 } from '../../types/causalTracer.types';
 
-import { findAllPaths, scorePath } from './pathFinder';
-import { PathCache } from './pathFinder';
+import { findAllPaths } from './pathFinder';
+import PathFinder from './pathFinder';
+const { PathCache } = PathFinder;
 
 // ============================================================================
 // GRAPH CLONING & MODIFICATION
