@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Search, Globe, Brain, Shield, Layout, Zap, FileText, Target, Code, Sparkles } from 'lucide-react';
+import { Search, Globe, Brain, Shield, Layout, Zap, FileText, Target, Code, Sparkles, CheckCircle } from 'lucide-react';
 
 interface AnalysisStep {
   id: string;
@@ -20,6 +20,7 @@ const ANALYSIS_STEPS: AnalysisStep[] = [
   { id: 'content', label: 'Content Quality', icon: FileText, color: 'text-teal-400', duration: 1400 },
   { id: 'technical', label: 'Technical GEO', icon: Target, color: 'text-orange-400', duration: 1000 },
   { id: 'ai-agent', label: 'AI Analysis', icon: Sparkles, color: 'text-fuchsia-400', duration: 2000 },
+  { id: 'finalizing', label: 'Finalizing Results', icon: CheckCircle, color: 'text-emerald-400', duration: 9999999 }, // Infinite duration until actual completion
 ];
 
 interface AnalysisProgressProps {
@@ -45,8 +46,14 @@ const AnalysisProgress = ({ isAnalyzing, url }: AnalysisProgressProps) => {
     let progressInterval: NodeJS.Timeout | null = null;
     let isMounted = true;
 
-    const advanceStep = () => {
-      if (!isMounted || stepIndex >= ANALYSIS_STEPS.length) {
+  const advanceStep = () => {
+      if (!isMounted) {
+        return;
+      }
+      
+      // Stop before finalizing step - it will run indefinitely until isAnalyzing becomes false
+      if (stepIndex >= ANALYSIS_STEPS.length - 1) {
+        setCurrentStep(ANALYSIS_STEPS.length - 1);
         return;
       }
 
@@ -212,6 +219,7 @@ function getTipForStep(stepIndex: number): string {
     'Assessing content depth, readability, and citation potential',
     'Validating technical GEO elements like HTTPS and canonical URLs',
     'GEO Marketolog AI Agent generating personalized recommendations...',
+    'Generating alerts, trends, and competitive intelligence... Almost done!',
   ];
   return tips[stepIndex] || 'Running comprehensive analysis...';
 }
