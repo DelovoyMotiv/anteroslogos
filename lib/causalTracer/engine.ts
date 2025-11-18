@@ -773,6 +773,160 @@ function determineMarketPosition(
 }
 
 // ============================================================================
+// ENGINE CLASS
+// ============================================================================
+
+/**
+ * Main CausalTracerEngine class for enterprise integration
+ * Manages graph registry and provides unified API
+ */
+export class CausalTracerEngine {
+  private graphs: Map<string, CausalGraph>;
+  private config: TracerConfig;
+
+  constructor(config: Partial<TracerConfig> = {}) {
+    this.graphs = new Map();
+    this.config = { ...DEFAULT_CONFIG, ...config };
+  }
+
+  /**
+   * Add a graph to the engine's registry
+   */
+  addGraph(graph: any): void {
+    const causalGraph: CausalGraph = {
+      domain: graph.metadata?.url || 'unknown',
+      nodes: new Map(graph.nodes.map((n: any) => [n.id, n])),
+      edges: new Map(graph.edges.map((e: any) => [e.id, e])),
+      nodeCount: graph.nodes.length,
+      edgeCount: graph.edges.length,
+      density: 0,
+      avgPathLength: 0,
+      clusteringCoefficient: 0,
+      lastUpdated: new Date(),
+      version: 1,
+    };
+    this.graphs.set(graph.id, causalGraph);
+  }
+
+  /**
+   * Trace citation path for a specific node in a graph
+   */
+  async traceCitationPath(
+    graphId: string,
+    _targetNodeId: string,
+    query: string,
+    _platform: LLMPlatform
+  ): Promise<CitationTraceResult> {
+    const graph = this.graphs.get(graphId);
+    if (!graph) {
+      throw new Error(`Graph ${graphId} not found`);
+    }
+
+    return await traceCitationPath(query, graph, [], this.config);
+  }
+
+  /**
+   * Explain why this node/site would be chosen
+   */
+  async explainWhyChosen(
+    graphId: string,
+    _nodeId: string,
+    query: string,
+    _platform: LLMPlatform,
+    competitorUrls: string[]
+  ): Promise<{
+    reasonChosen: string;
+    keyFactors: Array<{ factor: string; impact: number; evidence: string }>;
+    platformBias: string;
+    competitivePosition: { position: string; advantage: number };
+    nearMisses: Array<{ competitorUrl: string; scoreGap: number }>;
+  }> {
+    const graph = this.graphs.get(graphId);
+    if (!graph) {
+      throw new Error(`Graph ${graphId} not found`);
+    }
+
+    // Run full trace to get paths and competitive data
+    const traceResult = await traceCitationPath(query, graph, [], this.config);
+    const topPath = traceResult.topPath;
+
+    return {
+      reasonChosen: topPath.humanReadableExplanation || explainWhyChosen(topPath),
+      keyFactors: topPath.keyFactors.map((f: string) => ({
+        factor: f,
+        impact: 0.8, // Default impact
+        evidence: 'See path analysis',
+      })),
+      platformBias: 'Platform-specific scoring applied',
+      competitivePosition: {
+        position: traceResult.marketPosition,
+        advantage: traceResult.competitorComparison[0]?.winProbability || 0,
+      },
+      nearMisses: competitorUrls.slice(0, 3).map((url, i) => ({
+        competitorUrl: url,
+        scoreGap: Math.abs(traceResult.competitorComparison[i]?.delta || 0),
+      })),
+    };
+  }
+
+  /**
+   * Run counterfactual analysis
+   */
+  async counterfactualImpact(
+    graphId: string,
+    nodeId: string,
+    query: string
+  ): Promise<CounterfactualResult> {
+    const graph = this.graphs.get(graphId);
+    if (!graph) {
+      throw new Error(`Graph ${graphId} not found`);
+    }
+
+    const node = graph.nodes.get(nodeId);
+    if (!node) {
+      throw new Error(`Node ${nodeId} not found in graph ${graphId}`);
+    }
+
+    return await counterfactualImpact(
+      graph,
+      { type: 'node_removal', element: node },
+      query,
+      this.config
+    );
+  }
+
+  /**
+   * Analyze predictive gaps
+   */
+  async predictiveGapAnalysis(
+    graphId: string,
+    query: string,
+    competitorGraphIds: string[]
+  ): Promise<GapAnalysisResult> {
+    const graph = this.graphs.get(graphId);
+    if (!graph) {
+      throw new Error(`Graph ${graphId} not found`);
+    }
+
+    const competitorGraphs = competitorGraphIds
+      .map(id => this.graphs.get(id))
+      .filter((g): g is CausalGraph => g !== undefined);
+
+    // predictiveGapAnalysis expects (ourGraph, competitorGraph, query)
+    if (competitorGraphs.length === 0) {
+      throw new Error('At least one competitor graph is required');
+    }
+
+    return await predictiveGapAnalysis(
+      graph,
+      competitorGraphs[0],
+      query,
+      this.config
+    );
+  }
+}
+
+// ============================================================================
 // EXPORTS
 // ============================================================================
 

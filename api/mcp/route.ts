@@ -244,7 +244,7 @@ async function executeSynthesizeNode(params: { url: string; targetKeywords?: str
 // NEW UNIQUE TOOLS
 // =====================================================
 
-async function executeCausalCitationTrace(params: { url: string; query: string }): Promise<any> {
+async function executeCausalCitationTrace(params: { url: string; query: string; platform?: string; competitors?: string[] }): Promise<any> {
   // Validate inputs
   if (!params.url || typeof params.url !== 'string') {
     throw new Error('Invalid URL parameter');
@@ -264,56 +264,212 @@ async function executeCausalCitationTrace(params: { url: string; query: string }
     throw new Error('Invalid URL format');
   }
   
+  // Validate competitors if provided
+  if (params.competitors) {
+    if (!Array.isArray(params.competitors)) {
+      throw new Error('competitors must be an array');
+    }
+    if (params.competitors.length > 10) {
+      throw new Error('Maximum 10 competitors allowed');
+    }
+    for (const comp of params.competitors) {
+      try {
+        new URL(comp);
+      } catch {
+        throw new Error(`Invalid competitor URL: ${comp}`);
+      }
+    }
+  }
+  
+  // Import CausalTracerEngine
+  const { CausalTracerEngine } = await import('../../lib/causalTracer/engine');
   const { performGeoAudit } = await import('../../utils/geoAuditEnhanced');
   
+  // Initialize engine
+  const engine = new CausalTracerEngine();
+  
+  // Build graph from site audit
   const audit = await performGeoAudit(params.url, { useAI: false });
   
-  // Build causal path based on audit metrics
-  const path = [];
-  let citationProbability = 0;
+  // Convert audit to causal graph
+  const graphId = `graph_${Date.now()}`;
+  const nodes: any[] = [];
+  const edges: any[] = [];
   
-  // Authority signals
-  if (audit.overallScore > 80) {
-    path.push({ node: 'high_authority', weight: 0.90 });
-    citationProbability += 0.30;
-  } else if (audit.overallScore > 60) {
-    path.push({ node: 'moderate_authority', weight: 0.70 });
-    citationProbability += 0.20;
+  // Create nodes from audit metrics
+  let nodeIdCounter = 0;
+  
+  // Authority node
+  const authorityId = `node_${nodeIdCounter++}`;
+  nodes.push({
+    id: authorityId,
+    type: 'authority',
+    label: `Authority Score: ${audit.overallScore}`,
+    weight: audit.overallScore / 100,
+    metadata: {
+      score: audit.overallScore,
+      source: 'geoaudit',
+    },
+  });
+  
+  // Schema node
+  if (audit.scores.schemaMarkup > 0) {
+    const schemaId = `node_${nodeIdCounter++}`;
+    nodes.push({
+      id: schemaId,
+      type: 'structured_data',
+      label: `Schema: ${audit.scores.schemaMarkup}`,
+      weight: audit.scores.schemaMarkup / 100,
+      metadata: {
+        score: audit.scores.schemaMarkup,
+      },
+    });
+    edges.push({
+      id: `edge_${edges.length}`,
+      source: schemaId,
+      target: authorityId,
+      type: 'enhances',
+      weight: 0.3,
+    });
   }
   
-  // Schema completeness
-  if (audit.scores.schemaMarkup > 80) {
-    path.push({ node: 'complete_schema', weight: 0.95 });
-    citationProbability += 0.25;
+  // Content quality node
+  if (audit.scores.contentQuality > 0) {
+    const contentId = `node_${nodeIdCounter++}`;
+    nodes.push({
+      id: contentId,
+      type: 'content_quality',
+      label: `Content: ${audit.scores.contentQuality}`,
+      weight: audit.scores.contentQuality / 100,
+      metadata: {
+        score: audit.scores.contentQuality,
+      },
+    });
+    edges.push({
+      id: `edge_${edges.length}`,
+      source: contentId,
+      target: authorityId,
+      type: 'enhances',
+      weight: 0.25,
+    });
   }
   
-  // Content quality
-  if (audit.scores.contentQuality > 75) {
-    path.push({ node: 'quality_content', weight: 0.88 });
-    citationProbability += 0.20;
+  // E-E-A-T node
+  if (audit.scores.eeat > 0) {
+    const eeatId = `node_${nodeIdCounter++}`;
+    nodes.push({
+      id: eeatId,
+      type: 'eeat_signal',
+      label: `E-E-A-T: ${audit.scores.eeat}`,
+      weight: audit.scores.eeat / 100,
+      metadata: {
+        score: audit.scores.eeat,
+      },
+    });
+    edges.push({
+      id: `edge_${edges.length}`,
+      source: eeatId,
+      target: authorityId,
+      type: 'validates',
+      weight: 0.35,
+    });
   }
   
-  // E-E-A-T signals
-  if (audit.scores.eeat > 70) {
-    path.push({ node: 'strong_eeat', weight: 0.85 });
-    citationProbability += 0.25;
-  }
+  // Citation decision node
+  const citationNodeId = `node_${nodeIdCounter++}`;
+  nodes.push({
+    id: citationNodeId,
+    type: 'citation_decision',
+    label: 'LLM Citation Decision',
+    weight: 1.0,
+    metadata: {
+      query: params.query,
+      platform: params.platform || 'Perplexity',
+    },
+  });
   
-  // Normalize probability
-  citationProbability = Math.min(citationProbability, 1.0);
+  edges.push({
+    id: `edge_${edges.length}`,
+    source: authorityId,
+    target: citationNodeId,
+    type: 'influences',
+    weight: 0.5,
+  });
   
-  // Generate reasoning chain
-  const reasoningChain = path
-    .map(p => p.node.replace(/_/g, ' '))
-    .join(' → ');
+  const graph = {
+    id: graphId,
+    nodes,
+    edges,
+    metadata: {
+      url: params.url,
+      query: params.query,
+      created: new Date().toISOString(),
+    },
+  };
+  
+  engine.addGraph(graph);
+  
+  // Trace citation path
+  // Convert platform name to lowercase for LLMPlatform type
+  const platformMapping: Record<string, 'perplexity' | 'chatgpt' | 'claude' | 'gemini' | 'grok'> = {
+    'Perplexity': 'perplexity',
+    'ChatGPT': 'chatgpt',
+    'Claude': 'claude',
+    'Gemini': 'gemini',
+    'Grok': 'grok',
+  };
+  const platformInput = params.platform || 'Perplexity';
+  const platform = platformMapping[platformInput] || 'perplexity';
+  
+  const traceResult = await engine.traceCitationPath(
+    graphId,
+    citationNodeId,
+    params.query,
+    platform
+  );
+  
+  // Explain why chosen
+  const explanation = await engine.explainWhyChosen(
+    graphId,
+    citationNodeId,
+    params.query,
+    platform,
+    params.competitors || []
+  );
   
   return {
     url: params.url,
     query: params.query,
-    path,
-    citationProbability: Math.round(citationProbability * 1000) / 1000,
-    reasoningChain,
-    explanation: `For query "${params.query}", this site has ${Math.round(citationProbability * 100)}% probability of citation due to: ${reasoningChain}`,
+    platform: platformInput,
+    trace: {
+      paths: traceResult.paths.map((p: any) => ({
+        nodes: p.nodes.map((n: any) => n.id),
+        score: p.score,
+        causalStrength: p.causalStrength,
+        criticalNodes: p.criticalNodes,
+      })),
+      overallProbability: traceResult.citationProbability,
+      confidenceLevel: traceResult.confidence > 0.8 ? 'high' : traceResult.confidence > 0.6 ? 'medium' : 'low',
+    },
+    explanation: {
+      reasonChosen: explanation.reasonChosen,
+      keyFactors: explanation.keyFactors.map((f: any) => ({
+        factor: f.factor,
+        impact: f.impact,
+        evidence: f.evidence,
+      })),
+      platformBias: explanation.platformBias,
+      competitivePosition: explanation.competitivePosition,
+      nearMisses: explanation.nearMisses.map((nm: any) => ({
+        competitorUrl: nm.competitorUrl,
+        scoreGap: nm.scoreGap,
+      })),
+    },
+    metadata: {
+      graphNodes: nodes.length,
+      graphEdges: edges.length,
+      processingTimeMs: Math.round(traceResult.computationTime || 0),
+    },
   };
 }
 

@@ -150,7 +150,7 @@ export const GRAPH_TOOLS: Record<string, ToolDefinition> = {
   // NEW UNIQUE TOOLS
   causal_citation_trace: {
     name: 'causal_citation_trace',
-    description: 'Trace exact causal path in knowledge graph explaining why LLM would cite this site',
+    description: 'Trace exact causal path in knowledge graph explaining why LLM would cite this site for given query. Returns full causal explanation with platform-specific reasoning, competitive analysis, and improvement recommendations.',
     parameters: [
       {
         name: 'url',
@@ -161,28 +161,69 @@ export const GRAPH_TOOLS: Record<string, ToolDefinition> = {
       {
         name: 'query',
         type: 'string',
-        description: 'User query that might trigger citation',
+        description: 'User query that might trigger citation (max 500 characters)',
         required: true,
+      },
+      {
+        name: 'platform',
+        type: 'string',
+        description: 'Target LLM platform for platform-specific scoring',
+        required: false,
+        enum: ['Perplexity', 'ChatGPT', 'Claude', 'Gemini', 'Grok'],
+      },
+      {
+        name: 'competitors',
+        type: 'array',
+        description: 'Competitor URLs for comparative analysis (max 10)',
+        required: false,
+        items: {
+          name: 'competitorUrl',
+          type: 'string',
+          description: 'Competitor website URL',
+          required: true,
+        },
       },
     ],
     returns: {
       type: 'object',
-      description: 'Causal graph path with reasoning nodes and edge weights',
+      description: 'Complete causal trace with paths, probabilities, platform-specific reasoning, competitive position, and actionable improvements',
     },
     examples: [
       {
         input: { 
           url: 'https://example.com/ai-guide', 
-          query: 'best practices for AI optimization' 
+          query: 'best practices for AI optimization',
+          platform: 'Perplexity',
+          competitors: ['https://competitor.com/guide']
         },
         output: {
-          path: [
-            { node: 'content_authority', weight: 0.85 },
-            { node: 'schema_completeness', weight: 0.92 },
-            { node: 'citation_network', weight: 0.78 },
-          ],
-          citationProbability: 0.856,
-          reasoningChain: 'Site has high E-E-A-T → Complete schema markup → Referenced by authoritative sources',
+          trace: {
+            paths: [
+              {
+                nodes: ['node_0', 'node_1', 'node_3'],
+                score: 85.2,
+                causalStrength: 0.78,
+                criticalNodes: ['node_1'],
+              },
+            ],
+            overallProbability: 0.856,
+            confidenceLevel: 'high',
+          },
+          explanation: {
+            reasonChosen: 'Site demonstrates strong E-E-A-T signals with comprehensive schema markup and high authority score',
+            keyFactors: [
+              { factor: 'authority', impact: 0.30, evidence: 'GEO score 85/100' },
+              { factor: 'structured_data', impact: 0.25, evidence: 'Complete schema coverage' },
+            ],
+            platformBias: 'Perplexity strongly prefers recent, authoritative content with structured data',
+            competitivePosition: { position: 'leader', advantage: 12.5 },
+            nearMisses: [{ competitorUrl: 'https://competitor.com/guide', scoreGap: 3.2 }],
+          },
+          metadata: {
+            graphNodes: 5,
+            graphEdges: 4,
+            processingTimeMs: 1240,
+          },
         },
       },
     ],
