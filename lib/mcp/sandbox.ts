@@ -69,10 +69,42 @@ export class EnterpriseSandboxV2 {
   private config: SandboxConfig;
   private keyPair?: { publicKey: string; privateKey: string };
   
+  // Production-safe resource limits
+  private static readonly MAX_MEMORY_MB = 512;
+  private static readonly MAX_CPU_TIMEOUT_MS = 5000;
+  private static readonly MIN_MEMORY_MB = 32;
+  private static readonly MIN_CPU_TIMEOUT_MS = 100;
+  
   constructor(config: Partial<SandboxConfig> = {}) {
+    // Validate and clamp memory limit
+    const requestedMemory = config.memoryLimitMB || 256;
+    if (requestedMemory > EnterpriseSandboxV2.MAX_MEMORY_MB) {
+      logger.warn(`Memory limit ${requestedMemory}MB exceeds maximum, clamping to ${EnterpriseSandboxV2.MAX_MEMORY_MB}MB`);
+    }
+    if (requestedMemory < EnterpriseSandboxV2.MIN_MEMORY_MB) {
+      logger.warn(`Memory limit ${requestedMemory}MB below minimum, increasing to ${EnterpriseSandboxV2.MIN_MEMORY_MB}MB`);
+    }
+    const memoryLimitMB = Math.max(
+      EnterpriseSandboxV2.MIN_MEMORY_MB,
+      Math.min(requestedMemory, EnterpriseSandboxV2.MAX_MEMORY_MB)
+    );
+    
+    // Validate and clamp CPU timeout
+    const requestedTimeout = config.cpuTimeoutMs || 2000;
+    if (requestedTimeout > EnterpriseSandboxV2.MAX_CPU_TIMEOUT_MS) {
+      logger.warn(`CPU timeout ${requestedTimeout}ms exceeds maximum, clamping to ${EnterpriseSandboxV2.MAX_CPU_TIMEOUT_MS}ms`);
+    }
+    if (requestedTimeout < EnterpriseSandboxV2.MIN_CPU_TIMEOUT_MS) {
+      logger.warn(`CPU timeout ${requestedTimeout}ms below minimum, increasing to ${EnterpriseSandboxV2.MIN_CPU_TIMEOUT_MS}ms`);
+    }
+    const cpuTimeoutMs = Math.max(
+      EnterpriseSandboxV2.MIN_CPU_TIMEOUT_MS,
+      Math.min(requestedTimeout, EnterpriseSandboxV2.MAX_CPU_TIMEOUT_MS)
+    );
+    
     this.config = {
-      memoryLimitMB: config.memoryLimitMB || 256,
-      cpuTimeoutMs: config.cpuTimeoutMs || 2000,
+      memoryLimitMB,
+      cpuTimeoutMs,
       allowNetworkAccess: config.allowNetworkAccess ?? false,
       allowFileSystem: config.allowFileSystem ?? false,
       tmpDir: config.tmpDir || '/tmp',
@@ -95,8 +127,47 @@ export class EnterpriseSandboxV2 {
    * Load Ed25519 keypair for request/response signing
    */
   async loadKeyPair(publicKey: string, privateKey: string): Promise<void> {
+    // Validate key format
+    if (!publicKey || !privateKey) {
+      throw new Error('Both publicKey and privateKey are required');
+    }
+    
+    // Validate base64 encoding
+    try {
+      Buffer.from(publicKey, 'base64');
+      Buffer.from(privateKey, 'base64');
+    } catch (error) {
+      throw new Error('Keys must be valid base64-encoded strings');
+    }
+    
+    // Validate key lengths (Ed25519 public key = 32 bytes, private key = 32-85 bytes depending on format)
+    const publicKeyBuffer = Buffer.from(publicKey, 'base64');
+    const privateKeyBuffer = Buffer.from(privateKey, 'base64');
+    
+    if (publicKeyBuffer.length !== 32) {
+      throw new Error(`Invalid Ed25519 public key length: ${publicKeyBuffer.length} bytes (expected 32)`);
+    }
+    
+    if (privateKeyBuffer.length < 32 || privateKeyBuffer.length > 85) {
+      throw new Error(`Invalid Ed25519 private key length: ${privateKeyBuffer.length} bytes (expected 32-85)`);
+    }
+    
+    // Test key pair by creating a CryptoKey object
+    try {
+      crypto.createPrivateKey({
+        key: privateKeyBuffer,
+        format: 'der',
+        type: 'pkcs8'
+      });
+    } catch (error) {
+      throw new Error('Invalid Ed25519 private key format: ' + (error instanceof Error ? error.message : String(error)));
+    }
+    
     this.keyPair = { publicKey, privateKey };
-    logger.info('Ed25519 keypair loaded');
+    logger.info('Ed25519 keypair loaded and validated', {
+      publicKeyLength: publicKeyBuffer.length,
+      privateKeyLength: privateKeyBuffer.length,
+    });
   }
   
   /**

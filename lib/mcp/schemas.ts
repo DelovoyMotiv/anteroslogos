@@ -33,8 +33,8 @@ export interface ToolDefinition {
     description: string;
   };
   examples?: Array<{
-    input: Record<string, any>;
-    output: any;
+    input: Record<string, unknown>; // Generic input for schema examples
+    output: unknown; // Generic output for schema examples
   }>;
 }
 
@@ -317,8 +317,9 @@ export const GRAPH_TOOLS: Record<string, ToolDefinition> = {
 
 /**
  * Convert to OpenAI Function Calling format
+ * Returns any for compatibility with OpenAI SDK types
  */
-export function toOpenAIFunction(tool: ToolDefinition): any {
+export function toOpenAIFunction(tool: ToolDefinition): any { // eslint-disable-line @typescript-eslint/no-explicit-any
   return {
     type: 'function',
     function: {
@@ -350,8 +351,9 @@ export function toOpenAIFunction(tool: ToolDefinition): any {
 
 /**
  * Convert to Claude Tools format
+ * Returns any for compatibility with Anthropic SDK types
  */
-export function toClaudeTool(tool: ToolDefinition): any {
+export function toClaudeTool(tool: ToolDefinition): any { // eslint-disable-line @typescript-eslint/no-explicit-any
   return {
     name: tool.name,
     description: tool.description,
@@ -374,8 +376,9 @@ export function toClaudeTool(tool: ToolDefinition): any {
 
 /**
  * Convert to Grok Tools format (similar to OpenAI but with extensions)
+ * Returns any for compatibility with Grok SDK types
  */
-export function toGrokTool(tool: ToolDefinition): any {
+export function toGrokTool(tool: ToolDefinition): any { // eslint-disable-line @typescript-eslint/no-explicit-any
   return {
     type: 'function',
     function: {
@@ -406,8 +409,9 @@ export function toGrokTool(tool: ToolDefinition): any {
 
 /**
  * Helper to convert parameter to JSON schema
+ * Returns any for JSON Schema compatibility
  */
-function toParameterSchema(param: ToolParameter): any {
+function toParameterSchema(param: ToolParameter): any { // eslint-disable-line @typescript-eslint/no-explicit-any
   return {
     type: param.type,
     description: param.description,
@@ -423,8 +427,9 @@ function toParameterSchema(param: ToolParameter): any {
 
 /**
  * Generate OpenAPI 3.1 specification
+ * Returns any for OpenAPI schema compatibility
  */
-export function generateOpenAPISpec(): any {
+export function generateOpenAPISpec(): any { // eslint-disable-line @typescript-eslint/no-explicit-any
   return {
     openapi: '3.1.0',
     info: {
@@ -551,12 +556,13 @@ export function generateOpenAPISpec(): any {
 
 /**
  * Export all tools in all formats
+ * Returns any[] for SDK compatibility
  */
 export function exportAllTools(): {
-  openai: any[];
-  claude: any[];
-  grok: any[];
-  openapi: any;
+  openai: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
+  claude: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
+  grok: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
+  openapi: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 } {
   const tools = Object.values(GRAPH_TOOLS);
   
