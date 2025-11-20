@@ -4,12 +4,14 @@
  */
 
 import { ed25519 } from '@noble/curves/ed25519.js';
+import { randomUUID } from 'crypto';
 import type { UCPTPayload, UCPTGenerationOptions, SerializedUCPT } from './types';
 import {
   encodeCanonicalCBOR,
   hashCanonicalCBOR,
   base64urlEncode,
 } from './serializer';
+import { validateGenerationOptions } from './validator';
 
 // COSE algorithm identifiers (RFC 9053)
 const COSE_ALG_EDDSA = -8;  // EdDSA with Ed25519
@@ -18,6 +20,9 @@ const COSE_ALG_EDDSA = -8;  // EdDSA with Ed25519
  * Generate UCPT token with COSE_Sign1 structure
  */
 export async function generateUCPT(options: UCPTGenerationOptions): Promise<SerializedUCPT> {
+  // Validate all inputs
+  validateGenerationOptions(options);
+  
   const {
     issuer_aid,
     tool_name,
@@ -31,17 +36,13 @@ export async function generateUCPT(options: UCPTGenerationOptions): Promise<Seri
     ttl_seconds = 3600,
   } = options;
   
-  // Validate keys
-  if (private_key.length !== 32) {
-    throw new Error(`Invalid private key length: ${private_key.length} (expected 32)`);
-  }
-  if (public_key.length !== 32) {
-    throw new Error(`Invalid public key length: ${public_key.length} (expected 32)`);
-  }
-  
   // Generate timestamps
   const iat = Math.floor(Date.now() / 1000);
+  const nbf = iat;  // Not before = issued at (prevent time-travel)
   const exp = iat + ttl_seconds;
+  
+  // Generate unique token ID
+  const jti = randomUUID();
   
   // Compute input and output hashes
   const input_hash = hashCanonicalCBOR(input);
@@ -50,9 +51,10 @@ export async function generateUCPT(options: UCPTGenerationOptions): Promise<Seri
   // Sort causal_path_ids
   const sorted_path_ids = [...causal_path_ids].sort((a, b) => a - b);
   
-  // Build payload (keys in canonical order)
+  // Build payload (keys in canonical order: integers first, then strings alphabetically)
   const payload: UCPTPayload = {
     1: issuer_aid,  // iss (integer key 1)
+    4: nbf,  // nbf (integer key 4)
     6: iat,  // iat (integer key 6)
     7: exp,  // exp (integer key 7)
     causal_path_ids: sorted_path_ids,
@@ -60,6 +62,7 @@ export async function generateUCPT(options: UCPTGenerationOptions): Promise<Seri
     graph_commit,
     graph_version,
     input_hash,
+    jti,
     tool: tool_name,
     ucpt_version: 1,
   };
@@ -119,30 +122,3 @@ export async function generateUCPT(options: UCPTGenerationOptions): Promise<Seri
   };
 }
 
-/**
- * Get current git commit hash
- */
-export async function getCurrentGitCommit(): Promise<string> {
-  try {
-    const { execSync } = await import('child_process');
-    const commit = execSync('git rev-parse HEAD', { encoding: 'utf-8' }).trim();
-    return commit;
-  } catch (error) {
-    console.warn('Failed to get git commit, using placeholder:', error);
-    return '0000000000000000000000000000000000000000';
-  }
-}
-
-/**
- * Get current git tag/version
- */
-export async function getCurrentGitVersion(): Promise<string> {
-  try {
-    const { execSync } = await import('child_process');
-    const version = execSync('git describe --tags --always', { encoding: 'utf-8' }).trim();
-    return version;
-  } catch (error) {
-    console.warn('Failed to get git version, using default:', error);
-    return 'v1.0.0';
-  }
-}

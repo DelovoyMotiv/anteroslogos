@@ -12,8 +12,9 @@
 export interface UCPTPayload {
   // Standard COSE claims (integer keys per RFC 9052)
   1: string;  // iss - issuer AID URI (aid://domain/agent/<aid>)
+  4: number;  // nbf - not before (unix timestamp, prevent time-travel attacks)
   6: number;  // iat - issued at (unix timestamp)
-  7: number;  // exp - expiration (iat + 3600)
+  7: number;  // exp - expiration (iat + ttl_seconds)
   
   // UCPT-specific claims (string keys, alphabetically sorted for canonical CBOR)
   causal_path_ids: number[];  // Sorted int64 array of causal path node IDs
@@ -21,7 +22,8 @@ export interface UCPTPayload {
   graph_commit: string;  // Git commit hash of knowledge graph at execution time
   graph_version: string;  // Semantic version of graph (e.g., "v1.8.0")
   input_hash: string;  // base64url(SHA3-512(canonical_cbor(input)))
-  tool: string;  // Tool name (e.g., "causal_citation_trace")
+  jti: string;  // JWT ID - UUID v4 for unique token identification
+  tool: string;  // Tool name (e.g., "causal-citation-trace")
   ucpt_version: number;  // UCPT protocol version (currently 1)
 }
 

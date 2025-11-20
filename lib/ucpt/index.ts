@@ -19,5 +19,12 @@ export type * from './types';
 export * from './generator';
 export * from './verifier';
 export * from './serializer';
+export * from './validator';
+export * from './registry';
+export * from './replay';
+export * from './ratelimit';
+export * from './deterministic';
+export * from './cache';
+
 export const UCPT_VERSION = 1;
 export const UCPT_MIME_TYPE = 'application/cose; cose-type="cose-sign1"' as const;

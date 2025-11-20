@@ -11,11 +11,22 @@ import {
   base64urlDecode,
   validateCanonicalCBOR,
 } from './serializer';
+import { resolvePublicKey } from './registry';
+import { checkAndRecordToken } from './replay';
+import { checkRateLimit } from './ratelimit';
 
 /**
  * Verify UCPT token
+ * Full zero-trust verification with registry lookup, replay protection, and rate limiting
  */
-export async function verifyUCPT(serialized: SerializedUCPT): Promise<UCPTVerificationResult> {
+export async function verifyUCPT(
+  serialized: SerializedUCPT,
+  options?: {
+    skipRateLimit?: boolean;
+    skipReplayCheck?: boolean;
+    skipRegistryCheck?: boolean;
+  }
+): Promise<UCPTVerificationResult> {
   try {
     // Decode base64url
     const token_bytes = base64urlDecode(serialized.token);
@@ -70,27 +81,96 @@ export async function verifyUCPT(serialized: SerializedUCPT): Promise<UCPTVerifi
     // Decode payload
     const payload = decodeCanonicalCBOR<UCPTPayload>(payload_encoded as Uint8Array);
     
-    // Validate required fields
-    if (!payload[1] || !payload[6] || !payload[7] || !payload.tool) {
+    // Validate required fields (including jti and nbf)
+    if (!payload[1] || !payload[4] || !payload[6] || !payload[7] || !payload.tool || !payload.jti) {
       return {
         valid: false,
-        error: 'Missing required fields in payload',
+        error: 'Missing required fields in payload (iss, nbf, iat, exp, tool, jti)',
         error_code: UCPTErrorCode.MISSING_REQUIRED_FIELD,
       };
     }
     
-    // Check expiration
+    // Validate timestamps (nbf ≤ iat ≤ now ≤ exp)
     const now = Math.floor(Date.now() / 1000);
-    if (payload[7] < now) {
+    const nbf = payload[4];
+    const iat = payload[6];
+    const exp = payload[7];
+    
+    // Check not-before (prevent time-travel attacks)
+    if (nbf > now) {
       return {
         valid: false,
-        error: `Token expired at ${new Date(payload[7] * 1000).toISOString()}`,
+        error: `Token not yet valid (nbf: ${new Date(nbf * 1000).toISOString()})`,
+        error_code: UCPTErrorCode.INVALID_FORMAT,
+        payload,
+      };
+    }
+    
+    // Check expiration
+    if (exp < now) {
+      return {
+        valid: false,
+        error: `Token expired at ${new Date(exp * 1000).toISOString()}`,
         error_code: UCPTErrorCode.EXPIRED,
         payload,
       };
     }
     
-    // Rebuild Sig_structure
+    // Validate timestamp ordering (nbf ≤ iat ≤ exp)
+    if (nbf > iat || iat > exp) {
+      return {
+        valid: false,
+        error: `Invalid timestamp ordering (nbf: ${nbf}, iat: ${iat}, exp: ${exp})`,
+        error_code: UCPTErrorCode.INVALID_FORMAT,
+        payload,
+      };
+    }
+    
+    const issuerAid = payload[1];
+    
+    // Rate limiting (per issuer)
+    if (!options?.skipRateLimit) {
+      const rateLimitOk = await checkRateLimit(issuerAid);
+      if (!rateLimitOk) {
+        return {
+          valid: false,
+          error: 'Rate limit exceeded for issuer',
+          error_code: UCPTErrorCode.INVALID_FORMAT,
+        };
+      }
+    }
+    
+    // Registry check: verify issuer AID → public key mapping
+    if (!options?.skipRegistryCheck) {
+      const registeredKey = await resolvePublicKey(issuerAid);
+      if (registeredKey) {
+        // Compare with public key in token
+        let keysMatch = true;
+        if (registeredKey.length !== public_key.length) {
+          keysMatch = false;
+        } else {
+          for (let i = 0; i < registeredKey.length; i++) {
+            if (registeredKey[i] !== public_key[i]) {
+              keysMatch = false;
+              break;
+            }
+          }
+        }
+        
+        if (!keysMatch) {
+          return {
+            valid: false,
+            error: 'Public key does not match registered key for issuer',
+            error_code: UCPTErrorCode.UNKNOWN_ISSUER,
+          };
+        }
+      } else {
+        // Issuer not registered (warning only, not rejection)
+        console.warn(`⚠️  Issuer ${issuerAid} not registered in public key registry`);
+      }
+    }
+    
+    // Rebuild Sig_structure for signature verification
     const sig_structure = encodeCanonicalCBOR([
       'Signature1',
       protected_encoded,
@@ -98,7 +178,7 @@ export async function verifyUCPT(serialized: SerializedUCPT): Promise<UCPTVerifi
       payload_encoded,
     ]);
     
-    // Verify signature
+    // Verify Ed25519 signature
     const valid_signature = ed25519.verify(
       signature as Uint8Array,
       sig_structure,
@@ -113,11 +193,24 @@ export async function verifyUCPT(serialized: SerializedUCPT): Promise<UCPTVerifi
       };
     }
     
+    // Replay protection: check if token already used
+    if (!options?.skipReplayCheck) {
+      const isNew = await checkAndRecordToken(serialized.token, exp);
+      if (!isNew) {
+        return {
+          valid: false,
+          error: 'Token replay detected (token already used)',
+          error_code: UCPTErrorCode.REPLAY_ATTACK,
+          payload,
+        };
+      }
+    }
+    
     return {
       valid: true,
       payload,
       verified_at: now,
-      issuer: payload[1],
+      issuer: issuerAid,
     };
   } catch (error) {
     return {
