@@ -54,6 +54,20 @@
         "cpu_per_second": 0.001,
         "memory_per_mb_second": 0.0001
       }
+    },
+    "provenance": {
+      "ucpt": {
+        "version": 1,
+        "enabled": true,
+        "algorithms": ["EdDSA"],
+        "hash_functions": ["SHA3-512"],
+        "encoding": "COSE_Sign1",
+        "serialization": "canonical-CBOR",
+        "deterministic_execution": true,
+        "result_caching": true,
+        "replay_protection": true,
+        "zero_trust_verification": true
+      }
     }
   },
   "tools": [
@@ -186,7 +200,7 @@
   },
   "metadata": {
     "established": "2025",
-    "last_updated": "2025-01-18",
+    "last_updated": "2025-11-20",
     "status": "production",
     "uptime_target": "99.9%",
     "support": "https://anoteroslogos.com/#contact"

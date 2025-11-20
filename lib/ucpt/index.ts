@@ -25,6 +25,7 @@ export * from './replay';
 export * from './ratelimit';
 export * from './deterministic';
 export * from './cache';
+export * from './keys';
 
 export const UCPT_VERSION = 1;
 export const UCPT_MIME_TYPE = 'application/cose; cose-type="cose-sign1"' as const;

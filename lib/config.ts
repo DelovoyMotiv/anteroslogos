@@ -76,6 +76,16 @@ export const config = {
     url: getOptionalEnv('REDIS_URL'),
   },
   
+  // UCPT (Universal Causal Provenance Token)
+  ucpt: {
+    enabled: getOptionalEnv('UCPT_ENABLED') !== 'false', // Default enabled
+    issuerAid: getOptionalEnv('UCPT_ISSUER_AID') || 'aid://geoaudit.org/agent/geo-audit-platform',
+    privateKey: getOptionalEnv('UCPT_PRIVATE_KEY'), // Base64-encoded Ed25519 private key (32 bytes)
+    publicKey: getOptionalEnv('UCPT_PUBLIC_KEY'), // Base64-encoded Ed25519 public key (32 bytes)
+    ttlSeconds: parseInt(getOptionalEnv('UCPT_TTL_SECONDS') || '3600', 10),
+    cacheEnabled: getOptionalEnv('UCPT_CACHE_ENABLED') !== 'false', // Default enabled
+  },
+  
   // OpenAI (Optional for AI-enhanced features)
   openai: {
     apiKey: getOptionalEnv('VITE_OPENAI_API_KEY'),
@@ -113,6 +123,7 @@ export const config = {
     citationTracking: true,
     knowledgeGraph: true,
     competitiveIntelligence: true,
+    ucptProvenance: getOptionalEnv('UCPT_ENABLED') !== 'false',
   },
 };
 
@@ -130,6 +141,8 @@ export function validateConfig(): void {
   console.log(`   Supabase: ${config.supabase.url ? '✅' : '❌'}`);
   console.log(`   Redis: ${config.redis.url ? '✅' : '⚠️  In-memory fallback'}`);
   console.log(`   OpenAI: ${config.openai.apiKey ? '✅' : '⚠️  AI features disabled'}`);
+  console.log(`   UCPT Provenance: ${config.ucpt.enabled ? '✅' : '⚠️  Disabled'}`);
+  console.log(`   UCPT Keys: ${config.ucpt.privateKey && config.ucpt.publicKey ? '✅' : '⚠️  Not configured'}`);
   console.log(`   Contact Form: ${
     config.contact.customEndpoint || config.contact.formspreeId || config.contact.web3formsKey 
       ? '✅' 

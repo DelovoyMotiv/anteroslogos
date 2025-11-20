@@ -16,6 +16,7 @@ import { exportAllTools, generateOpenAPISpec } from '../../lib/mcp/schemas';
 import { logger } from '../../lib/a2a/logger';
 import { checkRateLimit } from '../../lib/a2a/rateLimiter';
 import { validateApiKey, recordAgentActivity } from '../../lib/a2a/agentRegistry';
+import { executeToolWithUCPT } from '../../lib/mcp/ucpt-integration';
 import crypto from 'crypto';
 import type {
   ToolExecutionResponse,
@@ -757,11 +758,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
     
-    // Execute tool
-    const result = await executeTool(toolName, params, {
+    // Execute tool with UCPT provenance
+    const execContext = {
       requestId,
       agentId: auth.agent!.id,
-    });
+    };
+    
+    const toolResult = await executeToolWithUCPT(
+      toolName,
+      params,
+      execContext,
+      (p, c) => executeTool(toolName, p, c)
+    );
     
     const executionTime = Date.now() - startTime;
     
@@ -773,14 +781,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       success: true,
     });
     
-    // Format response
-    const response: ToolExecutionResponse = {
+    // Format response with UCPT
+    const response: ToolExecutionResponse & { provenance?: unknown } = {
       success: true,
-      result,
+      result: toolResult.result,
       metadata: {
         executionTimeMs: executionTime,
       },
     };
+    
+    // Add UCPT token to response if available
+    if (toolResult.ucpt) {
+      response.provenance = {
+        ucpt: toolResult.ucpt.token,
+        mimeType: toolResult.ucpt.mime_type,
+        deterministicHash: toolResult.deterministicHash,
+      };
+    }
     
     logger.info('MCP request completed', { requestId, executionTime });
     
