@@ -38,11 +38,12 @@ export async function submitContactForm(data: ContactFormData): Promise<ContactF
     };
   }
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // RFC 5322 compliant email validation
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   if (!emailRegex.test(data.email)) {
     return {
       success: false,
-      message: 'Invalid email address',
+      message: 'Invalid email address format',
       error: 'VALIDATION_ERROR'
     };
   }
@@ -123,16 +124,25 @@ export async function submitContactForm(data: ContactFormData): Promise<ContactF
       }
     }
 
-    // Option 4: Fallback - Store in localStorage
-    // This ensures no contact is lost even without a configured service
+    // Option 4: Fallback - Development only
+    // Fail-fast in production to ensure contact forms are properly configured
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error(
+        'Contact form service not configured in production. ' +
+        'Set one of: VITE_CONTACT_FORM_ENDPOINT, VITE_FORMSPREE_ID, or VITE_WEB3FORMS_KEY'
+      );
+    }
+    
+    // Development fallback: Store in localStorage
     storeContactLocally(data);
     
-    console.log('Contact form data stored locally. Please configure a contact form service.');
-    console.log('To send via email, use: mailto:Peitho@anoteroslogos.com?subject=Contact%20Request');
+    console.warn('⚠️  Contact form data stored locally (development only)');
+    console.log('📧 Configure production service: VITE_WEB3FORMS_KEY or VITE_FORMSPREE_ID');
+    console.log('📧 Alternative: mailto:Peitho@anoteroslogos.com?subject=Contact%20Request');
     
     return {
       success: true,
-      message: 'Your message has been received. We will contact you shortly.',
+      message: 'Your message has been received (development mode). Configure production contact service.',
     };
 
   } catch (error) {

@@ -27,6 +27,9 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: true,
+    // Browser-only: localStorage used for Supabase Auth session persistence
+    // This is safe and recommended by Supabase for client-side authentication
+    // Server-side rendering will use undefined (no storage)
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
   },
   global: {

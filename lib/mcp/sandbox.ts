@@ -457,12 +457,31 @@ export class EnterpriseSandboxV2 {
       // Try full enterprise execution first
       return await this.execute(code, context, variables);
     } catch (error) {
-      logger.warn('Enterprise execution failed, falling back to basic mode', {
+      // Log security-critical fallback mode activation
+      logger.logSecurity('Sandbox execution failed, entering fallback mode', 'high', {
         requestId: context.requestId,
+        agentId: context.agentId,
         error: error instanceof Error ? error.message : String(error),
+        disabledFeatures: ['signature_verification', 'billing_hooks'],
       });
       
-      // Fallback: disable signature verification and billing
+      // Alert in production environment
+      if (process.env.NODE_ENV === 'production') {
+        logger.error('🚨 CRITICAL: Sandbox degraded mode in production', {
+          requestId: context.requestId,
+          error: error instanceof Error ? error.message : String(error),
+          tags: ['security', 'sandbox', 'degraded'],
+        });
+        
+        // In production, fail-fast instead of degrading security
+        throw new Error(
+          'Sandbox execution failed in production. Degraded mode not allowed. ' +
+          'Original error: ' + (error instanceof Error ? error.message : String(error))
+        );
+      }
+      
+      // Development fallback: disable signature verification and billing
+      logger.warn('⚠️  Using degraded sandbox mode (development only)');
       const fallbackConfig = { ...this.config };
       fallbackConfig.enableSignatureVerification = false;
       fallbackConfig.enableBillingHooks = false;

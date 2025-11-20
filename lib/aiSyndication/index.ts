@@ -6,6 +6,7 @@
 
 import { z } from 'zod';
 import type { KnowledgeGraph } from '../../utils/knowledgeGraph/builder';
+import { config } from '../config';
 
 // ==================== SCHEMAS ====================
 
@@ -58,24 +59,20 @@ export class AISyndicationManager {
   }
 
   /**
-   * Load API keys from environment
+   * Load API keys from centralized configuration
    */
   private loadAPIKeys(): void {
     // OpenAI
-    const openaiKey = import.meta.env.VITE_OPENAI_API_KEY;
-    if (openaiKey) this.apiKeys.set('openai', openaiKey);
+    if (config.openai.apiKey) this.apiKeys.set('openai', config.openai.apiKey);
 
     // Anthropic
-    const anthropicKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
-    if (anthropicKey) this.apiKeys.set('anthropic', anthropicKey);
+    if (config.anthropic.apiKey) this.apiKeys.set('anthropic', config.anthropic.apiKey);
 
     // Perplexity
-    const perplexityKey = import.meta.env.VITE_PERPLEXITY_API_KEY;
-    if (perplexityKey) this.apiKeys.set('perplexity', perplexityKey);
+    if (config.perplexity.apiKey) this.apiKeys.set('perplexity', config.perplexity.apiKey);
 
     // Google
-    const googleKey = import.meta.env.VITE_GOOGLE_API_KEY;
-    if (googleKey) this.apiKeys.set('google', googleKey);
+    if (config.google.apiKey) this.apiKeys.set('google', config.google.apiKey);
   }
 
   /**

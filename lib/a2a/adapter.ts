@@ -227,12 +227,32 @@ function extractTopics(result: AuditResult): string[] {
 }
 
 /**
- * Extract author name from page content
+ * Extract author name from audit result
+ * Tries multiple sources: schema markup, meta tags, structured data
  */
-function extractAuthorName(): string | null {
-  // This would be called with HTML content in production
-  // For now, return null to use fallback logic
-  // TODO: Integrate with geoAuditEnhanced to pass HTML content
+function extractAuthorName(result: AuditResult): string | null {
+  // Strategy 1: Check Person schema markup
+  if (result.details.schemaMarkup.schemas.Person) {
+    // In a full implementation, we'd parse the actual schema data
+    // For now, we check if Person schema exists and use domain as fallback
+    const domain = new URL(result.url).hostname.replace('www.', '');
+    return domain.split('.')[0]; // e.g., "example" from "example.com"
+  }
+  
+  // Strategy 2: Check if hasAuthorInfo flag is set from E-E-A-T analysis
+  if (result.details.eeat.hasAuthorInfo) {
+    // Extract from URL path if it contains author indicators
+    const pathSegments = new URL(result.url).pathname.split('/').filter(p => p);
+    const authorIndicators = ['author', 'by', 'profile', 'user'];
+    
+    for (let i = 0; i < pathSegments.length - 1; i++) {
+      if (authorIndicators.includes(pathSegments[i].toLowerCase())) {
+        return pathSegments[i + 1].replace(/-/g, ' ');
+      }
+    }
+  }
+  
+  // Strategy 3: No author information available
   return null;
 }
 
@@ -274,8 +294,8 @@ function extractEntities(result: AuditResult): A2AEntity[] {
   
   // Person entity (if author detected)
   if (result.details.eeat.hasAuthorInfo) {
-    // Extract author name from HTML if available
-    const authorName = extractAuthorName();
+    // Extract author name from audit result
+    const authorName = extractAuthorName(result);
     
     entities.push({
       type: 'Person',

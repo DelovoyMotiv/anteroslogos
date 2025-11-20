@@ -259,7 +259,7 @@ export class ProductionCodeExecutionEnvironment {
             },
           },
         },
-        example: `const result = await callA2ATool('geo-audit__auditWebsite', { url: 'https://example.com' });`,
+        example: `const result = await callA2ATool('geo-audit__auditWebsite', { url: 'https://yourdomain.com' });`,
       },
       'geo-audit__batchAudit': {
         schema: {
@@ -277,7 +277,7 @@ export class ProductionCodeExecutionEnvironment {
             },
           },
         },
-        example: `const result = await callA2ATool('geo-audit__batchAudit', { urls: ['https://a.com', 'https://b.com'], maxConcurrent: 3 });`,
+        example: `const result = await callA2ATool('geo-audit__batchAudit', { urls: ['https://site1.com', 'https://site2.com'], maxConcurrent: 3 });`,
       },
       'citation-tracking__detectCitations': {
         schema: {
@@ -296,7 +296,7 @@ export class ProductionCodeExecutionEnvironment {
             },
           },
         },
-        example: `const result = await callA2ATool('citation-tracking__detectCitations', { platform: 'perplexity', response: 'According to example.com...', domain: 'example.com' });`,
+        example: `const result = await callA2ATool('citation-tracking__detectCitations', { platform: 'perplexity', response: 'According to yourdomain.com...', domain: 'yourdomain.com' });`,
       },
     };
     

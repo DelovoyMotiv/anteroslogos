@@ -64,14 +64,22 @@ export function createRedisClient(): RedisClient {
       });
       
       return client;
-    } catch {
-      console.warn('Redis module not found, using in-memory fallback');
+    } catch (error) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('Redis module (ioredis) not available in production. Install with: npm install ioredis');
+      }
+      console.warn('Redis module not found, using in-memory fallback (development only)');
       return createMockRedisClient();
     }
   }
   
+  // Fail-fast in production if Redis not configured
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('REDIS_URL required in production environment. Set environment variable or use Vercel Redis.');
+  }
+  
   // Development: Use in-memory mock
-  console.warn('No REDIS_URL configured, using in-memory storage (not production-safe)');
+  console.warn('⚠️  No REDIS_URL configured, using in-memory storage (development only, not production-safe)');
   return createMockRedisClient();
 }
 
