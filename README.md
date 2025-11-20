@@ -1,4 +1,4 @@
-# Anóteros Lógos - AI Knowledge Infrastructure Platform
+# Anóteros Lógos - Enterprise AI Knowledge Infrastructure
 
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-2.7.0-blue.svg)](CHANGELOG.md)
@@ -7,7 +7,7 @@
 [![React](https://img.shields.io/badge/React-19.2-61dafb.svg)](https://react.dev)
 [![Build](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/DelovoyMotiv/anteroslogos/actions)
 
-Knowledge Graph Engine for GEO with direct LLM integration and bidirectional AI intelligence. Citation intelligence platform with self-improving knowledge graphs powered by feedback loop analysis. Enables direct syndication to ChatGPT, Claude, Gemini, and Perplexity through AID protocol discovery.
+Enterprise-grade AI knowledge infrastructure platform providing cryptographically verifiable provenance, deterministic execution, and zero-trust verification for AI agent interactions. First-in-world implementation of Universal Causal Provenance Token (UCPT) standard for Business-to-Agent (B2A) ecosystem.
 
 **Production URL:** https://anoteroslogos.com
 
