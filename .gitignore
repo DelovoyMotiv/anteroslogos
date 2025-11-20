@@ -67,6 +67,11 @@ Thumbs.db
 !LICENSE_EXPLANATION.md
 !OPEN_GRAPH_SETUP.md
 !DNS_SETUP.md
+
+# Internal documentation (not for public repo)
+GOLD_STANDARD_INNOVATIONS.md
+PRODUCTION_AUDIT_REPORT.md
+PRODUCTION_IMPROVEMENTS_COMPLETE.md
 docs/
 metadata.json
 
