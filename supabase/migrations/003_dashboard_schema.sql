@@ -499,3 +499,26 @@ COMMENT ON COLUMN public.usage_events.input_hash IS 'SHA256 of normalized input 
 COMMENT ON COLUMN public.usage_events.ucpt_hash IS 'SHA3-512 hash of UCPT token (null if not using UCPT)';
 COMMENT ON COLUMN public.usage_events.tokens_used IS 'Approximate token count for LLM calls';
 COMMENT ON COLUMN public.usage_events.cost_usd IS 'Estimated cost in USD for billing';
+
+-- =====================================================
+-- RATE LIMIT BUCKETS TABLE
+-- For distributed rate limiting (Supabase-backed)
+-- =====================================================
+CREATE TABLE IF NOT EXISTS public.rate_limit_buckets (
+  key TEXT PRIMARY KEY,
+  count INTEGER NOT NULL DEFAULT 0 CHECK (count >= 0),
+  window_start TIMESTAMPTZ NOT NULL,
+  expires_at TIMESTAMPTZ NOT NULL
+);
+
+-- Index for cleanup
+CREATE INDEX idx_rate_limit_expires ON public.rate_limit_buckets(expires_at);
+
+-- RLS (service role only)
+ALTER TABLE public.rate_limit_buckets ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Service role full access"
+  ON public.rate_limit_buckets FOR ALL
+  USING (auth.role() = 'service_role');
+
+COMMENT ON TABLE public.rate_limit_buckets IS 'Sliding window rate limiting buckets';
