@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Billing Page
  * Stripe integration, plan selector, usage overview

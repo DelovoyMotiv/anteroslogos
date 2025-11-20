@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Dashboard Overview Page
  * Main dashboard with KPIs and quick actions

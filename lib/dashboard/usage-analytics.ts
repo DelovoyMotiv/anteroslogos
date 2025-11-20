@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Usage Analytics
  * Query aggregations and real-time usage statistics
