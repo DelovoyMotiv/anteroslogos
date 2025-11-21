@@ -166,12 +166,27 @@ export function useAuth() {
     return data;
   };
 
+  const signInWithOAuth = async (provider: 'google' | 'github' | 'twitter') => {
+    if (!isSupabaseConfigured() || !supabase) {
+      throw new Error('Supabase not configured');
+    }
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+    if (error) throw error;
+    return data;
+  };
+
   return {
     user,
     loading,
     signIn,
     signUp,
     signInWithMagicLink,
+    signInWithOAuth,
     signOut,
     resetPassword,
   };
