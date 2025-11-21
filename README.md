@@ -1,6 +1,6 @@
 # Anóteros Lógos
 
-**AI Knowledge Infrastructure Platform**
+**Generative Engine Optimization Platform**
 
 Production URL: https://anoteroslogos.com  
 Codebase: 189 files | 60,189 lines
@@ -9,69 +9,168 @@ Codebase: 189 files | 60,189 lines
 
 ## Overview
 
-Enterprise AI knowledge infrastructure with cryptographically verifiable provenance, deterministic execution, and blockchain-based micropayments. Autonomous agent integration via JSON-RPC 2.0, Model Context Protocol (MCP), and Agent Identity & Discovery (AID) standards.
+Enterprise platform for optimizing digital content and brand presence for AI language models. Combines real-time audit capabilities, knowledge graph extraction, citation learning, competitive intelligence, and blockchain-based micropayments for autonomous agents.
 
-**Core Capabilities:**
+**System Architecture:**
 
-- **A2A Protocol** - JSON-RPC 2.0 API for agent-to-agent communication with Ed25519 signatures (RFC 9421)
-- **APA Micropayments** - USDC-based payments on Base L2 (Chain ID: 8453) with automatic detection
-- **MCP Integration** - Model Context Protocol v2.0 with isolated execution sandbox
-- **Knowledge Graph** - Self-improving graph with citation learning and cross-platform sync
-- **Causal Tracer** - Counterfactual reasoning engine for citation path analysis
-
----
-
-## Technical Stack
-
-**Runtime:**
-- Node.js 20.x
-- TypeScript 5.8 (strict mode)
-- React 19.2 (client)
-- Vercel Serverless Functions (API)
-
-**Data Layer:**
-- Supabase (PostgreSQL + Auth)
-- Redis (distributed caching)
-- Base L2 blockchain (payments)
-
-**AI Integration:**
-- OpenRouter API
-- OpenAI, Anthropic Claude, Perplexity, Google Gemini
-- Model Context Protocol v2.0
-
-**Security:**
-- Ed25519 cryptographic signatures
-- AES-256-GCM encryption
-- TLS 1.3
-- WCAG 2.1 AA compliance
+1. **GEO Audit Engine** - Real-time website analysis for AI visibility across Perplexity, ChatGPT, Claude, Gemini
+2. **Knowledge Graph Engine** - Self-improving semantic graph with citation learning and cross-platform syndication
+3. **Causal Citation Tracer** - Counterfactual reasoning for ROI attribution and path optimization
+4. **Agent-to-Agent Protocol** - JSON-RPC 2.0 API with Ed25519 signatures and WebSocket streaming
+5. **Agent-Pay-Agent Layer** - USDC micropayments on Base L2 with automatic detection
+6. **MCP Integration** - Model Context Protocol v2.0 with isolated execution sandbox
+7. **Content Intelligence** - NLP analysis, query intent classification, competitive monitoring
+8. **Gold Standard System** - Citation prediction, learning feedback, network effects amplification
 
 ---
 
-## Architecture
+## Core Modules
 
-### A2A Protocol (JSON-RPC 2.0)
+### 1. GEO Audit System (2,131 lines)
 
-**Endpoint:** `POST https://anoteroslogos.com/api/a2a`
+Real-time website analysis for generative engine visibility.
 
-**Authentication:**  
-Bearer token format: `sk_{tier}_{32_chars}`
+**Capabilities:**
+- Multi-platform analysis (Perplexity, ChatGPT, Claude, Gemini, Google AI Overviews)
+- Semantic structure evaluation (Schema.org, JSON-LD, RDFa, Microdata)
+- Content depth scoring (E-E-A-T, factual claims, data points, expert quotes)
+- Citation probability prediction per platform
+- Technical optimization checks (Core Web Vitals, mobile optimization, internationalization)
+- Security audit (HTTPS, CSP, HSTS, certificate validation)
 
-**Methods:**
+**Analysis Depth Modes:**
+- Quick (30s): Core metrics, schema validation, technical basics
+- Standard (60s): Full semantic analysis, content scoring, platform-specific optimization
+- Deep (120s): Citation prediction, competitive positioning, knowledge graph extraction
+
+**Output:**
+- Overall GEO Score (0-100)
+- Grade classification (Beginner → Novice → Intermediate → Advanced → Expert)
+- Category breakdown (Content, Technical, Authority, Citations, User Experience)
+- Actionable recommendations with priority levels
+- Platform-specific insights
+- PDF report generation
+
+**Files:**
+- `utils/geoAuditEnhanced.ts` - Main audit engine (2,131 lines)
+- `utils/geoAudit.ts` - Legacy audit logic (578 lines)
+- `utils/advancedMetrics.ts` - Scoring algorithms (643 lines)
+- `utils/advancedAnalytics.ts` - Trend analysis (360 lines)
+
+### 2. Knowledge Graph Engine (2,376 lines)
+
+Self-improving semantic graph with bidirectional learning.
+
+**Capabilities:**
+- Entity extraction from web pages (organizations, people, products, concepts)
+- Relationship mapping (hierarchical, associative, causal)
+- Citation link tracking
+- Cross-platform authority propagation
+- Real-time syndication (<60s to Perplexity, ChatGPT, Claude, Gemini)
+- Network effects amplification across clients
+- Self-improvement through citation feedback
+
+**Components:**
+- `utils/knowledgeGraph/builder.ts` - Graph extraction (736 lines)
+- `utils/knowledgeGraph/selfImproving.ts` - Learning loop (646 lines)
+- `utils/knowledgeGraph/realtimeSync.ts` - Platform syndication (541 lines)
+- `utils/knowledgeGraph/networkEffects.ts` - Authority amplification (453 lines)
+
+**Algorithms:**
+- Entity recognition using NLP and Schema.org parsing
+- Claim extraction with confidence scoring
+- Citation path traversal (BFS/DFS hybrid)
+- Authority score calculation with PageRank-inspired damping
+- Temporal graph evolution tracking
+
+### 3. Causal Citation Tracer (4,020 lines)
+
+Counterfactual reasoning engine for ROI attribution.
+
+**Capabilities:**
+- Citation path discovery (BFS/DFS + A* heuristic)
+- Counterfactual simulation (graph cloning with node removal)
+- Platform-specific decision emulation (Perplexity, ChatGPT, Claude, Gemini)
+- ROI calculation per content modification
+- Visibility impact prediction
+- Optimization prioritization
+
+**Components:**
+- `lib/causalTracer/pathFinder.ts` - Path discovery (506 lines)
+- `lib/causalTracer/counterfactualSimulator.ts` - ROI calculation (568 lines)
+- `lib/causalTracer/llmDecisionEmulator.ts` - Platform scoring (565 lines)
+- `lib/causalTracer/engine.ts` - Orchestration (785 lines)
+
+**Algorithms:**
+- Hybrid BFS/DFS with A* heuristic for path optimization
+- Deep graph cloning for counterfactual analysis
+- Platform-specific scoring models (authority weight, recency decay, relevance)
+- Impact quantification via differential analysis
+
+### 4. Citation Intelligence (1,923 lines)
+
+ML-based prediction, tracking, and learning systems.
+
+**Capabilities:**
+- **Citation Prediction** - Probability scoring per platform (Perplexity 0.87, ChatGPT 0.73, etc.)
+- **Citation Tracking** - Real-time detection across AI platforms with screenshot proof
+- **Learning Feedback** - Bidirectional intelligence exchange (AI → Platform → AI)
+- **ROI Measurement** - Monetary value attribution per citation
+
+**Components:**
+- `utils/citationPrediction/engine.ts` - ML prediction (752 lines)
+- `utils/citationProof/tracker.ts` - Citation monitoring (560 lines)
+- `utils/citationLearning/feedbackEngine.ts` - Bidirectional learning (611 lines)
+
+**Machine Learning:**
+- Feature engineering (graph metrics, content quality, authority signals)
+- Ensemble model (weighted combination of classifiers)
+- Confidence intervals and prediction uncertainty
+- Continuous model retraining from citation feedback
+
+### 5. Content Intelligence (2,210 lines)
+
+NLP analysis, competitive monitoring, query intent classification.
+
+**Capabilities:**
+- **NLP Analysis** - Entity extraction, sentiment analysis, readability scoring, semantic density
+- **Query Intent** - ML classification (navigational, informational, transactional, commercial)
+- **Competitive Intelligence** - Real-time monitoring of competitor citations in AI responses
+- **Content Gap Detection** - Opportunity identification via query coverage analysis
+
+**Components:**
+- `utils/nlpContentAnalysis.ts` - NLP processing (506 lines)
+- `utils/queryIntent/analyzer.ts` - Intent classification (808 lines)
+- `utils/competitiveIntelligence.ts` - Competitor monitoring (595 lines)
+- `utils/contentGap/detector.ts` - Gap analysis (726 lines)
+
+**Algorithms:**
+- TF-IDF for semantic density
+- Named Entity Recognition (NER)
+- Sentiment analysis via lexicon-based approach
+- Query intent classification using feature extraction
+- Competitive positioning via citation frequency analysis
+
+### 6. A2A Protocol (10,464 lines)
+
+JSON-RPC 2.0 API for agent-to-agent communication.
+
+**Capabilities:**
+- **Authentication** - Agent Registry with trust scoring (0-100)
+- **Rate Limiting** - Token bucket per tier (10-1,000 req/min)
+- **Caching** - ETag-based HTTP 304 with 1h TTL
+- **Streaming** - WebSocket for real-time audit progress
+- **Signatures** - Ed25519 per RFC 9421 for domain verification
+- **Persistence** - Supabase PostgreSQL with 7 tables
+
+**API Methods:**
 ```
-a2a.discover           Service metadata
-a2a.capabilities       API documentation
+a2a.discover           Service metadata and capabilities
+a2a.capabilities       Full API documentation
 geo.audit.request      Single URL audit (requires payment)
-geo.audit.batch        Batch processing (max 100 URLs)
+geo.audit.batch        Parallel processing (max 100 URLs)
 a2a.ping              Health check
 a2a.status            System status
-```
-
-**Rate Limits:**
-```
-Free:       10 req/min   | 100 req/hour
-Basic:      60 req/min   | 1,000 req/hour
-Pro:        300 req/min  | 10,000 req/hour
-Enterprise: 1,000 req/min| 50,000 req/hour
 ```
 
 **Error Codes:**
@@ -84,87 +183,151 @@ Enterprise: 1,000 req/min| 50,000 req/hour
 -32000  Rate limit exceeded
 ```
 
-### APA Micropayments
+**Components:**
+- `lib/a2a/protocol.ts` - JSON-RPC 2.0 (526 lines)
+- `lib/a2a/agentRegistry.ts` - Agent management (442 lines)
+- `lib/a2a/rateLimiter.ts` - Token bucket (264 lines)
+- `lib/a2a/ed25519Signatures.ts` - RFC 9421 (705 lines)
+- `lib/a2a/websocketServer.ts` - Real-time streaming (568 lines)
+- `lib/a2a/supabaseStorage.ts` - Persistence (668 lines)
 
-**Blockchain:** Base L2 (Chain ID: 8453)  
-**Token:** USDC (ERC-20)  
-**Status:** Production
+### 7. APA Micropayments (4,700 lines)
 
-**Payment Modes:**
+USDC-based payments on Base L2 for autonomous agents.
 
-1. **Pay-Per-Request**
-   - HTTP 402 response with invoice
-   - Agent pays on-chain
-   - Retry with tx_hash
+**Capabilities:**
+- ULID-based invoice generation
+- Pay-per-request and pre-deposit modes
+- Automatic payment detection via blockchain scanning
+- Double-entry bookkeeping (append-only ledger)
+- Reorg protection (<12 confirmations re-verified daily)
+- RPC failover (Base → Alchemy → Infura → QuickNode)
+- Database-driven pricing with temporal queries
 
-2. **Pre-Deposit**
-   - Agent deposits USDC to custodial wallet
-   - Balance auto-debited per request
-
-**Invoice Format:**
-```json
-{
-  "invoiceId": "inv_01JDKP5R2G4M8QYX3WTNZHF9V7",
-  "amount": 0.10,
-  "token": "USDC",
-  "recipientAddress": "0x...",
-  "expiresAt": "2025-11-21T17:00:00Z"
-}
+**Payment Flow:**
 ```
-
-**Pricing:**
-```
-geo.audit.request:       $0.10 (basic), $0.00 (pro)
-causal_citation_trace:   $0.50 (basic), $0.25 (pro)
+1. Request → HTTP 402 with invoice
+2. Agent pays USDC on Base L2
+3. Retry with tx_hash
+4. Receive HTTP 200 with results
 ```
 
 **Database Schema:**
-- `a2a_wallets` - EVM wallet storage (AES-256-GCM encrypted)
-- `a2a_invoices` - ULID-based invoice tracking
-- `a2a_ledger` - Double-entry bookkeeping (append-only)
+- `a2a_wallets` - EVM storage (AES-256-GCM encrypted)
+- `a2a_invoices` - ULID-based tracking
+- `a2a_ledger` - Double-entry bookkeeping
 - `a2a_chain_watchers` - Blockchain scan state
-- `a2a_pricing` - Temporal pricing queries
-- `a2a_payment_detections` - Auto-detection audit log
+- `a2a_pricing` - Temporal pricing
+- `a2a_payment_detections` - Auto-detection log
 
-**Security:**
-- Idempotency: UNIQUE constraint on (tx_hash, user_id)
-- Race conditions: PostgreSQL `SELECT FOR UPDATE`
-- Reorg protection: Daily re-verification for <12 confirmations
-- Params integrity: SHA3-512 hash verification
+**Components:**
+- `lib/payments/wallet.ts` - Custodial/non-custodial (582 lines)
+- `lib/payments/invoice.ts` - Invoice system (667 lines)
+- `lib/payments/ledger.ts` - Bookkeeping (467 lines)
+- `lib/payments/chainWatcher.ts` - Payment detection (528 lines)
+- `lib/payments/paymentGuard.ts` - Enforcement (467 lines)
+- `lib/payments/reorgMonitor.ts` - Reorg protection (363 lines)
+- `lib/payments/rpcProvider.ts` - RPC failover (363 lines)
 
-### MCP Protocol
+### 8. MCP Integration (1,659 lines)
 
-**Endpoint:** `POST https://anoteroslogos.com/api/mcp`
+Model Context Protocol v2.0 with isolated execution.
 
-**Execution:**
+**Capabilities:**
 - isolated-vm sandbox (256MB heap, 2s timeout)
-- No unsafe eval
+- Ed25519 signature verification
+- Universal tool schemas (OpenAI/Claude/Grok formats)
+- Real-time streaming via SSE
 - Memory leak prevention
-- Signature verification (Ed25519)
+- Billing hooks
 
 **Tool Catalog:**
 ```
 auditSite              Full GEO audit
-getGraph               Knowledge graph retrieval
-predictCitation        ML-based citation probability
+getGraph               Knowledge graph extraction
+predictCitation        ML-based probability
 trackCitation          Citation monitoring
 learnFromCitations     Feedback loop
 discoverAgent          AID protocol detection
-syncPlatforms          Real-time platform sync (<60s)
+syncPlatforms          Real-time syndication
 ```
 
-### Agent Identity & Discovery (AID v1.1)
+**Components:**
+- `lib/mcp/sandbox.ts` - Enterprise sandbox (507 lines)
+- `lib/mcp/schemas.ts` - Universal schemas (528 lines)
+- `api/mcp/route.ts` - Unified endpoint (624 lines)
 
-**DNS TXT Record:**  
-`_agent.anoteroslogos.com`
-```
-v=1.1;p=a2a,http;u=https://anoteroslogos.com/api/a2a;s=geoaudit
-```
+### 9. Gold Standard System (1,832 lines)
 
-**Well-Known Discovery:**  
-`/.well-known/agent.json`
+Production persistence, automation, and backend services.
 
-**Specification:** agentcommunity.org v1.1
+**Capabilities:**
+- Supabase persistence adapter
+- Job scheduling (cron, delayed, recurring)
+- Backend utilities (monitoring, webhooks, queue processing)
+- Real-time competitive monitoring
+- Citation prediction persistence
+- Learning analysis storage
+
+**Components:**
+- `utils/goldStandard/persistence.ts` - Supabase adapter (387 lines)
+- `utils/automation/scheduler.ts` - Job scheduling (284 lines)
+- `utils/backend/auditStorage.ts` - Audit persistence (465 lines)
+- `utils/competitiveIntelligence/realTimeMonitor.ts` - Monitoring (676 lines)
+
+### 10. Frontend Application (33 components)
+
+React 19 SPA with route-based code splitting.
+
+**Pages:**
+- HomePage - Platform positioning with GEO knowledge base
+- GeoAuditPage - SaaS audit interface (1,950+ lines)
+- AgentIdentityPage - AID protocol documentation (750+ lines)
+- InvestorRelationsPage - Infrastructure thesis (660 lines)
+- KnowledgeBasePage - GEO terminology and concepts
+- Dashboard - User portal (API keys, billing, usage, settings)
+- Blog - Content marketing
+
+**Key Components:**
+- `components/AIVisibilityScore.tsx` - Citation probability (253 lines)
+- `components/KnowledgeGraphDashboard.tsx` - Graph visualization (356 lines)
+- `components/CitationLearningDashboard.tsx` - Learning UI (420 lines)
+- `components/TracerViz.tsx` - Causal graph visualization (630 lines)
+- `components/GEOHealthTracker.tsx` - Daily monitoring (398 lines)
+
+---
+
+## Technical Stack
+
+**Runtime:**
+- Node.js 20.x
+- TypeScript 5.8 (strict mode)
+- React 19.2
+- Vite 6.2
+
+**Backend:**
+- Vercel Serverless Functions
+- Supabase (PostgreSQL + Auth)
+- Redis (optional distributed caching)
+- Base L2 blockchain
+
+**AI Integration:**
+- OpenRouter API
+- OpenAI, Anthropic Claude, Perplexity, Google Gemini
+- Model Context Protocol v2.0
+
+**Security:**
+- Ed25519 signatures (RFC 9421)
+- AES-256-GCM encryption
+- TLS 1.3
+- WCAG 2.1 AA compliance
+
+**Data Processing:**
+- Recharts (visualization)
+- jsPDF (report generation)
+- Sharp (image processing)
+- html2canvas (screenshots)
+- Zod (runtime validation)
 
 ---
 
@@ -190,10 +353,16 @@ CRON_SECRET=...
 # AI Integration
 VITE_OPENROUTER_API_KEY=...
 VITE_OPENROUTER_MODEL=minimax/minimax-m2:free
+
+# Stripe (optional)
+STRIPE_SECRET_KEY=...
 ```
 
 **Database Migrations:**
 ```bash
+psql $DATABASE_URL < supabase/migrations/001_initial_schema.sql
+psql $DATABASE_URL < supabase/migrations/002_gold_standard_schema.sql
+psql $DATABASE_URL < supabase/migrations/003_auth_schema.sql
 psql $DATABASE_URL < supabase/migrations/004_apa_payments_schema.sql
 psql $DATABASE_URL < supabase/migrations/005_pricing_matrix_table.sql
 psql $DATABASE_URL < supabase/migrations/006_payment_correlation_index.sql
@@ -201,87 +370,13 @@ psql $DATABASE_URL < supabase/migrations/006_payment_correlation_index.sql
 
 ---
 
-## Project Structure
+## API Integration
 
-```
-api/
-  a2a/index.ts                    # A2A Protocol endpoint (545 lines)
-  cron/reorg-monitor/             # Blockchain reorg monitoring
-  mcp/route.ts                    # MCP Sandbox v2 (624 lines)
-  goldStandard.ts                 # Gold Standard API (344 lines)
+**Endpoint:** `POST https://anoteroslogos.com/api/a2a`
 
-lib/
-  payments/                       # APA Layer (4,700 lines)
-    wallet.ts                     # Custodial/non-custodial (582 lines)
-    invoice.ts                    # ULID-based invoices (667 lines)
-    ledger.ts                     # Double-entry ledger (467 lines)
-    chainWatcher.ts               # Payment detection (528 lines)
-    paymentGuard.ts               # Enforcement (467 lines)
-    reorgMonitor.ts               # Reorg protection (363 lines)
-    rpcProvider.ts                # RPC failover (363 lines)
-  
-  a2a/                            # A2A Protocol (10,464 lines)
-    protocol.ts                   # JSON-RPC 2.0 (526 lines)
-    agentRegistry.ts              # Agent management (442 lines)
-    rateLimiter.ts                # Token bucket (264 lines)
-    ed25519Signatures.ts          # RFC 9421 (705 lines)
-    websocketServer.ts            # Real-time streaming (568 lines)
-    supabaseStorage.ts            # Persistence (668 lines)
-  
-  causalTracer/                   # Citation Tracer (4,020 lines)
-    pathFinder.ts                 # BFS/DFS + A* (506 lines)
-    counterfactualSimulator.ts    # ROI calculator (568 lines)
-    llmDecisionEmulator.ts        # Platform scoring (565 lines)
-  
-  mcp/                            # MCP Sandbox v2 (1,659 lines)
-    sandbox.ts                    # Enterprise sandbox (507 lines)
-    schemas.ts                    # Universal schemas (528 lines)
+**Authentication:** Bearer token format: `sk_{tier}_{32_chars}`
 
-supabase/migrations/
-  004_apa_payments_schema.sql     # Core APA tables (416 lines)
-  005_pricing_matrix_table.sql    # Dynamic pricing (150 lines)
-  006_payment_correlation_index.sql # Auto-detection (347 lines)
-```
-
----
-
-## Performance
-
-**Build:**
-- Bundle: 1.6 MB (445 KB gzipped)
-- Build time: 12-15s
-- LCP: <2.5s
-- CLS: <0.1
-- INP: <200ms
-
-**Runtime:**
-- Audit processing: 30-120s depending on depth
-- Payment detection: <60s from blockchain confirmation
-- Knowledge graph sync: <60s to all platforms
-
----
-
-## Documentation
-
-**Core:**
-- `lib/payments/README.md` - APA API reference (659 lines)
-- `lib/payments/DEPLOYMENT_GUIDE.md` - Production setup (610 lines)
-- `lib/payments/INTEGRATION_SUMMARY.md` - Technical overview (666 lines)
-
-**Specifications:**
-- `KNOWLEDGE_GRAPH_ENGINE.md` - KG architecture (450 lines)
-- `CITATION_LEARNING_ENGINE.md` - ML feedback loop (417 lines)
-- `GOLD_STANDARD_INNOVATIONS.md` - Persistence layer (417 lines)
-
-**Examples:**
-- `examples/agent-client.ts` - AI agent implementation (252 lines)
-- `scripts/ed25519KeyManager.ts` - Key lifecycle CLI (398 lines)
-
----
-
-## Integration
-
-**cURL Example:**
+**Example Request:**
 ```bash
 curl -X POST https://anoteroslogos.com/api/a2a \
   -H "Content-Type: application/json" \
@@ -296,92 +391,113 @@ curl -X POST https://anoteroslogos.com/api/a2a \
 
 **Payment Flow:**
 ```bash
-# 1. Request returns HTTP 402 with invoice
-# 2. Send USDC to recipientAddress on Base L2
+# 1. HTTP 402 response with invoice
+# 2. Send 0.10 USDC to recipientAddress on Base L2
 # 3. Retry with tx_hash in params
-# 4. Receive HTTP 200 with audit results
+# 4. HTTP 200 with audit results
 ```
 
-**LangChain Tool:**
-```typescript
-import { Tool } from "langchain/tools";
-
-class GeoAuditTool extends Tool {
-  name = "geo_audit";
-  description = "Audit website for AI visibility";
-  
-  async _call(url: string): Promise<string> {
-    const response = await fetch("https://anoteroslogos.com/api/a2a", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer sk_basic_..."
-      },
-      body: JSON.stringify({
-        jsonrpc: "2.0",
-        method: "geo.audit.request",
-        params: { url },
-        id: 1
-      })
-    });
-    return JSON.stringify(await response.json());
-  }
-}
+**Rate Limits:**
+```
+Free:       10 req/min   | 100 req/hour
+Basic:      60 req/min   | 1,000 req/hour
+Pro:        300 req/min  | 10,000 req/hour
+Enterprise: 1,000 req/min| 50,000 req/hour
 ```
 
 ---
 
-## Security
+## Project Structure
 
-**Cryptography:**
-- Ed25519 signatures per RFC 9421
-- SHA-256 content digests
-- AES-256-GCM wallet encryption
-- Keccak256 invoice memos
+```
+api/
+  a2a/index.ts                    # A2A Protocol (545 lines)
+  mcp/route.ts                    # MCP Sandbox (624 lines)
+  goldStandard.ts                 # Gold Standard API (344 lines)
+  stripe.ts                       # Stripe integration (178 lines)
+  agent-keys.ts                   # Agent key management
+  cron/reorg-monitor/             # Blockchain reorg monitoring
 
-**Authentication:**
-- API key format validation
-- Trust score enforcement (0-100)
-- Agent status validation (not banned, trust ≥20)
+lib/
+  payments/                       # APA Layer (4,700 lines)
+  a2a/                            # A2A Protocol (10,464 lines)
+  causalTracer/                   # Citation Tracer (4,020 lines)
+  mcp/                            # MCP Sandbox (1,659 lines)
+  aiSyndication/                  # Platform sync (558 lines)
 
-**Network:**
-- TLS 1.3 required
-- CORS headers configured
-- Rate limiting per tier
-- Replay protection (5min timestamp window)
+utils/
+  geoAuditEnhanced.ts            # Audit engine (2,131 lines)
+  knowledgeGraph/                 # KG engine (2,376 lines)
+  citationPrediction/             # ML prediction (752 lines)
+  citationProof/                  # Citation tracking (560 lines)
+  citationLearning/               # Feedback loop (611 lines)
+  queryIntent/                    # Intent classification (808 lines)
+  contentGap/                     # Gap detection (726 lines)
+  competitiveIntelligence/        # Monitoring (676 lines)
+  nlpContentAnalysis.ts          # NLP processing (506 lines)
+  advancedMetrics.ts             # Scoring (643 lines)
+  monitoringAlerts.ts            # Alert system (521 lines)
+  pdfReportGenerator.ts          # PDF export (390 lines)
 
-**Database:**
-- Row-level security
-- Append-only ledger
-- Foreign key constraints
-- Atomic transactions with SELECT FOR UPDATE
+components/
+  AIVisibilityScore.tsx          # Citation probability (253 lines)
+  KnowledgeGraphDashboard.tsx    # Graph viz (356 lines)
+  CitationLearningDashboard.tsx  # Learning UI (420 lines)
+  TracerViz.tsx                  # Causal graph (630 lines)
+  GEOHealthTracker.tsx           # Daily monitoring (398 lines)
+  [28 more components]
+
+pages/
+  HomePage.tsx                   # Platform homepage
+  GeoAuditPage.tsx              # Audit interface (1,950+ lines)
+  AgentIdentityPage.tsx         # AID protocol (750+ lines)
+  InvestorRelationsPage.tsx     # Infrastructure thesis (660 lines)
+  KnowledgeBasePage.tsx         # GEO knowledge base
+  Dashboard/                    # User portal (6 pages)
+
+data/
+  geoKnowledgeBase.ts           # GEO terminology (150+ terms)
+  blogPosts.ts                  # Content marketing
+
+supabase/migrations/
+  001-006                       # Database schema (6 migrations)
+```
 
 ---
 
-## Troubleshooting
+## Performance
 
-**Build Errors:**
-```bash
-rm -rf node_modules dist .vite
-npm install
-npm run build
-```
+**Build:**
+- Bundle: 1.6 MB (445 KB gzipped)
+- Build time: 12-15s
+- LCP: <2.5s
+- CLS: <0.1
+- INP: <200ms
 
-**TypeScript Errors:**
-```bash
-npm run typecheck
-```
+**Runtime:**
+- Quick audit: 30s
+- Standard audit: 60s
+- Deep audit: 120s
+- Payment detection: <60s from confirmation
+- Knowledge graph sync: <60s to all platforms
 
-**Payment Detection:**
-1. Verify tx on Base mainnet (not testnet)
-2. Wait 2 confirmations (~4-6 seconds)
-3. Check Vercel Cron logs (runs daily at midnight UTC)
+---
 
-**Environment Variables:**
-```bash
-vercel env add PLATFORM_WALLET_ADDRESS production
-vercel env add WALLET_ENCRYPTION_KEY production
-```
+## Documentation
+
+**Core:**
+- `lib/payments/README.md` - APA reference (659 lines)
+- `lib/payments/DEPLOYMENT_GUIDE.md` - Production setup (610 lines)
+- `lib/payments/INTEGRATION_SUMMARY.md` - Technical overview (666 lines)
+
+**Specifications:**
+- `KNOWLEDGE_GRAPH_ENGINE.md` - KG architecture (450 lines)
+- `CITATION_LEARNING_ENGINE.md` - ML feedback loop (417 lines)
+- `GOLD_STANDARD_INNOVATIONS.md` - Persistence layer (417 lines)
+
+**Examples:**
+- `examples/agent-client.ts` - AI agent implementation (252 lines)
+- `scripts/ed25519KeyManager.ts` - Key lifecycle CLI (398 lines)
 
 ---
 
@@ -393,27 +509,23 @@ vercel env add WALLET_ENCRYPTION_KEY production
 - TypeScript: 94.9%
 - PLpgSQL: 3.9%
 
-**Components:**
+**Modules:**
 - A2A Protocol: 10,464 lines
 - APA Payments: 4,700 lines
 - Causal Tracer: 4,020 lines
+- Knowledge Graph: 2,376 lines
+- GEO Audit: 2,131 lines
+- Citation Intelligence: 1,923 lines
+- Content Intelligence: 2,210 lines
 - MCP Sandbox: 1,659 lines
-- Knowledge Graph: 2,288 lines
-- React UI: 33 components
+- Gold Standard: 1,832 lines
+- Frontend: 33 components
 
 ---
 
 ## License
 
 Proprietary - All rights reserved
-
----
-
-## Links
-
-- Production: https://anoteroslogos.com
-- GitHub: https://github.com/DelovoyMotiv/anteroslogos
-- AID Specification: https://agentcommunity.org
 
 ---
 
