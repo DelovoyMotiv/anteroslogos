@@ -14,7 +14,7 @@ import { SchemaBlock } from '../components/AgentDocs/SchemaBlock';
 import { CodeSample } from '../components/AgentDocs/CodeSample';
 import { InteractiveExplorer } from '../components/AgentDocs/InteractiveExplorer';
 import {
-  Bot, Network, Shield, Code, Terminal, Zap, Database,
+  Network, Shield, Code, Terminal, Zap, Database,
   CheckCircle2, AlertTriangle, Clock, Lock, Key, FileJson,
   BookOpen, ChevronRight, Server, Cpu, Globe
 } from 'lucide-react';
@@ -48,10 +48,9 @@ const AgentIdentityPage = () => {
 
           {/* Hero Section */}
           <div className="mb-12">
-            <div className="inline-flex items-center gap-2 bg-brand-accent/10 border border-brand-accent/20 px-4 py-2 rounded-full text-xs font-medium mb-4 text-brand-accent">
-              <Bot className="w-4 h-4" />
-              <span>Machine-Readable Specification</span>
-            </div>
+            <p className="text-xs text-zinc-500 uppercase tracking-wider mb-4">
+              Machine-Readable Specification
+            </p>
             
             <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4">
               AI Agent Integration Specification
