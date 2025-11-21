@@ -1,5 +1,7 @@
 import React from 'react';
-import { Search } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../lib/dashboard/auth-guard';
+import { Search, Lock } from 'lucide-react';
 
 interface GeoAnalysisFormProps {
   url: string;
@@ -16,8 +18,24 @@ const GeoAnalysisForm: React.FC<GeoAnalysisFormProps> = ({
   isAnalyzing,
   compact = false
 }) => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Require authentication
+    if (!user) {
+      navigate(`/auth/signup?redirect=${encodeURIComponent('/geo-audit?url=' + url)}`);
+      return;
+    }
+    
+    onSubmit(e);
+  };
+
   return (
-    <form onSubmit={onSubmit} className={`${compact ? 'max-w-3xl' : 'max-w-2xl'} mx-auto`}>
+    <div className={`${compact ? 'max-w-3xl' : 'max-w-2xl'} mx-auto space-y-4`}>
+      <form onSubmit={handleSubmit}>
       {/* Desktop: Input with button inside */}
       <div className="hidden lg:block relative">
         <input
@@ -47,8 +65,9 @@ const GeoAnalysisForm: React.FC<GeoAnalysisFormProps> = ({
             </>
           ) : (
             <>
-              <Search className="w-4 h-4" />
-              <span>Analyze</span>
+              {!user && <Lock className="w-4 h-4" />}
+              {user && <Search className="w-4 h-4" />}
+              <span>{!user ? 'Sign Up to Analyze' : 'Analyze'}</span>
             </>
           )}
         </button>
@@ -83,13 +102,30 @@ const GeoAnalysisForm: React.FC<GeoAnalysisFormProps> = ({
             </>
           ) : (
             <>
-              <Search className="w-5 h-5" />
-              <span>Analyze Website</span>
+              {!user && <Lock className="w-5 h-5" />}
+              {user && <Search className="w-5 h-5" />}
+              <span>{!user ? 'Sign Up to Analyze' : 'Analyze Website'}</span>
             </>
           )}
         </button>
       </div>
-    </form>
+      </form>
+      
+      {/* Auth Info Banner */}
+      {!user && (
+        <div className="flex items-start gap-3 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+          <Lock className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="text-sm text-white/90 font-medium">
+              Free analysis requires a free account
+            </p>
+            <p className="text-xs text-white/60 mt-1">
+              Sign up in 30 seconds • No credit card • Start with 100 free credits
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 
