@@ -40,6 +40,21 @@ const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick }, ref) => 
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    // Close user menu when clicking outside
+    useEffect(() => {
+        if (!userMenuOpen) return;
+        
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+            if (!target.closest('[data-user-menu]')) {
+                setUserMenuOpen(false);
+            }
+        };
+        
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, [userMenuOpen]);
+
     const menuItems = [
         { label: 'Method', onClick: onMethodClick || (() => navigate('/')), isScroll: true },
         { label: 'GEO vs SEO', onClick: () => navigate('/geo-vs-seo'), isScroll: false },
@@ -84,7 +99,7 @@ const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick }, ref) => 
                     
                     {/* Auth Buttons / User Menu */}
                     {user ? (
-                        <div className="relative">
+                        <div className="relative" data-user-menu>
                             <button
                                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                                 className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all duration-300"
