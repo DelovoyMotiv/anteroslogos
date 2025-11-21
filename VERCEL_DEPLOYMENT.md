@@ -58,28 +58,30 @@ Vercel uses these settings automatically:
 
 API routes are in `/api` directory and are automatically deployed as **Vercel Serverless Functions**.
 
+**Important**: Vercel Hobby plan allows **max 12 serverless functions**. This project uses **7 functions** (consolidated).
+
 ### Structure:
 ```
 /api
+  keys.ts              → Unified handler for:
+                          - POST /api/keys/create
+                          - GET  /api/keys
+                          - POST /api/keys/revoke
+  agent-keys.ts        → Unified handler for:
+                          - POST /api/agent-keys/register
+                          - GET  /api/agent-keys
+                          - POST /api/agent-keys/revoke
+  stripe.ts            → Unified handler for:
+                          - POST /api/stripe/create-checkout
+                          - POST /api/stripe/create-portal
+                          - POST /api/stripe/webhook
   /auth
-    callback.ts          → POST /api/auth/callback
-  /keys
-    create.ts            → POST /api/keys/create
-    list.ts              → GET  /api/keys/list
-    revoke.ts            → POST /api/keys/revoke
-  /agent-keys
-    register.ts          → POST /api/agent-keys/register
-    list.ts              → GET  /api/agent-keys/list
-    revoke.ts            → POST /api/agent-keys/revoke
-  /stripe
-    create-checkout.ts   → POST /api/stripe/create-checkout
-    create-portal.ts     → POST /api/stripe/create-portal
-    webhook.ts           → POST /api/stripe/webhook
-  goldStandard.ts        → GET  /api/goldStandard (aliased from /api/gold-standard)
+    callback.ts        → POST /api/auth/callback
+  goldStandard.ts      → GET  /api/goldStandard (aliased from /api/gold-standard)
   /a2a
-    index.ts             → POST /api/a2a
+    index.ts           → POST /api/a2a
   /mcp
-    route.ts             → POST /api/mcp
+    route.ts           → POST /api/mcp
 ```
 
 **Important**: API routes use `lib/dashboard/billing.ts` and `lib/dashboard/api-keys.ts` which require **Node.js crypto** and **Stripe SDK**. These are server-only modules and MUST NOT be imported in client code.
