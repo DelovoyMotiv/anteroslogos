@@ -6,11 +6,13 @@
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Toaster } from 'sonner';
+import { AuthGuard } from '../../../lib/dashboard/auth-guard';
 
 export function DashboardLayout() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
-      <Sidebar />
+    <AuthGuard requireAuth={true} redirectTo="/auth/login">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+        <Sidebar />
       
       {/* Main content - offset by sidebar width */}
       <main className="pl-64 transition-all duration-300">
@@ -31,6 +33,7 @@ export function DashboardLayout() {
           },
         }}
       />
-    </div>
+      </div>
+    </AuthGuard>
   );
 }

@@ -27,6 +27,10 @@ const DashboardBilling = lazy(() => import('./src/pages/dashboard/BillingPage'))
 const DashboardUsage = lazy(() => import('./src/pages/dashboard/UsagePage'));
 const DashboardSettings = lazy(() => import('./src/pages/dashboard/SettingsPage'));
 
+// Auth pages
+const LoginPage = lazy(() => import('./src/pages/auth/LoginPage'));
+const SignupPage = lazy(() => import('./src/pages/auth/SignupPage'));
+
 const App: React.FC = () => {
     return (
         <ErrorBoundary>
@@ -44,6 +48,12 @@ const App: React.FC = () => {
                         <Route path="/agent-identity" element={<AgentIdentityPage />} />
                         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                         <Route path="/cookie-policy" element={<CookiePolicyPage />} />
+                        
+                        {/* Auth Routes */}
+                        <Route path="/auth/login" element={<LoginPage />} />
+                        <Route path="/auth/signup" element={<SignupPage />} />
+                        <Route path="/login" element={<LoginPage />} />
+                        <Route path="/signup" element={<SignupPage />} />
                         
                         {/* Dashboard Routes (with Layout) */}
                         <Route path="/dashboard" element={<DashboardLayout />}>

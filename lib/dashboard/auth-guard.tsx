@@ -100,7 +100,53 @@ export function useAuth() {
     return () => subscription.unsubscribe();
   }, []);
 
-  return { user, loading };
+  const signIn = async (email: string, password: string) => {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    return data;
+  };
+
+  const signUp = async (email: string, password: string, metadata?: Record<string, any>) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: metadata },
+    });
+    if (error) throw error;
+    return data;
+  };
+
+  const signInWithMagicLink = async (email: string) => {
+    const { data, error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+    });
+    if (error) throw error;
+    return data;
+  };
+
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+  };
+
+  const resetPassword = async (email: string) => {
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth/reset-password`,
+    });
+    if (error) throw error;
+    return data;
+  };
+
+  return {
+    user,
+    loading,
+    signIn,
+    signUp,
+    signInWithMagicLink,
+    signOut,
+    resetPassword,
+  };
 }
 
 /**
