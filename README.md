@@ -1,60 +1,20 @@
 # Anóteros Lógos - Enterprise AI Knowledge Infrastructure
 
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.7.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](CHANGELOG.md)
 [![Node](https://img.shields.io/badge/node-20.x-brightgreen.svg)](https://nodejs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19.2-61dafb.svg)](https://react.dev)
-[![Build](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/DelovoyMotiv/anteroslogos/actions)
+[![Build](https://img.shields.io/badge/build-passing-brightgreen.svg)](https://github.com/DelovoyMotiv/anteroslogos)
 
-Enterprise-grade AI knowledge infrastructure platform providing cryptographically verifiable provenance, deterministic execution, and zero-trust verification for AI agent interactions. First-in-world implementation of Universal Causal Provenance Token (UCPT) standard for Business-to-Agent (B2A) ecosystem.
+Enterprise-grade AI knowledge infrastructure platform with cryptographically verifiable provenance, deterministic execution, and **Agent-Pay-Agent (APA) micropayments layer**. First production implementation of USDC-based micropayments for autonomous AI agent interactions on Base L2 blockchain.
 
-**Production URL:** https://anoteroslogos.com
+**Production URL:** https://anoteroslogos.com  
+**Codebase:** 189 files | **60,189 lines of code**
 
+---
 
-## Architecture
-
-Modern React 19 SPA with TypeScript strict mode, serverless API architecture, and comprehensive monitoring capabilities.
-
-### Core Stack
-
-- **Frontend**: React 19.2, TypeScript 5.8, Vite 6.2
-- **Routing**: React Router 7.9.5 with lazy loading
-- **Styling**: Tailwind CSS 3.4+ with custom design system
-- **Data Visualization**: Recharts 3.3
-- **AI Integration**: OpenRouter API with LLM support (MiniMax M2, Llama 3.2, Gemma 2)
-- **Direct LLM Integration**: OpenAI, Anthropic Claude, Perplexity, Google Gemini
-- **MCP Protocol**: Enterprise Sandbox v2 with Ed25519 signatures and universal tool schemas
-- **PDF Generation**: jsPDF for professional audit reports
-- **Validation**: Zod 3.x for runtime type checking
-- **Deployment**: Vercel Edge Functions with GitHub Actions
-
-### Technical Capabilities
-
-**Performance:**
-- Route-based code splitting with React.lazy
-- LCP under 2.5s, CLS under 0.1, INP under 200ms
-- Total bundle: approximately 1.6 MB (approximately 445 kB gzipped)
-- Main GeoAudit page: 510 kB (approximately 144 kB gzipped)
-- Knowledge Graph module: 213 kB integrated
-- Build time: 12-15s in CI/CD
-
-**Security:**
-- WCAG 2.1 AA compliant
-- XSS and SQL injection prevention
-- SSRF protection with IP blocklisting
-- Rate limiting: 5 req/min, 20 req/hour
-
-**SEO & AI Optimization:**
-- Schema.org structured data (Organization, Person, Article, Product, Review, HowTo, FAQ, SoftwareApplication)
-- Support for 20+ AI crawlers (GPTBot, Claude-Web, ClaudeBot, Perplexity, Google-Extended, Gemini)
-- Priority-based sitemap with AI discovery hints
-- Open Graph and Twitter Card meta tags
-- Zero-competition keyword strategy: Knowledge Graph Engine for GEO, AI knowledge infrastructure, Direct LLM integration, Citation intelligence platform, AID protocol discovery, AI platform syndication
-- Platform/Infrastructure positioning (not agency positioning)
-
-
-## Installation
+## 🚀 Quick Start
 
 ```bash
 # Install dependencies
@@ -66,283 +26,473 @@ npm run dev
 # Build for production
 npm run build
 
-# Preview production build
-npm run preview
-
 # Type check
 npm run typecheck
-
-# Lint code
-npm run lint
 ```
 
-## Environment Variables
+**Environment Variables:** Copy `.env.example` to `.env` and configure Supabase, OpenRouter API, and APA payment credentials.
 
-Copy `.env.example` to `.env` and configure:
+---
 
-```env
-# SEO & Meta
-VITE_SITE_URL=https://anoteroslogos.com
-VITE_SITE_NAME=Anóteros Lógos
-VITE_SITE_DESCRIPTION=Generative Engine Optimization Agency
+## 🏗️ Architecture Overview
 
-# AI Agent Configuration (GEO Marketolog)
-VITE_OPENROUTER_API_KEY=your_openrouter_api_key_here
-VITE_OPENROUTER_MODEL=minimax/minimax-m2:free
-# Alternative models: meta-llama/llama-3.2-3b-instruct:free, google/gemma-2-9b-it:free
+### Core Technology Stack
 
-# A2A Protocol Configuration
-VITE_APP_URL=https://anoteroslogos.com  # Base URL for A2A endpoint discovery
+**Frontend:**
+- React 19.2 + TypeScript 5.8 (strict mode)
+- Vite 6.2 (build tool)
+- React Router 7.9.5 (lazy loading)
+- Tailwind CSS 3.4 (design system)
+- Recharts 3.3 (data visualization)
+- jsPDF (PDF generation)
 
-# API Configuration (when ready)
-# VITE_API_URL=https://api.yoursite.com
-# VITE_CONTACT_FORM_ENDPOINT=/api/contact
+**Backend:**
+- Vercel Serverless Functions (Edge runtime)
+- Supabase (PostgreSQL database + Auth)
+- Redis (optional, for distributed rate limiting)
 
-# Analytics (optional)
-# VITE_GA_TRACKING_ID=G-XXXXXXXXXX
-```
+**AI Integration:**
+- OpenRouter API (LLM aggregation)
+- Direct LLM: OpenAI, Anthropic Claude, Perplexity, Google Gemini
+- Model Context Protocol (MCP) with Enterprise Sandbox v2
 
-## Project Structure
+**Blockchain:**
+- Base L2 (Chain ID: 8453)
+- Viem + Ethers.js (blockchain interaction)
+- USDC payments (ERC-20)
+
+### Performance Metrics
+
+- **Bundle Size:** ~1.6 MB (445 KB gzipped)
+- **Build Time:** 12-15s in CI/CD
+- **LCP:** <2.5s | **CLS:** <0.1 | **INP:** <200ms
+- **Code Splitting:** Route-based with React.lazy
+
+### Security Features
+
+- WCAG 2.1 AA compliant
+- XSS/SQL injection prevention
+- SSRF protection with IP blocklisting
+- Rate limiting: 5 req/min (free), up to 1,000 req/min (enterprise)
+- Ed25519 cryptographic signatures (RFC 9421)
+- AES-256-GCM wallet encryption
+
+---
+
+## 📦 Project Structure
 
 ```
 F:\air\
-├── api/
-│   ├── a2a/
-│   │   └── index.ts                # A2A Protocol HTTP endpoint (490 lines)
-│   ├── mcp/
-│   │   └── route.ts                # MCP Sandbox v2 unified endpoint (624 lines)
-│   └── goldStandard.ts             # Gold Standard REST API (344 lines)
-├── components/
-│   ├── charts/                     # Recharts visualizations
-│   │   ├── CategoryBarChart.tsx
-│   │   ├── PriorityMatrix.tsx
-│   │   ├── ScoreRadarChart.tsx
-│   │   └── ScoreTrendChart.tsx
-|   ├── AIVisibilityScore.tsx       # AI citation probability metric (253 lines)
-|   ├── AIDAgentStatus.tsx          # AID protocol visualization (253 lines)
-|   ├── GEOHealthTracker.tsx        # Daily monitoring with forecasts (398 lines)
-|   ├── KnowledgeGraphDashboard.tsx # Knowledge Graph visualization (356 lines)
-||   ├── CitationLearningDashboard.tsx # Citation Learning UI (420 lines)
-||   ├── TracerViz.tsx              # Causal graph visualization (630 lines)
-|   ├── AnalysisProgress.tsx        # Progress tracking (220 lines)
-|   ├── ExecutiveSummary.tsx        # Dashboard summary (271 lines)
-|   ├── NLPInsights.tsx             # NLP analysis display (362 lines)
-|   ├── PulseLine.tsx               # Organic animated pulse visual (150 lines)
-|   ├── Hero.tsx                    # Homepage hero with Tier 1 keywords (165 lines)
-|   ├── Philosophy.tsx              # Brand philosophy section (147 lines)
-|   ├── Header.tsx                  # Navigation (142 lines)
-|   ├── Footer.tsx                  # Footer with links (210 lines)
-|   ├── Modal.tsx                   # Contact form (222 lines)
-|   ├── SEOHead.tsx                 # Meta tags manager (130 lines)
-|   └── [25 more components]        # Total 33 components
-├── pages/
-│   ├── HomePage.tsx               # Platform positioning with Tier 1 keywords
-│   ├── GeoAuditPage.tsx           # GEO SaaS Platform with citation tracking ROI (1950+ lines)
-│   ├── AgentIdentityPage.tsx     # AID protocol + Direct LLM integration (750+ lines)
-│   ├── InvestorRelationsPage.tsx # Infrastructure thesis, TAM expansion roadmap (660 lines)
-│   ├── Blog.tsx
-│   ├── BlogPost.tsx
-│   ├── Author.tsx
-│   └── KnowledgeBasePage.tsx
-├── lib/
+├── api/                           # Vercel Serverless Functions
+│   ├── a2a/index.ts              # A2A Protocol endpoint (545 lines) ⚡ APA integrated
+│   ├── cron/reorg-monitor/       # Blockchain reorg monitoring
+│   ├── mcp/route.ts              # MCP Sandbox v2 (624 lines)
+│   ├── goldStandard.ts           # Gold Standard API (344 lines)
+│   ├── agent-keys.ts             # Agent key management
+│   ├── keys.ts                   # API key generation
+│   └── stripe.ts                 # Stripe payment integration
+│
+├── lib/                           # Core Business Logic
+│   ├── payments/                  # ⚡ APA Micropayments Layer (4,700 lines)
+│   │   ├── wallet.ts             # Custodial/non-custodial wallets (582 lines)
+│   │   ├── invoice.ts            # ULID-based invoice system (667 lines)
+│   │   ├── ledger.ts             # Double-entry bookkeeping (467 lines)
+│   │   ├── chainWatcher.ts       # Auto-payment detection (528 lines)
+│   │   ├── paymentGuard.ts       # Payment enforcement (467 lines)
+│   │   ├── reorgMonitor.ts       # Reorg protection (363 lines)
+│   │   ├── rpcProvider.ts        # RPC failover (363 lines)
+│   │   ├── detectionAnalytics.ts # Payment analytics (321 lines)
+│   │   └── types.ts              # TypeScript schemas (320 lines)
 │   ├── a2a/                       # A2A Protocol (10,464 lines)
-│   ├── causalTracer/              # CAUSAL CITATION TRACER (4,020 lines)
-│   │   ├── pathFinder.ts          # Hybrid BFS/DFS with A* heuristic (506 lines)
-│   │   ├── counterfactualSimulator.ts # Deep graph cloning with ROI calc (568 lines)
-│   │   ├── llmDecisionEmulator.ts # Platform-specific scoring (565 lines)
-│   │   └── engine.ts              # Main orchestration API (785 lines)
+│   │   ├── protocol.ts           # JSON-RPC 2.0 (526 lines)
+│   │   ├── agentRegistry.ts      # Agent management (442 lines)
+│   │   ├── rateLimiter.ts        # Token bucket (264 lines)
+│   │   ├── cache.ts              # TTL cache (478 lines)
+│   │   ├── queue.ts              # Job queue (467 lines)
+│   │   ├── logger.ts             # Structured logging (486 lines)
+│   │   ├── ed25519Signatures.ts  # RFC 9421 signatures (705 lines)
+│   │   ├── ed25519KeyStorage.ts  # Key persistence (423 lines)
+│   │   ├── websocketServer.ts    # Real-time streaming (568 lines)
+│   │   ├── supabaseStorage.ts    # Database persistence (668 lines)
+│   │   ├── mcpAdapter.ts         # MCP integration (597 lines)
+│   │   └── mcpSandbox.ts         # Code execution (362 lines)
+│   ├── causalTracer/              # Causal Citation Tracer (4,020 lines)
+│   │   ├── pathFinder.ts         # BFS/DFS + A* (506 lines)
+│   │   ├── counterfactualSimulator.ts # ROI calculator (568 lines)
+│   │   ├── llmDecisionEmulator.ts # Platform scoring (565 lines)
+│   │   └── engine.ts             # Orchestration (785 lines)
 │   ├── mcp/                       # MCP Sandbox v2 (1,659 lines)
-│   │   ├── sandbox.ts             # Enterprise sandbox with Ed25519 (507 lines)
-│   │   └── schemas.ts             # Universal tool schemas (528 lines)
-│   │   ├── protocol.ts            # JSON-RPC 2.0 (526 lines)
-│   │   ├── adapter.ts             # Result conversion (455 lines)
-│   │   ├── rateLimiter.ts         # Token bucket (264 lines)
-│   │   ├── queue.ts               # Priority queue (467 lines)
-│   │   ├── cache.ts               # TTL cache (478 lines)
-│   │   ├── agentRegistry.ts       # Agent management (442 lines)
-│   │   ├── logger.ts              # Structured logging (486 lines)
-│   │   ├── websocketServer.ts     # Real-time streaming (568 lines)
-│   │   ├── supabaseStorage.ts     # Production persistence (668 lines)
-│   │   ├── ed25519Signatures.ts   # RFC 9421 HTTP signatures (705 lines)
-│   │   ├── ed25519KeyStorage.ts   # Key management (423 lines)
-│   │   ├── redisAdapter.ts        # Redis persistence (500 lines)
-│   │   ├── mcpAdapter.ts          # MCP code execution mode (597 lines)
-│   │   ├── mcpClient.ts           # A2A tool router (327 lines)
-│   │   └── mcpSandbox.ts          # isolated-vm sandbox (362 lines)
-│   ├── aiSyndication/
-│   │   └── index.ts               # AI platform integration (558 lines)
-│   └── supabase.ts                # Supabase client configuration (177 lines)
-├── utils/
-|   ├── ai/
-|   │   ├── openrouter.ts          # LLM integration (466 lines)
-|   │   └── geoMarketologAgent.ts  # AI recommendations (166 lines)
-|   ├── knowledgeGraph/
-|   │   ├── builder.ts             # Knowledge graph extraction (618 lines)
-|   │   ├── selfImproving.ts       # Self-improving KG with learning loop (656 lines)
-|   │   ├── realtimeSync.ts        # Real-time platform sync under 60s (551 lines)
-|   │   └── networkEffects.ts      # Cross-client authority amplification (463 lines)
-|   ├── citationProof/
-|   │   └── tracker.ts             # Citation tracking and ROI (465 lines)
-|   ├── citationPrediction/
-|   │   └── engine.ts              # ML-based citation prediction (765 lines)
-|   ├── citationLearning/
-|   │   └── feedbackEngine.ts      # Bidirectional AI intelligence (705 lines)
-|   ├── goldStandard/
-|   │   └── persistence.ts         # Supabase persistence adapter (444 lines)
-|   ├── automation/
-|   │   └── scheduler.ts           # Automated job scheduling (357 lines)
-|   ├── competitiveIntelligence/
-|   │   └── realTimeMonitor.ts     # Real-time competitor monitoring (687 lines)
-|   ├── queryIntent/
-|   │   └── analyzer.ts            # ML query intent classification (828 lines)
-|   ├── contentGap/
-|   │   └── detector.ts            # Content gap detection system (748 lines)
-|   ├── geoAuditEnhanced.ts        # Audit engine with precision scoring (2100+ lines)
-|   ├── aidDiscovery.ts            # AID protocol detection (559 lines)
-|   ├── advancedAnalytics.ts       # Trend analysis (418 lines)
-|   ├── monitoringAlerts.ts        # Alert system (574 lines)
-|   ├── competitiveIntelligence.ts # Benchmarking (614 lines)
-|   ├── nlpContentAnalysis.ts      # NLP analysis (531 lines)
-|   ├── pdfReportGenerator.ts      # PDF export (469 lines)
-|   ├── urlValidator.ts            # Security validation with retry (333 lines)
-|   └── auditHistory.ts            # LocalStorage audit management
-├── data/
-│   ├── blogPosts.ts
-│   └── geoKnowledgeBase.ts
-├── scripts/
-│   └── ed25519KeyManager.ts       # Ed25519 CLI key manager (398 lines)
-├── public/
-│   ├── robots.txt
-│   ├── sitemap.xml
-│   ├── manifest.json
-│   └── .well-known/
-│       ├── ai.txt
-│       ├── security.txt
-│       ├── agent.json              # AID protocol discovery file
-│       ├── mcp-manifest.json       # MCP Agent Discovery manifest
-│       ├── mcp-openapi.json        # OpenAPI 3.1 specification
-│       ├── mcp-tools-openai.json   # OpenAI Function Calling format
-│       ├── mcp-tools-claude.json   # Claude Tools format
-│       └── mcp-tools-grok.json     # Grok Tools format
-├── supabase/
+│   │   ├── sandbox.ts            # Enterprise sandbox (507 lines)
+│   │   └── schemas.ts            # Universal tool schemas (528 lines)
+│   └── aiSyndication/            # AI platform sync (558 lines)
+│
+├── components/                    # React Components (33 total)
+│   ├── charts/                   # Recharts visualizations
+│   ├── AIVisibilityScore.tsx    # Citation probability (253 lines)
+│   ├── KnowledgeGraphDashboard.tsx # KG visualization (356 lines)
+│   ├── CitationLearningDashboard.tsx # Learning UI (420 lines)
+│   ├── TracerViz.tsx            # Causal graph viz (630 lines)
+│   ├── GEOHealthTracker.tsx     # Daily monitoring (398 lines)
+│   └── [28 more components]
+│
+├── pages/                         # Application Pages
+│   ├── HomePage.tsx              # Platform positioning
+│   ├── GeoAuditPage.tsx          # GEO SaaS (1,950+ lines)
+│   ├── AgentIdentityPage.tsx    # AID protocol (750+ lines)
+│   ├── InvestorRelationsPage.tsx # Infrastructure thesis (660 lines)
+│   └── [4 more pages]
+│
+├── utils/                         # Utility Functions
+│   ├── knowledgeGraph/           # Self-improving KG (2,288 lines)
+│   ├── citationPrediction/       # ML prediction (765 lines)
+│   ├── citationLearning/         # Feedback engine (705 lines)
+│   ├── citationProof/            # ROI tracking (465 lines)
+│   ├── goldStandard/             # Persistence (444 lines)
+│   ├── queryIntent/              # Intent classification (828 lines)
+│   ├── contentGap/               # Gap detection (748 lines)
+│   ├── competitiveIntelligence/  # Real-time monitoring (687 lines)
+│   ├── geoAuditEnhanced.ts      # Audit engine (2,100+ lines)
+│   └── [10 more utilities]
+│
+├── supabase/                      # Database Migrations
 │   └── migrations/
 │       ├── 001_initial_schema.sql
-│       └── 002_gold_standard_schema.sql  # Gold Standard persistence schema (487 lines)
-├── types/
-│   ├── database.types.ts          # Supabase database types
-│   ├── causalTracer.types.ts      # Causal Tracer type definitions (596 lines)
-│   └── goldStandard.types.ts      # Gold Standard type definitions (326 lines)
-├── KNOWLEDGE_GRAPH_ENGINE.md       # Knowledge Graph documentation (450 lines)
-├── CITATION_LEARNING_ENGINE.md     # Citation Learning documentation (417 lines)
-├── GOLD_STANDARD_INNOVATIONS.md    # Gold Standard systems documentation (417 lines)
-├── App.tsx
-├── index.tsx
-├── index.html
-├── tailwind.config.js
-├── tsconfig.json
-├── vite.config.ts
-└── vercel.json
+│       ├── 002_gold_standard_schema.sql (487 lines)
+│       ├── 003_auth_schema.sql
+│       ├── 004_apa_payments_schema.sql ⚡ (416 lines)
+│       ├── 005_pricing_matrix_table.sql ⚡ (150 lines)
+│       └── 006_payment_correlation_index.sql ⚡ (347 lines)
+│
+├── examples/
+│   └── agent-client.ts           ⚡ Working AI agent client (252 lines)
+│
+├── public/
+│   ├── .well-known/
+│   │   ├── agent.json            # AID protocol discovery
+│   │   ├── mcp-manifest.json     # MCP discovery
+│   │   └── mcp-*.json            # Tool schemas (OpenAI/Claude/Grok)
+│   ├── robots.txt
+│   └── sitemap.xml
+│
+├── scripts/
+│   └── ed25519KeyManager.ts      # CLI key manager (398 lines)
+│
+└── types/
+    ├── database.types.ts         # Supabase types
+    ├── causalTracer.types.ts    # Tracer types (596 lines)
+    └── goldStandard.types.ts    # Gold Standard types (326 lines)
 ```
 
+**⚡ = New APA Integration (November 2025)**
 
+---
 
-## Deployment
+## 💰 Agent-Pay-Agent (APA) Micropayments Layer
 
-### Vercel (Current Production Setup)
+**Status:** ✅ Production Ready (9/10)  
+**Blockchain:** Base L2 (Chain ID: 8453)  
+**Token:** USDC (ERC-20)  
+**Launch Date:** November 21, 2025
 
-The project is configured for **automatic deployments** on Vercel:
+### Overview
 
-- **Production URL**: https://anoteroslogos.com
-- **Auto-deploy**: Enabled on push to `main` branch
-- **Framework Preset**: Vite
-- **Build Command**: `npm run build`
-- **Output Directory**: `dist`
-- **Node Version**: 20.x
+First production implementation of **blockchain-based micropayments for autonomous AI agents**. Agents can pay for API calls using USDC on Base L2 with automatic payment detection, invoice generation, and balance management.
 
-#### Manual Deploy via CLI
+### Key Features
+
+**Payment Modes:**
+- **Pay-Per-Request:** Agent receives HTTP 402 invoice → pays on Base L2 → retries with tx_hash
+- **Pre-Deposit:** Agent deposits USDC → balance auto-debited per request
+- **Free Tier:** $0.00 for basic methods (discovery, ping, status)
+
+**Core Capabilities:**
+- ✅ ULID-based invoice IDs (`inv_{ULID}`)
+- ✅ Automatic payment detection via blockchain scanning
+- ✅ Double-entry bookkeeping ledger (append-only)
+- ✅ Atomic balance operations (race condition prevention)
+- ✅ Idempotency protection (replay attack prevention)
+- ✅ Reorg monitoring (<12 confirmations re-verified)
+- ✅ RPC failover resilience (Base → Alchemy → Infura → QuickNode)
+- ✅ Database-driven pricing with temporal queries
+- ✅ Custodial + non-custodial wallet support (AES-256-GCM encryption)
+
+### Pricing Matrix
+
+| Method | Free Tier | Basic Tier | Pro Tier |
+|--------|-----------|------------|----------|
+| `geo.audit.request` | $0.00 | $0.10 | $0.00 |
+| `causal_citation_trace` | $0.00 | $0.50 | $0.25 |
+| `a2a.discover` | $0.00 | $0.00 | $0.00 |
+
+### Payment Flow Example
+
 ```bash
-# Install Vercel CLI
-npm i -g vercel
+# 1. Agent requests audit (no payment)
+curl -X POST https://anoteroslogos.com/api/a2a \
+  -H "Authorization: Bearer sk_basic_..." \
+  -d '{"method":"geo.audit.request","params":{"url":"https://example.com"}}'
 
-# Deploy to preview
-vercel
+# Response: HTTP 402 Payment Required
+{
+  "invoiceId": "inv_01JDKP5R2G4M8QYX3WTNZHF9V7",
+  "amount": 0.10,
+  "token": "USDC",
+  "recipientAddress": "0x...",
+  "expiresAt": "2025-11-21T17:00:00Z"
+}
 
-# Deploy to production
+# 2. Agent pays 0.10 USDC on Base L2
+# (gets tx_hash: 0xabc...)
+
+# 3. Agent retries with tx_hash
+curl -X POST https://anoteroslogos.com/api/a2a \
+  -H "Authorization: Bearer sk_basic_..." \
+  -d '{"method":"geo.audit.request","params":{"url":"https://example.com","tx_hash":"0xabc..."}}'
+
+# Response: HTTP 200 OK with audit results
+```
+
+### Auto-Detection Algorithm
+
+Blockchain watcher scans Base L2 for USDC transfers:
+- **Recipient match:** 50 points
+- **Amount match:** 30 points (±0.01 USDC tolerance)
+- **Token match:** 10 points
+- **Recency bonus:** 10 points (<5 min)
+- **Confidence threshold:** 60% minimum
+
+### Database Tables
+
+**Core Tables:**
+- `a2a_wallets` - EVM wallet storage (custodial/non-custodial)
+- `a2a_invoices` - Invoice lifecycle tracking
+- `a2a_ledger` - Double-entry bookkeeping (append-only)
+- `a2a_chain_watchers` - Blockchain scanning state
+- `a2a_pricing` - Database-driven pricing
+- `a2a_payment_detections` - Auto-detection audit log
+
+### Security Features
+
+1. **Idempotency:** UNIQUE constraint on (tx_hash, user_id)
+2. **Race Conditions:** PostgreSQL `SELECT FOR UPDATE` in atomic functions
+3. **Reorg Protection:** Daily cron re-verifies invoices with <12 confirmations
+4. **Wallet Encryption:** AES-256-GCM with `WALLET_ENCRYPTION_KEY` env var
+5. **Params Integrity:** SHA3-512 hash prevents request tampering
+
+### Documentation
+
+- **API Reference:** `lib/payments/README.md` (659 lines)
+- **Deployment Guide:** `lib/payments/DEPLOYMENT_GUIDE.md` (610 lines)
+- **Integration Summary:** `lib/payments/INTEGRATION_SUMMARY.md` (666 lines)
+- **Example Client:** `examples/agent-client.ts` (252 lines)
+
+### Limitations (Vercel Hobby Plan)
+
+⚠️ **Cron Jobs:** Hobby plan supports **daily cron only** (not every 5 minutes)
+- Current: Reorg monitor runs daily at midnight UTC
+- Recommended: Use external cron service (cron-job.org) or upgrade to Vercel Pro
+
+**Environment Variables (Required):**
+```bash
+PLATFORM_WALLET_ADDRESS=0x...  # Base L2 wallet receiving USDC
+WALLET_ENCRYPTION_KEY=...      # 64-char hex (32 bytes)
+CRON_SECRET=...                # Vercel cron authentication
+```
+
+---
+
+## 🤖 A2A Protocol - Agent-to-Agent API
+
+Production-ready **JSON-RPC 2.0** API for AI agent integration with Ed25519 signatures, WebSocket streaming, and Supabase persistence.
+
+### Key Features
+
+- **16 Core Components** (10,464 lines total)
+- **Rate Limiting:** Token bucket with burst support
+- **Authentication:** Agent Registry with trust scoring (0-100)
+- **Caching:** ETag-based HTTP 304 responses
+- **Real-Time:** WebSocket streaming for audit progress
+- **Persistence:** Supabase PostgreSQL with 7 tables
+- **Cryptography:** Ed25519 signatures (RFC 9421) for domain proof
+
+### API Methods
+
+**Discovery:**
+- `a2a.discover` - Service metadata
+- `a2a.capabilities` - API documentation
+- `a2a.ping` - Health check
+
+**GEO Audit:**
+- `geo.audit.request` - Single URL audit (⚡ requires payment)
+- `geo.audit.batch` - Batch audit (max 100 URLs)
+
+### Rate Limits
+
+| Tier | Req/Min | Req/Hour | Price |
+|------|---------|----------|-------|
+| Free | 10 | 100 | $0 |
+| Basic | 60 | 1,000 | $99/mo |
+| Pro | 300 | 10,000 | $299/mo |
+| Enterprise | 1,000 | 50,000 | Custom |
+
+### AI Agent Detection
+
+Automatic optimization for:
+- Perplexity AI (search with citations)
+- ChatGPT (conversational)
+- Claude (analysis focus)
+- Google Gemini (multimodal)
+- Grok (real-time data)
+
+---
+
+## 🔐 AID Protocol - Agent Identity & Discovery
+
+DNS-first approach for making AI agents discoverable. One TXT record = instant global discovery.
+
+### Implementation
+
+**1. DNS TXT Record** (`_agent.anoteroslogos.com`)
+```
+v=1.1;p=a2a,http;u=https://anoteroslogos.com/api/a2a;s=geoaudit
+```
+
+**2. Well-Known Discovery** (`/.well-known/agent.json`)
+- Agent capabilities enumeration
+- Protocol version information
+- Ed25519 key metadata
+
+**3. Documentation** (`/agent-identity` page)
+
+### Market Context
+
+- **Adoption:** 5,000+ domains (3 months post-v1.0)
+- **Standards:** IETF RFC discussion (expected 2026)
+- **Specification:** agentcommunity.org v1.1 (October 2025)
+
+---
+
+## 🧪 MCP Sandbox v2 - Universal Tool Platform
+
+Enterprise-grade **Model Context Protocol** implementation with cryptographic signatures and universal schema generation.
+
+### Core Components
+
+- **Enterprise Sandbox:** isolated-vm execution (no unsafe eval)
+- **Universal Schemas:** 7 graph tools with multi-platform support
+- **Ed25519 Signatures:** RFC 9421 for request authentication
+- **Memory Limits:** 256MB heap, 2s CPU timeout
+- **Real-Time Streaming:** Server-Sent Events (SSE)
+
+### Tool Catalog
+
+1. `auditSite` - Full GEO audit
+2. `getGraph` - Knowledge graph retrieval
+3. `predictCitation` - ML-based prediction
+4. `trackCitation` - Citation monitoring
+5. `learnFromCitations` - Feedback loop
+6. `discoverAgent` - AID protocol detection
+7. `syncPlatforms` - Real-time platform sync
+
+---
+
+## 📊 Knowledge Graph Engine
+
+Self-improving knowledge graph with citation learning and cross-client network effects.
+
+### Features
+
+- **Bidirectional Learning:** AI ↔ Platform intelligence exchange
+- **Real-Time Sync:** <60s to Perplexity, ChatGPT, Claude, Gemini
+- **Network Effects:** Cross-client authority amplification
+- **ML Prediction:** Citation probability scoring
+- **ROI Tracking:** Citation value measurement
+
+### Components
+
+- `knowledgeGraph/builder.ts` (618 lines)
+- `knowledgeGraph/selfImproving.ts` (656 lines)
+- `knowledgeGraph/realtimeSync.ts` (551 lines)
+- `knowledgeGraph/networkEffects.ts` (463 lines)
+- `citationPrediction/engine.ts` (765 lines)
+- `citationLearning/feedbackEngine.ts` (705 lines)
+
+---
+
+## 🚀 Deployment
+
+### Vercel (Current Production)
+
+**Configuration:**
+- **Framework:** Vite
+- **Build Command:** `npm run build`
+- **Output Directory:** `dist`
+- **Node Version:** 20.x
+- **Auto-Deploy:** Enabled on `main` branch
+
+**Manual Deploy:**
+```bash
 vercel --prod
 ```
 
-#### Vercel Configuration
-The `vercel.json` file includes:
-- SPA fallback routing
-- Custom headers for security and caching
-- Redirects configuration
+### Environment Variables
 
-### Alternative Hosting
-
-#### Netlify
 ```bash
-# Build command
-npm run build
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=...
 
-# Publish directory
-dist
+# APA Payments (NEW)
+PLATFORM_WALLET_ADDRESS=0x...
+WALLET_ENCRYPTION_KEY=...
+CRON_SECRET=...
+
+# AI Integration
+VITE_OPENROUTER_API_KEY=...
+VITE_OPENROUTER_MODEL=minimax/minimax-m2:free
+
+# Site Configuration
+VITE_SITE_URL=https://anoteroslogos.com
+VITE_APP_URL=https://anoteroslogos.com
 ```
 
-#### Traditional Hosting (Apache/Nginx)
+### Database Migrations
+
 ```bash
-# Build
-npm run build
-
-# Upload dist/ folder to your hosting
-# Configure SPA fallback to index.html
+# Apply APA migrations
+psql $DATABASE_URL < supabase/migrations/004_apa_payments_schema.sql
+psql $DATABASE_URL < supabase/migrations/005_pricing_matrix_table.sql
+psql $DATABASE_URL < supabase/migrations/006_payment_correlation_index.sql
 ```
 
-## Customization
+---
 
-### Colors (tailwind.config.js)
-```js
-colors: {
-  'brand-bg': '#0a0f1e',
-  'brand-text': '#e5e7eb',
-  'brand-accent': '#3b82f6',
-  'brand-secondary': '#1e293b',
-}
-```
+## 📈 SEO & AI Optimization
 
-### Typography
-- **Display Font**: Space Grotesk (headings)
-- **Body Font**: DM Sans (paragraphs)
+**Schema.org Types:** Organization, Person, Article, Product, Review, HowTo, FAQ, SoftwareApplication
 
-### Contact Form
-Update `components/Modal.tsx` to connect to your backend:
-```typescript
-// Replace mock API call with real endpoint
-await fetch('/api/contact', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ name, email, company, message })
-});
-```
+**AI Crawlers Supported (20+):**
+- GPTBot, Claude-Web, ClaudeBot
+- Perplexity, Google-Extended, Gemini
+- Anthropic-AI, Cohere-AI, Diffbot
+- [+12 more]
 
-## Pre-Production Checklist
+**Zero-Competition Keywords:**
+- Knowledge Graph Engine for GEO
+- AI knowledge infrastructure
+- Direct LLM integration
+- Citation intelligence platform
+- Agent-Pay-Agent micropayments
+- Base L2 USDC payments for AI
 
-- [x] TypeScript compilation (no errors)
-- [x] ESLint passing (0 warnings, 0 errors)
-- [x] Production build successful
-- [x] All imports cleaned
-- [x] Accessibility audit (ARIA labels, semantic HTML)
-- [x] SEO meta tags configured
-- [x] Structured data (JSON-LD) implemented
-- [x] robots.txt and sitemap.xml configured
-- [x] Responsive design tested
-- [x] Contact form validation
-- [x] Environment variables documented
+**Positioning:** Platform/Infrastructure (not agency)
 
-## Troubleshooting
+---
+
+## 🔧 Troubleshooting
 
 ### Build Errors
 ```bash
-# Clear cache and reinstall
 rm -rf node_modules dist .vite
 npm install
 npm run build
@@ -350,1868 +500,111 @@ npm run build
 
 ### TypeScript Errors
 ```bash
-# Check types without building
 npm run typecheck
-
-# Ensure TypeScript is up to date
 npm install typescript@latest
 ```
 
-### Lint Issues
+### Deployment Issues
 ```bash
-# Auto-fix where possible
-npm run lint -- --fix
-
-# Check specific files
-npm run lint src/components/
-```
-
-### Deployment Issues (Vercel)
-```bash
-# Check deployment logs
 vercel logs
-
-# Clear Vercel cache and redeploy
 vercel --force
-
-# Verify build locally matches production
-npm run build && npm run preview
 ```
 
-### Performance Optimization
+### APA Payment Issues
+
+**Invoice not detected:**
+1. Check Vercel Cron logs (daily at midnight UTC)
+2. Verify tx is on Base mainnet (not testnet)
+3. Wait for 2 confirmations (~4-6 seconds)
+
+**Environment variable missing:**
 ```bash
-# Analyze bundle size
-npm run build -- --mode production --sourcemap
-
-# Check for unused dependencies
-npm prune
+vercel env add PLATFORM_WALLET_ADDRESS production
 ```
-
-## Performance
-
-### Production Build Stats (Latest)
-- HTML: 22.10 kB (gzip: 5.15 kB)
-- CSS: 64.90 kB (gzip: 10.17 kB)
-- JS (main): 184.82 kB (gzip: 58.90 kB)
-- JS (GeoAudit): 510.46 kB (gzip: 143.93 kB) - optimized from 877KB (42% reduction)
-- JS (PDF Generator): 392.91 kB (gzip: 126.79 kB)
-- JS (blog): 163.35 kB (gzip: 47.75 kB)
-- JS (home): 73.53 kB (gzip: 22.14 kB)
-- Total Bundle: approximately 1.6 MB (gzip: approximately 445 kB)
-- Build Time: approximately 12-15s on CI/CD
-
-### Core Web Vitals (Production)
-- LCP (Largest Contentful Paint): under 2.5s
-- FID/INP (Interaction Delay): under 200ms
-- CLS (Cumulative Layout Shift): under 0.1
-
-### Optimization Features
-- Route-based code splitting with React.lazy
-- Tree-shaking and dead code elimination
-- CSS purging via Tailwind
-- Self-hosted fonts (no external requests)
-- Markdown rendering with proper code highlighting
-- Minified and optimized assets
-- Gzip compression enabled on Vercel
-
-## AID Protocol - Agent Identity & Discovery
-
-Implementation of the Agent Identity & Discovery protocol (AID v1.1) from agentcommunity.org. DNS-first approach for making AI agents discoverable across the agentic web ecosystem.
-
-### Protocol Overview
-
-**What is AID?**
-AID (Agent Identity & Discovery) is the DNS for AI agents. It solves the fundamental question: "Given a domain, where is its AI agent?" One TXT record makes an agent instantly discoverable.
-
-**Strategic Philosophy:**
-"Minimal, DNS-crystal clear mechanism of discoverability" - No registries, no configuration, no intermediaries. Just DNS.
-
-### Technical Implementation
-
-**1. DNS TXT Record** (`_agent.anoteroslogos.com`)
-```
-v=1.1;p=a2a,http;u=https://anoteroslogos.com/api/a2a;s=geoaudit;d=anoteroslogos.com
-```
-
-Single-letter aliases fit within 255-byte DNS limit:
-- `v=1.1` - AID protocol version 1.1
-- `p=a2a,http` - Supported protocols (A2A, HTTP)
-- `u=...` - Primary endpoint URL
-- `s=geoaudit` - Service identifier
-- `d=...` - Domain ownership verification
-
-**2. Well-Known Discovery** (`/.well-known/agent.json`)
-Fallback HTTPS discovery mechanism per RFC 8615:
-- Agent capabilities enumeration
-- Protocol version information
-- Ed25519 key metadata (RFC 9421)
-- Pricing and rate limit details
-- Organization metadata
-
-**3. Documentation Page** (`/agent-identity`)
-Public-facing page explaining:
-- AID protocol integration
-- DNS configuration instructions
-- Agent capabilities showcase
-- Discovery mechanisms
-- Security considerations
-- Market adoption metrics
-
-### Key Features
-
-- **DNS-First Discovery**: Single TXT record for global agent discovery
-- **Hybrid Fallback**: DNS primary, HTTPS well-known secondary
-- **Protocol-Agnostic**: Supports A2A, MCP, ANP, HTTP protocols
-- **Cryptographic Proof**: Ed25519 signatures (RFC 9421) for domain verification
-- **Zero Dependencies**: No external registries or platforms required
-- **Vercel Compatible**: Serverless-friendly static discovery file
-
-### Market Context
-
-- **Adoption**: 5,000+ domains (3 months post-v1.0)
-- **Standards Track**: IETF RFC discussion (expected 2026)
-- **Integration**: MCP, A2A, ANP servers
-- **Marketplace Support**: OpenAI Plugins, Claude, Vertex AI
-- **Specification**: agentcommunity.org v1.1 (October 2025)
-
-### Setup Instructions
-
-See `DNS_SETUP.md` for complete configuration guide including:
-- Cloudflare setup
-- Route 53 (AWS) setup
-- Google Cloud DNS setup
-- Verification methods
-- Troubleshooting
 
 ---
 
-## A2A Protocol - Agent2Agent API
-
-Production-ready JSON-RPC 2.0 API endpoint for AI agent integration with Ed25519 cryptographic signatures, WebSocket streaming, and Supabase persistence. Optimized for Perplexity, ChatGPT, Claude, Gemini, and other AI search agents.
-
-### Architecture
-
-**16 Core Components (10,464 lines):**
-
-1. **Protocol Layer** (`lib/a2a/protocol.ts` - 526 lines)
-   - JSON-RPC 2.0 implementation with Zod runtime validation
-   - 12 API methods: discover, capabilities, audit, batch, insights, ping, status
-   - AI agent detection (Perplexity, ChatGPT, Claude, Gemini, Grok)
-   - 4-tier rate limiting configs (free/basic/pro/enterprise)
-   - 10 custom error codes + JSON-RPC 2.0 standard codes
-
-2. **Adapter Layer** (`lib/a2a/adapter.ts` - 455 lines)
-   - Converts GEO AuditResult → AI-optimized A2AAuditResult format
-   - Semantic data extraction: entities, topics, keywords, industry detection
-   - Confidence scoring based on data completeness (0.5-0.95)
-   - Actionable insights generation (best practices, opportunities, benchmarks, predictions)
-   - Citation sources extraction from link analysis
-
-3. **HTTP API Endpoint** (`api/a2a/index.ts` - 490 lines)
-   - Vercel serverless function with Edge runtime compatibility
-   - Method routing with parameter validation
-   - Production authentication via Agent Registry (validates API key format + database lookup)
-   - Agent status validation (not banned, not inactive, trust score >= 20)
-   - Rate limiting integration with X-RateLimit headers
-   - Response caching (1-hour TTL for audits)
-   - Full CORS support for cross-origin requests
-   - Request tracing with unique request IDs
-   - Performance metrics recording (request duration, memory usage)
-   - Automatic agent activity tracking on success/failure
-   - Security logging for authentication failures
-   - Structured error logging with stack traces
-
-4. **Queue System** (`lib/a2a/queue.ts` - 467 lines)
-   - Priority-based job queue (high/normal/low)
-   - Progress tracking (0-100%)
-   - Automatic retry logic (max 3 attempts)
-   - Batch job support (max 100 URLs)
-   - Auto-cleanup (24-hour retention)
-   - Configurable concurrent worker support
-
-5. **Cache Layer** (`lib/a2a/cache.ts` - 478 lines)
-   - TTL-based caching with configurable expiration
-   - ETag support for HTTP 304 Not Modified responses
-   - LRU eviction strategy (100MB memory limit)
-   - Auto-cleanup every 5 minutes
-   - Cache warming support
-   - Express/Vercel middleware wrapper
-
-6. **Agent Registry** (`lib/a2a/agentRegistry.ts` - 442 lines)
-   - Centralized agent management system
-   - API key generation and validation (format: `sk_{tier}_{32_chars}`)
-   - Trust Score system (0-100) based on agent behavior
-   - Agent status management (active, inactive, banned, pending_verification)
-   - Activity tracking: total_requests, failed_requests, avg_response_time_ms, error_rate
-   - Performance metrics with automatic trust score updates
-   - Agent metadata: IP addresses, user agents, uptime percentage
-   - Indexed lookups by API key and name for O(1) retrieval
-
-7. **Structured Logger** (`lib/a2a/logger.ts` - 486 lines)
-   - JSON structured logging compatible with DataDog, CloudWatch
-   - Log levels: debug, info, warn, error, fatal
-   - RequestTracer with checkpoint tracking and performance monitoring
-   - PerformanceMonitor with p50/p95/p99 percentile metrics
-   - Automatic sensitive data masking for security
-   - Security event logging with severity levels (low, medium, high, critical)
-   - Audit execution logging with status tracking
-   - Rate limit event logging with allowed/blocked tracking
-   - Agent activity logging for observability
-
-8. **MCP Adapter** (`lib/a2a/mcpAdapter.ts` - 597 lines)
-   - Model Context Protocol code execution mode implementation
-   - 98.7% token reduction (150k tokens → 2k tokens)
-   - 4 MCP servers: geo-audit, knowledge-graph, citation-tracking, aidiscovery
-   - 11 tool definitions with TypeScript code generation
-   - Progressive disclosure pattern: load tools on-demand as filesystem
-   - 3 built-in skills: batch-audit-with-filtering, progressive-citation-tracking, knowledge-graph-diff
-   - Token savings calculator (validates 98.7% reduction claim)
-   - Data filtering in execution environment (not model context)
-   - SKILL.md pattern for reusable code patterns
-
-9. **MCP Client** (`lib/a2a/mcpClient.ts` - 327 lines)
-   - Production A2A tool execution bridge
-   - Routes callA2ATool() to real implementations
-   - Integration with performGeoAudit, KnowledgeGraphBuilder, detectCitations, discoverAIDAgent
-   - Parameter validation and error handling
-   - Batch processing with concurrency limits
-   - AID configuration validation with scoring
-
-10. **MCP Sandbox** (`lib/a2a/mcpSandbox.ts` - 362 lines)
-    - Production code execution environment using isolated-vm
-    - Secure sandboxed execution (no unsafe eval)
-    - Memory limits (128MB default), timeout protection (30s)
-    - Console capture with structured logging
-    - Real A2A tool integration via mcpClient bridge
-    - Skill management: loadSkill(), saveSkill(), getSkills()
-    - Real token savings calculation during execution
-    - Tool definition progressive disclosure
-
-11. **WebSocket Streaming** (`lib/a2a/websocketServer.ts` - 568 lines)
-    - Real-time audit progress streaming via WebSocket connections
-    - Authentication via API key with automatic agent validation
-    - Heartbeat mechanism (60s connection timeout, 30s check interval)
-    - Subscription-based event broadcasting: `audit:progress`, `audit:complete`, `audit:error`
-    - Connection management with graceful shutdown handling
-    - Per-connection audit job tracking (max 100 active jobs per connection)
-    - Integration with queue system for progress event emission
-    - Express server wrapper with upgrade handler
-    - Error isolation: connection failures don't crash server
-    - Structured logging for all WebSocket lifecycle events
-
-12. **Supabase Persistence** (`lib/a2a/supabaseStorage.ts` - 668 lines)
-    - Production database persistence layer for PostgreSQL via Supabase
-    - **SupabaseAgentStorage**: agent registry with indexes on api_key, domain, status
-    - **SupabaseRateLimitStorage**: distributed rate limiting state with token bucket algorithm
-    - **SupabaseQueueStorage**: job queue persistence with priority, retry, batch support
-    - **SupabaseAuditCache**: cached audit results with TTL, ETag, domain indexes
-    - Complete SQL migration script for schema creation
-    - Database indexes for performance: api_key, domain, status, priority, expires
-    - Foreign key constraints ensuring referential integrity
-    - Automatic timestamp tracking (created_at, updated_at)
-    - Batch operations support for high-throughput scenarios
-
-13. **Ed25519 Signatures** (`lib/a2a/ed25519Signatures.ts` - 705 lines)
-    - RFC 9421 HTTP Message Signatures implementation
-    - Ed25519 cryptographic signature generation and verification
-    - Web Crypto API integration for key pair generation
-    - Signature base string construction: `@method`, `@target-uri`, `@authority`, `content-digest`, `content-type`
-    - Content digest calculation using SHA-256 with base64 encoding
-    - Timestamp validation: created timestamp within 5 minutes (300s), future tolerance 60s
-    - Domain ownership proof via key ID format: `domain-YYYY-MM-DD`
-    - In-memory key store with expiration and revocation support
-    - Express/Vercel middleware for automatic request signature verification
-    - Signature header parsing and formatting per RFC 9421 spec
-    - Key export to PEM format (PKCS#8 for private keys)
-
-14. **Ed25519 Key Storage** (`lib/a2a/ed25519KeyStorage.ts` - 423 lines)
-    - Supabase database persistence for Ed25519 key pairs
-    - Database tables: `a2a_ed25519_keys`, `a2a_key_audit_log`
-    - Key storage with revocation and expiration tracking (default 90 days)
-    - Audit trail for all key operations: created, used, revoked, expired
-    - Key rotation function with automatic old key revocation
-    - Detection of keys expiring soon (30-day threshold)
-    - Automatic cleanup of expired keys from database
-    - Foreign key constraint to `a2a_agents` table ensuring agent existence
-    - Composite index on (domain, revoked, expires) for fast lookups
-    - IP address and user agent tracking in audit log
-
-15. **Redis Adapter** (`lib/a2a/redisAdapter.ts` - 500 lines)
-    - Redis-backed persistence implementation
-    - Distributed rate limiting with sliding window algorithm
-    - Session management with TTL expiration
-    - Job queue operations with atomic operations
-    - Cache layer with Redis GET/SET/DEL
-
-16. **Ed25519 Key Manager CLI** (`scripts/ed25519KeyManager.ts` - 398 lines)
-    - Command-line interface for Ed25519 key lifecycle management
-    - **generate**: Create new Ed25519 key pairs for domain
-    - **rotate**: Rotate keys with automatic old key revocation
-    - **revoke**: Revoke compromised keys with reason tracking
-    - **list**: Display all keys for domain with status
-    - **audit**: Show audit log history for specific key
-    - **expiring**: Check for keys expiring within N days
-    - Full help documentation with usage examples
-    - Integration with Supabase storage layer
-    - Support for custom expiration periods during generation
-
-### Rate Limiting
-
-| Tier       | Req/Min | Req/Hour | Concurrent | Burst | Price      |
-|------------|---------|----------|------------|-------|------------|
-| Free       | 10      | 100      | 2          | 5     | $0         |
-| Basic      | 60      | 1,000    | 5          | 20    | $99/mo     |
-| Pro        | 300     | 10,000   | 20         | 100   | $299/mo    |
-| Enterprise | 1,000   | 50,000   | 100        | 500   | Custom     |
-
-### AI Agent Detection
-
-Automatic detection and optimization for:
-- **Perplexity AI** (search agent with real-time citations)
-- **ChatGPT** (OpenAI assistant with conversational capabilities)
-- **Claude** (Anthropic assistant with analysis focus)
-- **Google Gemini** (multimodal with search integration)
-- **Grok** (X-integrated search with real-time data)
-
-### Semantic Extraction
-
-**Entity Types:** Organization, Person, LocalBusiness, Article, Product, SoftwareApplication
-
-**Industry Detection:** E-commerce, Technology, Media & Publishing, Local Business, Education
-
-**Topics:** Structured Data, E-E-A-T, AI Optimization, Citations, Comprehensive Content
-
-**Keywords:** Extracted from URL paths + schema types (max 10)
-
-### Ed25519 Cryptographic Signatures (RFC 9421)
-
-**Purpose:** Domain ownership proof and request authentication
-
-**Implementation:**
-- Ed25519 elliptic curve cryptography (32-byte keys)
-- Web Crypto API for key generation (`crypto.subtle.generateKey`)
-- Signature components: `@method`, `@target-uri`, `@authority`, `content-digest`, `content-type`
-- Content digest: `SHA-256` with base64 encoding, format `sha-256=:digest:`
-- Timestamp validation: 5-minute window (300s), future tolerance 60s
-- Key ID format: `domain-YYYY-MM-DD` (e.g., `anoteroslogos.com-2025-04-15`)
-
-**Key Management Workflow:**
-
-1. **Generation:**
-   ```bash
-   npx tsx scripts/ed25519KeyManager.ts generate --domain anoteroslogos.com --expires-in-days 90
-   ```
-   Generates Ed25519 key pair, stores in Supabase, returns key ID and public key.
-
-2. **Rotation:**
-   ```bash
-   npx tsx scripts/ed25519KeyManager.ts rotate --domain anoteroslogos.com
-   ```
-   Creates new key, revokes old key with reason "Key rotation".
-
-3. **Revocation:**
-   ```bash
-   npx tsx scripts/ed25519KeyManager.ts revoke --key-id anoteroslogos.com-2025-04-15 --reason "Key compromised"
-   ```
-   Marks key as revoked, records in audit log.
-
-4. **Monitoring:**
-   ```bash
-   npx tsx scripts/ed25519KeyManager.ts expiring --domain anoteroslogos.com --days 30
-   ```
-   Lists keys expiring within 30 days.
-
-**Database Schema:**
-- **Table:** `a2a_ed25519_keys`
-  - Columns: `id` (UUID), `domain`, `key_id`, `public_key`, `private_key_encrypted`, `created_at`, `expires`, `revoked`
-  - Indexes: `domain`, `revoked`, `expires`, composite `(domain, revoked, expires)`
-- **Table:** `a2a_key_audit_log`
-  - Columns: `id` (UUID), `key_id`, `action`, `performed_by`, `ip_address`, `user_agent`, `metadata`, `timestamp`
-  - Actions: `created`, `used`, `revoked`, `expired`
-
-**Signature Verification:**
-- Middleware: `verifyEd25519Signature(keyStore, options)` for Express/Vercel
-- Automatic signature header parsing and validation
-- Rejects requests with expired/revoked keys
-- Integration with agent registry for domain validation
-
-**Security Features:**
-- Private keys stored encrypted in database
-- Audit log tracks all key operations with IP and user agent
-- Automatic expiration enforcement (default 90 days)
-- Revocation support with reason tracking
-- Foreign key constraint to `a2a_agents` table
-
-### WebSocket Real-Time Streaming
-
-**Endpoint:** `wss://anoteroslogos.com/api/a2a/ws`
-
-**Authentication:**
-```json
-{
-  "type": "authenticate",
-  "apiKey": "sk_pro_abc123..."
-}
-```
-
-**Events:**
-- `audit:progress` - Job progress updates (0-100%)
-- `audit:complete` - Audit finished with full results
-- `audit:error` - Audit failed with error details
-
-**Example Client:**
-```typescript
-const ws = new WebSocket('wss://anoteroslogos.com/api/a2a/ws');
-
-ws.on('open', () => {
-  ws.send(JSON.stringify({ type: 'authenticate', apiKey: 'sk_pro_...' }));
-  ws.send(JSON.stringify({ type: 'subscribe', channels: ['audit:*'] }));
-});
-
-ws.on('message', (data) => {
-  const event = JSON.parse(data);
-  if (event.type === 'audit:progress') {
-    console.log(`Progress: ${event.data.progress}%`);
-  }
-});
-```
-
-**Connection Lifecycle:**
-- Heartbeat every 30s (client sends ping, server responds pong)
-- Connection timeout: 60s of inactivity
-- Automatic cleanup on disconnect
-- Max 100 active audit jobs per connection
-
-### Supabase Production Persistence
-
-**Database Tables:**
-
-1. **a2a_agents** - Agent registry
-   - Columns: `id`, `api_key`, `name`, `domain`, `tier`, `status`, `trust_score`, `total_requests`, `failed_requests`, `created_at`, `last_active_at`
-   - Indexes: `api_key` (unique), `domain`, `status`
-
-2. **a2a_rate_limits** - Rate limiting state
-   - Columns: `id`, `api_key`, `tokens`, `last_refill`, `updated_at`
-   - Index: `api_key` (unique)
-
-3. **a2a_audit_jobs** - Job queue
-   - Columns: `id`, `url`, `priority`, `status`, `progress`, `retries`, `created_at`, `updated_at`, `completed_at`
-   - Indexes: `status`, `priority`, composite `(status, priority)`
-
-4. **a2a_batch_jobs** - Batch operations
-   - Columns: `id`, `api_key`, `urls`, `priority`, `progress`, `completed_count`, `failed_count`, `status`, `created_at`
-   - Index: `api_key`
-
-5. **a2a_audit_cache** - Cached results
-   - Columns: `id`, `url`, `domain`, `result`, `etag`, `created_at`, `expires_at`
-   - Indexes: `url` (unique), `domain`, `expires_at`, composite `(domain, expires_at)`
-
-6. **a2a_ed25519_keys** - Ed25519 key pairs
-7. **a2a_key_audit_log** - Key operation audit trail
-
-**Migration:**
-```sql
--- Complete SQL migration script included in lib/a2a/supabaseStorage.ts
--- Run via Supabase dashboard SQL editor or CLI
-```
-
-**Configuration:**
-```bash
-# Environment variables
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-```
-
-### API Methods
-
-**Discovery & Health:**
-- `a2a.discover` - Service metadata and capabilities
-- `a2a.capabilities` - Detailed API documentation
-- `a2a.ping` - Health check
-- `a2a.status` - Server status
-
-**GEO Audit:**
-- `geo.audit.request` - Single URL audit (cached 1 hour)
-- `geo.audit.batch` - Batch audit (max 100 URLs, 5 concurrent)
-- `geo.audit.status` - Job status tracking (via WebSocket streaming)
-- `geo.audit.result` - Retrieve cached results (Supabase persistence)
-
-**Insights (Planned):**
-- `geo.insights.global` - Global GEO trends
-- `geo.insights.industry` - Industry benchmarks
-- `geo.insights.domain` - Domain-specific analytics
-
-### Usage Example
-
-```bash
-# cURL Request
-curl -X POST https://anoteroslogos.com/api/a2a \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer sk_basic_your_32_character_api_key_here" \
-  -d '{
-    "jsonrpc": "2.0",
-    "method": "geo.audit.request",
-    "params": { "url": "https://example.com" },
-    "id": 1
-  }'
-
-# Response (AI-Optimized Format)
-{
-  "jsonrpc": "2.0",
-  "result": {
-    "audit_id": "aud_1735891234_abc123",
-    "url": "https://example.com",
-    "status": "completed",
-    "overall_score": 85,
-    "grade": "Expert",
-    "confidence": 0.88,
-    "categories": { ... },
-    "findings": {
-      "critical": [],
-      "warnings": [...],
-      "recommendations": [...],
-      "opportunities": [...]
-    },
-    "semantic_data": {
-      "entity_type": "Organization",
-      "industry": "Technology",
-      "topics": ["Structured Data", "E-E-A-T"],
-      "keywords": [...],
-      "entities": [...]
-    },
-    "citations": {
-      "sources": [...],
-      "data_points": 45,
-      "factual_claims": 23,
-      "expert_quotes": 5
-    },
-    "insights": [
-      {
-        "type": "best_practice",
-        "title": "Strong Technical & Authority Foundation",
-        "description": "...",
-        "confidence": 0.88
-      }
-    ],
-    "metadata": {
-      "processing_time_ms": 3842,
-      "agent_used": "Perplexity AI",
-      "depth": "standard",
-      "version": "1.0.0"
-    }
-  },
-  "id": 1
-}
-```
-
-### Cache Strategy
-
-- **Audit Results:** 1 hour TTL
-- **Global Insights:** 24 hours TTL
-- **Industry Insights:** 12 hours TTL
-- **Domain Trends:** 6 hours TTL
-- **Max Size:** 100 MB with LRU eviction at 80% capacity
-
-### Production Features
-
-✅ **Type Safety:** Full TypeScript with Zod runtime validation
-✅ **Rate Limiting:** Token bucket algorithm with burst support
-✅ **Caching:** ETag-based HTTP 304 responses
-✅ **Error Handling:** JSON-RPC 2.0 compliant error codes
-✅ **Security:** API key format validation, CORS headers, trust score enforcement
-✅ **Authentication:** Agent Registry with status validation and trust scoring
-✅ **Observability:** Structured logging with request tracing and performance metrics
-✅ **Monitoring:** Request logging, rate limit headers, agent activity tracking
-✅ **Scalability:** Serverless architecture, in-memory cache with LRU eviction
-
-### Next Steps
-
-**Phase 2 - WebSocket Streaming (Planned):**
-- Real-time progress updates
-- Subscription management
-- WebSocket server endpoint
-
-**Phase 3 - Async Job Processing (Planned):**
-- Queue integration with audit engine
-- Job status tracking API
-- Webhook callbacks
-
-**Phase 4 - Advanced Insights (Planned):**
-- Global insights aggregation from database
-- Industry benchmarking with percentiles
-- Trend analysis endpoints
-
-**Phase 5 - Production Hardening (In Progress):**
-- ✅ Enterprise Agent Registry system
-- ✅ Structured logging with request tracing
-- ✅ Production authentication with trust scoring
-- ✅ Performance monitoring with p50/p95/p99 metrics
-- ✅ Security event logging with severity levels
-- ✅ MCP Adapter with code execution mode (98.7% token reduction)
-- ✅ Production sandbox using isolated-vm (no unsafe eval)
-- ✅ Real A2A tool integration via mcpClient
-- ⏳ Replace in-memory storage with Redis
-- ⏳ Distributed tracing (OpenTelemetry)
-- ⏳ Monitoring & alerting (Sentry)
-- ⏳ API key management UI
-- ⏳ Developer portal
+## 📚 Documentation
+
+**Core Documentation:**
+- **APA Payments:** `lib/payments/README.md` (659 lines)
+- **APA Deployment:** `lib/payments/DEPLOYMENT_GUIDE.md` (610 lines)
+- **APA Integration:** `lib/payments/INTEGRATION_SUMMARY.md` (666 lines)
+- **Knowledge Graph:** `KNOWLEDGE_GRAPH_ENGINE.md` (450 lines)
+- **Citation Learning:** `CITATION_LEARNING_ENGINE.md` (417 lines)
+- **Gold Standard:** `GOLD_STANDARD_INNOVATIONS.md` (417 lines)
+
+**Example Implementations:**
+- **AI Agent Client:** `examples/agent-client.ts` (252 lines)
+- **Ed25519 Key Manager:** `scripts/ed25519KeyManager.ts` (398 lines)
 
 ---
 
-## MCP Sandbox v2 - Universal Tool Platform
-
-Enterprise-grade Model Context Protocol implementation transforming Anóteros Lógos into the premier Graph Tool for AI agents in 2026. Full production-ready sandbox with cryptographic signatures and universal schema generation.
-
-### Core Architecture
-
-**Enterprise Sandbox v2** (507 lines)
-- Isolated execution environment using isolated-vm (no unsafe eval)
-- Ed25519 cryptographic signatures (RFC 9421) for request authentication
-- Memory limits: 256MB heap, CPU timeout: 2 seconds
-- Real-time streaming via Server-Sent Events (SSE)
-- Billing hooks for usage tracking and cost allocation
-- Graceful degradation with detailed error messages
-- Context cleanup preventing memory leaks
-- Signature verification with proper Web Crypto API key objects
-
-**Universal Tool Schemas** (528 lines)
-- 7 graph tools with comprehensive type definitions
-- Multi-platform schema generation from single source
-- OpenAI Function Calling format with parameters object
-- Claude Tools format with input_schema
-- Grok Tools format with examples and usage patterns
-- OpenAPI 3.1 specification with full REST documentation
-- Type-safe conversions with zero data loss
-
-**Unified API Endpoint** (624 lines)
-- Automatic format detection (OpenAI/Claude/Grok/JSON-RPC)
-- Request routing based on content inspection
-- URL validation with protocol checking (HTTP/HTTPS only)
-- Input sanitization with type checking and length limits
-- Timeout protection (10s) for all external requests
-- Integration with existing rate limiter and API key validation
-- Comprehensive error handling with structured responses
-
-### Tool Catalog (7 Total)
-
-**Standard Tools:**
-1. **auditSite**: Full GEO audit with WebGL detection, I18N analysis, CDN optimization
-2. **getGraph**: Knowledge graph retrieval with citation links and entity relationships
-3. **predictCitation**: ML-based citation prediction from knowledge graph data
-4. **synthesizeNode**: Generate new knowledge graph nodes with source metadata
-
-**Unique Advanced Tools (Not Found Elsewhere):**
-5. **causal_citation_trace**: Causal reasoning path analysis (authority→schema→content→eeat)
-   - Analyzes audit scores to build citation causality chain
-   - Identifies bottlenecks in citation probability pipeline
-   - Evidence-based recommendations with confidence scoring
-
-6. **predictive_synthesis**: Prioritized recommendations for visibility targets
-   - Input: current visibility, target increase (1-100%)
-   - Output: Sorted action list with impact estimates and effort levels
-   - ROI-optimized strategy generation
-
-7. **federated_authority_boost**: ZKP-like proof for authority amplification
-   - Generates cryptographic proof with SHA-256 hex hash
-   - Participation status tracking across client network
-   - Verification URL for proof validation
-   - Network effects visualization
-
-### Agent Discovery Protocol
-
-**MCP Manifest** (`mcp-manifest.json` - 187 lines)
-- Complete service metadata with organization details
-- Version information and changelog
-- Pricing tiers with rate limits
-- Authentication methods documentation
-- Link to full OpenAPI specification
-- Compliance with Agent Discovery Protocol standards
-
-**Auto-Generated Schemas** (`public/.well-known/`):
-- `mcp-openapi.json` (17 KB): Complete REST API documentation
-- `mcp-tools-openai.json` (4.4 KB): OpenAI Assistants integration
-- `mcp-tools-claude.json` (3.7 KB): Anthropic Claude tools
-- `mcp-tools-grok.json` (6.4 KB): Grok AI platform format
-- All schemas generated from single GRAPH_TOOLS definition
-- Zero manual synchronization required
-
-### Security Features
-
-**Cryptographic Authentication:**
-- Ed25519 signature generation and verification (RFC 9421)
-- Signature components: @method, @target-uri, @authority, content-digest, content-type
-- Content digest: SHA-256 with base64 encoding
-- Timestamp validation: 5-minute window (300s), future tolerance 60s
-- Key ID format: domain-YYYY-MM-DD
-- Proper key object creation with Web Crypto API
-
-**Input Validation:**
-- URL validation with try/catch error handling
-- Protocol whitelist (HTTP/HTTPS only, no javascript:, data:, file:)
-- Input type checking for all parameters
-- Length limits (query max 500 chars, targetIncrease 1-100)
-- Bounds checking for numeric inputs
-
-**Request Protection:**
-- AbortController timeout (10s) for all external requests
-- User-Agent headers for transparency
-- Error isolation preventing information leakage
-- Rate limiting via existing a2a registry integration
-
-### Performance Optimizations
-
-**Memory Management:**
-- Context cleanup with ivmContext.release()
-- Try/catch around cleanup preventing silent failures
-- 256MB heap limit per execution
-- Automatic garbage collection
-
-**Execution Efficiency:**
-- CPU time tracking with proper bigint conversion
-- 2-second CPU timeout preventing runaway processes
-- Streaming results via SSE for large responses
-- Early termination on validation failures
-
-### Integration Points
-
-**Existing Systems:**
-- A2A Protocol: Uses checkRateLimit and validateApiKey from a2a registry
-- GEO Audit: Calls performGeoAudit with options object
-- Knowledge Graph: Integrates KnowledgeGraphBuilder for getGraph
-- Citation Tracking: Links to citation prediction and proof engines
-
-**External Platforms:**
-- OpenAI Assistants: Direct tool import via mcp-tools-openai.json
-- Claude Projects: Tool definitions via mcp-tools-claude.json
-- Grok AI: Usage examples and patterns via mcp-tools-grok.json
-- Custom Agents: OpenAPI 3.1 spec for any HTTP client
-
-### Usage Examples
-
-**OpenAI Function Calling:**
-```json
-{
-  "model": "gpt-4",
-  "messages": [{"role": "user", "content": "Analyze example.com"}],
-  "tools": [{
-    "type": "function",
-    "function": {
-      "name": "auditSite",
-      "description": "Full GEO audit with AI optimization analysis",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "url": {"type": "string", "description": "Website URL"},
-          "useAI": {"type": "boolean", "default": false}
-        },
-        "required": ["url"]
-      }
-    }
-  }]
-}
-```
-
-**Claude Tools:**
-```json
-{
-  "name": "causal_citation_trace",
-  "description": "Analyze causal reasoning path for citations",
-  "input_schema": {
-    "type": "object",
-    "properties": {
-      "url": {"type": "string"},
-      "audit": {"type": "object"}
-    },
-    "required": ["url", "audit"]
-  }
-}
-```
-
-**cURL Request:**
-```bash
-curl -X POST https://anoteroslogos.com/api/mcp \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer sk_pro_your_api_key" \
-  -d '{
-    "tool": "predictive_synthesis",
-    "params": {
-      "currentVisibility": 45,
-      "targetIncrease": 30,
-      "audit": {...}
-    }
-  }'
-```
-
-### Quality Assurance
-
-**Type Safety:**
-- TypeScript strict mode: 0 errors
-- npm run typecheck: passes
-- Fixed 31 previous TypeScript errors
-- Proper type assertions for all parameters
-- Bigint conversion issues resolved
-
-**Build Validation:**
-- npm run build: success (13.3s)
-- Production bundle: 3,214 lines added
-- No runtime errors or warnings
-- All dependencies properly resolved
-
-**Security Audit:**
-- Ed25519 implementation: proper key object creation
-- URL validation: comprehensive protocol checking
-- Input sanitization: type checking and length limits
-- Timeout protection: AbortController on all fetches
-- Error handling: graceful degradation throughout
-
-### Market Positioning
-
-**Competitive Advantages:**
-1. **Universal Schema Generation**: Single source of truth for 4+ platforms
-2. **Enterprise Security**: RFC 9421 cryptographic signatures
-3. **Unique Advanced Tools**: Causal tracing and predictive synthesis
-4. **Zero-Config Discovery**: Agent Discovery Protocol compliance
-5. **Production-Grade Sandbox**: isolated-vm, no unsafe eval
-
-**Target Markets:**
-- OpenAI GPT Store: Assistants requiring graph tools
-- Claude Projects: Research and analysis agents
-- Grok AI Platform: Real-time knowledge agents
-- Enterprise AI Teams: Custom agent development
-- LangChain/LlamaIndex: Tool integration for RAG systems
-
-**Revenue Model:**
-- Free tier: 100 calls/month per agent
-- Basic ($99/mo): 10,000 calls/month
-- Pro ($299/mo): 100,000 calls/month
-- Enterprise (custom): Unlimited with SLA
-
-### Technical Documentation
-
-Complete documentation available:
-- `docs/mcp.md` (531 lines): Full technical specification
-- `docs/mcp-examples.sh` (125 lines): cURL examples for all tools
-- `MCP-V2-DEPLOYMENT.md` (309 lines): Deployment guide
-- `scripts/test-mcp.ts` (328 lines): Comprehensive test suite
-
----
-
-## CAUSAL CITATION TRACER - World's First Causal Explainability for LLM Citations
-
-Revolutionary system tracing exact causal paths explaining why LLMs cite specific sources. Zero competitors as of November 2025 (24-36 month development moat).
-
-### Core Innovation
-
-**Paradigm Shift**: From "track citations" to "understand WHY citations happen."
-
-Competitors track citation outcomes. We trace the complete causal decision tree from query to citation using counterfactual simulation and platform-specific LLM emulation.
-
-### Architecture Components (4,020 Production Lines)
-
-**Path Finder Engine** (506 lines)
-- Hybrid BFS/DFS with A* heuristic for optimal path discovery
-- PriorityQueue with multi-factor scoring (authority 25%, freshness 15%, relevance 30%, validation 20%, uniqueness 10%)
-- PathCache with 87% hit rate for performance optimization
-- Critical node identification and bottleneck detection
-- Performance: <4s on 50k nodes/300k edges
-
-**Counterfactual Simulator** (568 lines)
-- Deep graph cloning for what-if analysis
-- Node/edge removal and addition simulation
-- Differential path analysis calculating delta impact
-- ROI estimation: deltaScore / (estimatedEffort / 40 hours)
-- Batch simulation with prioritization
-
-**LLM Decision Emulator** (565 lines)
-- Platform-specific scoring with research-based weights:
-  - **Perplexity**: relevance 30%, authority 25%, freshness 20% (real-time focus, maxAge 30d)
-  - **ChatGPT**: comprehensiveness 25%, relevance 25%, structure 7% (detailed answers, maxAge 180d)
-  - **Claude**: uniqueness 12%, comprehensiveness 20%, authority 20% (novel insights, maxAge 90d)
-  - **Gemini**: freshness 20%, relevance 28%, authority 18% (Google real-time, maxAge 60d)
-  - **Grok**: freshness 25%, relevance 25%, attention 8% (X integration, maxAge 7d)
-- 8-factor decision model with platform biases
-- Genre matching and embedding distance calculation
-- Winner selection with near-miss competitive analysis
-
-**Main Orchestration Engine** (785 lines)
-- Complete API: traceCitationPath(), explainWhyChosen(), counterfactualImpact(), predictiveGapAnalysis()
-- Automated improvement generation with 8 action types
-- Market positioning: leader/challenger/follower/niche
-- Competitor analysis with win probability calculation
-
-**Complete Type System** (596 lines)
-- CausalGraph, CausalNode, CausalEdge, CausalPath with 10+ node types
-- CounterfactualResult with impact assessment
-- LLMDecisionFactors for platform-specific scoring
-- GapAnalysisResult with predictive recommendations
-- Full TypeScript strict mode compliance
-
-### Key Algorithms
-
-**Citation Probability Formula**:
-```
-sigmoid(bestScore/100 + pathCount/10 + uniqueness×0.1)
-```
-
-**Win Probability Against Competitor**:
-```
-sigmoid((ourScore - theirScore) / 10)
-```
-
-**Causal Strength Calculation**:
-```
-necessity×0.5 + sufficiency×0.3 + coOccurrence×0.2
-```
-
-### Interactive Visualization (TracerViz Component - 630 lines)
-
-**Custom Force-Directed Graph Layout**:
-- Zero external dependencies (no D3.js, no cytoscape)
-- ForceSimulation class: link force, charge force, center force
-- Alpha decay with velocity damping for smooth animation
-- Performance: handles 50k+ nodes with 60fps
-
-**Interactive Features**:
-- Pan and zoom with mouse controls
-- Node highlighting for critical paths
-- Interactive tooltips with node metadata
-- Platform-specific color coding
-- Export to PNG/SVG with one click
-- Real-time explanation panel with key factors
-
-**Visual Design**:
-- Platform colors: Perplexity (#1FB6FF), ChatGPT (#10B981), Claude (#8B5CF6), Gemini (#F59E0B), Grok (#EF4444)
-- Node type colors: authority, structured_data, content_quality, eeat_signal, citation_decision
-- Critical node glow effects for visual emphasis
-- Top path highlighting with thickness variation
-- Legend with node type indicators
-
-### MCP Integration
-
-**Enhanced Tool Schema**:
-- Added `platform` parameter: Perplexity/ChatGPT/Claude/Gemini/Grok
-- Added `competitors` array parameter (max 10 URLs)
-- Complete response structure with trace + explanation + metadata
-- Schema auto-generated for OpenAI/Claude/Grok platforms
-
-**API Endpoint Implementation** (api/mcp/route.ts):
-- Converts GeoAudit metrics to causal graph nodes/edges
-- Executes full trace with CausalTracerEngine
-- Returns paths, probabilities, competitive analysis, explanations
-- Platform-specific LLM decision emulation
-- Processing time: <5s per trace
-
-### GeoAuditPage Integration
-
-**UI Section**:
-- "Generate Causal Trace" button after Knowledge Graph Dashboard
-- Placeholder explanation before trace generation
-- Full TracerViz rendering after API call
-- Error handling with user-friendly messages
-- On-demand loading to optimize initial page load
-
-**API Call Flow**:
-1. User clicks "Generate Causal Trace"
-2. POST /api/mcp with causal_citation_trace tool
-3. Backend: GeoAudit → Causal Graph → Trace → Explanation
-4. Frontend: Render TracerViz with interactive graph
-5. User interacts: zoom, pan, hover tooltips
-
-### Technical Performance
-
-**Speed**:
-- Path finding: <4s on 50k nodes/300k edges
-- Cache hit rate: 87%
-- Accuracy target: 94%+
-- Build time: 12.63s
-- TypeScript: 0 errors
-
-**Quality**:
-- Production-ready: 4,020 lines, 0 mocks
-- Complete type system with 10+ interfaces
-- Research-based platform weights from real LLM behavior
-- Enterprise-grade error handling with graceful degradation
-
-### Competitive Advantages
-
-1. **World's First and Only**: No competitor has causal explainability for LLM citations (as of Nov 2025)
-2. **Platform-Specific Models**: Different scoring for each LLM based on actual behavior patterns
-3. **Counterfactual Simulation**: What-if analysis with ROI calculation per change
-4. **Interactive Visualization**: Custom force-directed layout without external dependencies
-5. **24-36 Month Moat**: Implementation complexity requires ML + graph theory + LLM expertise
-
-### Market Impact
-
-**TAM Expansion**: From "citation tracking" ($500M) to "citation intelligence" ($2-3B)
-
-**Use Cases**:
-- **Pre-publication**: Predict citation probability before content creation
-- **Post-publication**: Understand why content was/wasn't cited
-- **Competitive**: Identify exact gaps vs competitors
-- **Strategic**: Plan content roadmap based on causal analysis
-- **Enterprise**: CFO-friendly ROI metrics for content investments
-
-**Pricing Tier** (Planned):
-- Professional ($1,999/mo): 100 traces/month
-- Enterprise ($5,999/mo): Unlimited traces with API access
-
----
-
-## Knowledge Graph Engine
-
-Revolutionary AI knowledge infrastructure that transforms content into native AI sources. See `KNOWLEDGE_GRAPH_ENGINE.md` for comprehensive documentation.
-
-### Core Innovation
-
-**Paradigm Shift**: From "optimize for AI crawlers" to "become part of AI platforms."
-
-Competitors optimize content hoping AI finds it. We integrate knowledge directly into AI platforms through official APIs.
-
-### Architecture Components
-
-**Knowledge Graph Builder** (618 lines)
-- Entity extraction with 10 types: Person, Organization, Product, Concept, Technology, Location, Event, Document, Metric, Process
-- Relationship mapping with 10 types: worksFor, creates, uses, proves, describes, locatedIn, happenedAt, references, measures, enables
-- Claim detection with evidence validation and confidence scoring
-- Temporal context tracking for time-sensitive information
-- JSON-LD export compatible with Schema.org ontology
-
-**AI Native Syndication** (558 lines)
-- OpenAI integration via Assistants API v2 with Vector Store
-- Anthropic Claude tool use definitions for knowledge access
-- Perplexity source submission for citable references
-- Google Gemini web-based grounding with structured data
-- Meta Llama Index RAG integration for retrieval pipelines
-- Cost tracking per platform with ROI measurement
-
-**Citation Proof Engine** (465 lines)
-- Real-time citation detection across AI platforms (ChatGPT, Claude, Perplexity, Gemini, Grok)
-- Pattern matching algorithm with confidence scoring (domain mention 40%, entity match 30%, citation markers 30%)
-- Competitive share of voice analysis against market benchmarks
-- Citation velocity tracking (daily trend analysis)
-- ROI calculation: estimated reach (citations × 100 views), estimated value (reach / 1000 × $10 CPM)
-- Cost per citation and comparable paid channel metrics (Google Ads, Facebook Ads, LinkedIn Ads)
-
-**Knowledge Graph Dashboard** (356 lines)
-- Graph View: Interactive entity-relationship visualization (D3.js in production roadmap)
-- Entities Tab: Complete list with types and confidence scores
-- Claims Tab: Factual statements with evidence sources
-- Citations Tab: Real-time tracking by AI platform with metrics
-- Quality Score: 0-100 rating based on entity count, relationship density, claim validation
-- Syndication Status: Live indicators for each AI platform integration
-
-### Technical Implementation
-
-**Entity Recognition**:
-- Regex-based NLP patterns for 10 entity types
-- Capitalization analysis for proper nouns
-- Context window analysis (surrounding 100 characters)
-- Confidence scoring based on pattern matches and co-occurrence
-
-**Relationship Inference**:
-- Co-occurrence analysis within sentence boundaries
-- Distance-based relevance scoring
-- Directional relationship detection (subject-predicate-object)
-- Multiple relationship type support between same entities
-
-**Claim Detection**:
-- Citation marker patterns (parenthetical references, footnotes, inline citations)
-- Statistical statement recognition (percentages, numeric data)
-- Expert quote identification with attribution
-- Evidence validation through source URL checking
-
-**OpenAI Syndication Workflow**:
-1. Create GPT Assistant with name format: KG_{domain}
-2. Initialize Vector Store with 1-year expiration policy
-3. Attach Vector Store to Assistant via files parameter
-4. Upload 3 text files: entities.txt (structured list), relationships.txt (triple format), claims.txt (statement + evidence)
-5. Enable file_search tool for semantic retrieval
-6. Return Assistant URL for client access and API tracking
-
-### Integration with GEO Audit
-
-Knowledge Graph extraction runs automatically during website audit:
-- Triggers after HTML content fetch
-- Progress callback integration ("Building knowledge graph...")
-- Error handling with graceful degradation
-- Results stored in AuditResult.knowledgeGraph field
-- Dashboard renders below AID Agent section
-- Export included in PDF reports and JSON downloads
-
-### Pricing Tiers
-
-**Starter ($499/mo)**
-- Knowledge Graph: up to 1,000 entities
-- 1 AI platform integration (OpenAI)
-- Monthly citation report (30-day summary)
-- Basic dashboard access
-- Email support
-
-**Professional ($1,999/mo)**
-- Knowledge Graph: up to 10,000 entities
-- 3 AI platform integrations (OpenAI, Claude, Perplexity)
-- Real-time citation tracking with daily updates
-- Competitive benchmarking (up to 5 competitors)
-- Advanced dashboard with trend analysis
-- Priority support
-
-**Enterprise ($5,999/mo)**
-- Unlimited Knowledge Graph entities
-- All 5 AI platforms (OpenAI, Claude, Perplexity, Gemini, Meta)
-- White-label dashboard with custom branding
-- API access for CMS integration
-- Dedicated knowledge architect (4 hours/month)
-- Custom syndication schedules
-- SLA guarantees (99.9% uptime)
-- 24/7 support
-
-### Competitive Advantages
-
-1. **Direct Integration vs Content Optimization**: Competitors optimize content hoping AI finds it. We push knowledge directly to AI platforms via official APIs.
-2. **Measurable ROI vs Vanity Metrics**: Track exact citations with estimated reach and value (CPM-based). CFO-friendly metrics enable enterprise sales.
-3. **Network Effects vs Isolated Services**: Knowledge graphs connect and reinforce each other. Clients benefit from collective authority.
-4. **Platform Agnostic vs Vendor Lock-in**: Syndicate to all major AI platforms simultaneously. Future-proof against platform shifts.
-5. **Proprietary Algorithms**: Entity extraction, relationship inference, and citation detection use production-grade NLP that competitors cannot replicate without 12-18 months R&D.
-
-### Market Impact
-
-Expands TAM from $2-3B (GEO services) to $5-7B (plus Knowledge Management and AI Infrastructure markets).
-
-Addresses AI Knowledge Infrastructure market segment with distributed protocol architecture.
-
----
-
-## Autonomous Learning Infrastructure
-
-Automation and intelligence layer implementing autonomous knowledge graph optimization. See `GOLD_STANDARD_INNOVATIONS.md` for full technical documentation.
-
-### Architecture Overview
-
-**Automated Workflow**: Traditional platforms require manual intervention. This infrastructure implements closed-loop architecture where citation feedback automatically refines knowledge graphs, prediction models guide optimization workflows, and cross-client network effects distribute authority signals.
-
-### Architecture Components
-
-**Citation Prediction Engine** (765 lines)
-- Pre-publication citation probability prediction using 70-feature ML model
-- Platform-specific models for Perplexity, ChatGPT, Claude, Gemini, Meta
-- 5-factor prediction: entity value (30%), claim validation (25%), relationship density (20%), structural quality (15%), temporal relevance (10%)
-- Confidence scoring (0-1 scale) based on historical data volume and model accuracy
-- Generates optimization actions with impact estimates and effort levels
-- Predicted reach (citations per month) and value (CPM-based ROI)
-- Time-to-first-citation forecasting using regression models
-- Historical tracking of predictions vs actual performance
-
-**Self-Improving Knowledge Graph** (656 lines)
-- Bidirectional learning loop: citations feed back into KG updates
-- Analyzes real citation patterns to identify high-value entities and claims
-- Query pattern detection: extracts citation triggers from AI responses
-- Confidence signal extraction: measures which KG elements drive citations
-- Entity performance metrics: 0-100 optimization scores per entity
-- Automatic update generation: 8 action types (add entity, enhance claim, strengthen relationship, boost confidence, add temporal context, improve evidence, cross-reference, remove low-value)
-- Priority levels: critical, high, medium, low with effort estimates
-- Impact forecasting: expected citation probability improvement after updates
-- Version control: tracks learning iterations and measures improvement over time
-
-**Real-Time KG Synchronization** (551 lines)
-- Incremental updates to AI platforms in under 60 seconds
-- Platform-specific sync adapters: OpenAI Vector Store, Claude Context, Perplexity Sources, Gemini Grounding, Meta Llama Index
-- Delta detection: only syncs changed entities, relationships, and claims
-- Batch processing: groups updates for API efficiency
-- Retry logic: exponential backoff with 3 attempts per platform
-- Sync metrics: duration, entity count, success rate, error tracking
-- Rollback support: revert to previous KG version on failure
-- Cost optimization: minimizes API calls through intelligent batching
-
-**Cross-Client Network Effects** (463 lines)
-- Global entity index: tracks entities referenced across multiple clients
-- Authority amplification: confidence boost when 2+ clients reference same entity
-- Boost formula: +0.20 for 2nd client, +0.10 for 3rd client, +0.05 for 4th+
-- Authority score bonus: +30 points for 2nd client, +20 for 3rd, +10 for 4th+
-- Entity discovery: surfaces high-authority entities to new clients
-- Relationship strength: measures cross-client relationship consistency
-- Collective intelligence: all clients benefit from shared entity validation
-- Network metrics: total clients, entity occurrence count, average confidence
-
-**Gold Standard Persistence Layer** (444 lines)
-- Production Supabase integration with 8-table schema
-- Knowledge graphs table: version control with parent_version_id tracking
-- Citations table: links citations to specific KG versions
-- Learning analyses table: stores improvement suggestions and impact forecasts
-- Global entities table: cross-client entity authority tracking
-- Global relationships table: shared relationship validation
-- Network effects table: authority boost calculations and metrics
-- Sync operations table: platform sync history and performance
-- Citation predictions table: stores predictions with actual outcomes for model training
-- Full RLS policies: user data isolation with row-level security
-- GIN indexes: fast JSONB queries on entities, relationships, claims
-- Soft deletes: data retention with deleted_at timestamps
-
-**Automation Scheduler** (357 lines)
-- Cron-style job scheduling with 5 automated workflows
-- Learning cycle: runs every 6 hours, analyzes citations and applies KG updates
-- Network effects sync: every 30 minutes, propagates authority boosts
-- Prediction refresh: every 12 hours, updates citation probability forecasts
-- Sync backlog processor: every 5 minutes, ensures all platforms are current
-- Prediction accuracy tracking: daily comparison of predicted vs actual citations
-- Concurrency control: prevents overlapping job execution
-- Job metrics: duration, success rate, error tracking
-- Enable/disable control: per-job activation switches
-- Error handling: graceful degradation with alert notifications
-
-**Gold Standard REST API** (344 lines)
-- 6 production endpoints for external integration
-- POST /api/gold-standard/prediction/create: Generate citation probability prediction
-- POST /api/gold-standard/learning/trigger: Manually trigger learning cycle
-- POST /api/gold-standard/network-effects/sync: Force network effects update
-- GET /api/gold-standard/network-effects/entity: Query entity authority data
-- POST /api/gold-standard/webhook/citation-detected: External citation notification
-- POST /api/gold-standard/webhook/kg-updated: Trigger sync after KG changes
-- Bearer token authentication: validates user API keys
-- CORS support: cross-origin requests for external systems
-- Request validation: Zod schemas for type safety
-- Error responses: structured JSON with timestamps
-
-### Database Schema (002_gold_standard_schema.sql - 487 lines)
-
-8 production tables with comprehensive indexes and constraints:
-
-1. **knowledge_graphs**: Stores KG versions with parent tracking
-   - Columns: id, user_id, domain, version, parent_version_id, is_current, entities, relationships, claims, metadata, source_urls, entity_count, relationship_count, claim_count, learning_version, last_learning_update, total_learning_updates
-   - Indexes: user_id + domain, is_current, learning_version
-   - RLS: Users can only access their own graphs
-
-2. **citations**: Citation records linked to KG versions
-   - Columns: id, user_id, knowledge_graph_id, citation_id, source (enum: chatgpt, claude, perplexity, gemini, grok), query, response, cited_entity, cited_claim, url, confidence, context, timestamp, metadata
-   - Indexes: knowledge_graph_id, source, timestamp, user_id + timestamp
-   - RLS: User-owned data only
-
-3. **learning_analyses**: Learning cycle results and suggestions
-   - Columns: id, user_id, knowledge_graph_id, total_citations_analyzed, high_value_entities, validated_claims, high_value_relationships, suggested_updates (JSONB), current_citation_score, predicted_citation_score_after_updates, expected_improvement, confidence, analysis_metadata
-   - Indexes: knowledge_graph_id, confidence, expected_improvement
-
-4. **global_entities**: Cross-client entity authority
-   - Columns: id, entity_name, entity_type, total_clients, client_ids, occurrence_count, average_confidence, max_confidence, authority_score, first_seen, last_seen, metadata
-   - Indexes: entity_name (unique), total_clients, authority_score
-   - RLS: Read-only access (global data)
-
-5. **global_relationships**: Shared relationship validation
-   - Columns: id, subject_entity, predicate, object_entity, total_clients, client_ids, occurrence_count, average_confidence, strength_score, first_seen, last_seen, metadata
-   - Indexes: subject_entity + predicate + object_entity, strength_score
-
-6. **network_effects**: Authority boost tracking
-   - Columns: id, entity_name, client_user_id, boost_amount, authority_bonus, trigger_client_count, applied_at, metadata
-   - Indexes: entity_name, client_user_id, applied_at
-   - RLS: Users see boosts applied to their entities
-
-7. **sync_operations**: Platform sync history
-   - Columns: id, user_id, knowledge_graph_id, platform (enum: openai, claude, perplexity, gemini, meta), operation_type (enum: full_sync, incremental_update, delete), status (enum: pending, in_progress, completed, failed), entities_synced, duration_ms, error_message, metadata
-   - Indexes: knowledge_graph_id + platform, status, created_at
-
-8. **citation_predictions**: ML prediction tracking
-   - Columns: id, user_id, knowledge_graph_id, overall_probability, confidence, platform_probabilities (JSONB), predicted_reach, predicted_value, time_to_citation, optimization_actions (JSONB), actual_citations_received, actual_time_to_citation, prediction_accuracy, metadata
-   - Indexes: knowledge_graph_id, overall_probability, prediction_accuracy
-
-### Technical Features
-
-**Production-Grade Quality**:
-- Zero mocks or test data: all systems use real production implementations
-- Full TypeScript strict mode with comprehensive type definitions
-- Error handling: graceful degradation with detailed error messages
-- Retry logic: exponential backoff for external API calls
-- Transaction support: atomic operations for data consistency
-- Monitoring: structured logging for all operations
-- Performance: optimized queries with proper indexing
-
-**Integration Points**:
-- Seamlessly integrates with existing Knowledge Graph Builder
-- Links to Citation Proof Engine for real citation data
-- Works with AI Syndication layer for platform updates
-- Exposes REST API for external system integration
-- Automated workflows require zero manual intervention
-- Dashboard visualization for all metrics (planned)
-
-**Business Impact**:
-- Reduces manual optimization work from hours to minutes
-- Improves citation rates by 15-30% through learning loop
-- Network effects architecture: multi-client data improves prediction accuracy
-- Enables enterprise pricing tier with autonomous optimization
-- CFO-friendly: tracks ROI improvement over time with prediction accuracy
-
-### Market Differentiation
-
-No competitor has self-improving knowledge graphs. Traditional platforms:
-- Require manual optimization based on human analysis
-- Cannot predict citation probability before publication
-- Lack cross-client network effects
-- Have no real-time sync across multiple AI platforms
-- Store data in localStorage (lost on logout)
-
-System implementation complexity equivalent to 24-36 month development timeline requires:
-- ML engineering expertise for citation prediction models
-- Distributed systems knowledge for real-time sync
-- Database architecture for version control and network effects
-- Production DevOps for automated scheduling
-- Deep AI platform API integration experience
-
----
-
-## Advanced AI Intelligence Systems
-
-Three production systems implementing predictive intelligence and autonomous optimization with 36-48 month development timeline equivalence.
-
-### Competitive Intelligence Engine
-
-Real-time monitoring and threat detection across AI platforms (687 lines).
-
-**Core Capabilities:**
-- Competitor profile tracking with metrics (total citations, velocity, market share, growth rate)
-- Platform distribution analysis (ChatGPT, Claude, Perplexity, Gemini, Meta)
-- Content strategy reverse engineering (entity types, claim density, relationship patterns)
-- Competitive threat detection when competitors get citations we should have won
-- Root cause analysis with 4 evidence-based factors (entity coverage gap, insufficient validated claims, content recency, platform optimization)
-- Counter-strategy generation with priority actions and implementation steps
-- Market intelligence reports with share of voice tracking
-- Threat severity classification (critical, high, medium, low)
-
-**Threat Detection Algorithm:**
-1. Monitor AI responses for competitor citations
-2. Analyze if we had relevant content to win that citation
-3. Calculate threat severity based on query value and competitor strength
-4. Generate root cause analysis with confidence scores
-5. Create automated counter-strategy with expected impact percentages
-6. Track resolution status and actual outcomes
-
-**Business Value:**
-- Prevents citation losses to competitors with automated alerts
-- Identifies exact content gaps based on competitive analysis
-- Provides actionable counter-strategies with effort estimates
-- Tracks market share trends and competitive positioning
-- Enables proactive content planning based on competitor moves
-
-### Query Intent Analyzer
-
-ML-based prediction of which user queries will lead to citations (828 lines).
-
-**Intent Classification:**
-- 15 intent categories: factual lookup, comparison, how-to, definition, list compilation, data query, opinion, troubleshooting, temporal, causal, procedural, entity info, research, recommendation, explanation
-- 50+ feature extraction per query: linguistic features (question type, interrogatives), semantic features (comparison words, list indicators, temporal markers, quantifiers), entity detection (proper nouns, multi-word entities), specificity and ambiguity scoring
-- Rule-based classification with confidence scores
-- Secondary intent detection for compound queries
-
-**Citation Probability Prediction:**
-- Intent-based baseline probabilities (research: 90%, data query: 85%, how-to: 80%)
-- Content match analysis (entity coverage, claim relevance, relationship depth)
-- Query feature impact (specificity bonus, ambiguity penalty, temporal freshness requirements)
-- Platform-specific probabilities based on intent preferences
-- Confidence scoring based on historical sample size
-- Overall probability 0-100% with 0-1 confidence metric
-
-**Content Match Analysis:**
-- Entity coverage: percentage of query entities found in knowledge graph
-- Claim relevance: word overlap between query and existing claims
-- Relationship depth: connections between detected entities
-- Overall match score: weighted combination (entity 40%, claims 35%, relationships 25%)
-
-**Platform Preferences:**
-- Perplexity: factual lookup (90%), research (95%), temporal (95%)
-- ChatGPT: how-to (90%), explanation (95%), troubleshooting (85%)
-- Claude: research (90%), explanation (90%), causal (85%)
-- Gemini: entity info (90%), data query (90%), temporal (85%)
-- Meta: balanced across all intents (65-80%)
-
-**Optimization Recommendations:**
-- Add missing entities with impact estimation
-- Create validated claims for query topics
-- Strengthen evidence with quantitative data
-- Connect entities with relevant relationships
-- Each recommendation includes effort level and expected citation lift
-
-**Learning Loop:**
-- Records actual citation results per query
-- Updates platform probability models
-- Refines intent classification accuracy
-- Retrains feature weights based on outcomes
-
-**Business Value:**
-- Predicts citation success before content creation
-- Identifies high-value query patterns to target
-- Optimizes content strategy based on platform preferences
-- Reduces wasted effort on low-probability content
-- Enables ROI forecasting for content investments
-
-### Content Gap Detector
-
-Identifies exactly what content competitors have that we are missing (748 lines).
-
-**Gap Detection Types:**
-1. Missing entity: competitor has entity, we do not (4 hour effort)
-2. Missing claim: competitor has validated claim, we do not (6 hour effort)
-3. Missing relationship: competitor connects entities, we do not (2 hour effort)
-4. Missing topic: competitor covers entire topic area, we do not (16 hour effort)
-5. Outdated content: we have content but it is stale
-6. Insufficient depth: we have basic coverage, competitor has comprehensive
-
-**Analysis Process:**
-1. Extract entities, claims, topics, relationships from competitor citations
-2. Compare against our knowledge graph
-3. Identify gaps with citation frequency and query volume
-4. Calculate ROI per gap (estimated citations per month, USD value)
-5. Prioritize by impact and effort (critical, high, medium, low)
-6. Generate detailed content recommendations
-
-**Gap Prioritization:**
-- Critical: 50+ score (citation count + queries/10)
-- High: 30-50 score
-- Medium: 15-30 score
-- Low: under 15 score
-- Quick wins: low effort (under 4 hours), high impact (10+ citations/month)
-- Strategic investments: high effort (over 8 hours), high impact (20+ citations/month)
-
-**Content Recommendations:**
-- Content type: entity, claim, relationship, comprehensive article
-- Title and description with specific requirements
-- Minimum requirements checklist
-- Success criteria for validation
-- Estimated effort in hours
-- Expected citations per month
-- Implementation steps with platform sync instructions
-
-**ROI Tracking:**
-- Total potential citations per month across all gaps
-- Total potential value in USD (CPM-based)
-- Gaps completed vs detected
-- Actual citations received vs predicted
-- ROI percentage: actual/estimated citations
-
-**Content Strategy Report:**
-- Total gaps by type (entity, claim, relationship, topic)
-- Gaps by platform (which platforms show most opportunity)
-- Top 10 opportunities ranked by impact
-- Quick wins for immediate implementation
-- Strategic investments for long-term authority
-- Progress tracking with completion status
-
-**Business Value:**
-- Eliminates guesswork from content planning
-- Provides exact specifications for content creation
-- Prioritizes based on actual competitor citation data
-- Tracks ROI to validate content investments
-- Creates clear roadmap from gaps to citations
-
-### Technical Implementation
-
-**Production Quality:**
-- 2,263 lines of TypeScript production code
-- Zero mocks, zero test data, zero shortcuts
-- Full type safety with comprehensive interfaces
-- Error handling with graceful degradation
-- Integrates seamlessly with existing systems
+## 📊 Project Statistics
+
+**Codebase Size:**
+- **Total Files:** 189
+- **Total Lines:** 60,189
+- **Languages:** TypeScript 94.9%, PLpgSQL 3.9%
+
+**Major Components:**
+- A2A Protocol: 10,464 lines
+- APA Payments: 4,700 lines
+- Causal Tracer: 4,020 lines
+- MCP Sandbox: 1,659 lines
+- Knowledge Graph: 2,288 lines
+- Components: 33 React components
 
 **Performance:**
-- Query intent analysis: under 100ms per query
-- Content gap detection: batch processing with efficient comparison algorithms
-- Competitive monitoring: event-driven threat detection
-- All systems designed for real-time operation
-
-**Scalability:**
-- Handles unlimited competitors per client
-- Query analysis scales to millions of queries
-- Content gap detection supports comprehensive topic coverage
-- No performance degradation with data growth
-
-### Platform Differentiation
-
-Current market solutions:
-
-**Industry Standard Implementations:**
-- Manual competitor analysis workflows
-- Rule-based content recommendations
-- Heuristic-driven content gap identification
-- Static query analysis without probability modeling
-- Reactive monitoring systems
-
-**Technical Implementation:**
-- Automated competitive intelligence with real-time processing
-- ML-based citation probability prediction engine
-- Data-driven content gap analysis with ROI metrics
-- Platform-specific optimization algorithms
-- Closed-loop learning architecture
-
-**System Complexity:**
-Full implementation requires expertise in:
-- ML model development for multi-class intent classification
-- NLP feature extraction pipelines and entity recognition
-- Competitive analysis algorithms with confidence intervals
-- Citation pattern analysis and gap detection
-- Platform-specific probability distribution modeling
-- Production TypeScript with complex type inference systems
+- Bundle: 1.6 MB (~445 KB gzipped)
+- Build: 12-15s
+- LCP: <2.5s | CLS: <0.1 | INP: <200ms
 
 ---
 
-## GEO Audit Tool
+## 🎯 Roadmap
 
-Production-ready website analysis platform with advanced analytics capabilities and AI-powered recommendations.
+**Phase 1 - Core Platform** ✅
+- GEO Audit Engine
+- A2A Protocol
+- AID Discovery
+- MCP Sandbox v2
 
-### New Dashboard Components (2025)
+**Phase 2 - Payments** ✅ (November 2025)
+- Agent-Pay-Agent (APA) micropayments
+- Base L2 USDC integration
+- Auto-payment detection
+- Database-driven pricing
 
-**AI Visibility Index** - Single unified metric (0-100%) answering "Will AI see my site?":
-- Calculates AI citation probability based on 5 weighted factors
-- AI Access (25%): Crawler permissions and discoverability
-- Authority (20%): E-E-A-T signals and trust indicators
-- Structure (20%): Schema markup and semantic HTML
-- Content (20%): Quality, citations, and factual density
-- Technical (15%): Performance, security, mobile optimization
-- Visual progress indicator with Eye icon and color-coded status
-- Breakdown cards showing each factor's contribution
-- Positioned prominently after Executive Summary
+**Phase 3 - Advanced Features** (Q1 2026)
+- ETH payment support (Chainlink oracle)
+- Webhooks for payment notifications
+- Multi-chain support (Optimism, Arbitrum)
+- Advanced analytics dashboard
 
-**GEO Health Tracker** - Daily monitoring dashboard with historical trends:
-- 30-day sparkline chart with SVG area gradient visualization
-- Daily delta tracking showing 24-hour score changes
-- Streak system with flame icon (consecutive improvements)
-- 7-day and 30-day forecasts using linear regression
-- Data persistence in localStorage with URL-based keys
-- Hover tooltips showing score history
-- Encourages daily return with gamification elements
-- Tracks same AI Visibility metric over time
+**Phase 4 - Scale** (Q2 2026)
+- Distributed tracing (OpenTelemetry)
+- Monitoring (Sentry integration)
+- API key management UI
+- Developer portal
 
-**High-Precision GEO Score** - 3-decimal accuracy for enterprise analytics:
-- Main score with 3 decimals (e.g., 54.649/100) instead of rounded integers
-- Three-component breakdown with specific weightings:
-  - **Core** (35%): Schema + AI Access + E-E-A-T
-  - **Technical** (25%): SEO + Links + Meta + Structure
-  - **Content** (40%): Quality + Citation + Performance
-- Professional display with tabular-nums and glow effects
-- Backward compatible with existing rounded scores
-- Component scores shown with 1 decimal precision
+---
 
-### AI-Powered Recommendations
+## 📄 License
 
-**GEO Marketolog AI Agent** - Elite AI strategist with enhanced precision scoring:
+Proprietary - All rights reserved.
 
-**Technology Stack:**
-- OpenRouter API for LLM access
-- Current Model: MiniMax M2 (free tier) with multilingual support
-- Alternative models: Llama 3.2 3B, Gemma 2 9B
-- Enhanced system prompt with precision score understanding
-- Graceful fallback to default recommendations if API unavailable
-- 30-second timeout protection
-- Temperature: 0.7, max_tokens: 2500
+---
 
-**Enhanced System Prompt (2025):**
-- High-precision scoring system documentation (3-decimal scores)
-- Component breakdown understanding (Core/Technical/Content)
-- Updated weight percentages for all metrics:
-  - Schema Markup: 16-20% (highest single weight)
-  - AI Crawler Access: 18%
-  - E-E-A-T: 15-18%
-  - Content Citation: 9-15%
-- ROI prioritization considering score breakdown
-- Recommendations aligned with component weaknesses
+## 🔗 Links
 
-**Expertise Areas:**
-- AI/LLM architecture (ChatGPT, Claude, Gemini, Perplexity citation mechanics)
-- Semantic web technologies (Schema.org ontologies, knowledge graphs)
-- Information retrieval (TF-IDF, vector embeddings, RAG systems)
-- E-E-A-T signals and authority patterns
-- Citation probability optimization
-- High-precision scoring methodologies
+- **Production:** https://anoteroslogos.com
+- **GitHub:** https://github.com/DelovoyMotiv/anteroslogos
+- **Documentation:** https://anoteroslogos.com/docs
+- **AID Protocol:** https://agentcommunity.org
 
-**Analytical Approach:**
-1. Root Cause Analysis - explains WHY issues matter for AI systems
-2. Competitive Context - compares to high-authority sources
-3. Systemic Thinking - identifies interconnected issues
-4. ROI Prioritization - focuses on multiplicative effects
-5. Technical Precision - uses exact terminology and specific Schema types
+---
 
-**Recommendation Quality:**
-- Professional, specific titles ("Implement Organization Schema with knowledge graph structure")
-- Deep analysis with mechanism explanations
-- Quantified impact with research-backed metrics ("3x entity recognition accuracy")
-- Precise technical steps with validation methods
-- Strategic insights connecting multiple observations
-
-**Output Format:**
-- 3-7 expert-level recommendations per audit
-- Priority levels: critical, high, medium, low
-- Effort estimation: quick-win, strategic, long-term
-- Business-level strategic insights
-- Competitive positioning analysis
-
-### Core Analysis Engine (geoAuditEnhanced.ts - 2100+ lines)
-
-Analyzes 11 key categories with high-precision weighted scoring:
-- Schema Markup (15%): Detects 16+ schema types including Organization, Person, Article, Product, Review, HowTo, FAQ, LocalBusiness
-- AI Crawlers (14%): Validates robots.txt for GPTBot, Claude-Web, Perplexity, Google-Extended, Gemini
-- E-E-A-T (14%): Experience, Expertise, Authoritativeness, Trust signals
-- Technical SEO (12%): HTTPS, canonicals, redirects, broken links
-- Link Analysis (11%): Internal/external link quality, anchor text analysis
-- Meta Tags (8%): Title, description, Open Graph, Twitter Cards
-- Content Quality (8%): Word count, readability, semantic structure
-- AID Agent Discovery (8%): DNS TXT and HTTPS well-known agent detection
-- Structure (6%): HTML5 semantics, heading hierarchy
-- Performance (4%): HTML size, script optimization, lazy loading
-- Citation Potential (custom): Factual statements, data points, quotes
-
-**Precision Scoring System:**
-- Overall score calculated to 3 decimals (e.g., 54.649)
-- Component breakdown:
-  - Core (35%): Schema + AI Crawlers + E-E-A-T + AID Agent (15%)
-  - Technical (25%): SEO + Links + Meta + Structure
-  - Content (40%): Quality + Citation + Performance
-- Weighted aggregation of all 11 category scores
-- Backward compatible with rounded integer scores
-
-Grade System: Authority (96-100), Expert (86-95), Advanced (71-85), Intermediate (41-70), Beginner (0-40)
-
-### Advanced Analytics Module (advancedAnalytics.ts - 418 lines)
-
-- Linear Regression Trend Analysis: Slope calculation with R-squared confidence (0-1)
-- Anomaly Detection: Z-score method with threshold 2.5 standard deviations
-- Forecasting: 7-day and 30-day score predictions based on audit frequency
-- Performance Insights: Best/worst scores, median, improvement percentage, consistency (0-100)
-- Category-Specific Trends: Individual trend analysis for all 10 metrics
-- Time-to-Target: Calculates days to reach 90+ score at current improvement rate
-- Executive Summaries: AI-optimized insights with contextual recommendations
-
-### Monitoring & Alerts (monitoringAlerts.ts - 574 lines)
-
-8 Alert Types:
-- score_drop: Significant score decreases (configurable threshold)
-- schema_error: Schema markup validation failures
-- broken_link: Dead internal/external links
-- performance: Core Web Vitals degradation
-- security: HTTPS and security header issues
-- content: Low content quality indicators
-- accessibility: WCAG compliance violations
-- seo: Technical SEO problems
-
-5 Severity Levels: critical, high, medium, low, info
-
-Features:
-- Configurable thresholds and preferences
-- Alert statistics and trend analysis
-- Filtering by severity, category, URL
-- JSON export functionality
-
-### Competitive Intelligence (competitiveIntelligence.ts - 614 lines)
-
-- Competitor Tracking: Monitor up to 20 competitor sites
-- Competitive Comparison: Ranking, score differences, category breakdowns
-- Industry Benchmarks: 6 sectors (E-commerce, SaaS, Media, Healthcare, Finance, Education)
-- SWOT-like Analysis: Strengths, weaknesses, opportunities identification
-- Percentile Positioning: Top 10%, 25%, 50%, or below average
-- Category-Level Analysis: Best/worst/average scores across all metrics
-
-### URL Validation & Fetch Logic (Enhanced 2025)
-
-**Improved Reliability** (urlValidator.ts + geoAuditEnhanced.ts):
-- Retry mechanism with exponential backoff (2 retries: 1s, 2s delays)
-- Request timeouts: 10s for direct fetch, 15s for proxy
-- AbortController for proper timeout handling
-- Minimum response validation: 100 characters (was 0)
-- Trailing slash preserved (some sites require it)
-- User-Agent header: "GEO-Audit/2.0 (+https://anoteroslogos.com)"
-- Context-aware error messages with retry suggestions
-- 95%+ first-attempt success rate
-
-### AID Agent Discovery Integration (aidDiscovery.ts - 559 lines)
-
-Production-ready detection of AI agent support via AID (Agent Identity & Discovery) protocol v1.1:
-
-**Detection Methods:**
-- DNS TXT lookup via Google Public DNS (DoH): `_agent.{domain}` TXT record parsing
-- HTTPS well-known fallback: `/.well-known/agent.json` endpoint check
-- Hybrid approach: Primary DNS (5s timeout), fallback HTTPS (10s timeout)
-- Discovery status: both, dns-only, https-only, or none
-
-**AID Protocol v1.1 Support:**
-- Single-letter field parsing (v=version, p=protocols, u=endpoint, s=service, d=domain)
-- Protocol detection: A2A, MCP, ANP, HTTP
-- Agent metadata extraction: name, description, version, capabilities, vendor
-- Organization metadata: industry, specialization, established date
-- Pricing tier detection: free/basic/pro with rate limits
-- Ed25519 key metadata (RFC 9421) for signature verification
-
-**Scoring Algorithm (0-100):**
-- Base detection: 40 points
-- Discovery method: 20 points (both), 15 (DNS), 10 (HTTPS)
-- Protocol support: 15 points (5 per protocol, max 3)
-- Metadata completeness: 15 points (name, description, capabilities, vendor, docs)
-- Valid endpoint: 10 points
-- Error penalty: -5 points per error (max -20)
-
-**Recommendations Generator:**
-- No AID: "Implement AID Protocol" (high priority, strategic effort)
-- DNS-only: "Add HTTPS well-known endpoint" (medium priority, quick-win)
-- HTTPS-only: "Add DNS TXT record" (medium priority, quick-win)
-- Missing capabilities: "Document agent capabilities" (low priority)
-- Missing documentation: "Add documentation URL" (low priority)
-- Configuration errors: "Fix AID configuration" (high priority)
-
-**UI Component (AIDAgentStatus.tsx - 253 lines):**
-- Detection status with icon (CheckCircle/XCircle/AlertTriangle)
-- Discovery method badges (DNS + HTTPS, DNS Only, HTTPS Only, None)
-- Agent name and description display
-- Discovery method status grid (green/gray cards)
-- Supported protocols (A2A, MCP, HTTP badges)
-- Agent capabilities list (up to 6 shown, +N more)
-- Agent endpoint in code block
-- Organization and industry metadata
-- Errors/warnings display (red/yellow cards)
-- Educational info box with link to `/agent-identity`
-- Integrated in GEO Audit results below Health Tracker
-
-**Integration Points:**
-- Audit flow: `auditWebsite()` calls `discoverAIDAgent()` after AI crawlers check
-- Score weight: 8% of overall score, 15% of Core metrics
-- Result storage: `AuditResult.details.aidAgent` (AIDAgentInfo)
-- Recommendations: Merged with main recommendation list
-- Export: Filtered from generic details loop (has dedicated section)
-
-**Technical Implementation:**
-- DNS Resolution: Real queries via `dns.google/resolve` API (DoH)
-- HTTPS Fetch: Standard fetch with User-Agent header
-- Error Handling: Graceful degradation, warnings instead of failures
-- TypeScript: Full type safety with AIDAgentInfo interface
-- Production-Ready: No mocks, real DNS/HTTP requests, comprehensive validation
-
-### Additional Modules
-
-- Advanced Metrics (advancedMetrics.ts - 723 lines):
-  - Core Web Vitals: LCP, FID, CLS, FCP, TTFB, TTI with good/needs-improvement/poor grades
-  - Security Audit: HTTPS, TLS version, security headers (HSTS, CSP, X-Frame), cookie security, GDPR
-  - Mobile-First Analysis: Viewport, responsive design, AMP, PWA, manifest detection
-  - Accessibility Scoring: ARIA, semantic HTML, alt texts, WCAG level (AAA/AA/A)
-  - International SEO: Hreflang validation, multi-language support, geo-targeting
-
-- NLP Content Analysis (nlpContentAnalysis.ts - 531 lines):
-  - Keyword extraction with density calculation and stuffing detection
-  - Topic clustering across 5 domains (Technology, Business, Science, Medical, Legal)
-  - Semantic analysis: vocabulary diversity, lexical density, abstract concept ratio
-  - Content uniqueness scoring (0-100) with duplicate risk assessment
-  - Sentiment analysis (positive/negative/neutral) with tone detection
-  - Entity recognition: people, organizations, products, concepts
-
-- PDF Report Generation (pdfReportGenerator.ts - 469 lines):
-  - Professional multi-page reports using jsPDF
-  - Cover page with branding, overall score, grade badge
-  - Executive summary with 6 key metrics grid
-  - Score breakdown table with color-coded progress bars
-  - Grouped recommendations by priority (Critical/High/Medium)
-  - Next steps checklist with clear call-to-action
-
-- Security & Validation (urlValidator.ts - 333 lines):
-  - 18-level URL validation including XSS, SQL injection, command injection prevention
-  - Rate limiting: 5 requests/minute, 20/hour with localStorage tracking
-  - SSRF prevention: blocks localhost, private IPs, IPv6 localhost
-  - Dangerous protocol blocking (javascript:, data:, vbscript:, file:)
-
-### User Interface (2025 AAA-Level Optimization)
-
-**Compact Dashboard Design:**
-- Executive Summary: Reduced padding (p-3), micro-typography (text-[9px]-text-[11px])
-- Score Breakdown: 3-4-5 column grid, compact cards with hover effects
-- AI Visibility Index: Circular SVG progress with Eye icon, 5 factor breakdown
-- GEO Health Tracker: 30-day sparkline, streak counter, 7/30-day forecasts
-- High-Precision Score: 3-decimal display with component breakdown cards
-- Monitoring Alerts: 2-column grid, 6 alerts visible, arrow symbols (→)
-- ~40-50% increased data density without sacrificing readability
-
-**Visualization Components:**
-- Interactive Charts: Radar, bar, trend line, and priority matrix
-- Real-time progress indicators during analysis
-- Color-coded severity levels (critical/high/medium/low)
-- Responsive grid layouts (mobile-first design)
-
-**Export & Sharing:**
-- PDF report generation with professional formatting
-- JSON export functionality for API integration
-- Social sharing integration (Twitter, LinkedIn)
-- Copy-to-clipboard for audit results
-
-## Primary Website Features
-
-Key implementation details:
-- Enhanced Schema.org markup with Knowledge Graph connections
-- E-E-A-T signals in Person and Organization schemas
-- AI-crawler optimized robots.txt (GPTBot, Claude-Web, Google-Extended, PerplexityBot)
-- Priority-based sitemap with proper AI discovery hints
-- Multimodal content schema support (VideoObject, HowTo)
-- BreadcrumbList and FAQPage schemas for better AI understanding
-
-## License
-
-Proprietary - Copyright 2025 Anóteros Lógos. All rights reserved.
-
-## Support
-
-For technical support or customization requests, contact the development team.
-
-## Key Features
-
-**MCP Sandbox v2 - Universal Tool Platform:**
-- **Enterprise Sandbox** (507 lines): isolated-vm execution, Ed25519 signatures (RFC 9421), 256MB memory limit, 2s CPU timeout, SSE streaming, billing hooks, graceful degradation, context cleanup
-- **Universal Tool Schemas** (528 lines): 7 graph tools with multi-platform generation (OpenAI/Claude/Grok/OpenAPI 3.1), type-safe conversions, single source of truth
-- **Unified API Endpoint** (624 lines): Auto-format detection (OpenAI/Claude/Grok/JSON-RPC), URL validation, input sanitization, timeout protection (10s), rate limiting integration
-- **Unique Advanced Tools**: causal_citation_trace (reasoning path analysis), predictive_synthesis (ROI-optimized recommendations), federated_authority_boost (ZKP-like authority proof)
-- **Agent Discovery**: mcp-manifest.json with auto-generated schemas for 4+ platforms, zero-config discovery
-- **Security**: Ed25519 cryptographic auth, protocol whitelist, bounds checking, AbortController timeouts
-- **Quality**: TypeScript 0 errors, npm run build success, 3,214 production lines, fixed 31 previous errors
-
-**Core Intelligence Systems:**
-- **Advanced AI Intelligence Layer** (2,263 lines): Competitive Intelligence Engine (687 lines, real-time competitor monitoring with threat detection and counter-strategy generation), Query Intent Analyzer (828 lines, ML classification with 15+ intent categories and citation probability prediction 0-100%), Content Gap Detector (748 lines, entity/claim/topic gap identification with ROI projection algorithms). Implements predictive intelligence with automated optimization capabilities.
-- **Autonomous Learning Infrastructure** - multi-engine intelligence architecture: Citation Prediction (765 lines, 70-feature ML model with platform-specific probability distributions), Self-Improving KG (656 lines, bidirectional feedback loop), Real-Time Sync (551 lines, sub-60s platform synchronization), Cross-Client Network Effects (463 lines, distributed authority amplification). Production persistence layer via Supabase (444 lines, 8-table schema with version control), job scheduler (357 lines, 5 automated workflows), REST API (344 lines, 6 endpoints with Bearer authentication).
-- **Citation Learning Engine** - bidirectional feedback system analyzing AI platform citation behavior for knowledge graph optimization. Implements query pattern detection, confidence signal extraction, entity performance metrics (0-100 scoring), citation probability prediction (5-factor weighted model), automated optimization action generation (8 action types with priority classification and impact estimation)
-
-**Core Capabilities:**
-- **Knowledge Graph Engine for GEO** - automated entity extraction (10 types), relationship mapping (10 types), claim detection with evidence validation, temporal context tracking, JSON-LD export with Schema.org compatibility
-- **Direct LLM Integration Infrastructure** - OpenAI Assistants API v2 with Vector Store, Anthropic Claude tool definitions, Perplexity source submission, Google Gemini grounding, Meta Llama Index RAG integration, cost tracking per platform
-- **Citation Intelligence Platform** - real-time citation detection across ChatGPT, Claude, Perplexity, Gemini, Grok with pattern matching algorithm, confidence scoring, competitive share of voice, citation velocity tracking, ROI calculation with estimated reach and CPM-based value
-- **AID Protocol Discovery** - DNS TXT and HTTPS well-known detection with real-time DNS-over-HTTPS queries via Google Public DNS, hybrid fallback approach (primary DNS 5s, secondary HTTPS 10s), protocol detection (A2A, MCP, ANP, HTTP), agent metadata extraction, scoring algorithm (0-100)
-- **AI Platform Syndication** - direct integration via official APIs, not content optimization, measurable ROI with CFO-friendly metrics, network effects across client knowledge graphs, platform agnostic approach
-- **GEO SaaS Platform** - enterprise generative engine optimization platform with citation tracking ROI, AI visibility management, analyze/optimize/track workflow
-- **Infrastructure Thesis Positioning** - DNS analogy (DNS 1983 vs Anoteros 2023), 4-phase evolution roadmap (Phase 1: $2-3B TAM, Phase 2: $5-7B, Phase 3: $15-30B, Phase 4: $100B+), network effects visualization, Verisign $1.8B comparison, ecosystem vision
-- **AI Visibility Index** - unified AI citation probability metric (0-100%) with 5 weighted factors (AI Access 25%, Authority 20%, Structure 20%, Content 20%, Technical 15%)
-- **GEO Health Tracker** - daily monitoring with 30-day sparkline, daily delta tracking, streak system, 7/30-day forecasts using linear regression, localStorage persistence
-- **High-Precision Scoring** - 3-decimal accuracy (e.g., 54.649/100) with Core/Technical/Content breakdown, professional display with tabular-nums and glow effects
-- **11-Category Audit** - Schema Markup (15%), AI Crawlers (14%), E-E-A-T (14%), Technical SEO (12%), Link Analysis (11%), Meta Tags (8%), Content Quality (8%), AID Agent Discovery (8%), Structure (6%), Performance (4%), Citation Potential
-- **Enhanced AI System Prompt** - high-precision scoring documentation, component breakdown understanding, updated weight percentages, ROI prioritization, recommendations aligned with component weaknesses
-- **URL Validation with Retry** - exponential backoff (2 retries: 1s, 2s), request timeouts (10s direct, 15s proxy), AbortController, minimum 100 character validation, trailing slash preserved, context-aware error messages
-- **Dashboard UI** - AAA-level compact design with 40-50% more data density, micro-typography (text-[9px]-text-[11px]), 3-4-5 column grids, hover effects
-
-**Performance Optimizations:**
-- GeoAudit bundle reduced from 877KB to 510KB (42% reduction)
-- Build time optimized to 12-15s
-- Code splitting for PDF generator (392KB separate chunk)
-- Knowledge Graph module integrated with minimal bundle impact (11KB increase)
-
-Total Project Scale:
-- **26,477+ lines** of production code (10,464 lines in A2A Protocol, 4,580 lines in Autonomous Learning Infrastructure, 3,879 lines in MCP legacy, 2,722 lines in Knowledge Graph Engine, 2,263 lines in Advanced AI Intelligence, 1,659 lines in MCP Sandbox v2, 1,125 lines in Citation Learning Engine)
-- **Advanced AI Intelligence Layer** (2,263 lines): competitiveIntelligence/realTimeMonitor 687 lines (competitor monitoring, threat detection, counter-strategy generation), queryIntent/analyzer 828 lines (ML intent classification, 50+ feature extraction, citation probability prediction), contentGap/detector 748 lines (gap identification with ROI projection algorithms, effort/impact classification)
-- **Autonomous Learning Infrastructure** (4,580 lines total): citationPrediction/engine 765 lines, knowledgeGraph/selfImproving 656 lines, knowledgeGraph/realtimeSync 551 lines, knowledgeGraph/networkEffects 463 lines, goldStandard/persistence 444 lines, automation/scheduler 357 lines, api/goldStandard 344 lines. Database schema 487 lines (8 tables), type definitions 326 lines, documentation 417 lines.
-- **32+ major utility modules** (geoAuditEnhanced 2100+ lines, queryIntent/analyzer 828 lines, citationPrediction/engine 765 lines, citationLearning/feedbackEngine 705 lines, competitiveIntelligence/realTimeMonitor 687 lines, knowledgeGraph/selfImproving 656 lines, contentGap/detector 748 lines, knowledgeGraph builder 618 lines, a2a/mcpAdapter 597 lines, aidDiscovery 559 lines, aiSyndication 558 lines, knowledgeGraph/realtimeSync 551 lines, nlpContentAnalysis 531 lines, a2a/logger 486 lines, citationProof tracker 465 lines, knowledgeGraph/networkEffects 463 lines, goldStandard/persistence 444 lines, a2a/agentRegistry 442 lines, automation/scheduler 357 lines, a2a/mcpSandbox 362 lines, api/goldStandard 344 lines, a2a/mcpClient 327 lines, and 9 more)
-- **34+ React components** (CitationLearningDashboard, AIVisibilityScore, GEOHealthTracker, AIDAgentStatus, KnowledgeGraphDashboard, PulseLine, Hero, Philosophy, ExecutiveSummary, and 25 more)
-- **10 route pages** with lazy loading (HomePage, GeoAuditPage 1950+ lines, AgentIdentityPage 750+ lines, InvestorRelationsPage 660 lines, Blog, KnowledgeBase, and 4 more)
-- **11 audit categories** with precision weighting (Schema 15%, AI Crawlers 14%, E-E-A-T 14%, Technical SEO 12%, Links 11%, Meta 8%, Content 8%, AID Discovery 8%, Structure 6%, Performance 4%, Citation)
-- **Full TypeScript strict mode** with Zod 3.x runtime validation
-- **AI-powered recommendation engine** with MiniMax M2/Llama 3.2/Gemma 2 via OpenRouter, enhanced system prompt for precision scoring
-- **Advanced AI Intelligence Systems** with 3 predictive engines (Competitive Intelligence: real-time competitor monitoring with threat detection, automated counter-strategy generation with root cause analysis, Query Intent Analyzer: 15+ intent categories, 50+ feature extraction per query, citation probability 0-100% prediction with confidence intervals, platform-specific probability distributions, Content Gap Detector: 6 gap types, ROI projection per gap, effort/impact classification, actual vs predicted ROI tracking)
-- **Autonomous Learning Infrastructure** with 4 processing engines (Citation Prediction: 70-feature ML model with platform-specific probability distributions, Self-Improving KG: bidirectional feedback loop with 8 update types, Real-Time Sync: sub-60s platform updates with delta detection, Network Effects: cross-client authority amplification with +0.20 confidence adjustment), production persistence layer (8-table Supabase schema with version control, RLS policies, GIN indexes), job scheduler (5 workflows: learning cycle 6h intervals, network sync 30m intervals, prediction refresh 12h intervals), REST API (6 endpoints with Bearer token authentication)
-- **Knowledge Graph Engine** with direct AI platform syndication (OpenAI Assistants API v2, Claude tool definitions, Perplexity submission, Gemini grounding, Meta Llama RAG)
-- **Citation Proof Engine** with real-time detection across 5 AI platforms, pattern matching with confidence scoring, competitive analysis, ROI calculation
-- **Citation Learning Engine** with bidirectional AI intelligence (query pattern detection, confidence signal extraction, entity performance scoring, citation probability prediction with 5-factor model, auto-optimization actions with 8 types)
-- **A2A Protocol JSON-RPC 2.0** API with 12 methods, 4-tier rate limiting, Agent Registry system, structured logging with request tracing, performance monitoring (p50/p95/p99), queue system, cache layer with ETag support
-- **MCP Code Execution Mode** with 98.7% token reduction (150k → 2k tokens), 4 MCP servers (geo-audit, knowledge-graph, citation-tracking, aidiscovery) with 11 tool definitions, progressive disclosure pattern, 3 built-in skills, production sandbox using isolated-vm (no unsafe eval), real A2A tool integration
-- **AID protocol v1.1** integration with DNS-over-HTTPS detection, hybrid DNS/HTTPS fallback, protocol detection (A2A, MCP, ANP, HTTP)
-- **Production database persistence** via Supabase with 8 tables (knowledge_graphs with version control, citations linked to KG versions, learning_analyses with impact forecasts, global_entities for cross-client authority, global_relationships, network_effects tracking, sync_operations history, citation_predictions with accuracy tracking), full RLS policies, GIN indexes for JSONB queries, soft deletes
-- **Automated workflows** with scheduler (learning cycle every 6 hours, network effects sync every 30 minutes, prediction refresh every 12 hours, sync backlog every 5 minutes, accuracy tracking daily), concurrency control, job metrics, graceful error handling
-- **Technical SEO implementation** with primary keywords: Knowledge Graph Engine for GEO, AI knowledge infrastructure, Direct LLM integration, Citation intelligence platform, AID protocol discovery, AI platform syndication, GEO SaaS, Citation tracking ROI
-- **Infrastructure layer architecture** following distributed protocol model, TAM analysis spanning $2-3B to $100B+ across 4-phase expansion roadmap
-
-The platform is organized as three cooperating layers:
-- Knowledge Graph Engine: structured extraction, relationship modeling, and integration with AI platforms through official interfaces; consistent citation tracking across providers.
-- Autonomous Learning Infrastructure: feedback-driven graph updates, authority propagation across clients, and scheduled synchronization jobs with clear SLAs.
-- Advanced Intelligence Systems: competitive monitoring, query intent analysis, and content gap detection with quantified, reproducible scoring.
-
-Each layer exposes stable interfaces, deterministic behavior where required, auditable processing, and production observability (metrics, logs, rate limits).
+**Last Updated:** November 21, 2025  
+**Version:** 3.0.0  
+**Build Status:** ✅ Passing
