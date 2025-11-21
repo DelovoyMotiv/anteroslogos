@@ -86,6 +86,9 @@ const AgentIdentityPage = () => {
               <a href="#a2a-protocol" className="text-xs text-brand-accent hover:text-blue-400 transition-colors font-medium">
                 → A2A Protocol
               </a>
+              <a href="#apa-payments" className="text-xs text-brand-accent hover:text-blue-400 transition-colors font-medium">
+                → APA Micropayments
+              </a>
               <a href="#mcp-protocol" className="text-xs text-brand-accent hover:text-blue-400 transition-colors font-medium">
                 → MCP Protocol
               </a>
@@ -609,6 +612,380 @@ audit = response.json()`
           {/* Interactive Explorer */}
           <section className="mb-16">
             <InteractiveExplorer />
+          </section>
+
+          {/* Section 2.5: APA Micropayments */}
+          <section id="apa-payments" className="mb-16">
+            <div className="flex items-center gap-3 mb-6">
+              <Zap className="w-8 h-8 text-yellow-400" />
+              <h2 className="text-3xl font-bold text-white">APA Micropayments (Agent-Pay-Agent)</h2>
+            </div>
+
+            <p className="text-white/70 mb-6">
+              First production implementation of USDC-based micropayments for autonomous AI agent interactions. Pay-per-request or pre-deposit modes with automatic blockchain verification on Base L2.
+            </p>
+
+            <div className="space-y-6">
+              {/* Core Information */}
+              <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div>
+                    <h4 className="text-sm font-semibold text-white mb-2">Blockchain</h4>
+                    <code className="text-xs text-brand-accent font-mono">Base L2 (Chain ID 8453)</code>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-white mb-2">Token</h4>
+                    <code className="text-xs text-green-400 font-mono">USDC Only</code>
+                    <p className="text-xs text-white/60 mt-1">0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-white mb-2">Confirmations</h4>
+                    <code className="text-xs text-purple-400 font-mono">2 blocks (4s)</code>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-white mb-2">Invoice ID Format</h4>
+                    <code className="text-xs text-orange-400 font-mono">inv_ULID</code>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Flow */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">Payment Flow (Pay-Per-Request)</h3>
+                <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-6">
+                  <div className="space-y-3 text-sm text-white/70 font-mono">
+                    <div className="flex items-start gap-3">
+                      <span className="text-brand-accent">1.</span>
+                      <span>Agent sends JSON-RPC request without <code className="text-purple-400">invoice_id</code></span>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="text-brand-accent">2.</span>
+                      <span>Server responds with <code className="text-red-400">HTTP 402 Payment Required</code></span>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="text-brand-accent">3.</span>
+                      <span>Response includes invoice: <code className="text-green-400">{'{invoiceId, amount, recipientAddress, memoHash}'}</code></span>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="text-brand-accent">4.</span>
+                      <span>Agent sends USDC to <code className="text-orange-400">recipientAddress</code> on Base L2</span>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="text-brand-accent">5.</span>
+                      <span>Agent retries request with <code className="text-purple-400">invoice_id</code> and <code className="text-blue-400">tx_hash</code></span>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="text-brand-accent">6.</span>
+                      <span>Server verifies payment (2 confirmations), returns <code className="text-green-400">HTTP 200</code> with audit result</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* HTTP 402 Response Example */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">HTTP 402 Response Schema</h3>
+                <SchemaBlock
+                  title="Payment Required Response"
+                  schema={{
+                    jsonrpc: "2.0",
+                    error: {
+                      code: -32002,
+                      message: "Payment required",
+                      data: {
+                        invoiceId: "inv_01JDKP5R2G4M8QYX3WTNZHF9V7",
+                        amount: 0.10,
+                        token: "USDC",
+                        chainId: 8453,
+                        recipientAddress: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+                        memoHash: "0x9a7b3c2e1f8d4b6a5c9e2f1a3b5c7d9e",
+                        expiresAt: "2025-11-21T18:00:00.000Z",
+                        status: "pending"
+                      }
+                    },
+                    id: 1
+                  }}
+                  defaultOpen={true}
+                  description="Agent must send USDC payment before retrying request"
+                />
+              </div>
+
+              {/* Code Example: Full Payment Flow */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">Implementation Example</h3>
+                <CodeSample
+                  title="TypeScript: Autonomous Payment Flow"
+                  samples={[
+                    {
+                      language: 'typescript',
+                      code: `import { ethers } from 'ethers';
+
+const USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
+const BASE_RPC = 'https://mainnet.base.org';
+
+async function auditWithPayment(url: string) {
+  const apiKey = process.env.ANOTEROS_API_KEY;
+  const wallet = new ethers.Wallet(process.env.AGENT_PRIVATE_KEY!);
+  const provider = new ethers.JsonRpcProvider(BASE_RPC);
+  const signer = wallet.connect(provider);
+
+  // Step 1: Initial request (will return HTTP 402)
+  let response = await fetch('https://anoteroslogos.com/api/a2a', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': \`Bearer \${apiKey}\`
+    },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      method: 'geo.audit.request',
+      params: { url, depth: 'standard' },
+      id: 1
+    })
+  });
+
+  if (response.status === 402) {
+    const error = await response.json();
+    const invoice = error.error.data;
+
+    // Step 2: Send USDC payment
+    const usdcContract = new ethers.Contract(
+      USDC_ADDRESS,
+      ['function transfer(address to, uint256 amount) returns (bool)'],
+      signer
+    );
+
+    const amountInUnits = ethers.parseUnits(invoice.amount.toString(), 6); // USDC has 6 decimals
+    const tx = await usdcContract.transfer(
+      invoice.recipientAddress,
+      amountInUnits
+    );
+
+    console.log('Payment sent:', tx.hash);
+
+    // Step 3: Wait for 2 confirmations
+    await tx.wait(2);
+
+    // Step 4: Retry request with payment proof
+    response = await fetch('https://anoteroslogos.com/api/a2a', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': \`Bearer \${apiKey}\`
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        method: 'geo.audit.request',
+        params: {
+          url,
+          depth: 'standard',
+          invoice_id: invoice.invoiceId,
+          tx_hash: tx.hash
+        },
+        id: 1
+      })
+    });
+  }
+
+  // Step 5: Get audit result
+  const result = await response.json();
+  return result.result;
+}
+
+// Usage
+const audit = await auditWithPayment('https://example.com');
+console.log('GEO Score:', audit.score);`
+                    },
+                    {
+                      language: 'python',
+                      code: `from web3 import Web3
+import requests
+import os
+
+USDC_ADDRESS = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'
+BASE_RPC = 'https://mainnet.base.org'
+
+def audit_with_payment(url: str):
+    api_key = os.getenv('ANOTEROS_API_KEY')
+    w3 = Web3(Web3.HTTPProvider(BASE_RPC))
+    account = w3.eth.account.from_key(os.getenv('AGENT_PRIVATE_KEY'))
+    
+    # Step 1: Initial request
+    response = requests.post(
+        'https://anoteroslogos.com/api/a2a',
+        headers={'Authorization': f'Bearer {api_key}'},
+        json={
+            'jsonrpc': '2.0',
+            'method': 'geo.audit.request',
+            'params': {'url': url, 'depth': 'standard'},
+            'id': 1
+        }
+    )
+    
+    if response.status_code == 402:
+        error = response.json()
+        invoice = error['error']['data']
+        
+        # Step 2: Send USDC payment
+        usdc = w3.eth.contract(
+            address=USDC_ADDRESS,
+            abi=[{
+                'constant': False,
+                'inputs': [
+                    {'name': 'to', 'type': 'address'},
+                    {'name': 'value', 'type': 'uint256'}
+                ],
+                'name': 'transfer',
+                'outputs': [{'name': '', 'type': 'bool'}],
+                'type': 'function'
+            }]
+        )
+        
+        amount_in_units = int(invoice['amount'] * 1_000_000)  # USDC 6 decimals
+        tx = usdc.functions.transfer(
+            invoice['recipientAddress'],
+            amount_in_units
+        ).build_transaction({
+            'from': account.address,
+            'nonce': w3.eth.get_transaction_count(account.address),
+            'gas': 100000,
+            'gasPrice': w3.eth.gas_price
+        })
+        
+        signed = account.sign_transaction(tx)
+        tx_hash = w3.eth.send_raw_transaction(signed.rawTransaction)
+        
+        # Step 3: Wait for confirmations
+        receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+        
+        # Step 4: Retry with payment proof
+        response = requests.post(
+            'https://anoteroslogos.com/api/a2a',
+            headers={'Authorization': f'Bearer {api_key}'},
+            json={
+                'jsonrpc': '2.0',
+                'method': 'geo.audit.request',
+                'params': {
+                    'url': url,
+                    'depth': 'standard',
+                    'invoice_id': invoice['invoiceId'],
+                    'tx_hash': tx_hash.hex()
+                },
+                'id': 1
+            }
+        )
+    
+    # Step 5: Return result
+    return response.json()['result']
+
+# Usage
+audit = audit_with_payment('https://example.com')
+print(f"GEO Score: {audit['score']}")`
+                    }
+                  ]}
+                />
+              </div>
+
+              {/* Pre-Deposit Mode */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">Pre-Deposit Mode (Faster)</h3>
+                <p className="text-sm text-white/70 mb-4">
+                  For high-frequency usage, agents can pre-deposit USDC. Subsequent requests use balance without on-chain transactions (latency: &lt;500ms vs 2-3s).
+                </p>
+                
+                <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                  <div className="flex items-start gap-2">
+                    <Zap className="w-4 h-4 text-blue-400 mt-0.5" />
+                    <div className="text-sm text-blue-300">
+                      <strong>How it works:</strong> Send USDC to platform wallet once. Each API call deducts from balance. Automatic top-up when balance &lt; $5. Check balance via <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">a2a.balance</code> method.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Pricing */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">Pricing (USDC)</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-white mb-2">geo.audit.request</h4>
+                    <div className="space-y-1 text-xs text-white/60">
+                      <p>Quick: <span className="text-white">$0.05 USDC</span></p>
+                      <p>Standard: <span className="text-white">$0.10 USDC</span></p>
+                      <p>Deep: <span className="text-white">$0.25 USDC</span></p>
+                    </div>
+                  </div>
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-white mb-2">geo.audit.batch</h4>
+                    <p className="text-xs text-white/60">Per-URL pricing × quantity</p>
+                    <p className="text-xs text-white mt-1">Max 100 URLs/batch</p>
+                  </div>
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-white mb-2">MCP Tools</h4>
+                    <p className="text-xs text-white/60">auditSite: <span className="text-white">$0.10</span></p>
+                    <p className="text-xs text-white/60 mt-1">predictCitation: <span className="text-white">$0.05</span></p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Security & Best Practices */}
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+                <div className="flex items-start gap-2">
+                  <Shield className="w-4 h-4 text-yellow-400 mt-0.5" />
+                  <div className="text-sm text-yellow-300">
+                    <strong>Security Best Practices:</strong>
+                    <ul className="list-disc ml-4 mt-2 space-y-1">
+                      <li>Always verify <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">recipientAddress</code> matches platform wallet</li>
+                      <li>Include <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">memoHash</code> in transaction memo/data field for automatic detection</li>
+                      <li>Implement exponential backoff if payment detection fails (max 3 retries)</li>
+                      <li>Store private keys in secure enclave (HSM/KMS), never in code</li>
+                      <li>Monitor for blockchain reorgs (&lt;12 confirmations may be re-verified)</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Error Handling */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">Payment Error Codes</h3>
+                <div className="space-y-2">
+                  {[
+                    { code: -32002, name: 'Payment Required', description: 'Invoice generated, awaiting payment' },
+                    { code: -32003, name: 'Payment Pending', description: 'Transaction submitted but <2 confirmations' },
+                    { code: -32004, name: 'Insufficient Balance', description: 'Pre-deposit balance too low' },
+                    { code: -32005, name: 'Invoice Expired', description: 'Payment window (1h) exceeded' },
+                    { code: -32006, name: 'Invalid Transaction', description: 'tx_hash not found or incorrect amount' },
+                  ].map((error) => (
+                    <div key={error.code} className="bg-zinc-900/30 border border-zinc-800 rounded p-3 flex items-start gap-3">
+                      <code className="text-xs font-mono text-red-400 min-w-[60px]">{error.code}</code>
+                      <div>
+                        <div className="text-sm font-semibold text-white">{error.name}</div>
+                        <div className="text-xs text-white/60">{error.description}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Additional Methods */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">Additional APA Methods</h3>
+                <div className="space-y-3">
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                    <code className="text-sm font-mono text-brand-accent">a2a.balance</code>
+                    <p className="text-xs text-white/60 mt-2">Check pre-deposit balance: <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">{'{"method": "a2a.balance", "params": {}}'}</code></p>
+                  </div>
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                    <code className="text-sm font-mono text-green-400">a2a.invoice.status</code>
+                    <p className="text-xs text-white/60 mt-2">Check invoice payment status: <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">{'{"method": "a2a.invoice.status", "params": {"invoice_id": "inv_..."}}'}</code></p>
+                  </div>
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                    <code className="text-sm font-mono text-purple-400">a2a.wallet.create</code>
+                    <p className="text-xs text-white/60 mt-2">Create custodial wallet (platform manages keys): <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">{'{"method": "a2a.wallet.create", "params": {"type": "custodial"}}'}</code></p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </section>
 
           {/* Section 3: MCP Protocol - Simplified summary for space */}
