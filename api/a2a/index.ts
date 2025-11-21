@@ -18,6 +18,7 @@ import { performGeoAudit } from '../../utils/geoAuditEnhanced';
 import { getCachedAuditResult, cacheAuditResult } from '../../lib/a2a/cache';
 import { validateApiKey as validateRegisteredApiKey, recordAgentActivity, getAgentByApiKey } from '../../lib/a2a/agentRegistry';
 import { createRequestTracer, logger, perfMonitor, formatApiKey } from '../../lib/a2a/logger';
+import { enforcePayment, type PaymentContext } from '../../lib/payments/paymentGuard';
 
 // =====================================================
 // CORS & HEADERS
@@ -173,10 +174,10 @@ async function handleCapabilities(_params: any, context: A2AContext) {
 }
 
 /**
- * Handle geo.audit.request - Perform GEO audit
+ * Handle geo.audit.request - Perform GEO audit WITH PAYMENT ENFORCEMENT
  */
 async function handleAuditRequest(params: any, context: A2AContext) {
-  const { url } = params;
+  const { url, invoice_id, tx_hash } = params;
   
   if (!url || typeof url !== 'string') {
     throw createA2AErrorResponse(
@@ -198,6 +199,46 @@ async function handleAuditRequest(params: any, context: A2AContext) {
       { url }
     );
   }
+  
+  // =====================================================
+  // PAYMENT ENFORCEMENT (APA Integration)
+  // =====================================================
+  
+  // Get agent info from context
+  const agent = context.api_key ? getAgentByApiKey(context.api_key) : null;
+  
+  if (!agent) {
+    throw createA2AErrorResponse(
+      null,
+      ERROR_CODES.AUTHENTICATION_REQUIRED,
+      'Valid agent API key required for paid methods',
+      { method: 'geo.audit.request' }
+    );
+  }
+  
+  // Prepare payment context
+  const paymentContext: PaymentContext = {
+    userId: agent.id,
+    agentId: agent.id,
+    method: 'geo.audit.request',
+    params: { url }, // Clean params without payment fields
+    tier: context.tier as 'free' | 'basic' | 'pro',
+    preferredToken: 'USDC',
+  };
+  
+  // Enforce payment - will throw HTTP 402 if payment required but not provided
+  const paymentResult = await enforcePayment(paymentContext, invoice_id, tx_hash);
+  
+  // Payment successful, proceed with audit
+  logger.debug('Payment verified, proceeding with audit', {
+    agent_id: agent.id,
+    payment_mode: paymentResult.mode,
+    invoice_id: paymentResult.invoice?.invoiceId,
+  });
+  
+  // =====================================================
+  // AUDIT EXECUTION
+  // =====================================================
   
   // Check cache first
   const cached = getCachedAuditResult(url);
@@ -521,6 +562,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
     
     tracer.fail(error);
+    
+    // Check for HTTP 402 Payment Required (APA invoice)
+    if (error.httpStatus === 402 && error.invoice) {
+      // Return invoice to client
+      return res.status(402).json(error.invoice);
+    }
     
     // If error is already an A2A error response, return it
     if (error.jsonrpc === '2.0' && error.error) {

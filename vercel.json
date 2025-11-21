@@ -1,4 +1,10 @@
 {
+  "crons": [
+    {
+      "path": "/api/cron/reorg-monitor",
+      "schedule": "*/5 * * * *"
+    }
+  ],
   "rewrites": [
     { "source": "/api/gold-standard/:path*", "destination": "/api/goldStandard" },
     { "source": "/api/keys/:path*", "destination": "/api/keys" },
