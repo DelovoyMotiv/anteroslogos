@@ -1,6 +1,9 @@
 {
   "rewrites": [
     { "source": "/api/gold-standard/:path*", "destination": "/api/goldStandard" },
+    { "source": "/api/keys/:path*", "destination": "/api/keys" },
+    { "source": "/api/agent-keys/:path*", "destination": "/api/agent-keys" },
+    { "source": "/api/stripe/:path*", "destination": "/api/stripe" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "headers": [
