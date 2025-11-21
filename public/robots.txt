@@ -99,12 +99,21 @@ Allow: /
 User-agent: *
 Allow: /
 
-# === Disallow sensitive paths ===
-Disallow: /api/
+# === CRITICAL: Allow AI agents access to protocol endpoints ===
+# These paths are REQUIRED for autonomous agent integration
+Allow: /.well-known/
+Allow: /api/a2a
+Allow: /api/mcp
+Allow: /.well-known/agent.json
+Allow: /.well-known/ai.txt
+Allow: /.well-known/mcp-manifest.json
+
+# === Disallow only truly sensitive paths ===
 Disallow: /admin/
-Disallow: /*.json$
 Disallow: /node_modules/
 Disallow: /dist/
+Disallow: /api/cron/
+Disallow: /api/stripe/webhook
 
 # === Sitemap location ===
 Sitemap: https://anoteroslogos.com/sitemap.xml
