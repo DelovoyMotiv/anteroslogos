@@ -97,4 +97,3 @@ validate-*.ps1
 # Development files
 .vercel
 *.local
-src/
