@@ -10,19 +10,19 @@ import type { Database } from '../types/database.types';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl) {
-  throw new Error('Missing VITE_SUPABASE_URL environment variable');
-}
+// Check if Supabase is configured
+const isConfigured = !!(supabaseUrl && supabaseAnonKey);
 
-if (!supabaseAnonKey) {
-  throw new Error('Missing VITE_SUPABASE_ANON_KEY environment variable');
+if (!isConfigured) {
+  console.warn('Supabase not configured: Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY. Authentication features will be disabled.');
 }
 
 /**
  * Supabase client instance
  * Configured with production settings for optimal performance
+ * Will be null if env variables are not set
  */
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+export const supabase = isConfigured ? createClient<Database>(supabaseUrl!, supabaseAnonKey!, {
   auth: {
     autoRefreshToken: true,
     persistSession: true,
@@ -45,13 +45,13 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
       eventsPerSecond: 10,
     },
   },
-});
+}) : null as any;
 
 /**
  * Check if Supabase client is properly configured
  */
 export function isSupabaseConfigured(): boolean {
-  return !!(supabaseUrl && supabaseAnonKey);
+  return isConfigured;
 }
 
 /**
@@ -174,7 +174,8 @@ export async function updatePassword(newPassword: string) {
  * Listen to auth state changes
  */
 export function onAuthStateChange(callback: (event: string, session: any) => void) {
-  return supabase.auth.onAuthStateChange((event, session) => {
+  if (!isConfigured || !supabase) return { data: { subscription: { unsubscribe: () => {} } } };
+  return supabase.auth.onAuthStateChange((event: any, session: any) => {
     callback(event, session);
   });
 }

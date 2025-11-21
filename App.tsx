@@ -19,7 +19,7 @@ const CookiePolicyPage = lazy(() => import('./pages/CookiePolicyPage'));
 const NotFound = lazy(() => import('./components/NotFound'));
 
 // Dashboard layout and pages (protected)
-const DashboardLayout = lazy(() => import('./src/components/dashboard/DashboardLayout').then(m => ({ default: m.DashboardLayout })));
+const DashboardLayout = lazy(() => import('./src/components/dashboard/DashboardLayout'));
 const DashboardOverview = lazy(() => import('./src/pages/dashboard/OverviewPage'));
 const DashboardAPIKeys = lazy(() => import('./src/pages/dashboard/APIKeysPage'));
 const DashboardAgentKeys = lazy(() => import('./src/pages/dashboard/AgentKeysPage'));

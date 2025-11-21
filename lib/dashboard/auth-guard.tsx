@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../supabase';
+import { supabase, isSupabaseConfigured } from '../supabase';
 import type { User } from '@supabase/supabase-js';
 
 interface AuthGuardProps {
@@ -28,8 +28,16 @@ export function AuthGuard({
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (!isSupabaseConfigured() || !supabase) {
+      setLoading(false);
+      if (requireAuth) {
+        navigate(redirectTo, { replace: true });
+      }
+      return;
+    }
+
     // Check initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }: any) => {
       setUser(session?.user ?? null);
       setLoading(false);
 
@@ -41,7 +49,7 @@ export function AuthGuard({
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null);
 
       if (requireAuth && !session) {
@@ -85,14 +93,19 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    if (!isSupabaseConfigured() || !supabase) {
+      setLoading(false);
+      return;
+    }
+
+    supabase.auth.getUser().then(({ data: { user } }: any) => {
       setUser(user);
       setLoading(false);
     });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null);
       setLoading(false);
     });
@@ -101,12 +114,18 @@ export function useAuth() {
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    if (!isSupabaseConfigured() || !supabase) {
+      throw new Error('Supabase not configured');
+    }
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
     return data;
   };
 
   const signUp = async (email: string, password: string, metadata?: Record<string, any>) => {
+    if (!isSupabaseConfigured() || !supabase) {
+      throw new Error('Supabase not configured');
+    }
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -117,6 +136,9 @@ export function useAuth() {
   };
 
   const signInWithMagicLink = async (email: string) => {
+    if (!isSupabaseConfigured() || !supabase) {
+      throw new Error('Supabase not configured');
+    }
     const { data, error } = await supabase.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
@@ -126,11 +148,17 @@ export function useAuth() {
   };
 
   const signOut = async () => {
+    if (!isSupabaseConfigured() || !supabase) {
+      throw new Error('Supabase not configured');
+    }
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
   };
 
   const resetPassword = async (email: string) => {
+    if (!isSupabaseConfigured() || !supabase) {
+      throw new Error('Supabase not configured');
+    }
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/reset-password`,
     });

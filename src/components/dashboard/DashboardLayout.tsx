@@ -37,3 +37,5 @@ export function DashboardLayout() {
     </AuthGuard>
   );
 }
+
+export default DashboardLayout;
