@@ -6,7 +6,8 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../../lib/dashboard/auth-guard';
-import { getSubscription, PLAN_CONFIG } from '../../../lib/dashboard/billing';
+import { getSubscription, PLAN_CONFIG } from '../../../lib/dashboard/billing-client';
+import { supabase } from '../../../lib/supabase';
 import { Check, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 

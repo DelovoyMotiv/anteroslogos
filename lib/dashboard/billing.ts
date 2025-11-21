@@ -1,7 +1,8 @@
 // @ts-nocheck
 /**
- * Billing Management
+ * Billing Management - SERVER-ONLY
  * Stripe integration for subscriptions and payments
+ * IMPORTANT: This file MUST only be imported by serverless functions in /api
  */
 
 import { supabase } from '../supabase';
@@ -12,7 +13,7 @@ let stripe: Stripe | null = null;
 
 function getStripe(): Stripe {
   if (!stripe) {
-    const apiKey = process.env.STRIPE_SECRET_KEY || import.meta.env.VITE_STRIPE_SECRET_KEY;
+    const apiKey = process.env.STRIPE_SECRET_KEY;
     if (!apiKey) {
       throw new Error('Missing STRIPE_SECRET_KEY');
     }
@@ -24,52 +25,28 @@ function getStripe(): Stripe {
   return stripe;
 }
 
-// Plan configuration with Stripe Price IDs
-export const PLAN_CONFIG = {
+// Plan configuration with Stripe Price IDs (server-only)
+const PLAN_CONFIG = {
   free: {
     id: 'free',
     name: 'Free',
     price: 0,
     interval: null,
     stripePriceId: null,
-    features: [
-      '100 calls/day',
-      'Basic tools only',
-      '1 API key',
-      'Community support',
-    ],
   },
   pro: {
     id: 'pro',
     name: 'Pro',
     price: 4900, // cents
     interval: 'month' as const,
-    stripePriceId: process.env.STRIPE_PRICE_PRO || import.meta.env.VITE_STRIPE_PRICE_PRO,
-    features: [
-      'Unlimited calls',
-      'All tools + UCPT',
-      'Causal tracer',
-      '5 API keys',
-      '10 agent keys',
-      'Priority support',
-    ],
+    stripePriceId: process.env.STRIPE_PRICE_PRO,
   },
   agency: {
     id: 'agency',
     name: 'Agency',
     price: 29900, // cents
     interval: 'month' as const,
-    stripePriceId: process.env.STRIPE_PRICE_AGENCY || import.meta.env.VITE_STRIPE_PRICE_AGENCY,
-    features: [
-      'Unlimited calls',
-      'All tools + white-label',
-      '20 API keys',
-      '50 agent keys',
-      '5 team seats',
-      'API billing webhooks',
-      'Dedicated support',
-      'SLA guarantee',
-    ],
+    stripePriceId: process.env.STRIPE_PRICE_AGENCY,
   },
 } as const;
 
@@ -235,46 +212,6 @@ export async function createPortalSession(
   }
 }
 
-/**
- * Get current subscription for user
- */
-export async function getSubscription(
-  userId: string
-): Promise<Subscription | { error: string }> {
-  try {
-    const { data: subscription, error } = await supabase
-      .from('subscriptions')
-      .select('*')
-      .eq('user_id', userId)
-      .single();
-
-    if (error) {
-      // No subscription = free tier
-      return {
-        id: '',
-        user_id: userId,
-        stripe_subscription_id: null,
-        stripe_customer_id: '',
-        plan_id: 'free',
-        status: 'active',
-        current_period_start: null,
-        current_period_end: null,
-        cancel_at_period_end: false,
-        canceled_at: null,
-        trial_start: null,
-        trial_end: null,
-        metadata: {},
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
-    }
-
-    return subscription;
-  } catch (error) {
-    console.error('getSubscription error:', error);
-    return { error: 'Failed to fetch subscription' };
-  }
-}
 
 /**
  * Cancel subscription at period end

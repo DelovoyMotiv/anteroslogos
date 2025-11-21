@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../../lib/dashboard/auth-guard';
 import { getCurrentCycleUsage, getUCPTRate } from '../../../lib/dashboard/usage-analytics';
-import { getSubscription } from '../../../lib/dashboard/billing';
+import { getSubscription } from '../../../lib/dashboard/billing-client';
 import { Activity, TrendingUp, Shield, Zap } from 'lucide-react';
 
 interface Stats {
