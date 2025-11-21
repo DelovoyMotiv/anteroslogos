@@ -1,6 +1,13 @@
-# Anóteros Lógos
+# Anóteros Lógos - Enterprise AI Knowledge Infrastructure
 
-**Generative Engine Optimization Platform**
+![License](https://img.shields.io/badge/License-Proprietary-red)
+![Version](https://img.shields.io/badge/version-3.0.0-blue)
+![Node](https://img.shields.io/badge/node-20.x-green)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)
+![React](https://img.shields.io/badge/React-19.2-cyan)
+![Build](https://img.shields.io/badge/build-passing-brightgreen)
+
+Enterprise-grade AI knowledge infrastructure platform providing cryptographically verifiable provenance, deterministic execution, and **Agent-Pay-Agent (APA) micropayments layer.** First production implementation of USDC-based micropayments for autonomous AI agent interactions on Base L2 blockchain.
 
 Production URL: https://anoteroslogos.com  
 Codebase: 189 files | 60,189 lines
