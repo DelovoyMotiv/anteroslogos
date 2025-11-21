@@ -1,7 +1,7 @@
 {
   "rewrites": [
     { "source": "/api/gold-standard/:path*", "destination": "/api/goldStandard" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "headers": [
     {
