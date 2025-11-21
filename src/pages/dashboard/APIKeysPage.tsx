@@ -5,11 +5,11 @@
  */
 
 import { useEffect, useState } from 'react';
-import { useAuth } from '../../lib/dashboard/auth-guard';
-import { listAPIKeys, type APIKey } from '../../lib/dashboard/api-keys';
+import { useAuth } from '../../../lib/dashboard/auth-guard';
+import { listAPIKeys, type APIKey } from '../../../lib/dashboard/api-keys-client';
 import { Plus, Copy, Trash2, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../../lib/supabase';
 
 export function APIKeysPage() {
   const { user } = useAuth();
@@ -285,3 +285,5 @@ function LoadingSkeleton() {
     </div>
   );
 }
+
+export default APIKeysPage;

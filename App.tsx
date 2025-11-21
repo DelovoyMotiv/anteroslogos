@@ -18,6 +18,15 @@ const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
 const CookiePolicyPage = lazy(() => import('./pages/CookiePolicyPage'));
 const NotFound = lazy(() => import('./components/NotFound'));
 
+// Dashboard layout and pages (protected)
+const DashboardLayout = lazy(() => import('./src/components/dashboard/DashboardLayout').then(m => ({ default: m.DashboardLayout })));
+const DashboardOverview = lazy(() => import('./src/pages/dashboard/OverviewPage'));
+const DashboardAPIKeys = lazy(() => import('./src/pages/dashboard/APIKeysPage'));
+const DashboardAgentKeys = lazy(() => import('./src/pages/dashboard/AgentKeysPage'));
+const DashboardBilling = lazy(() => import('./src/pages/dashboard/BillingPage'));
+const DashboardUsage = lazy(() => import('./src/pages/dashboard/UsagePage'));
+const DashboardSettings = lazy(() => import('./src/pages/dashboard/SettingsPage'));
+
 const App: React.FC = () => {
     return (
         <ErrorBoundary>
@@ -35,6 +44,17 @@ const App: React.FC = () => {
                         <Route path="/agent-identity" element={<AgentIdentityPage />} />
                         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                         <Route path="/cookie-policy" element={<CookiePolicyPage />} />
+                        
+                        {/* Dashboard Routes (with Layout) */}
+                        <Route path="/dashboard" element={<DashboardLayout />}>
+                            <Route index element={<DashboardOverview />} />
+                            <Route path="api-keys" element={<DashboardAPIKeys />} />
+                            <Route path="agent-keys" element={<DashboardAgentKeys />} />
+                            <Route path="billing" element={<DashboardBilling />} />
+                            <Route path="usage" element={<DashboardUsage />} />
+                            <Route path="settings" element={<DashboardSettings />} />
+                        </Route>
+                        
                         <Route path="*" element={<NotFound />} />
                     </Routes>
                 </Suspense>

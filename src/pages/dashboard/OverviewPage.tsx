@@ -6,9 +6,9 @@
 
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../lib/dashboard/auth-guard';
-import { getUsageStats, getCurrentCycleUsage, getUCPTRate } from '../../lib/dashboard/usage-analytics';
-import { getSubscription } from '../../lib/dashboard/billing';
+import { useAuth } from '../../../lib/dashboard/auth-guard';
+import { getCurrentCycleUsage, getUCPTRate } from '../../../lib/dashboard/usage-analytics';
+import { getSubscription } from '../../../lib/dashboard/billing';
 import { Activity, TrendingUp, Shield, Zap } from 'lucide-react';
 
 interface Stats {
@@ -227,3 +227,5 @@ function formatNumber(num: number): string {
   if (num >= 1_000) return `${(num / 1_000).toFixed(1)}K`;
   return num.toString();
 }
+
+export default OverviewPage;

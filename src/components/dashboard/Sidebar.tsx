@@ -16,8 +16,8 @@ import {
   ChevronLeft,
   LogOut,
 } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
-import { useAuth } from '../../lib/dashboard/auth-guard';
+import { supabase } from '../../../lib/supabase';
+import { useAuth } from '../../../lib/dashboard/auth-guard';
 
 interface NavItem {
   name: string;

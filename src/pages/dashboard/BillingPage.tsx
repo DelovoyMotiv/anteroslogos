@@ -5,8 +5,8 @@
  */
 
 import { useEffect, useState } from 'react';
-import { useAuth } from '../../lib/dashboard/auth-guard';
-import { getSubscription, PLAN_CONFIG } from '../../lib/dashboard/billing';
+import { useAuth } from '../../../lib/dashboard/auth-guard';
+import { getSubscription, PLAN_CONFIG } from '../../../lib/dashboard/billing';
 import { Check, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -250,4 +250,6 @@ function LoadingSkeleton() {
 }
 
 // Import supabase for auth token
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../../lib/supabase';
+
+export default BillingPage;
