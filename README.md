@@ -10,7 +10,7 @@
 Enterprise-grade AI knowledge infrastructure platform providing cryptographically verifiable provenance, deterministic execution, and **Agent-Pay-Agent (APA) micropayments layer.** First production implementation of USDC-based micropayments for autonomous AI agent interactions on Base L2 blockchain.
 
 Production URL: https://anoteroslogos.com  
-Codebase: 189 files | 60,189 lines
+Codebase: 173 files | 60,867 lines
 
 ---
 
@@ -25,9 +25,10 @@ Enterprise platform for optimizing digital content and brand presence for AI lan
 3. **Causal Citation Tracer** - Counterfactual reasoning for ROI attribution and path optimization
 4. **Agent-to-Agent Protocol** - JSON-RPC 2.0 API with Ed25519 signatures and WebSocket streaming
 5. **Agent-Pay-Agent Layer** - USDC micropayments on Base L2 with automatic detection
-6. **MCP Integration** - Model Context Protocol v2.0 with isolated execution sandbox
-7. **Content Intelligence** - NLP analysis, query intent classification, competitive monitoring
-8. **Gold Standard System** - Citation prediction, learning feedback, network effects amplification
+6. **Agent Mesh Network** - Distributed peer discovery, capability routing, trust propagation via DHT
+7. **MCP Integration** - Model Context Protocol v2.0 with isolated execution sandbox
+8. **Content Intelligence** - NLP analysis, query intent classification, competitive monitoring
+9. **Gold Standard System** - Citation prediction, learning feedback, network effects amplification
 
 ---
 
@@ -176,8 +177,12 @@ a2a.discover           Service metadata and capabilities
 a2a.capabilities       Full API documentation
 geo.audit.request      Single URL audit (requires payment)
 geo.audit.batch        Parallel processing (max 100 URLs)
-a2a.ping              Health check
-a2a.status            System status
+a2a.ping               Health check
+a2a.status             System status
+a2a.mesh.discover      Find peers by capability
+a2a.mesh.announce      Broadcast capabilities to mesh
+a2a.mesh.sync          Sync knowledge graph/models
+a2a.mesh.health        Mesh network statistics
 ```
 
 **Error Codes:**
@@ -282,7 +287,55 @@ Production persistence, automation, and backend services.
 - `utils/backend/auditStorage.ts` - Audit persistence (465 lines)
 - `utils/competitiveIntelligence/realTimeMonitor.ts` - Monitoring (676 lines)
 
-### 10. Frontend Application (33 components)
+### 10. Agent Mesh Network (5,513 lines)
+
+Decentralized peer-to-peer infrastructure for autonomous agent communication.
+
+**Capabilities:**
+- Distributed Hash Table with Kademlia-inspired k-bucket routing
+- Capability-based routing with trust score propagation
+- Multi-hop pathfinding with cost optimization
+- Real-time health monitoring with jitter and packet loss tracking
+- CBOR message compression achieving 30-50% size reduction
+- Circuit breaker pattern for unreliable peers
+- Supabase persistence with reputation history
+
+**DHT Features:**
+- 160-bit node IDs via SHA-1 hashing
+- XOR distance metric with BigInt precision
+- Automatic peer eviction using LRU policy
+- Bucket refresh protocol every 24 hours
+- Support for 1000+ agents in mesh network
+
+**Routing Algorithms:**
+- Dijkstra pathfinding with constraint satisfaction
+- Weighted round-robin load balancing
+- Path caching with 5-minute TTL
+- QoS scoring based on trust, capability, RTT, and cost
+- Multi-hop routing with up to 3 hops
+
+**Health Monitor:**
+- RTT measurement with exponential moving average
+- Jitter calculation using standard deviation
+- Health scoring from 0-100 with 4 states
+- Periodic checks every 24 hours aligned with Vercel CRON
+
+**Discovery Service:**
+- DNS TXT record discovery for agent identities
+- HTTPS well-known endpoint fallback
+- Bootstrap node support
+- Capability broadcasting to mesh
+
+**Components:**
+- `lib/mesh/dht.ts` - Distributed hash table (588 lines)
+- `lib/mesh/network.ts` - Mesh router with circuit breaker (800 lines)
+- `lib/mesh/routing.ts` - Advanced routing algorithms (561 lines)
+- `lib/mesh/healthMonitor.ts` - Peer health tracking (572 lines)
+- `lib/mesh/compression.ts` - CBOR encoding per RFC 8949 (626 lines)
+- `lib/mesh/discovery.ts` - Peer discovery service (488 lines)
+- `lib/mesh/peerStorage.ts` - Supabase persistence (656 lines)
+
+### 11. Frontend Application (33 components)
 
 React 19 SPA with route-based code splitting.
 
@@ -428,9 +481,11 @@ api/
 lib/
   payments/                       # APA Layer (4,700 lines)
   a2a/                            # A2A Protocol (10,464 lines)
+  mesh/                           # Agent Mesh Network (5,513 lines)
   causalTracer/                   # Citation Tracer (4,020 lines)
   mcp/                            # MCP Sandbox (1,659 lines)
   aiSyndication/                  # Platform sync (558 lines)
+  nlu/                            # NLU Foundation (1,130 lines)
 
 utils/
   geoAuditEnhanced.ts            # Audit engine (2,131 lines)
@@ -511,21 +566,23 @@ supabase/migrations/
 ## Statistics
 
 **Codebase:**
-- Total files: 189
-- Total lines: 60,189
-- TypeScript: 94.9%
-- PLpgSQL: 3.9%
+- Total files: 173
+- Total lines: 60,867
+- TypeScript: 95.1%
+- PLpgSQL: 3.8%
 
 **Modules:**
 - A2A Protocol: 10,464 lines
+- Agent Mesh Network: 5,513 lines
 - APA Payments: 4,700 lines
 - Causal Tracer: 4,020 lines
 - Knowledge Graph: 2,376 lines
+- Content Intelligence: 2,210 lines
 - GEO Audit: 2,131 lines
 - Citation Intelligence: 1,923 lines
-- Content Intelligence: 2,210 lines
-- MCP Sandbox: 1,659 lines
 - Gold Standard: 1,832 lines
+- MCP Sandbox: 1,659 lines
+- NLU Foundation: 1,130 lines
 - Frontend: 33 components
 
 ---
@@ -536,5 +593,5 @@ Proprietary - All rights reserved
 
 ---
 
-Last Updated: November 21, 2025  
-Version: 3.0.0
+Last Updated: November 22, 2025  
+Version: 3.1.0
