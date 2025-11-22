@@ -89,6 +89,9 @@ const AgentIdentityPage = () => {
               <a href="#apa-payments" className="text-xs text-brand-accent hover:text-blue-400 transition-colors font-medium">
                 → APA Micropayments
               </a>
+              <a href="#mesh-network" className="text-xs text-brand-accent hover:text-blue-400 transition-colors font-medium">
+                → Agent Mesh Network
+              </a>
               <a href="#mcp-protocol" className="text-xs text-brand-accent hover:text-blue-400 transition-colors font-medium">
                 → MCP Protocol
               </a>
@@ -205,7 +208,11 @@ print(agent_info)`
                         capabilities: [
                           "geo.audit.request",
                           "geo.audit.batch",
-                          "a2a.discover"
+                          "a2a.discover",
+                          "a2a.mesh.discover",
+                          "a2a.mesh.announce",
+                          "a2a.mesh.sync",
+                          "a2a.mesh.health"
                         ]
                       },
                       d: "anoteroslogos.com",
@@ -356,7 +363,11 @@ result = response.json()`
                           "a2a.discover",
                           "a2a.capabilities",
                           "a2a.ping",
-                          "a2a.status"
+                          "a2a.status",
+                          "a2a.mesh.discover",
+                          "a2a.mesh.announce",
+                          "a2a.mesh.sync",
+                          "a2a.mesh.health"
                         ],
                         endpoints: {
                           http: "/api/a2a",
@@ -604,6 +615,406 @@ audit = response.json()`
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Section 2.7: Agent Mesh Network */}
+          <section id="mesh-network" className="mb-16">
+            <div className="flex items-center gap-3 mb-6">
+              <Network className="w-8 h-8 text-purple-400" />
+              <h2 className="text-3xl font-bold text-white">Agent Mesh Network</h2>
+            </div>
+
+            <p className="text-white/70 mb-6">
+              Decentralized peer-to-peer infrastructure for autonomous agent discovery and communication. DHT-based capability routing with trust propagation and circuit breaker protection.
+            </p>
+
+            <div className="space-y-6">
+              {/* Core Features */}
+              <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div>
+                    <h4 className="text-sm font-semibold text-white mb-2">DHT Algorithm</h4>
+                    <code className="text-xs text-brand-accent font-mono">Kademlia k-bucket</code>
+                    <p className="text-xs text-white/60 mt-1">160-bit node IDs, XOR distance</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-white mb-2">Network Scale</h4>
+                    <code className="text-xs text-green-400 font-mono">1000+ agents</code>
+                    <p className="text-xs text-white/60 mt-1">Mesh routing latency: &lt;500ms</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-white mb-2">Compression</h4>
+                    <code className="text-xs text-purple-400 font-mono">CBOR (RFC 8949)</code>
+                    <p className="text-xs text-white/60 mt-1">30-50% size reduction vs JSON</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-white mb-2">Health Monitoring</h4>
+                    <code className="text-xs text-orange-400 font-mono">RTT + Jitter + Loss</code>
+                    <p className="text-xs text-white/60 mt-1">Health scoring: 0-100</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Method: a2a.mesh.discover */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">Method: a2a.mesh.discover</h3>
+                <p className="text-sm text-white/70 mb-4">
+                  Find peers with specific capability. Returns list of nodes sorted by trust score and RTT.
+                </p>
+
+                <CodeSample
+                  title="Request: a2a.mesh.discover"
+                  samples={[
+                    {
+                      language: 'bash',
+                      code: `curl -X POST https://anoteroslogos.com/api/a2a \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer sk_basic_..." \\
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "a2a.mesh.discover",
+    "params": {
+      "capability": "geo.audit",
+      "max_peers": 10
+    },
+    "id": 1
+  }'`
+                    },
+                    {
+                      language: 'typescript',
+                      code: `const response = await fetch('https://anoteroslogos.com/api/a2a', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': \`Bearer \${apiKey}\`
+  },
+  body: JSON.stringify({
+    jsonrpc: '2.0',
+    method: 'a2a.mesh.discover',
+    params: {
+      capability: 'geo.audit',
+      max_peers: 10
+    },
+    id: 1
+  })
+});
+const { result } = await response.json();
+console.log('Found peers:', result.peers.length);`
+                    },
+                    {
+                      language: 'python',
+                      code: `import requests
+
+response = requests.post(
+    'https://anoteroslogos.com/api/a2a',
+    headers={'Authorization': f'Bearer {api_key}'},
+    json={
+        'jsonrpc': '2.0',
+        'method': 'a2a.mesh.discover',
+        'params': {
+            'capability': 'geo.audit',
+            'max_peers': 10
+        },
+        'id': 1
+    }
+)
+result = response.json()['result']
+print(f"Found peers: {len(result['peers'])}")`
+                    }
+                  ]}
+                />
+
+                <div className="mt-4">
+                  <SchemaBlock
+                    title="Response: a2a.mesh.discover"
+                    schema={{
+                      jsonrpc: "2.0",
+                      result: {
+                        capability: "geo.audit",
+                        peers: [
+                          {
+                            node_id: "a3f9c2e1d8b4f6a5c9e2f1a3b5c7d9e0a1b2c3d4",
+                            aid_uri: "agent://geoaudit.example.com",
+                            endpoint: "https://geoaudit.example.com/api/a2a",
+                            capabilities: ["geo.audit", "kg.extract"],
+                            trust_score: 87,
+                            rtt: 45,
+                            cost_per_call: {
+                              token: "USDC",
+                              amount: 0.08
+                            }
+                          }
+                        ],
+                        total: 1
+                      },
+                      id: 1
+                    }}
+                    defaultOpen={true}
+                    description="Peers sorted by trust score descending, then RTT ascending"
+                  />
+                </div>
+              </div>
+
+              {/* Method: a2a.mesh.announce */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">Method: a2a.mesh.announce</h3>
+                <p className="text-sm text-white/70 mb-4">
+                  Announce own capabilities to mesh network. Broadcasts to bootstrap nodes for peer discovery.
+                </p>
+
+                <CodeSample
+                  title="Request: a2a.mesh.announce"
+                  samples={[
+                    {
+                      language: 'typescript',
+                      code: `const response = await fetch('https://anoteroslogos.com/api/a2a', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': \`Bearer \${apiKey}\`
+  },
+  body: JSON.stringify({
+    jsonrpc: '2.0',
+    method: 'a2a.mesh.announce',
+    params: {
+      capabilities: ['geo.audit', 'citation.predict'],
+      cost_per_call: {
+        token: 'USDC',
+        amount: 0.10
+      }
+    },
+    id: 1
+  })
+});
+const { result } = await response.json();
+console.log('Announced as:', result.node_id);`
+                    }
+                  ]}
+                />
+
+                <div className="mt-4">
+                  <SchemaBlock
+                    title="Response: a2a.mesh.announce"
+                    schema={{
+                      jsonrpc: "2.0",
+                      result: {
+                        success: true,
+                        node_id: "b4e8d3f2a1c5e9b7d6f4a2c8e1b5d9f3",
+                        aid_uri: "agent://myagent.example.com",
+                        announced_capabilities: ["geo.audit", "citation.predict"]
+                      },
+                      id: 1
+                    }}
+                    description="Node registered in mesh DHT with 24-hour TTL"
+                  />
+                </div>
+              </div>
+
+              {/* Method: a2a.mesh.sync */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">Method: a2a.mesh.sync</h3>
+                <p className="text-sm text-white/70 mb-4">
+                  Synchronize knowledge graph updates, citation learning data, or model parameters across mesh network.
+                </p>
+
+                <CodeSample
+                  title="Request: a2a.mesh.sync"
+                  samples={[
+                    {
+                      language: 'typescript',
+                      code: `// Broadcast knowledge graph delta to all peers
+const response = await fetch('https://anoteroslogos.com/api/a2a', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': \`Bearer \${apiKey}\`
+  },
+  body: JSON.stringify({
+    jsonrpc: '2.0',
+    method: 'a2a.mesh.sync',
+    params: {
+      type: 'knowledge_graph',
+      payload: {
+        entities: [{id: 'ent_123', type: 'Organization', name: 'ACME Corp'}],
+        relationships: [{from: 'ent_123', to: 'ent_456', type: 'owns'}]
+      }
+    },
+    id: 1
+  })
+});
+const { result } = await response.json();
+console.log('Broadcast to', result.broadcast, 'peers');`
+                    }
+                  ]}
+                />
+
+                <div className="mt-4">
+                  <SchemaBlock
+                    title="Response: a2a.mesh.sync"
+                    schema={{
+                      jsonrpc: "2.0",
+                      result: {
+                        success: true,
+                        type: "knowledge_graph",
+                        broadcast: true,
+                        compression_stats: {
+                          originalSize: 1024,
+                          compressedSize: 387,
+                          compressionRatio: 0.378,
+                          timeTaken: 12
+                        }
+                      },
+                      id: 1
+                    }}
+                    description="CBOR compression applied automatically, payload sent to all active peers"
+                  />
+                </div>
+
+                <div className="mt-4 bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+                  <div className="flex items-start gap-2">
+                    <Database className="w-4 h-4 text-blue-400 mt-0.5" />
+                    <div className="text-sm text-blue-300">
+                      <strong>Sync Types:</strong> <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">knowledge_graph</code>, <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">citation_learning</code>, <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">model_update</code>, <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">peer_update</code>. Targeted sync via <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">target_peer</code> parameter.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Method: a2a.mesh.health */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">Method: a2a.mesh.health</h3>
+                <p className="text-sm text-white/70 mb-4">
+                  Get mesh network statistics including peer health, DHT metrics, and circuit breaker states.
+                </p>
+
+                <CodeSample
+                  title="Request: a2a.mesh.health"
+                  samples={[
+                    {
+                      language: 'bash',
+                      code: `curl -X POST https://anoteroslogos.com/api/a2a \\
+  -H "Content-Type: application/json" \\
+  -H "Authorization: Bearer sk_pro_..." \\
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "a2a.mesh.health",
+    "params": {},
+    "id": 1
+  }'`
+                    }
+                  ]}
+                />
+
+                <div className="mt-4">
+                  <SchemaBlock
+                    title="Response: a2a.mesh.health"
+                    schema={{
+                      jsonrpc: "2.0",
+                      result: {
+                        mesh: {
+                          total_peers: 342,
+                          peers_by_capability: {
+                            "geo.audit": 87,
+                            "kg.extract": 56,
+                            "citation.predict": 34
+                          },
+                          avg_trust_score: 73.4,
+                          avg_rtt: 67,
+                          dht_nodes: 342,
+                          dht_buckets: 8
+                        },
+                        health: {
+                          total_monitored: 342,
+                          healthy: 298,
+                          degraded: 32,
+                          unhealthy: 8,
+                          down: 4,
+                          avg_health_score: 81.2,
+                          avg_success_rate: 0.947
+                        },
+                        circuit_breakers: {
+                          total: 342,
+                          open: 4,
+                          half_open: 2,
+                          closed: 336
+                        }
+                      },
+                      id: 1
+                    }}
+                    defaultOpen={true}
+                    description="Real-time mesh network diagnostics with per-capability peer counts"
+                  />
+                </div>
+              </div>
+
+              {/* Technical Details */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">Technical Architecture</h3>
+                <div className="space-y-4">
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-white mb-2">DHT (Distributed Hash Table)</h4>
+                    <ul className="text-xs text-white/60 space-y-1">
+                      <li>• 160-bit node IDs generated via SHA-1 hash of AID URI</li>
+                      <li>• K-bucket routing with k=20 peers per bucket</li>
+                      <li>• XOR distance metric for peer selection</li>
+                      <li>• Automatic peer eviction using LRU policy (30-minute timeout)</li>
+                      <li>• Bucket refresh protocol every 24 hours</li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-white mb-2">Routing Algorithms</h4>
+                    <ul className="text-xs text-white/60 space-y-1">
+                      <li>• Dijkstra pathfinding with constraint satisfaction</li>
+                      <li>• Multi-hop routing up to 3 hops with path optimization</li>
+                      <li>• QoS scoring: trust (40%), capability (30%), RTT (20%), cost (10%)</li>
+                      <li>• Path caching with 5-minute TTL (1000 entry limit)</li>
+                      <li>• Weighted round-robin load balancing</li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-white mb-2">Circuit Breaker</h4>
+                    <ul className="text-xs text-white/60 space-y-1">
+                      <li>• Failure threshold: 5 consecutive failures</li>
+                      <li>• Open state duration: 60 seconds</li>
+                      <li>• Half-open state: allows 3 test requests</li>
+                      <li>• Automatic peer exclusion for unreliable nodes</li>
+                      <li>• Per-peer failure tracking with exponential backoff</li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-white mb-2">Health Monitoring</h4>
+                    <ul className="text-xs text-white/60 space-y-1">
+                      <li>• RTT measurement via HTTP HEAD requests</li>
+                      <li>• Jitter calculation using standard deviation (last 10 samples)</li>
+                      <li>• Health scoring: success rate (40%), RTT (30%), jitter (20%), failures (10%)</li>
+                      <li>• Periodic checks every 24 hours (Vercel CRON aligned)</li>
+                      <li>• Four health states: healthy (80+), degraded (50-79), unhealthy (20-49), down (&lt;20)</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Best Practices */}
+              <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
+                <div className="flex items-start gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-green-400 mt-0.5" />
+                  <div className="text-sm text-green-300">
+                    <strong>Best Practices:</strong>
+                    <ul className="list-disc ml-4 mt-2 space-y-1">
+                      <li>Announce capabilities immediately after agent initialization</li>
+                      <li>Implement retry logic with exponential backoff for mesh.discover failures</li>
+                      <li>Cache peer lists locally with 5-minute TTL to reduce discovery overhead</li>
+                      <li>Use mesh.sync for knowledge graph deltas, not full snapshots (reduces bandwidth)</li>
+                      <li>Monitor mesh.health periodically to detect network degradation</li>
+                      <li>Set trust score thresholds based on criticality (critical: 80+, standard: 50+)</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
