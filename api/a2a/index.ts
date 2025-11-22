@@ -19,6 +19,9 @@ import { getCachedAuditResult, cacheAuditResult } from '../../lib/a2a/cache';
 import { validateApiKey as validateRegisteredApiKey, recordAgentActivity, getAgentByApiKey } from '../../lib/a2a/agentRegistry';
 import { createRequestTracer, logger, perfMonitor, formatApiKey } from '../../lib/a2a/logger';
 import { enforcePayment, type PaymentContext } from '../../lib/payments/paymentGuard';
+import { getMeshRouter } from '../../lib/mesh/network';
+import { getHealthMonitor } from '../../lib/mesh/healthMonitor';
+import { getMessageCompressor } from '../../lib/mesh/compression';
 
 // =====================================================
 // CORS & HEADERS
@@ -122,6 +125,10 @@ async function handleDiscover() {
       'geo.insights.global',
       'geo.insights.industry',
       'geo.insights.domain',
+      'a2a.mesh.discover',
+      'a2a.mesh.announce',
+      'a2a.mesh.sync',
+      'a2a.mesh.health',
     ],
     endpoints: {
       http: '/api/a2a',
@@ -170,6 +177,158 @@ async function handleCapabilities(_params: any, context: A2AContext) {
       format: 'Bearer <api_key>',
     },
     agent_info: context.agent_info,
+  };
+}
+
+// =====================================================
+// MESH NETWORK HANDLERS
+// =====================================================
+
+/**
+ * Handle a2a.mesh.discover - Discover peers with specific capability
+ */
+async function handleMeshDiscover(params: any, _context: A2AContext) {
+  const { capability, max_peers = 10 } = params;
+  
+  if (!capability || typeof capability !== 'string') {
+    throw createA2AErrorResponse(
+      null,
+      ERROR_CODES.INVALID_PARAMS,
+      'Invalid capability parameter',
+      { param: 'capability' }
+    );
+  }
+  
+  const meshRouter = getMeshRouter();
+  const peers = await meshRouter.discoverPeers(capability, max_peers);
+  
+  return {
+    capability,
+    peers: peers.map(peer => ({
+      node_id: peer.nodeId,
+      aid_uri: peer.aidUri,
+      endpoint: peer.endpoint,
+      capabilities: peer.capabilities,
+      trust_score: peer.trustScore,
+      rtt: peer.rtt,
+      cost_per_call: peer.metadata?.costPerCall,
+    })),
+    total: peers.length,
+  };
+}
+
+/**
+ * Handle a2a.mesh.announce - Announce self to mesh network
+ */
+async function handleMeshAnnounce(params: any, _context: A2AContext) {
+  const { capabilities, cost_per_call } = params;
+  
+  if (!Array.isArray(capabilities) || capabilities.length === 0) {
+    throw createA2AErrorResponse(
+      null,
+      ERROR_CODES.INVALID_PARAMS,
+      'Invalid capabilities parameter',
+      { param: 'capabilities' }
+    );
+  }
+  
+  const meshRouter = getMeshRouter();
+  await meshRouter.announceSelf(capabilities, cost_per_call);
+  
+  const localNode = meshRouter.getLocalNode();
+  
+  return {
+    success: true,
+    node_id: localNode.nodeId,
+    aid_uri: localNode.aidUri,
+    announced_capabilities: capabilities,
+  };
+}
+
+/**
+ * Handle a2a.mesh.sync - Broadcast sync message to mesh
+ */
+async function handleMeshSync(params: any, _context: A2AContext) {
+  const { type, payload, target_peer } = params;
+  
+  if (!type || !['knowledge_graph', 'citation_learning', 'model_update', 'peer_update'].includes(type)) {
+    throw createA2AErrorResponse(
+      null,
+      ERROR_CODES.INVALID_PARAMS,
+      'Invalid sync type',
+      { param: 'type', valid_types: ['knowledge_graph', 'citation_learning', 'model_update', 'peer_update'] }
+    );
+  }
+  
+  const meshRouter = getMeshRouter();
+  const compressor = getMessageCompressor();
+  
+  // Compress payload
+  const { data: compressedPayload, stats } = compressor.compress(payload);
+  
+  if (target_peer) {
+    // Sync with specific peer
+    const success = await meshRouter.syncWithPeer(target_peer, payload);
+    
+    return {
+      success,
+      type,
+      target_peer,
+      compression_stats: stats,
+    };
+  } else {
+    // Broadcast to all peers
+    const meshRouter = getMeshRouter();
+    await meshRouter.broadcastUpdate({
+      type,
+      sender: meshRouter.getLocalNode().nodeId,
+      payload: compressedPayload,
+      timestamp: Date.now(),
+    });
+    
+    return {
+      success: true,
+      type,
+      broadcast: true,
+      compression_stats: stats,
+    };
+  }
+}
+
+/**
+ * Handle a2a.mesh.health - Get mesh network health statistics
+ */
+async function handleMeshHealth(_params: any, _context: A2AContext) {
+  const meshRouter = getMeshRouter();
+  const healthMonitor = getHealthMonitor();
+  
+  const meshStats = meshRouter.getStats();
+  const healthStats = healthMonitor.getStats();
+  
+  return {
+    mesh: {
+      total_peers: meshStats.peers.total,
+      peers_by_capability: meshStats.peers.byCapability,
+      avg_trust_score: meshStats.peers.avgTrustScore,
+      avg_rtt: meshStats.peers.avgRtt,
+      dht_nodes: meshStats.dht.totalNodes,
+      dht_buckets: meshStats.dht.nodesByBucket,
+    },
+    health: {
+      total_monitored: healthStats.totalPeers,
+      healthy: healthStats.healthy,
+      degraded: healthStats.degraded,
+      unhealthy: healthStats.unhealthy,
+      down: healthStats.down,
+      avg_health_score: healthStats.avgHealthScore,
+      avg_success_rate: healthStats.avgSuccessRate,
+    },
+    circuit_breakers: {
+      total: meshStats.circuitBreakers.total,
+      open: meshStats.circuitBreakers.open,
+      half_open: meshStats.circuitBreakers.halfOpen,
+      closed: meshStats.circuitBreakers.closed,
+    },
   };
 }
 
@@ -368,6 +527,19 @@ async function routeMethod(method: string, params: any, context: A2AContext): Pr
     
     case 'a2a.status':
       return handleStatus();
+    
+    // Mesh network methods
+    case 'a2a.mesh.discover':
+      return handleMeshDiscover(params, context);
+    
+    case 'a2a.mesh.announce':
+      return handleMeshAnnounce(params, context);
+    
+    case 'a2a.mesh.sync':
+      return handleMeshSync(params, context);
+    
+    case 'a2a.mesh.health':
+      return handleMeshHealth(params, context);
     
     // Not implemented yet
     case 'geo.audit.status':
