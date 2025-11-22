@@ -10,7 +10,7 @@
 Enterprise-grade AI knowledge infrastructure platform providing cryptographically verifiable provenance, deterministic execution, and **Agent-Pay-Agent (APA) micropayments layer.** First production implementation of USDC-based micropayments for autonomous AI agent interactions on Base L2 blockchain.
 
 Production URL: https://anoteroslogos.com  
-Codebase: 173 files | 60,867 lines
+Codebase: 178 files | 63,507 lines
 
 ---
 
@@ -26,9 +26,10 @@ Enterprise platform for optimizing digital content and brand presence for AI lan
 4. **Agent-to-Agent Protocol** - JSON-RPC 2.0 API with Ed25519 signatures and WebSocket streaming
 5. **Agent-Pay-Agent Layer** - USDC micropayments on Base L2 with automatic detection
 6. **Agent Mesh Network** - Distributed peer discovery, capability routing, trust propagation via DHT
-7. **MCP Integration** - Model Context Protocol v2.0 with isolated execution sandbox
-8. **Content Intelligence** - NLP analysis, query intent classification, competitive monitoring
-9. **Gold Standard System** - Citation prediction, learning feedback, network effects amplification
+7. **Byzantine Fault Tolerance** - PBFT consensus for critical operations with malicious node protection
+8. **MCP Integration** - Model Context Protocol v2.0 with isolated execution sandbox
+9. **Content Intelligence** - NLP analysis, query intent classification, competitive monitoring
+10. **Gold Standard System** - Citation prediction, learning feedback, network effects amplification
 
 ---
 
@@ -287,7 +288,59 @@ Production persistence, automation, and backend services.
 - `utils/backend/auditStorage.ts` - Audit persistence (465 lines)
 - `utils/competitiveIntelligence/realTimeMonitor.ts` - Monitoring (676 lines)
 
-### 10. Agent Mesh Network (5,513 lines)
+### 10. Byzantine Fault Tolerance (2,668 lines)
+
+Production PBFT consensus protecting critical operations from malicious agents.
+
+**Capabilities:**
+- Practical Byzantine Fault Tolerance implementing Castro & Liskov algorithm
+- Quorum consensus tolerating f=2 Byzantine nodes in 7-node network
+- Automatic routing of critical operations through consensus
+- Payment verification for transactions exceeding 10 USDC threshold
+- Trust score updates via Byzantine-resistant reputation system
+- Deep audit consensus for high-value assessments
+- Mesh topology changes requiring quorum agreement
+
+**Consensus Protocol:**
+- Three-phase commit with PRE-PREPARE, PREPARE, and COMMIT messages
+- 2f+1 threshold requiring 5 of 7 nodes for consensus validity
+- Quorum selection via composite scoring: trust 40%, stake 30%, RTT 20%, reputation 10%
+- View change protocol for primary rotation and failure recovery
+- Message log maintaining 100 entries per node for equivocation detection
+- Circuit breaker isolating nodes after 3 consecutive failures
+- Consensus timeout at 30 seconds with automatic failure handling
+
+**Byzantine Detection:**
+- Equivocation identification via conflicting message analysis
+- Ed25519 signature verification on all protocol messages
+- Evidence reporting with cryptographic proof generation
+- Automatic stake slashing for proven Byzantine behavior
+- Reputation scoring inversely proportional to verified evidence
+- Circuit breaker preventing repeated attacks from malicious nodes
+
+**Routing Intelligence:**
+- Criticality analysis determining consensus necessity
+- Automatic consensus for operations scoring above 80 threshold
+- Fallback mechanism executing directly on consensus failure
+- Statistics tracking consensus percentage and execution times
+- Health monitoring across consensus, storage, and mesh layers
+
+**Database Integration:**
+- Consensus audit trail recording all PBFT rounds
+- Byzantine evidence storage with ZKP proof hashes
+- Agent stake tracking mirroring Base L2 blockchain state
+- Atomic operations via PostgreSQL stored procedures
+- Row-level security policies protecting sensitive data
+- Statistics views aggregating consensus performance metrics
+
+**Components:**
+- `lib/bft/types.ts` - PBFT types with Zod validation (267 lines)
+- `lib/bft/storage.ts` - Supabase operations wrapper (537 lines)
+- `lib/bft/pbftConsensus.ts` - Core consensus engine (845 lines)
+- `lib/bft/bftRouter.ts` - Consensus-aware routing (581 lines)
+- `supabase/migrations/009_bft_schema.sql` - Database schema (410 lines)
+
+### 11. Agent Mesh Network (5,513 lines)
 
 Decentralized peer-to-peer infrastructure for autonomous agent communication.
 
@@ -335,7 +388,7 @@ Decentralized peer-to-peer infrastructure for autonomous agent communication.
 - `lib/mesh/discovery.ts` - Peer discovery service (488 lines)
 - `lib/mesh/peerStorage.ts` - Supabase persistence (656 lines)
 
-### 11. Frontend Application (33 components)
+### 12. Frontend Application (33 components)
 
 React 19 SPA with route-based code splitting.
 
@@ -426,6 +479,9 @@ psql $DATABASE_URL < supabase/migrations/003_auth_schema.sql
 psql $DATABASE_URL < supabase/migrations/004_apa_payments_schema.sql
 psql $DATABASE_URL < supabase/migrations/005_pricing_matrix_table.sql
 psql $DATABASE_URL < supabase/migrations/006_payment_correlation_index.sql
+psql $DATABASE_URL < supabase/migrations/007_multi_tenancy_isolation.sql
+psql $DATABASE_URL < supabase/migrations/008_audit_trail_worm.sql
+psql $DATABASE_URL < supabase/migrations/009_bft_schema.sql
 ```
 
 ---
@@ -482,6 +538,7 @@ lib/
   payments/                       # APA Layer (4,700 lines)
   a2a/                            # A2A Protocol (10,464 lines)
   mesh/                           # Agent Mesh Network (5,513 lines)
+  bft/                            # Byzantine Fault Tolerance (2,668 lines)
   causalTracer/                   # Citation Tracer (4,020 lines)
   mcp/                            # MCP Sandbox (1,659 lines)
   aiSyndication/                  # Platform sync (558 lines)
@@ -522,7 +579,7 @@ data/
   blogPosts.ts                  # Content marketing
 
 supabase/migrations/
-  001-006                       # Database schema (6 migrations)
+  001-009                       # Database schema (9 migrations)
 ```
 
 ---
@@ -566,16 +623,17 @@ supabase/migrations/
 ## Statistics
 
 **Codebase:**
-- Total files: 173
-- Total lines: 60,867
-- TypeScript: 95.1%
-- PLpgSQL: 3.8%
+- Total files: 178
+- Total lines: 63,507
+- TypeScript: 95.2%
+- PLpgSQL: 3.9%
 
 **Modules:**
 - A2A Protocol: 10,464 lines
 - Agent Mesh Network: 5,513 lines
 - APA Payments: 4,700 lines
 - Causal Tracer: 4,020 lines
+- Byzantine Fault Tolerance: 2,668 lines
 - Knowledge Graph: 2,376 lines
 - Content Intelligence: 2,210 lines
 - GEO Audit: 2,131 lines
