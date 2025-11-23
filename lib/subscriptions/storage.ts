@@ -43,13 +43,12 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
   },
 });
 
-// Platform wallet address (required)
-if (!process.env.PLATFORM_WALLET_ADDRESS) {
-  throw new Error(
-    "PLATFORM_WALLET_ADDRESS environment variable is required for subscription billing"
-  );
-}
-const PLATFORM_WALLET_ADDRESS = process.env.PLATFORM_WALLET_ADDRESS;
+// Platform wallet address (owner's wallet on Base L2)
+// Fallback to hardcoded address if env var not set
+// Owner wallet: 0x8dc66e84c31fe4dd455e1b32fe42d42d026abb93
+const PLATFORM_WALLET_ADDRESS =
+  process.env.PLATFORM_WALLET_ADDRESS ||
+  "0x8dc66e84c31fe4dd455e1b32fe42d42d026abb93";
 
 // Default invoice expiration: 7 days
 const DEFAULT_INVOICE_TTL_SECONDS = 7 * 24 * 3600;

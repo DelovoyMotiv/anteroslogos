@@ -48,12 +48,30 @@ export async function subscribeToPlan(
   planTier: PlanTier,
   billingWalletAddress?: string
 ): Promise<SubscribeResponse> {
+  // Prevent explicit subscription to FREE plan (auto-activated on registration)
+  if (planTier === "free") {
+    throw new Error(
+      "Cannot subscribe to FREE plan explicitly. FREE plan is automatically activated upon registration."
+    );
+  }
+
   // Check for existing active subscription
   const existingSubscription = await storage.getUserSubscription(userId);
   if (existingSubscription) {
-    throw new Error(
-      `User already has active ${existingSubscription.status} subscription. Cancel existing subscription before subscribing to new plan.`
-    );
+    // Get current plan details
+    const currentPlan = await storage.getPlanById(existingSubscription.planId);
+    
+    // Allow upgrades from FREE plan (cancel FREE, create new)
+    if (currentPlan?.planName === "free") {
+      // Cancel FREE subscription
+      await storage.updateSubscriptionStatus(existingSubscription.id, "cancelled", {
+        cancelledAt: new Date(),
+      });
+    } else {
+      throw new Error(
+        `User already has active ${currentPlan?.planName || "unknown"} subscription. Cancel existing subscription before subscribing to new plan.`
+      );
+    }
   }
 
   // Get plan details

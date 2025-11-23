@@ -11,7 +11,7 @@
 
 CREATE TABLE IF NOT EXISTS public.subscription_plans (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  plan_name TEXT NOT NULL UNIQUE CHECK (plan_name IN ('starter', 'pro', 'enterprise')),
+  plan_name TEXT NOT NULL UNIQUE CHECK (plan_name IN ('free', 'starter', 'pro', 'enterprise')),
   display_name TEXT NOT NULL,
   price_usd DECIMAL(10,2) NOT NULL CHECK (price_usd >= 0),
   billing_cycle_days INTEGER NOT NULL DEFAULT 30 CHECK (billing_cycle_days > 0),
@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS public.subscription_plans (
   description TEXT,
   features JSONB NOT NULL DEFAULT '[]'::jsonb,
   is_active BOOLEAN DEFAULT TRUE NOT NULL,
+  is_default BOOLEAN DEFAULT FALSE NOT NULL,
   created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
@@ -39,38 +40,57 @@ CREATE TRIGGER subscription_plans_updated_at
   BEFORE UPDATE ON public.subscription_plans
   FOR EACH ROW EXECUTE FUNCTION update_subscription_plans_updated_at();
 
--- Seed data: Insert default plans
-INSERT INTO public.subscription_plans (plan_name, display_name, price_usd, billing_cycle_days, audit_quota, description, features)
+-- Seed data: Insert default plans (freemium model)
+INSERT INTO public.subscription_plans (plan_name, display_name, price_usd, billing_cycle_days, audit_quota, description, features, is_default)
 VALUES 
+  (
+    'free',
+    'Free',
+    0.00,
+    30,
+    1,
+    'Free tier with basic access - perfect for trying out the platform',
+    '[
+      "1 GEO audit per month",
+      "Basic website analysis",
+      "Community support",
+      "7-day audit history"
+    ]'::jsonb,
+    TRUE
+  ),
   (
     'starter',
     'Starter',
-    49.00,
+    19.00,
     30,
-    5,
-    'Perfect for small businesses and startups',
+    10,
+    'Ideal for freelancers and small projects',
     '[
-      "5 GEO audits per month",
-      "Basic citation tracking",
+      "10 GEO audits per month",
+      "Full citation tracking",
       "Email support",
-      "30-day audit history"
-    ]'::jsonb
+      "30-day audit history",
+      "Export reports"
+    ]'::jsonb,
+    FALSE
   ),
   (
     'pro',
     'Pro',
-    149.00,
+    49.00,
     30,
-    20,
-    'For growing teams requiring regular optimization',
+    100,
+    'For agencies and growing businesses',
     '[
-      "20 GEO audits per month",
+      "100 GEO audits per month",
       "Advanced citation prediction",
       "Priority support",
       "90-day audit history",
       "Competitive intelligence",
-      "API access"
-    ]'::jsonb
+      "API access",
+      "Custom branding"
+    ]'::jsonb,
+    FALSE
   ),
   (
     'enterprise',
@@ -86,8 +106,11 @@ VALUES
       "Unlimited audit history",
       "Knowledge graph extraction",
       "Custom integrations",
-      "SLA guarantees"
-    ]'::jsonb
+      "SLA guarantees",
+      "White-label solution",
+      "Dedicated account manager"
+    ]'::jsonb,
+    FALSE
   )
 ON CONFLICT (plan_name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
@@ -96,6 +119,7 @@ ON CONFLICT (plan_name) DO UPDATE SET
   audit_quota = EXCLUDED.audit_quota,
   description = EXCLUDED.description,
   features = EXCLUDED.features,
+  is_default = EXCLUDED.is_default,
   updated_at = NOW();
 
 -- =====================================================

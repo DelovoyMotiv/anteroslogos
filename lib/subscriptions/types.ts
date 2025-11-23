@@ -10,7 +10,7 @@ import { z } from "zod";
 // ENUMS & CONSTANTS
 // =====================================================
 
-export const PlanTierSchema = z.enum(["starter", "pro", "enterprise"]);
+export const PlanTierSchema = z.enum(["free", "starter", "pro", "enterprise"]);
 export type PlanTier = z.infer<typeof PlanTierSchema>;
 
 export const SubscriptionStatusSchema = z.enum([
@@ -48,34 +48,50 @@ export interface SubscriptionPlanMetadata {
 }
 
 export const SUBSCRIPTION_PLANS: Record<PlanTier, SubscriptionPlanMetadata> = {
+  free: {
+    planName: "free",
+    displayName: "Free",
+    priceUsd: 0.0,
+    billingCycleDays: 30,
+    auditQuota: 1,
+    description: "Free tier with basic access - perfect for trying out the platform",
+    features: [
+      "1 GEO audit per month",
+      "Basic website analysis",
+      "Community support",
+      "7-day audit history",
+    ],
+  },
   starter: {
     planName: "starter",
     displayName: "Starter",
-    priceUsd: 49.0,
+    priceUsd: 19.0,
     billingCycleDays: 30,
-    auditQuota: 5,
-    description: "Perfect for small businesses and startups",
+    auditQuota: 10,
+    description: "Ideal for freelancers and small projects",
     features: [
-      "5 GEO audits per month",
-      "Basic citation tracking",
+      "10 GEO audits per month",
+      "Full citation tracking",
       "Email support",
       "30-day audit history",
+      "Export reports",
     ],
   },
   pro: {
     planName: "pro",
     displayName: "Pro",
-    priceUsd: 149.0,
+    priceUsd: 49.0,
     billingCycleDays: 30,
-    auditQuota: 20,
-    description: "For growing teams requiring regular optimization",
+    auditQuota: 100,
+    description: "For agencies and growing businesses",
     features: [
-      "20 GEO audits per month",
+      "100 GEO audits per month",
       "Advanced citation prediction",
       "Priority support",
       "90-day audit history",
       "Competitive intelligence",
       "API access",
+      "Custom branding",
     ],
   },
   enterprise: {
@@ -93,6 +109,8 @@ export const SUBSCRIPTION_PLANS: Record<PlanTier, SubscriptionPlanMetadata> = {
       "Knowledge graph extraction",
       "Custom integrations",
       "SLA guarantees",
+      "White-label solution",
+      "Dedicated account manager",
     ],
   },
 };
@@ -309,7 +327,9 @@ export const SubscriptionUsageLogSchema = z.object({
 // =====================================================
 
 export const SubscribeInputSchema = z.object({
-  planTier: PlanTierSchema,
+  planTier: PlanTierSchema.refine((tier) => tier !== "free", {
+    message: "Cannot explicitly subscribe to FREE plan. FREE plan is automatically activated.",
+  }),
   billingWalletAddress: z
     .string()
     .regex(/^0x[a-fA-F0-9]{40}$/)
