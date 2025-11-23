@@ -65,7 +65,7 @@ const AgentIdentityPage = () => {
                 AID v1.1
               </span>
               <span className="px-3 py-1 bg-green-500/10 border border-green-500/30 rounded text-xs font-mono text-green-400">
-                A2A v1.0.0
+                A2A v1.0 (Linux Foundation)
               </span>
               <span className="px-3 py-1 bg-purple-500/10 border border-purple-500/30 rounded text-xs font-mono text-purple-400">
                 MCP v2.0
@@ -84,7 +84,10 @@ const AgentIdentityPage = () => {
                 → Protocol Discovery
               </a>
               <a href="#a2a-protocol" className="text-xs text-brand-accent hover:text-blue-400 transition-colors font-medium">
-                → A2A Protocol
+                → A2A Protocol v1.0
+              </a>
+              <a href="#a2a-tasks" className="text-xs text-brand-accent hover:text-blue-400 transition-colors font-medium">
+                → Task Lifecycle
               </a>
               <a href="#apa-payments" className="text-xs text-brand-accent hover:text-blue-400 transition-colors font-medium">
                 → APA Micropayments
@@ -135,7 +138,7 @@ const AgentIdentityPage = () => {
                 <SchemaBlock
                   title="_agent.anoteroslogos.com TXT"
                   schema="v=1.1;p=a2a,http;u=https://anoteroslogos.com/api/a2a;s=geoaudit;d=anoteroslogos.com"
-                  defaultOpen={true}
+                  defaultOpen={false}
                   description="Compact format fitting within 255-byte DNS limit"
                 />
 
@@ -157,13 +160,13 @@ const AgentIdentityPage = () => {
 
               {/* HTTPS Well-Known */}
               <div>
-                <h3 className="text-xl font-semibold text-white mb-4">HTTPS Well-Known Endpoint (RFC 8615)</h3>
+                <h3 className="text-xl font-semibold text-white mb-4">HTTPS Well-Known Endpoints (RFC 8615)</h3>
                 <p className="text-sm text-white/70 mb-4">
-                  Fallback discovery if DNS lookup fails. CORS-enabled, JSON format.
+                  Two discovery endpoints: agent.json (AID v1.1) and agent-card.json (Linux Foundation A2A v1.0). CORS-enabled, JSON format.
                 </p>
 
                 <CodeSample
-                  title="GET /.well-known/agent.json"
+                  title="GET /.well-known/agent.json (AID v1.1)"
                   samples={[
                     {
                       language: 'bash',
@@ -196,7 +199,7 @@ print(agent_info)`
 
                 <div className="mt-4">
                   <SchemaBlock
-                    title="agent.json Schema"
+                    title="agent.json Schema (AID v1.1)"
                     schema={{
                       v: "1.1",
                       p: ["a2a", "http"],
@@ -223,6 +226,82 @@ print(agent_info)`
                     }}
                     description="Complete agent metadata with capabilities and cryptographic keys"
                   />
+                </div>
+
+                <div className="mt-6">
+                  <h4 className="text-lg font-semibold text-white mb-3">Linux Foundation Agent Card</h4>
+                  <p className="text-sm text-white/70 mb-4">
+                    Standard A2A Protocol v1.0 discovery format with extensions for payment and consensus verification.
+                  </p>
+                  
+                  <CodeSample
+                    title="GET /.well-known/agent-card.json (A2A v1.0)"
+                    samples={[
+                      {
+                        language: 'bash',
+                        label: 'cURL',
+                        code: `curl -H "Accept: application/json" \\
+  https://anoteroslogos.com/.well-known/agent-card.json`
+                      },
+                      {
+                        language: 'typescript',
+                        code: `const response = await fetch(
+  'https://anoteroslogos.com/.well-known/agent-card.json',
+  { headers: { 'Accept': 'application/json' } }
+);
+const agentCard = await response.json();
+console.log(agentCard.capabilities); // 18 capabilities
+console.log(agentCard.extensions.payment); // USDC on Base L2`
+                      }
+                    ]}
+                  />
+
+                  <div className="mt-4">
+                    <SchemaBlock
+                      title="agent-card.json Schema (Linux Foundation A2A v1.0)"
+                      schema={{
+                        id: "agent://anoteroslogos.com/geo-audit",
+                        name: "Anóteros Lógos GEO Audit Agent",
+                        version: "1.0.0",
+                        capabilities: [
+                          "a2a.discover",
+                          "geo.audit.request",
+                          "geo.audit.status",
+                          "geo.audit.stream",
+                          "knowledge.graph.query",
+                          "citation.predict",
+                          "agent.mesh.discover",
+                          "...18 total capabilities"
+                        ],
+                        protocols: ["a2a/1.0", "jsonrpc/2.0", "mcp/2.0"],
+                        endpoints: {
+                          http: "https://anoteroslogos.com/api/a2a",
+                          websocket: "wss://anoteroslogos.com/api/a2a/ws",
+                          stream: "https://anoteroslogos.com/api/a2a/stream"
+                        },
+                        authentication: ["bearer", "api_key", "ed25519"],
+                        pricing: {
+                          model: "pay-per-request",
+                          currency: "USDC",
+                          base_price: "0.10"
+                        },
+                        extensions: {
+                          payment: {
+                            supported: true,
+                            network: "base-l2",
+                            token: "USDC"
+                          },
+                          verification: {
+                            supported: true,
+                            method: "pbft-consensus",
+                            quorum_size: 7
+                          }
+                        }
+                      }}
+                      defaultOpen={true}
+                      description="Linux Foundation standard with payment and consensus extensions"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -263,12 +342,21 @@ print(agent_info)`
           <section id="a2a-protocol" className="mb-16">
             <div className="flex items-center gap-3 mb-6">
               <Network className="w-8 h-8 text-green-400" />
-              <h2 className="text-3xl font-bold text-white">A2A Protocol (JSON-RPC 2.0)</h2>
+              <h2 className="text-3xl font-bold text-white">A2A Protocol v1.0 (Linux Foundation)</h2>
             </div>
 
             <p className="text-white/70 mb-6">
-              Agent-to-Agent communication protocol. JSON-RPC 2.0 compliant with bearer token authentication.
+              Full Linux Foundation Agent-to-Agent Protocol v1.0 implementation. 14/14 core requirements met with custom extensions for payment (USDC on Base L2) and Byzantine consensus (PBFT with 7-node quorum).
             </p>
+
+            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-6">
+              <div className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-blue-400 mt-0.5" />
+                <div className="text-sm text-blue-300">
+                  <strong>Standards Compliance:</strong> Agent Card discovery, ULID-based task IDs, SSE streaming, session management, multi-agent orchestration, reputation scoring, payment integration, and consensus routing. Full specification: <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">lib/a2a/A2A_SPEC_COMPLIANCE.md</code>
+                </div>
+              </div>
+            </div>
 
             <div className="space-y-6">
               {/* Endpoint Information */}
@@ -616,6 +704,266 @@ audit = response.json()`
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Section 2.5: A2A Task Lifecycle */}
+          <section id="a2a-tasks" className="mb-16">
+            <div className="flex items-center gap-3 mb-6">
+              <Terminal className="w-8 h-8 text-cyan-400" />
+              <h2 className="text-3xl font-bold text-white">Task Lifecycle & SSE Streaming</h2>
+            </div>
+
+            <p className="text-white/70 mb-6">
+              Linux Foundation A2A Protocol task management with ULID-based IDs, structured responses, real-time progress via Server-Sent Events, and artifact tracking.
+            </p>
+
+            <div className="space-y-6">
+              {/* Task Structure */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">Task Structure</h3>
+                <p className="text-sm text-white/70 mb-4">
+                  Every A2A request creates a task with ULID identifier. Tasks track status, progress, cost breakdown, artifacts, and errors.
+                </p>
+
+                <SchemaBlock
+                  title="Task Response Schema"
+                  schema={{
+                    task_id: "01JDKP5R2G4M8QYX3WTNZHF9V7",
+                    status: "running",
+                    method: "geo.audit.request",
+                    params: { url: "https://example.com", depth: "standard" },
+                    progress: 0.65,
+                    result: null,
+                    cost: {
+                      base: 0.10,
+                      priority_multiplier: 1.0,
+                      tier_discount: 0.0,
+                      total: 0.10,
+                      currency: "USDC"
+                    },
+                    artifacts: [],
+                    error: null,
+                    created_at: "2025-11-23T17:30:00.000Z",
+                    updated_at: "2025-11-23T17:30:15.000Z",
+                    completed_at: null
+                  }}
+                  defaultOpen={true}
+                  description="Task lifecycle from pending → running → completed/failed/cancelled"
+                />
+              </div>
+
+              {/* SSE Streaming */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">Server-Sent Events (SSE) Streaming</h3>
+                <p className="text-sm text-white/70 mb-4">
+                  Real-time task progress via SSE. EventSource-compatible format with automatic reconnection and heartbeat.
+                </p>
+
+                <CodeSample
+                  title="SSE Streaming Client"
+                  samples={[
+                    {
+                      language: 'typescript',
+                      code: `const eventSource = new EventSource(
+  \`https://anoteroslogos.com/api/a2a/tasks/\${taskId}/stream\`,
+  { headers: { 'Authorization': \`Bearer \${apiKey}\` } }
+);
+
+eventSource.addEventListener('task.progress', (event) => {
+  const data = JSON.parse(event.data);
+  console.log(\`Progress: \${data.progress * 100}%\`);
+});
+
+eventSource.addEventListener('task.completed', (event) => {
+  const data = JSON.parse(event.data);
+  console.log('Result:', data.result);
+  eventSource.close();
+});
+
+eventSource.addEventListener('task.failed', (event) => {
+  const data = JSON.parse(event.data);
+  console.error('Error:', data.error);
+  eventSource.close();
+});
+
+eventSource.onerror = (error) => {
+  console.error('Stream error:', error);
+  eventSource.close();
+};`
+                    },
+                    {
+                      language: 'python',
+                      code: `import sseclient
+import requests
+
+response = requests.get(
+    f'https://anoteroslogos.com/api/a2a/tasks/{task_id}/stream',
+    headers={'Authorization': f'Bearer {api_key}'},
+    stream=True
+)
+
+client = sseclient.SSEClient(response)
+
+for event in client.events():
+    if event.event == 'task.progress':
+        data = json.loads(event.data)
+        print(f"Progress: {data['progress'] * 100}%")
+    elif event.event == 'task.completed':
+        data = json.loads(event.data)
+        print('Result:', data['result'])
+        break
+    elif event.event == 'task.failed':
+        data = json.loads(event.data)
+        print('Error:', data['error'])
+        break`
+                    }
+                  ]}
+                />
+
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {[
+                    { event: 'task.created', color: 'blue', desc: 'Task initialized' },
+                    { event: 'task.started', color: 'green', desc: 'Execution began' },
+                    { event: 'task.progress', color: 'cyan', desc: 'Progress update' },
+                    { event: 'task.completed', color: 'emerald', desc: 'Task finished' },
+                    { event: 'task.failed', color: 'red', desc: 'Task error' },
+                    { event: 'task.cancelled', color: 'yellow', desc: 'User cancelled' },
+                    { event: 'heartbeat', color: 'gray', desc: 'Connection alive' },
+                    { event: 'error', color: 'orange', desc: 'Stream error' }
+                  ].map((item) => (
+                    <div key={item.event} className={`bg-${item.color}-500/10 border border-${item.color}-500/30 rounded-lg p-3`}>
+                      <code className={`text-xs font-mono text-${item.color}-400`}>{item.event}</code>
+                      <p className="text-xs text-white/60 mt-1">{item.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Session Management */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">Session Management</h3>
+                <p className="text-sm text-white/70 mb-4">
+                  Group multiple tasks into sessions for conversation history, aggregated metrics, and batch cancellation.
+                </p>
+
+                <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-6">
+                  <div className="space-y-3 text-sm text-white/70 font-mono">
+                    <div className="flex items-start gap-3">
+                      <span className="text-brand-accent">1.</span>
+                      <span>Create session: <code className="text-green-400">POST /api/a2a/sessions</code> returns <code className="text-purple-400">session_id</code></span>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="text-brand-accent">2.</span>
+                      <span>Execute tasks with <code className="text-orange-400">session_id</code> parameter</span>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="text-brand-accent">3.</span>
+                      <span>Query session metrics: total cost, execution time, success rate</span>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="text-brand-accent">4.</span>
+                      <span>Cancel all tasks in session with single API call</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Orchestration */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">Multi-Agent Orchestration</h3>
+                <p className="text-sm text-white/70 mb-4">
+                  Chain multiple agent tasks with sequential, parallel, or DAG execution patterns. Results automatically passed between agents.
+                </p>
+
+                <CodeSample
+                  title="Orchestration Example: GEO Audit → Knowledge Graph → Citation Prediction"
+                  samples={[
+                    {
+                      language: 'typescript',
+                      code: `import { orchestrate } from '@anoteroslogos/a2a-sdk';
+
+const result = await orchestrate({
+  execution: 'sequential',
+  steps: [
+    {
+      agent: 'geo-audit',
+      method: 'geo.audit.request',
+      params: { url: 'https://example.com', depth: 'deep' }
+    },
+    {
+      agent: 'knowledge-graph',
+      method: 'knowledge.graph.extract',
+      params: { url: 'https://example.com' }
+    },
+    {
+      agent: 'citation-predictor',
+      method: 'citation.predict',
+      params: {
+        domain: 'example.com',
+        graph: '{{steps[1].result}}' // Reference previous step
+      }
+    }
+  ]
+});
+
+console.log('GEO Score:', result.steps[0].result.score);
+console.log('Entities:', result.steps[1].result.entities.length);
+console.log('Citation Probability:', result.steps[2].result.probability);`
+                    }
+                  ]}
+                />
+
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-white mb-2">Sequential</h4>
+                    <p className="text-xs text-white/60">Execute steps in order. Each step receives previous results.</p>
+                  </div>
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-white mb-2">Parallel</h4>
+                    <p className="text-xs text-white/60">Execute all steps concurrently. Wait for all to complete.</p>
+                  </div>
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-white mb-2">DAG</h4>
+                    <p className="text-xs text-white/60">Directed acyclic graph with dependencies between arbitrary steps.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Reputation System */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">Agent Reputation System</h3>
+                <p className="text-sm text-white/70 mb-4">
+                  Weighted reputation scoring across success rate (40%), cost accuracy (25%), response time (20%), and consensus participation (15%). Grades: S/A/B/C/D/F.
+                </p>
+
+                <SchemaBlock
+                  title="Agent Reputation Response"
+                  schema={{
+                    agent_id: "agent://anoteroslogos.com/geo-audit",
+                    reputation: {
+                      score: 87.3,
+                      grade: "A",
+                      metrics: {
+                        success_rate: 0.963,
+                        cost_accuracy: 0.891,
+                        avg_response_time: 42.7,
+                        consensus_participation: 0.812
+                      },
+                      weights: {
+                        success_rate: 0.40,
+                        cost_accuracy: 0.25,
+                        response_time: 0.20,
+                        consensus: 0.15
+                      }
+                    },
+                    rank: 12,
+                    total_agents: 342,
+                    updated_at: "2025-11-23T17:30:00.000Z"
+                  }}
+                  description="Reputation calculated from historical task execution data"
+                />
               </div>
             </div>
           </section>
