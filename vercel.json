@@ -3,7 +3,7 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "functions": {
-    "api/**/*.ts": {
+    "api/cron/**/*.ts": {
       "runtime": "nodejs20.x"
     }
   },
@@ -18,10 +18,6 @@
     }
   ],
   "rewrites": [
-    { "source": "/api/gold-standard/:path*", "destination": "/api/goldStandard" },
-    { "source": "/api/keys/:path*", "destination": "/api/keys" },
-    { "source": "/api/agent-keys/:path*", "destination": "/api/agent-keys" },
-    { "source": "/api/stripe/:path*", "destination": "/api/stripe" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "headers": [
@@ -51,48 +47,6 @@
         {
           "key": "X-Robots-Tag",
           "value": "all"
-        }
-      ]
-    },
-    {
-      "source": "/api/a2a",
-      "headers": [
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "*"
-        },
-        {
-          "key": "Access-Control-Allow-Methods",
-          "value": "POST, OPTIONS, HEAD"
-        },
-        {
-          "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, Authorization, X-Agent-Info"
-        },
-        {
-          "key": "X-Robots-Tag",
-          "value": "noindex"
-        }
-      ]
-    },
-    {
-      "source": "/api/mcp",
-      "headers": [
-        {
-          "key": "Access-Control-Allow-Origin",
-          "value": "*"
-        },
-        {
-          "key": "Access-Control-Allow-Methods",
-          "value": "POST, OPTIONS, HEAD"
-        },
-        {
-          "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, Authorization, X-API-Key"
-        },
-        {
-          "key": "X-Robots-Tag",
-          "value": "noindex"
         }
       ]
     },
