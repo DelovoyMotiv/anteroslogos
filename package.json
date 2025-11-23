@@ -16,6 +16,7 @@
     "og:check": "npm run og:generate && npm run og:validate"
   },
   "dependencies": {
+    "@fingerprintjs/fingerprintjs": "^5.0.1",
     "@fontsource/dm-sans": "^5.2.8",
     "@fontsource/inter": "^5.2.8",
     "@fontsource/space-grotesk": "^5.2.10",
