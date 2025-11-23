@@ -1,0 +1,84 @@
+{
+  "id": "agent://anoteroslogos.com/geo-audit",
+  "name": "Anóteros Lógos GEO Audit Agent",
+  "version": "1.0.0",
+  "description": "Enterprise AI knowledge infrastructure platform providing GEO audits, knowledge graph extraction, citation prediction, and blockchain-based micropayments",
+  "capabilities": [
+    "a2a.discover",
+    "a2a.capabilities",
+    "geo.audit.request",
+    "geo.audit.status",
+    "geo.audit.result",
+    "geo.audit.batch",
+    "geo.insights.global",
+    "geo.insights.industry",
+    "geo.insights.domain",
+    "geo.audit.stream",
+    "a2a.subscribe",
+    "a2a.unsubscribe",
+    "a2a.ping",
+    "a2a.status",
+    "knowledge.graph.query",
+    "citation.predict",
+    "agent.mesh.discover",
+    "agent.mesh.announce"
+  ],
+  "protocols": [
+    "a2a/1.0",
+    "jsonrpc/2.0",
+    "mcp/2.0"
+  ],
+  "endpoints": {
+    "http": "https://anoteroslogos.com/api/a2a",
+    "websocket": "wss://anoteroslogos.com/api/a2a/ws",
+    "stream": "https://anoteroslogos.com/api/a2a/stream"
+  },
+  "authentication": [
+    "bearer",
+    "api_key",
+    "ed25519"
+  ],
+  "pricing": {
+    "model": "pay-per-request",
+    "currency": "USDC",
+    "base_price": "0.10",
+    "billing_details": "https://anoteroslogos.com/pricing"
+  },
+  "extensions": {
+    "payment": {
+      "supported": true,
+      "network": "base-l2",
+      "token": "USDC"
+    },
+    "verification": {
+      "supported": true,
+      "method": "pbft-consensus",
+      "quorum_size": 7
+    },
+    "provenance": {
+      "supported": false
+    }
+  },
+  "metadata": {
+    "version_code": "3.2.0",
+    "deployment": "vercel-static",
+    "language": "typescript",
+    "rate_limits": {
+      "free": "10/min",
+      "basic": "60/min",
+      "pro": "300/min",
+      "enterprise": "1000/min"
+    },
+    "features": [
+      "geo-audit",
+      "knowledge-graph",
+      "citation-prediction",
+      "byzantine-consensus",
+      "usdc-micropayments",
+      "agent-mesh-network"
+    ],
+    "contact": "https://anoteroslogos.com/contact",
+    "documentation": "https://anoteroslogos.com/docs",
+    "status_page": "https://anoteroslogos.com/status"
+  }
+}
