@@ -4,11 +4,11 @@
   "framework": "vite",
   "crons": [
     {
-      "path": "/api/cron/subscription-payments",
+      "path": "/api/cron/subscription-payments/index",
       "schedule": "*/5 * * * *"
     },
     {
-      "path": "/api/cron/subscription-renewals",
+      "path": "/api/cron/subscription-renewals/index",
       "schedule": "0 0 * * *"
     }
   ],
