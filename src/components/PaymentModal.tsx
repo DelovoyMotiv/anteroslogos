@@ -4,10 +4,10 @@
  * Shows payment instructions with QR code for USDC transfers on Base L2
  */
 
-import { useEffect, useState } from 'react';
-import { X, Copy, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { X, Copy, CheckCircle, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import QRCode from 'qrcode';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -28,25 +28,8 @@ export function PaymentModal({
   walletAddress,
   onPaymentVerified,
 }: PaymentModalProps) {
-  const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
   const [copied, setCopied] = useState<{ address?: boolean; amount?: boolean; invoice?: boolean }>({});
   const [isVerifying, setIsVerifying] = useState(false);
-
-  // Generate QR code for wallet address
-  useEffect(() => {
-    if (isOpen && walletAddress) {
-      QRCode.toDataURL(walletAddress, {
-        width: 256,
-        margin: 2,
-        color: {
-          dark: '#000000',
-          light: '#FFFFFF',
-        },
-      })
-        .then(setQrCodeUrl)
-        .catch(err => console.error('QR code generation error:', err));
-    }
-  }, [isOpen, walletAddress]);
 
   const handleCopy = async (text: string, field: 'address' | 'amount' | 'invoice') => {
     try {
@@ -137,13 +120,14 @@ export function PaymentModal({
           {/* QR Code */}
           <div className="flex flex-col items-center">
             <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border-2 border-gray-200 dark:border-gray-700">
-              {qrCodeUrl ? (
-                <img src={qrCodeUrl} alt="Wallet QR Code" className="w-64 h-64" />
-              ) : (
-                <div className="w-64 h-64 flex items-center justify-center">
-                  <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-                </div>
-              )}
+              <QRCodeSVG
+                value={walletAddress}
+                size={256}
+                level="M"
+                includeMargin={true}
+                fgColor="#000000"
+                bgColor="#FFFFFF"
+              />
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
               Scan with your Base L2 wallet
