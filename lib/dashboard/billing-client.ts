@@ -106,7 +106,28 @@ export async function getSubscription(
   userId: string
 ): Promise<USDCSubscription | { error: string }> {
   try {
-    const { supabase } = await import('../supabase');
+    const { supabase, isSupabaseConfigured } = await import('../supabase');
+    
+    // Dev mode: return mock subscription
+    if (!isSupabaseConfigured() || !supabase) {
+      console.warn('[DEV MODE] getSubscription: Returning mock free tier subscription');
+      const now = new Date();
+      const periodEnd = new Date(now);
+      periodEnd.setMonth(periodEnd.getMonth() + 1);
+      
+      return {
+        subscription_id: 'mock-sub-id',
+        user_id: userId,
+        plan_tier: 'free',
+        status: 'active',
+        current_period_start: now.toISOString(),
+        current_period_end: periodEnd.toISOString(),
+        audits_used_this_period: 0,
+        audits_quota: 1,
+        created_at: now.toISOString(),
+        updated_at: now.toISOString(),
+      } as USDCSubscription;
+    }
     
     const { data, error } = await supabase
       .from('user_subscriptions')

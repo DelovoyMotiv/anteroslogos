@@ -28,11 +28,21 @@ export function AuthGuard({
   const navigate = useNavigate();
 
   useEffect(() => {
+    // DEV MODE: Bypass auth check if Supabase not configured
+    // This allows viewing dashboard without authentication in development
     if (!isSupabaseConfigured() || !supabase) {
+      console.warn('[DEV MODE] Supabase not configured - bypassing authentication');
+      // Create mock user for dev mode
+      const mockUser = {
+        id: 'dev-user-mock-id',
+        email: 'dev@localhost',
+        aud: 'authenticated',
+        role: 'authenticated',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as User;
+      setUser(mockUser);
       setLoading(false);
-      if (requireAuth) {
-        navigate(redirectTo, { replace: true });
-      }
       return;
     }
 
@@ -93,7 +103,18 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // DEV MODE: Create mock user if Supabase not configured
     if (!isSupabaseConfigured() || !supabase) {
+      console.warn('[DEV MODE] useAuth: Supabase not configured - using mock user');
+      const mockUser = {
+        id: 'dev-user-mock-id',
+        email: 'dev@localhost',
+        aud: 'authenticated',
+        role: 'authenticated',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      } as User;
+      setUser(mockUser);
       setLoading(false);
       return;
     }

@@ -33,6 +33,15 @@ export function APIKeysPage() {
 
   const handleCreate = async (name: string) => {
     try {
+      // Dev mode: show warning and don't proceed
+      if (!supabase) {
+        toast.error('Dev mode: API key creation disabled', {
+          description: 'Connect to Supabase to create real API keys',
+        });
+        setShowCreateModal(false);
+        return;
+      }
+
       const response = await fetch('/api/keys/create', {
         method: 'POST',
         headers: {
@@ -68,6 +77,14 @@ export function APIKeysPage() {
     }
 
     try {
+      // Dev mode: show warning and don't proceed
+      if (!supabase) {
+        toast.error('Dev mode: API key revocation disabled', {
+          description: 'Connect to Supabase to revoke real API keys',
+        });
+        return;
+      }
+
       const response = await fetch('/api/keys/revoke', {
         method: 'POST',
         headers: {

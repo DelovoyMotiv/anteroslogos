@@ -1,7 +1,7 @@
 // @ts-nocheck
 /**
- * Dashboard Overview Page
- * Main dashboard with KPIs and quick actions
+ * Dashboard Overview Page - HUD Style
+ * High-density, data-first dashboard with scientific aesthetic
  */
 
 import { useEffect, useState } from 'react';
@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../../lib/dashboard/auth-guard';
 import { getCurrentCycleUsage, getUCPTRate } from '../../../lib/dashboard/usage-analytics';
 import { getSubscription, getUsageStats, type USDCSubscription, type UsageStats } from '../../../lib/dashboard/billing-client';
-import { Activity, TrendingUp, Shield, Zap, CreditCard } from 'lucide-react';
+import { Activity, TrendingUp, Shield, CreditCard, ArrowUpRight, Terminal, Cpu, Zap } from 'lucide-react';
 
 interface Stats {
   totalCalls: number;
@@ -33,19 +33,24 @@ export function OverviewPage() {
       getUCPTRate(user.id, 7),
       getSubscription(user.id),
     ]).then(([cycleUsage, ucptRate, subscriptionResult]) => {
-      if ('error' in cycleUsage || 'error' in ucptRate) {
+      // Handle both primitive and error object returns
+      const hasCycleError = typeof cycleUsage === 'object' && cycleUsage !== null && 'error' in cycleUsage;
+      const hasUcptError = typeof ucptRate === 'object' && ucptRate !== null && 'error' in ucptRate;
+      
+      if (hasCycleError || hasUcptError) {
         setLoading(false);
         return;
       }
 
       setStats({
-        totalCalls: cycleUsage.total_calls,
-        successfulCalls: cycleUsage.successful_calls,
-        totalTokens: cycleUsage.total_tokens,
+        totalCalls: typeof cycleUsage === 'object' ? cycleUsage.total_calls : 0,
+        successfulCalls: typeof cycleUsage === 'object' ? cycleUsage.successful_calls : 0,
+        totalTokens: typeof cycleUsage === 'object' ? cycleUsage.total_tokens : 0,
         ucptRate: typeof ucptRate === 'number' ? ucptRate : 0,
       });
       
-      if (!('error' in subscriptionResult)) {
+      const hasSubError = typeof subscriptionResult === 'object' && subscriptionResult !== null && 'error' in subscriptionResult;
+      if (!hasSubError && subscriptionResult) {
         setSubscription(subscriptionResult);
         getUsageStats(subscriptionResult).then(setUsageStats);
       }
@@ -62,173 +67,289 @@ export function OverviewPage() {
     ? Math.round((stats.successfulCalls / stats.totalCalls) * 100) || 0
     : 0;
 
+  const auditsUsed = usageStats?.auditsUsed || 0;
+  const auditsQuota = usageStats?.auditsQuota || 1;
+  const auditsPercent = auditsQuota === -1 ? 100 : Math.min((auditsUsed / auditsQuota) * 100, 100);
+  const daysRemaining = usageStats?.daysRemaining || 0;
+  const totalTokens = stats?.totalTokens || 0;
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          Dashboard
-        </h1>
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-          Monitor your API usage and manage your account
-        </p>
-      </div>
-
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Total Calls"
-          value={stats?.totalCalls || 0}
-          icon={Activity}
-          color="blue"
-        />
-        <StatCard
-          title="Success Rate"
-          value={`${successRate}%`}
-          icon={TrendingUp}
-          color="green"
-        />
-        <StatCard
-          title="GEO Audits Left"
-          value={
-            usageStats 
-              ? usageStats.auditsQuota === -1 
-                ? '∞'
-                : `${usageStats.auditsQuota - usageStats.auditsUsed}/${usageStats.auditsQuota}`
-              : '0/0'
-          }
-          icon={CreditCard}
-          color="purple"
-          subtitle={subscription?.plan_tier === 'free' ? 'Upgrade for more' : `${usageStats?.daysRemaining || 0}d left`}
-        />
-        <StatCard
-          title="UCPT Verified"
-          value={`${stats?.ucptRate || 0}%`}
-          icon={Shield}
-          color="orange"
-          subtitle={subscription?.plan_tier === 'free' ? 'Upgrade to Pro' : undefined}
-        />
-      </div>
-
-      {/* Quick Actions */}
-      <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Quick Actions
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <QuickAction
-            title="Create API Key"
-            description="Generate a new API key for programmatic access"
-            href="/dashboard/api-keys"
-            buttonText="Create Key"
-          />
-          <QuickAction
-            title="Generate Agent Key"
-            description="Create Ed25519 keypair for AI agent authentication"
-            href="/dashboard/agent-keys"
-            buttonText="Generate"
-          />
-          <QuickAction
-            title="View Usage"
-            description="Analyze your API usage and performance metrics"
-            href="/dashboard/usage"
-            buttonText="View Analytics"
-          />
+    <div className="space-y-3 pb-8">
+      {/* Compact Header with Status Indicator */}
+      <div className="flex items-center justify-between border-b border-slate-800/50 pb-3">
+        <div>
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+            <h1 className="text-base font-semibold text-slate-100 tracking-tight uppercase">
+              System Status
+            </h1>
+            <span className="text-[10px] font-mono text-slate-500 tracking-wider">
+              OPERATIONAL
+            </span>
+          </div>
+          <p className="text-xs text-slate-500 mt-0.5 font-mono">
+            {user?.email} · {subscription?.plan_tier?.toUpperCase() || 'FREE'} TIER
+          </p>
+        </div>
+        <div className="text-right">
+          <div className="text-[10px] font-mono text-slate-500 uppercase tracking-wider">
+            Cycle Remaining
+          </div>
+          <div className="text-lg font-mono font-bold text-slate-200">
+            {daysRemaining}<span className="text-xs text-slate-500 ml-0.5">days</span>
+          </div>
         </div>
       </div>
 
-      {/* Upgrade CTA (Free tier only) */}
-      {subscription?.plan_tier === 'free' && usageStats && (
-        <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white">
-          <h3 className="text-xl font-semibold mb-2">Upgrade for More Audits</h3>
-          <p className="text-white/90 mb-4">
-            You have {usageStats.auditsQuota - usageStats.auditsUsed} audit{usageStats.auditsQuota - usageStats.auditsUsed !== 1 ? 's' : ''} remaining this month. 
-            Upgrade to Starter ($19/mo) for 10 audits, Pro ($49/mo) for 100 audits, or Enterprise ($499/mo) for unlimited.
-          </p>
-          <Link
-            to="/dashboard/billing"
-            className="inline-flex px-4 py-2 bg-white text-blue-600 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
-          >
-            View Plans
-          </Link>
+      {/* Primary Metrics Grid - Ultra Dense */}
+      <div className="grid grid-cols-4 gap-2">
+        {/* API Calls */}
+        <MetricPanel
+          label="API Calls"
+          value={formatNumber(stats?.totalCalls || 0)}
+          sublabel={`${stats?.successfulCalls || 0} success`}
+          trend="+12%"
+          status="nominal"
+        />
+        
+        {/* Success Rate */}
+        <MetricPanel
+          label="Success Rate"
+          value={`${successRate}%`}
+          sublabel="last 24h"
+          trend={successRate >= 95 ? 'optimal' : 'warning'}
+          status={successRate >= 95 ? 'nominal' : 'warning'}
+        />
+        
+        {/* UCPT Verification */}
+        <MetricPanel
+          label="UCPT Verified"
+          value={`${stats?.ucptRate || 0}%`}
+          sublabel="compliance rate"
+          trend="stable"
+          status="nominal"
+        />
+        
+        {/* Token Usage */}
+        <MetricPanel
+          label="Tokens"
+          value={formatNumber(totalTokens)}
+          sublabel="this cycle"
+          trend="+8%"
+          status="nominal"
+        />
+      </div>
+
+      {/* Audit Quota - HUD Style Bar Chart */}
+      <div className="border border-slate-800/50 bg-slate-950/30 backdrop-blur-sm">
+        <div className="px-3 py-2 border-b border-slate-800/50 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Shield className="w-3.5 h-3.5 text-slate-500" />
+            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">
+              GEO Audit Quota
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-mono text-slate-400">
+              {auditsQuota === -1 ? '∞ UNLIMITED' : `${auditsUsed}/${auditsQuota}`}
+            </span>
+            {subscription?.plan_tier === 'free' && (
+              <Link
+                to="/dashboard/billing"
+                className="text-[10px] font-mono text-blue-400 hover:text-blue-300 uppercase tracking-wider flex items-center gap-1"
+              >
+                UPGRADE
+                <ArrowUpRight className="w-3 h-3" />
+              </Link>
+            )}
+          </div>
+        </div>
+        <div className="p-3">
+          <div className="relative h-8 bg-slate-900/50 border border-slate-800/50">
+            <div
+              className="absolute inset-y-0 left-0 bg-gradient-to-r from-blue-600/20 to-blue-500/30 border-r border-blue-500/50"
+              style={{ width: `${auditsPercent}%` }}
+            >
+              <div className="absolute inset-0 bg-blue-500/10 animate-pulse" />
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-xs font-mono font-bold text-slate-300 drop-shadow-lg">
+                {auditsQuota === -1 ? 'UNLIMITED' : `${Math.round(auditsPercent)}% CONSUMED`}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Action Panels - Compact Grid */}
+      <div className="grid grid-cols-3 gap-2">
+        <ActionPanel
+          icon={Terminal}
+          label="API Keys"
+          description="Manage authentication"
+          href="/dashboard/api-keys"
+        />
+        <ActionPanel
+          icon={Cpu}
+          label="Agent Keys"
+          description="Ed25519 keypairs"
+          href="/dashboard/agent-keys"
+        />
+        <ActionPanel
+          icon={Activity}
+          label="Analytics"
+          description="Usage metrics"
+          href="/dashboard/usage"
+        />
+      </div>
+
+      {/* Upgrade Notice - Minimal */}
+      {subscription?.plan_tier === 'free' && (
+        <div className="border border-blue-500/20 bg-blue-950/20 backdrop-blur-sm">
+          <div className="px-3 py-2.5 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Zap className="w-4 h-4 text-blue-400" />
+              <div>
+                <div className="text-xs font-mono text-slate-300">
+                  Free Tier · {auditsQuota - auditsUsed} audit{(auditsQuota - auditsUsed) !== 1 ? 's' : ''} remaining
+                </div>
+                <div className="text-[10px] font-mono text-slate-500 mt-0.5">
+                  Starter $19/mo · Pro $49/mo · Enterprise $499/mo
+                </div>
+              </div>
+            </div>
+            <Link
+              to="/dashboard/billing"
+              className="px-3 py-1 text-[10px] font-mono font-bold bg-blue-500/10 text-blue-400 border border-blue-500/30 hover:bg-blue-500/20 transition-colors uppercase tracking-wider"
+            >
+              View Plans
+            </Link>
+          </div>
         </div>
       )}
     </div>
   );
 }
 
-function StatCard({
-  title,
+/**
+ * HUD-Style Metric Panel - High Density
+ */
+function MetricPanel({
+  label,
   value,
-  icon: Icon,
-  color,
-  subtitle,
+  sublabel,
+  trend,
+  status,
 }: {
-  title: string;
-  value: string | number;
-  icon: React.ComponentType<{ className?: string }>;
-  color: 'blue' | 'green' | 'purple' | 'orange';
-  subtitle?: string;
+  label: string;
+  value: string;
+  sublabel: string;
+  trend: string;
+  status: 'nominal' | 'warning' | 'critical';
 }) {
-  const colors = {
-    blue: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
-    green: 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400',
-    purple: 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
-    orange: 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400',
+  const statusColors = {
+    nominal: 'border-slate-700/50 bg-slate-900/30',
+    warning: 'border-amber-500/20 bg-amber-950/10',
+    critical: 'border-red-500/20 bg-red-950/10',
+  };
+
+  const statusIndicators = {
+    nominal: 'bg-emerald-500',
+    warning: 'bg-amber-500',
+    critical: 'bg-red-500',
   };
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6">
-      <div className="flex items-center justify-between">
-        <div className={`p-2 rounded-lg ${colors[color]}`}>
-          <Icon className="w-5 h-5" />
+    <div className={`border ${statusColors[status]} backdrop-blur-sm p-2.5`}>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-1.5">
+          <div className={`w-1 h-1 rounded-full ${statusIndicators[status]}`} />
+          <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">
+            {label}
+          </span>
         </div>
-      </div>
-      <div className="mt-4">
-        <p className="text-sm text-gray-600 dark:text-gray-400">{title}</p>
-        <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-          {value}
-        </p>
-        {subtitle && (
-          <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">{subtitle}</p>
+        {trend && trend !== 'stable' && (
+          <span className="text-[9px] font-mono text-emerald-400">{trend}</span>
         )}
+      </div>
+      
+      {/* Value */}
+      <div className="font-mono font-bold text-2xl text-slate-100 leading-none mb-1">
+        {value}
+      </div>
+      
+      {/* Sublabel */}
+      <div className="text-[10px] font-mono text-slate-600">
+        {sublabel}
       </div>
     </div>
   );
 }
 
-function QuickAction({
-  title,
+/**
+ * HUD-Style Action Panel - Compact
+ */
+function ActionPanel({
+  icon: Icon,
+  label,
   description,
   href,
-  buttonText,
 }: {
-  title: string;
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
   description: string;
   href: string;
-  buttonText: string;
 }) {
   return (
-    <div className="border border-gray-200 dark:border-gray-800 rounded-lg p-4">
-      <h3 className="font-semibold text-gray-900 dark:text-white mb-1">{title}</h3>
-      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">{description}</p>
-      <Link
-        to={href}
-        className="inline-flex px-3 py-1.5 text-sm font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-      >
-        {buttonText}
-      </Link>
-    </div>
+    <Link
+      to={href}
+      className="border border-slate-800/50 bg-slate-950/30 backdrop-blur-sm hover:border-slate-700 hover:bg-slate-900/50 transition-all group"
+    >
+      <div className="p-2.5 flex items-center gap-2.5">
+        <div className="p-1.5 border border-slate-800/50 bg-slate-900/50">
+          <Icon className="w-4 h-4 text-slate-400 group-hover:text-slate-300 transition-colors" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-xs font-mono font-semibold text-slate-300 group-hover:text-slate-200">
+            {label}
+          </div>
+          <div className="text-[10px] font-mono text-slate-600 truncate">
+            {description}
+          </div>
+        </div>
+        <ArrowUpRight className="w-3.5 h-3.5 text-slate-700 group-hover:text-slate-500 transition-colors" />
+      </div>
+    </Link>
   );
 }
 
 function LoadingSkeleton() {
   return (
-    <div className="space-y-6 animate-pulse">
-      <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded w-64" />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="space-y-3 animate-pulse">
+      {/* Header Skeleton */}
+      <div className="flex items-center justify-between border-b border-slate-800/50 pb-3">
+        <div className="space-y-2">
+          <div className="h-4 w-48 bg-slate-800/50" />
+          <div className="h-3 w-64 bg-slate-800/30" />
+        </div>
+        <div className="h-8 w-24 bg-slate-800/50" />
+      </div>
+      
+      {/* Metrics Skeleton */}
+      <div className="grid grid-cols-4 gap-2">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="h-32 bg-gray-200 dark:bg-gray-800 rounded-lg" />
+          <div key={i} className="border border-slate-800/50 bg-slate-900/30 p-2.5 h-24" />
+        ))}
+      </div>
+      
+      {/* Bar Chart Skeleton */}
+      <div className="border border-slate-800/50 bg-slate-950/30 h-32" />
+      
+      {/* Action Panels Skeleton */}
+      <div className="grid grid-cols-3 gap-2">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="border border-slate-800/50 bg-slate-950/30 h-16" />
         ))}
       </div>
     </div>

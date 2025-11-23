@@ -11,25 +11,27 @@ import { AuthGuard } from '../../../lib/dashboard/auth-guard';
 export function DashboardLayout() {
   return (
     <AuthGuard requireAuth={true} redirectTo="/auth/login">
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+      <div className="min-h-screen bg-slate-950">
         <Sidebar />
       
-      {/* Main content - offset by sidebar width */}
+      {/* Main content - offset by sidebar width, HUD-style background */}
       <main className="pl-64 transition-all duration-300">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-6 py-6">
           <Outlet />
         </div>
       </main>
 
-      {/* Toast notifications */}
+      {/* Toast notifications - HUD style */}
       <Toaster
         position="bottom-right"
         toastOptions={{
           duration: 3000,
+          className: 'font-mono text-xs',
           style: {
-            background: 'var(--toast-bg)',
-            color: 'var(--toast-text)',
-            border: '1px solid var(--toast-border)',
+            background: 'rgb(15 23 42 / 0.95)',
+            color: 'rgb(226 232 240)',
+            border: '1px solid rgb(51 65 85 / 0.5)',
+            backdropFilter: 'blur(8px)',
           },
         }}
       />

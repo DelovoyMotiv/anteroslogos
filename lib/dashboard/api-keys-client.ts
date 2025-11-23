@@ -29,6 +29,12 @@ export interface APIKey {
  */
 export async function listAPIKeys(): Promise<APIKey[] | { error: string }> {
   try {
+    // Dev mode: return mock data if supabase not configured
+    if (!supabase) {
+      console.warn('[DEV MODE] api-keys-client: Returning empty API keys list');
+      return [];
+    }
+
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return { error: 'Unauthorized' };
@@ -61,6 +67,12 @@ export async function revokeAPIKey(
   reason?: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
+    // Dev mode: simulate success
+    if (!supabase) {
+      console.warn('[DEV MODE] api-keys-client: Simulating API key revocation');
+      return { success: true };
+    }
+
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
       return { success: false, error: 'Unauthorized' };

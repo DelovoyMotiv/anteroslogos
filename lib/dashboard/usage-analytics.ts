@@ -61,6 +61,22 @@ export async function getUsageStats(
   endDate: Date
 ): Promise<UsageStats | { error: string }> {
   try {
+    // Dev mode: return mock data if supabase not configured
+    if (!supabase) {
+      console.warn('[DEV MODE] getUsageStats: Returning mock data');
+      return {
+        total_calls: 156,
+        successful_calls: 142,
+        failed_calls: 14,
+        rate_limited_calls: 0,
+        total_tokens: 45280,
+        total_cost: 4.52,
+        unique_tools: 5,
+        ucpt_verified_calls: 98,
+        avg_duration_ms: 247,
+      };
+    }
+    
     const { data, error } = await supabase.rpc('get_usage_stats', {
       p_user_id: userId,
       p_start_date: startDate.toISOString(),
@@ -403,6 +419,12 @@ export async function getUCPTRate(
   days: number = 7
 ): Promise<number | { error: string }> {
   try {
+    // Dev mode: return mock data
+    if (!supabase) {
+      console.warn('[DEV MODE] getUCPTRate: Returning mock rate');
+      return 63; // 63% verified
+    }
+    
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
@@ -431,6 +453,22 @@ export async function getCurrentCycleUsage(
   userId: string
 ): Promise<UsageStats | { error: string }> {
   try {
+    // Dev mode: return mock data
+    if (!supabase) {
+      console.warn('[DEV MODE] getCurrentCycleUsage: Returning mock data');
+      return {
+        total_calls: 78,
+        successful_calls: 71,
+        failed_calls: 7,
+        rate_limited_calls: 0,
+        total_tokens: 22140,
+        total_cost: 2.21,
+        unique_tools: 4,
+        ucpt_verified_calls: 45,
+        avg_duration_ms: 234,
+      };
+    }
+    
     // Get subscription to determine cycle dates
     const { data: subscription } = await supabase
       .from('subscriptions')
