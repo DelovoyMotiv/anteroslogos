@@ -360,7 +360,7 @@ async function handleAuditRequest(params: any, context: A2AContext) {
   }
   
   // =====================================================
-  // PAYMENT ENFORCEMENT (APA Integration)
+  // SUBSCRIPTION QUOTA CHECK (Primary)
   // =====================================================
   
   // Get agent info from context
@@ -374,6 +374,64 @@ async function handleAuditRequest(params: any, context: A2AContext) {
       { method: 'geo.audit.request' }
     );
   }
+  
+  // Check if user has active subscription with available quota
+  let auditId: string | undefined;
+  try {
+    const { checkQuota, consumeQuota } = await import('../../lib/subscriptions/manager');
+    
+    const quotaCheck = await checkQuota(agent.id, 1);
+    
+    if (quotaCheck.available) {
+      // User has subscription quota, execute audit and consume quota after
+      logger.debug('Using subscription quota for audit', {
+        agent_id: agent.id,
+        quota_remaining: quotaCheck.remaining,
+        subscription_id: quotaCheck.subscriptionId,
+      });
+      
+      // Perform audit first (moved from line 410)
+      const cached = getCachedAuditResult(url);
+      let a2aResult;
+      
+      if (cached) {
+        a2aResult = cached.result;
+      } else {
+        const startTime = Date.now();
+        const auditResult = await performGeoAudit(url);
+        const processingTime = Date.now() - startTime;
+        a2aResult = convertToA2AFormat(auditResult, context, processingTime);
+        cacheAuditResult(url, a2aResult, 60 * 60 * 1000);
+      }
+      
+      // Consume quota after successful audit
+      auditId = a2aResult.audit_id || `audit_${Date.now()}`;
+      await consumeQuota(agent.id, auditId, { url, method: 'geo.audit.request' });
+      
+      logger.debug('Subscription quota consumed', {
+        agent_id: agent.id,
+        audit_id: auditId,
+      });
+      
+      // Return audit result immediately (subscription path)
+      return a2aResult;
+    }
+  } catch (error) {
+    // Subscription check failed, fall through to payment flow
+    logger.warn('Subscription quota check failed, falling back to APA payment', {
+      agent_id: agent.id,
+      error: error instanceof Error ? error.message : String(error),
+    });
+  }
+  
+  // =====================================================
+  // PAYMENT ENFORCEMENT (APA Integration - Fallback)
+  // =====================================================
+  
+  // No subscription quota available, use APA micropayment flow
+  logger.debug('No subscription quota, using APA micropayment flow', {
+    agent_id: agent.id,
+  });
   
   // Prepare payment context
   const paymentContext: PaymentContext = {
@@ -389,7 +447,7 @@ async function handleAuditRequest(params: any, context: A2AContext) {
   const paymentResult = await enforcePayment(paymentContext, invoice_id, tx_hash);
   
   // Payment successful, proceed with audit
-  logger.debug('Payment verified, proceeding with audit', {
+  logger.debug('APA payment verified, proceeding with audit', {
     agent_id: agent.id,
     payment_mode: paymentResult.mode,
     invoice_id: paymentResult.invoice?.invoiceId,

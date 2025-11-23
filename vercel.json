@@ -3,6 +3,14 @@
     {
       "path": "/api/cron/reorg-monitor",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/subscription-payments/route",
+      "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/subscription-renewals/route",
+      "schedule": "0 0 * * *"
     }
   ],
   "rewrites": [
