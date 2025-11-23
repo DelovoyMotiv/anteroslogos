@@ -7,19 +7,26 @@ import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Toaster } from 'sonner';
 import { AuthGuard } from '../../../lib/dashboard/auth-guard';
+import DigitalBackground from '../../../components/DigitalBackground';
 
 export function DashboardLayout() {
   return (
     <AuthGuard requireAuth={true} redirectTo="/auth/login">
-      <div className="min-h-screen bg-slate-950">
-        <Sidebar />
-      
-      {/* Main content - offset by sidebar width, HUD-style background */}
-      <main className="pl-64 transition-all duration-300">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <Outlet />
+      <div className="min-h-screen bg-slate-950 relative">
+        {/* Animated background - same as main site */}
+        <DigitalBackground />
+        
+        {/* Content layer with glassmorphism */}
+        <div className="relative z-10">
+          <Sidebar />
+        
+          {/* Main content - offset by sidebar width, HUD-style */}
+          <main className="pl-64 transition-all duration-300">
+            <div className="max-w-7xl mx-auto px-6 py-6">
+              <Outlet />
+            </div>
+          </main>
         </div>
-      </main>
 
       {/* Toast notifications - HUD style */}
       <Toaster

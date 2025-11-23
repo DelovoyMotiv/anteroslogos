@@ -141,7 +141,7 @@ export function OverviewPage() {
       </div>
 
       {/* Audit Quota - HUD Style Bar Chart */}
-      <div className="border border-slate-800/50 bg-slate-950/30 backdrop-blur-sm">
+      <div className="border border-slate-800/50 bg-slate-950/30 backdrop-blur-md">
         <div className="px-3 py-2 border-b border-slate-800/50 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Shield className="w-3.5 h-3.5 text-slate-500" />
@@ -205,7 +205,7 @@ export function OverviewPage() {
 
       {/* Upgrade Notice - Minimal */}
       {subscription?.plan_tier === 'free' && (
-        <div className="border border-blue-500/20 bg-blue-950/20 backdrop-blur-sm">
+        <div className="border border-blue-500/20 bg-blue-950/20 backdrop-blur-md">
           <div className="px-3 py-2.5 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Zap className="w-4 h-4 text-blue-400" />
@@ -260,8 +260,8 @@ function MetricPanel({
   };
 
   return (
-    <div className={`border ${statusColors[status]} backdrop-blur-sm p-2.5`}>
-      {/* Header */}
+    <div className={`border ${statusColors[status]} backdrop-blur-md p-2.5`}>
+      {/* Status indicator */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-1.5">
           <div className={`w-1 h-1 rounded-full ${statusIndicators[status]}`} />
@@ -304,7 +304,7 @@ function ActionPanel({
   return (
     <Link
       to={href}
-      className="border border-slate-800/50 bg-slate-950/30 backdrop-blur-sm hover:border-slate-700 hover:bg-slate-900/50 transition-all group"
+      className="border border-slate-800/50 bg-slate-950/30 backdrop-blur-md hover:border-slate-700 hover:bg-slate-900/50 transition-all group"
     >
       <div className="p-2.5 flex items-center gap-2.5">
         <div className="p-1.5 border border-slate-800/50 bg-slate-900/50">
