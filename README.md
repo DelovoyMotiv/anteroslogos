@@ -738,6 +738,3 @@ Proprietary - All rights reserved
 
 Last Updated: November 23, 2025
 Version: 3.3.0
-Architecture: Static SPA on Vercel
-Payments: USDC on Base L2
-A2A Protocol: Linux Foundation v1.0 Compliant
