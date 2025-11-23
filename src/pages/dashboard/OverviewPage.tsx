@@ -8,8 +8,8 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../../lib/dashboard/auth-guard';
 import { getCurrentCycleUsage, getUCPTRate } from '../../../lib/dashboard/usage-analytics';
-import { getSubscription } from '../../../lib/dashboard/billing-client';
-import { Activity, TrendingUp, Shield, Zap } from 'lucide-react';
+import { getSubscription, getUsageStats, type USDCSubscription, type UsageStats } from '../../../lib/dashboard/billing-client';
+import { Activity, TrendingUp, Shield, Zap, CreditCard } from 'lucide-react';
 
 interface Stats {
   totalCalls: number;
@@ -21,7 +21,8 @@ interface Stats {
 export function OverviewPage() {
   const { user } = useAuth();
   const [stats, setStats] = useState<Stats | null>(null);
-  const [plan, setPlan] = useState<'free' | 'pro' | 'agency'>('free');
+  const [subscription, setSubscription] = useState<USDCSubscription | null>(null);
+  const [usageStats, setUsageStats] = useState<UsageStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,8 +32,8 @@ export function OverviewPage() {
       getCurrentCycleUsage(user.id),
       getUCPTRate(user.id, 7),
       getSubscription(user.id),
-    ]).then(([cycleUsage, ucptRate, subscription]) => {
-      if ('error' in cycleUsage || 'error' in ucptRate || 'error' in subscription) {
+    ]).then(([cycleUsage, ucptRate, subscriptionResult]) => {
+      if ('error' in cycleUsage || 'error' in ucptRate) {
         setLoading(false);
         return;
       }
@@ -44,7 +45,11 @@ export function OverviewPage() {
         ucptRate: typeof ucptRate === 'number' ? ucptRate : 0,
       });
       
-      setPlan(subscription.plan_id);
+      if (!('error' in subscriptionResult)) {
+        setSubscription(subscriptionResult);
+        getUsageStats(subscriptionResult).then(setUsageStats);
+      }
+      
       setLoading(false);
     });
   }, [user]);
@@ -84,17 +89,24 @@ export function OverviewPage() {
           color="green"
         />
         <StatCard
-          title="Total Tokens"
-          value={formatNumber(stats?.totalTokens || 0)}
-          icon={Zap}
+          title="GEO Audits Left"
+          value={
+            usageStats 
+              ? usageStats.auditsQuota === -1 
+                ? '∞'
+                : `${usageStats.auditsQuota - usageStats.auditsUsed}/${usageStats.auditsQuota}`
+              : '0/0'
+          }
+          icon={CreditCard}
           color="purple"
+          subtitle={subscription?.plan_tier === 'free' ? 'Upgrade for more' : `${usageStats?.daysRemaining || 0}d left`}
         />
         <StatCard
           title="UCPT Verified"
           value={`${stats?.ucptRate || 0}%`}
           icon={Shield}
           color="orange"
-          subtitle={plan === 'free' ? 'Upgrade to Pro' : undefined}
+          subtitle={subscription?.plan_tier === 'free' ? 'Upgrade to Pro' : undefined}
         />
       </div>
 
@@ -126,11 +138,12 @@ export function OverviewPage() {
       </div>
 
       {/* Upgrade CTA (Free tier only) */}
-      {plan === 'free' && (
+      {subscription?.plan_tier === 'free' && usageStats && (
         <div className="bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg p-6 text-white">
-          <h3 className="text-xl font-semibold mb-2">Upgrade to Pro</h3>
+          <h3 className="text-xl font-semibold mb-2">Upgrade for More Audits</h3>
           <p className="text-white/90 mb-4">
-            Unlock unlimited calls, UCPT verification, causal tracer, and priority support
+            You have {usageStats.auditsQuota - usageStats.auditsUsed} audit{usageStats.auditsQuota - usageStats.auditsUsed !== 1 ? 's' : ''} remaining this month. 
+            Upgrade to Starter ($19/mo) for 10 audits, Pro ($49/mo) for 100 audits, or Enterprise ($499/mo) for unlimited.
           </p>
           <Link
             to="/dashboard/billing"
