@@ -141,7 +141,7 @@ export function OverviewPage() {
       </div>
 
       {/* Audit Quota - HUD Style Bar Chart */}
-      <div className="border border-slate-800/50 bg-slate-950/30 backdrop-blur-md">
+      <div className="border border-slate-800/50 bg-black/20 backdrop-blur-md">
         <div className="px-3 py-2 border-b border-slate-800/50 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Shield className="w-3.5 h-3.5 text-slate-500" />
@@ -205,7 +205,7 @@ export function OverviewPage() {
 
       {/* Upgrade Notice - Minimal */}
       {subscription?.plan_tier === 'free' && (
-        <div className="border border-blue-500/20 bg-blue-950/20 backdrop-blur-md">
+        <div className="border border-blue-500/20 bg-black/15 backdrop-blur-md">
           <div className="px-3 py-2.5 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Zap className="w-4 h-4 text-blue-400" />
@@ -248,7 +248,7 @@ function MetricPanel({
   status: 'nominal' | 'warning' | 'critical';
 }) {
   const statusColors = {
-    nominal: 'border-slate-700/50 bg-slate-900/30',
+    nominal: 'border-slate-700/50 bg-black/20',
     warning: 'border-amber-500/20 bg-amber-950/10',
     critical: 'border-red-500/20 bg-red-950/10',
   };
@@ -304,10 +304,10 @@ function ActionPanel({
   return (
     <Link
       to={href}
-      className="border border-slate-800/50 bg-slate-950/30 backdrop-blur-md hover:border-slate-700 hover:bg-slate-900/50 transition-all group"
+      className="border border-slate-800/50 bg-black/20 backdrop-blur-md hover:border-slate-700 hover:bg-black/30 transition-all group"
     >
       <div className="p-2.5 flex items-center gap-2.5">
-        <div className="p-1.5 border border-slate-800/50 bg-slate-900/50">
+        <div className="p-1.5 border border-slate-800/50 bg-black/30">
           <Icon className="w-4 h-4 text-slate-400 group-hover:text-slate-300 transition-colors" />
         </div>
         <div className="flex-1 min-w-0">
@@ -339,17 +339,17 @@ function LoadingSkeleton() {
       {/* Metrics Skeleton */}
       <div className="grid grid-cols-4 gap-2">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="border border-slate-800/50 bg-slate-900/30 p-2.5 h-24" />
+          <div key={i} className="border border-slate-800/50 bg-black/20 p-2.5 h-24" />
         ))}
       </div>
       
       {/* Bar Chart Skeleton */}
-      <div className="border border-slate-800/50 bg-slate-950/30 h-32" />
+      <div className="border border-slate-800/50 bg-black/20 h-32" />
       
       {/* Action Panels Skeleton */}
       <div className="grid grid-cols-3 gap-2">
         {[1, 2, 3].map((i) => (
-          <div key={i} className="border border-slate-800/50 bg-slate-950/30 h-16" />
+          <div key={i} className="border border-slate-800/50 bg-black/20 h-16" />
         ))}
       </div>
     </div>

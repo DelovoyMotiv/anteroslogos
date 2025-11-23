@@ -12,7 +12,7 @@ import DigitalBackground from '../../../components/DigitalBackground';
 export function DashboardLayout() {
   return (
     <AuthGuard requireAuth={true} redirectTo="/auth/login">
-      <div className="min-h-screen bg-slate-950 relative">
+      <div className="min-h-screen bg-black relative">
         {/* Animated background - same as main site */}
         <DigitalBackground />
         

@@ -1,25 +1,29 @@
 // @ts-nocheck
 /**
- * Usage Analytics Page
- * Visualize API usage, UCPT metrics, and tool-level statistics
+ * Usage Analytics Page - OpenRouter Style
+ * Compact, efficient data visualization with inline charts
  */
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../../lib/dashboard/auth-guard';
 import { getDailyUsage, getTopTools, getUCPTRate } from '../../../lib/dashboard/usage-analytics';
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { TrendingUp, Cpu, Zap, Activity, Calendar } from 'lucide-react';
-import { toast } from 'sonner';
+import { Activity, TrendingUp, Zap, ChevronDown } from 'lucide-react';
 
-const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
+const CHART_COLORS = [
+  'rgb(59, 130, 246)',   // blue-500
+  'rgb(16, 185, 129)',   // emerald-500
+  'rgb(245, 158, 11)',   // amber-500
+  'rgb(239, 68, 68)',    // red-500
+  'rgb(139, 92, 246)',   // violet-500
+  'rgb(236, 72, 153)',   // pink-500
+];
 
 export function UsagePage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [dailyStats, setDailyStats] = useState<any[]>([]);
   const [toolStats, setToolStats] = useState<any[]>([]);
-  const [ucptStats, setUCPTStats] = useState<any>(null);
-  const [dateRange, setDateRange] = useState(7); // days
+  const [dateRange, setDateRange] = useState('7');
 
   useEffect(() => {
     fetchUsageData();
@@ -28,26 +32,16 @@ export function UsagePage() {
   const fetchUsageData = async () => {
     setLoading(true);
     try {
-      const endDate = new Date();
-      const startDate = new Date();
-      startDate.setDate(startDate.getDate() - dateRange);
-
-      const [daily, tools, ucptRate] = await Promise.all([
-        getDailyUsage(user.id, dateRange),
-        getTopTools(user.id, dateRange),
-        getUCPTRate(user.id, dateRange),
+      const days = parseInt(dateRange);
+      const [daily, tools] = await Promise.all([
+        getDailyUsage(user.id, days),
+        getTopTools(user.id, days),
       ]);
 
-      if ('error' in daily || 'error' in tools || typeof ucptRate === 'object' && 'error' in ucptRate) {
-        toast.error('Failed to load usage data');
-        return;
-      }
-
       setDailyStats(Array.isArray(daily) ? daily : []);
-      setToolStats(Array.isArray(tools) ? tools : []);
-      setUCPTStats({ average_ucpt: typeof ucptRate === 'number' ? ucptRate : 0, high_ucpt_calls: 0, low_ucpt_calls: 0, total_calls: dailyStats.length });
+      setToolStats(Array.isArray(tools) ? tools.slice(0, 10) : []);
     } catch (error) {
-      toast.error('Failed to fetch usage statistics');
+      console.error('Failed to fetch usage statistics', error);
     } finally {
       setLoading(false);
     }
@@ -57,252 +51,195 @@ export function UsagePage() {
     return <LoadingSkeleton />;
   }
 
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return `${date.getMonth() + 1}/${date.getDate()}`;
-  };
-
-  const totalCalls = dailyStats.reduce((acc, day) => acc + day.total_calls, 0);
+  const totalCalls = dailyStats.reduce((acc, day) => acc + (day.total_calls || 0), 0);
+  const totalTokens = dailyStats.reduce((acc, day) => acc + (day.total_tokens || 0), 0);
   const avgSuccessRate = dailyStats.length > 0
-    ? (dailyStats.reduce((acc, day) => acc + day.success_rate, 0) / dailyStats.length)
+    ? (dailyStats.reduce((acc, day) => acc + (day.success_rate || 0), 0) / dailyStats.length)
     : 0;
-  const totalTokens = dailyStats.reduce((acc, day) => acc + day.total_tokens, 0);
+
+  // Calculate max for chart scaling
+  const maxCalls = Math.max(...dailyStats.map(d => d.total_calls || 0), 1);
+  const maxTokens = Math.max(...dailyStats.map(d => d.total_tokens || 0), 1);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4">
+      {/* Compact Header */}
+      <div className="flex items-center justify-between border-b border-slate-800/50 pb-3">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Usage Analytics</h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+          <h1 className="text-lg font-semibold text-slate-100 tracking-tight">Usage Analytics</h1>
+          <p className="text-[10px] font-mono text-slate-500 mt-0.5">
             Monitor API usage, token consumption, and UCPT metrics
           </p>
         </div>
-        <select
-          value={dateRange}
-          onChange={(e) => setDateRange(Number(e.target.value))}
-          className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-        >
-          <option value={7}>Last 7 days</option>
-          <option value={14}>Last 14 days</option>
-          <option value={30}>Last 30 days</option>
-          <option value={90}>Last 90 days</option>
-        </select>
-      </div>
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Total Calls"
-          value={totalCalls.toLocaleString()}
-          icon={<Activity className="w-5 h-5" />}
-          color="blue"
-        />
-        <StatCard
-          title="Success Rate"
-          value={`${avgSuccessRate.toFixed(1)}%`}
-          icon={<TrendingUp className="w-5 h-5" />}
-          color="green"
-        />
-        <StatCard
-          title="Total Tokens"
-          value={(totalTokens / 1000).toFixed(1) + 'K'}
-          icon={<Cpu className="w-5 h-5" />}
-          color="purple"
-        />
-        <StatCard
-          title="Avg UCPT"
-          value={ucptStats?.average_ucpt?.toFixed(1) || '0.0'}
-          icon={<Zap className="w-5 h-5" />}
-          color="orange"
-        />
-      </div>
-
-      {/* Daily Usage Chart */}
-      <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Daily API Calls
-        </h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={dailyStats}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-            <XAxis
-              dataKey="date"
-              tickFormatter={formatDate}
-              stroke="#9CA3AF"
-              style={{ fontSize: '12px' }}
-            />
-            <YAxis stroke="#9CA3AF" style={{ fontSize: '12px' }} />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: '#1F2937',
-                border: '1px solid #374151',
-                borderRadius: '8px',
-                color: '#F9FAFB'
-              }}
-            />
-            <Legend wrapperStyle={{ fontSize: '12px' }} />
-            <Line
-              type="monotone"
-              dataKey="total_calls"
-              stroke="#3B82F6"
-              strokeWidth={2}
-              name="API Calls"
-              dot={{ fill: '#3B82F6' }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Tool Usage Distribution */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Tool Usage Distribution
-          </h3>
-          {toolStats.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={toolStats}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ tool_name, percentage }) => `${tool_name}: ${percentage}%`}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="call_count"
-                >
-                  {toolStats.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#1F2937',
-                    border: '1px solid #374151',
-                    borderRadius: '8px',
-                    color: '#F9FAFB'
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-64 flex items-center justify-center text-gray-500">
-              No tool usage data available
-            </div>
-          )}
-        </div>
-
-        <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            Tool Call Volume
-          </h3>
-          {toolStats.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={toolStats}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} />
-                <XAxis
-                  dataKey="tool_name"
-                  stroke="#9CA3AF"
-                  style={{ fontSize: '12px' }}
-                  angle={-45}
-                  textAnchor="end"
-                  height={80}
-                />
-                <YAxis stroke="#9CA3AF" style={{ fontSize: '12px' }} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: '#1F2937',
-                    border: '1px solid #374151',
-                    borderRadius: '8px',
-                    color: '#F9FAFB'
-                  }}
-                />
-                <Bar dataKey="call_count" fill="#3B82F6" radius={[8, 8, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="h-64 flex items-center justify-center text-gray-500">
-              No tool usage data available
-            </div>
-          )}
+        <div className="relative">
+          <select
+            value={dateRange}
+            onChange={(e) => setDateRange(e.target.value)}
+            className="appearance-none px-3 py-1.5 pr-8 text-xs font-mono bg-black/20 border border-slate-800/50 text-slate-300 backdrop-blur-md focus:outline-none focus:border-slate-700 cursor-pointer"
+          >
+            <option value="7">Last 7 days</option>
+            <option value="14">Last 14 days</option>
+            <option value="30">Last 30 days</option>
+            <option value="90">Last 90 days</option>
+          </select>
+          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500 pointer-events-none" />
         </div>
       </div>
 
-      {/* UCPT Breakdown */}
-      {ucptStats && (
-        <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-            UCPT (Useful Computation Per Token) Analysis
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <UCPTMetric
-              label="Average UCPT"
-              value={ucptStats.average_ucpt?.toFixed(2) || '0.00'}
-              description="Overall efficiency score"
-            />
-            <UCPTMetric
-              label="High UCPT %"
-              value={`${((ucptStats.high_ucpt_calls / ucptStats.total_calls) * 100 || 0).toFixed(1)}%`}
-              description="Calls with UCPT > 0.7"
-              color="green"
-            />
-            <UCPTMetric
-              label="Low UCPT %"
-              value={`${((ucptStats.low_ucpt_calls / ucptStats.total_calls) * 100 || 0).toFixed(1)}%`}
-              description="Calls with UCPT < 0.3"
-              color="red"
-            />
+      {/* Compact KPI Grid with Inline Charts - OpenRouter Style */}
+      <div className="grid grid-cols-3 gap-3">
+        {/* API Calls */}
+        <div className="border border-slate-800/50 bg-black/20 backdrop-blur-md p-3">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">API Calls</span>
+            <Activity className="w-3 h-3 text-slate-600" />
+          </div>
+          <div className="font-mono font-bold text-xl text-slate-100 mb-2">{totalCalls.toLocaleString()}</div>
+          <div className="flex items-end gap-0.5 h-12">
+            {dailyStats.slice(-14).map((day, i) => {
+              const height = (day.total_calls / maxCalls) * 100;
+              return (
+                <div
+                  key={i}
+                  className="flex-1 bg-gradient-to-t from-blue-500/30 to-blue-400/50 transition-all hover:from-blue-500/50 hover:to-blue-400/70"
+                  style={{ height: `${Math.max(height, 2)}%` }}
+                  title={`${day.date}: ${day.total_calls} calls`}
+                />
+              );
+            })}
+          </div>
+          <div className="text-[9px] font-mono text-slate-600 mt-1">Past 14 days</div>
+        </div>
+
+        {/* Tokens */}
+        <div className="border border-slate-800/50 bg-black/20 backdrop-blur-md p-3">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Tokens</span>
+            <Zap className="w-3 h-3 text-slate-600" />
+          </div>
+          <div className="font-mono font-bold text-xl text-slate-100 mb-2">
+            {(totalTokens / 1000).toFixed(1)}K
+          </div>
+          <div className="flex items-end gap-0.5 h-12">
+            {dailyStats.slice(-14).map((day, i) => {
+              const height = (day.total_tokens / maxTokens) * 100;
+              return (
+                <div
+                  key={i}
+                  className="flex-1 bg-gradient-to-t from-emerald-500/30 to-emerald-400/50 transition-all hover:from-emerald-500/50 hover:to-emerald-400/70"
+                  style={{ height: `${Math.max(height, 2)}%` }}
+                  title={`${day.date}: ${day.total_tokens} tokens`}
+                />
+              );
+            })}
+          </div>
+          <div className="text-[9px] font-mono text-slate-600 mt-1">Past 14 days</div>
+        </div>
+
+        {/* Success Rate */}
+        <div className="border border-slate-800/50 bg-black/20 backdrop-blur-md p-3">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Success Rate</span>
+            <TrendingUp className="w-3 h-3 text-slate-600" />
+          </div>
+          <div className="font-mono font-bold text-xl text-slate-100 mb-2">{avgSuccessRate.toFixed(1)}%</div>
+          <div className="flex items-end gap-0.5 h-12">
+            {dailyStats.slice(-14).map((day, i) => {
+              const height = day.success_rate || 0;
+              return (
+                <div
+                  key={i}
+                  className="flex-1 bg-gradient-to-t from-amber-500/30 to-amber-400/50 transition-all hover:from-amber-500/50 hover:to-amber-400/70"
+                  style={{ height: `${Math.max(height, 2)}%` }}
+                  title={`${day.date}: ${day.success_rate}%`}
+                />
+              );
+            })}
+          </div>
+          <div className="text-[9px] font-mono text-slate-600 mt-1">Past 14 days</div>
+        </div>
+      </div>
+
+      {/* Tool Usage Table - Compact */}
+      {toolStats.length > 0 && (
+        <div className="border border-slate-800/50 bg-black/20 backdrop-blur-md">
+          <div className="px-3 py-2 border-b border-slate-800/50">
+            <h3 className="text-xs font-mono font-semibold text-slate-300 uppercase tracking-wider">
+              Tool Usage Distribution
+            </h3>
+          </div>
+          <div className="divide-y divide-slate-800/30">
+            {toolStats.map((tool, index) => {
+              const percentage = totalCalls > 0 ? (tool.call_count / totalCalls) * 100 : 0;
+              return (
+                <div key={index} className="px-3 py-2 flex items-center gap-3 hover:bg-black/30 transition-colors">
+                  <div
+                    className="w-1 h-6"
+                    style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-mono text-slate-300 truncate">{tool.tool_name}</div>
+                    <div className="text-[9px] font-mono text-slate-600">
+                      {tool.call_count.toLocaleString()} calls · {tool.avg_duration_ms?.toFixed(0) || 0}ms avg
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="text-xs font-mono font-bold text-slate-400">
+                      {percentage.toFixed(1)}%
+                    </div>
+                    <div className="w-16 h-1.5 bg-slate-900/50 overflow-hidden">
+                      <div
+                        className="h-full transition-all"
+                        style={{
+                          width: `${percentage}%`,
+                          backgroundColor: CHART_COLORS[index % CHART_COLORS.length]
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* Recent Activity Table */}
+      {/* Daily Breakdown Table - Compact */}
       {dailyStats.length > 0 && (
-        <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="border border-slate-800/50 bg-black/20 backdrop-blur-md">
+          <div className="px-3 py-2 border-b border-slate-800/50">
+            <h3 className="text-xs font-mono font-semibold text-slate-300 uppercase tracking-wider">
               Daily Breakdown
             </h3>
           </div>
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-800">
-              <thead className="bg-gray-50 dark:bg-gray-800/50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                    Date
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                    Calls
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                    Success Rate
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                    Tokens
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
-                    Avg UCPT
-                  </th>
+            <table className="w-full text-xs">
+              <thead className="border-b border-slate-800/50">
+                <tr className="text-[9px] font-mono text-slate-500 uppercase tracking-wider">
+                  <th className="px-3 py-2 text-left font-medium">Date</th>
+                  <th className="px-3 py-2 text-right font-medium">Calls</th>
+                  <th className="px-3 py-2 text-right font-medium">Success</th>
+                  <th className="px-3 py-2 text-right font-medium">Tokens</th>
+                  <th className="px-3 py-2 text-right font-medium">Avg Duration</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
-                {dailyStats.map((day) => (
-                  <tr key={day.date}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {new Date(day.date).toLocaleDateString()}
+              <tbody className="divide-y divide-slate-800/30 font-mono">
+                {dailyStats.slice().reverse().map((day, index) => (
+                  <tr key={index} className="hover:bg-black/30 transition-colors">
+                    <td className="px-3 py-2 text-slate-300">
+                      {new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                      {day.total_calls.toLocaleString()}
+                    <td className="px-3 py-2 text-right text-slate-400">{day.total_calls.toLocaleString()}</td>
+                    <td className="px-3 py-2 text-right">
+                      <span className={`${day.success_rate >= 95 ? 'text-emerald-400' : day.success_rate >= 80 ? 'text-amber-400' : 'text-red-400'}`}>
+                        {day.success_rate.toFixed(1)}%
+                      </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                      {day.success_rate.toFixed(1)}%
+                    <td className="px-3 py-2 text-right text-slate-400">
+                      {(day.total_tokens / 1000).toFixed(1)}K
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                      {day.total_tokens.toLocaleString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                      {day.average_ucpt?.toFixed(2) || 'N/A'}
+                    <td className="px-3 py-2 text-right text-slate-400">
+                      {day.avg_duration_ms?.toFixed(0) || 0}ms
                     </td>
                   </tr>
                 ))}
@@ -315,55 +252,22 @@ export function UsagePage() {
   );
 }
 
-function StatCard({ title, value, icon, color = 'blue' }: any) {
-  const colorClasses = {
-    blue: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
-    green: 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400',
-    purple: 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
-    orange: 'bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400',
-  };
-
-  return (
-    <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</p>
-          <p className="mt-2 text-3xl font-bold text-gray-900 dark:text-white">{value}</p>
-        </div>
-        <div className={`w-12 h-12 rounded-full flex items-center justify-center ${colorClasses[color]}`}>
-          {icon}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function UCPTMetric({ label, value, description, color = 'blue' }: any) {
-  const colorClasses = {
-    blue: 'text-blue-600 dark:text-blue-400',
-    green: 'text-green-600 dark:text-green-400',
-    red: 'text-red-600 dark:text-red-400',
-  };
-
-  return (
-    <div>
-      <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{label}</p>
-      <p className={`mt-2 text-3xl font-bold ${colorClasses[color]}`}>{value}</p>
-      <p className="mt-1 text-xs text-gray-500 dark:text-gray-500">{description}</p>
-    </div>
-  );
-}
-
 function LoadingSkeleton() {
   return (
-    <div className="space-y-6 animate-pulse">
-      <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded w-64" />
-      <div className="grid grid-cols-4 gap-6">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="h-32 bg-gray-200 dark:bg-gray-800 rounded-lg" />
+    <div className="space-y-4 animate-pulse">
+      <div className="flex items-center justify-between border-b border-slate-800/50 pb-3">
+        <div className="space-y-2">
+          <div className="h-4 w-32 bg-slate-800/50" />
+          <div className="h-3 w-48 bg-slate-800/30" />
+        </div>
+        <div className="h-7 w-24 bg-slate-800/50" />
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="border border-slate-800/50 bg-black/20 p-3 h-32" />
         ))}
       </div>
-      <div className="h-96 bg-gray-200 dark:bg-gray-800 rounded-lg" />
+      <div className="border border-slate-800/50 bg-black/20 h-64" />
     </div>
   );
 }

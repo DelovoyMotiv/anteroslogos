@@ -117,7 +117,7 @@ export function Sidebar() {
   return (
     <div
       className={`
-        fixed top-0 left-0 h-screen bg-slate-950/80 backdrop-blur-xl border-r border-slate-800/50
+        fixed top-0 left-0 h-screen bg-black/60 backdrop-blur-xl border-r border-slate-800/50
         transition-all duration-300 ease-in-out z-40
         ${collapsed ? 'w-16' : 'w-64'}
       `}
