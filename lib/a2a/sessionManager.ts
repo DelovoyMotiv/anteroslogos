@@ -239,7 +239,7 @@ export class SessionManager {
       session.completed_at = now;
       
       // Calculate final metrics
-      session.metrics = this.calculateSessionMetrics(sessionId);
+      session.metrics = this.calculateSessionMetrics(sessionId) || undefined;
     }
     
     this.sessions.set(sessionId, session);

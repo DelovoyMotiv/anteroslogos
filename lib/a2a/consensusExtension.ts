@@ -8,7 +8,7 @@
  */
 
 import { BFTRouter, BFTRoutingResult } from '../bft/bftRouter';
-import { Task, TaskPriority, TaskStatus, taskManager } from './taskManager';
+import { Task, TaskPriority, taskManager } from './taskManager';
 import { agentCardManager } from './agentCard';
 
 // =====================================================
@@ -179,11 +179,11 @@ export class ConsensusExtensionManager {
       task_id: task.id,
       consensus_achieved: bftResult.success && bftResult.consensusUsed,
       quorum_size: requirement.quorum_size,
-      votes_for: bftResult.consensusResult?.votesFor || 0,
-      votes_against: bftResult.consensusResult?.votesAgainst || 0,
+      votes_for: (bftResult.consensusResult as any)?.votesFor || 0,
+      votes_against: (bftResult.consensusResult as any)?.votesAgainst || 0,
       consensus_time_ms: Date.now() - startTime,
-      validator_nodes: bftResult.consensusResult?.validators || [],
-      consensus_hash: bftResult.consensusResult?.consensusHash,
+      validator_nodes: (bftResult.consensusResult as any)?.validators || [],
+      consensus_hash: (bftResult.consensusResult as any)?.consensusHash,
     };
     
     // Store consensus result
@@ -234,11 +234,11 @@ export class ConsensusExtensionManager {
       task_id: taskId,
       consensus_achieved: bftResult.success && bftResult.consensusUsed,
       quorum_size: this.getConsensusConfig()?.quorum_size || 7,
-      votes_for: bftResult.consensusResult?.votesFor || 0,
-      votes_against: bftResult.consensusResult?.votesAgainst || 0,
+      votes_for: (bftResult.consensusResult as any)?.votesFor || 0,
+      votes_against: (bftResult.consensusResult as any)?.votesAgainst || 0,
       consensus_time_ms: bftResult.executionTimeMs,
-      validator_nodes: bftResult.consensusResult?.validators || [],
-      consensus_hash: bftResult.consensusResult?.consensusHash,
+      validator_nodes: (bftResult.consensusResult as any)?.validators || [],
+      consensus_hash: (bftResult.consensusResult as any)?.consensusHash,
     };
     
     this.taskConsensus.set(taskId, consensusResult);
@@ -270,11 +270,11 @@ export class ConsensusExtensionManager {
       task_id: taskId,
       consensus_achieved: bftResult.success && bftResult.consensusUsed,
       quorum_size: this.getConsensusConfig()?.quorum_size || 7,
-      votes_for: bftResult.consensusResult?.votesFor || 0,
-      votes_against: bftResult.consensusResult?.votesAgainst || 0,
+      votes_for: (bftResult.consensusResult as any)?.votesFor || 0,
+      votes_against: (bftResult.consensusResult as any)?.votesAgainst || 0,
       consensus_time_ms: bftResult.executionTimeMs,
-      validator_nodes: bftResult.consensusResult?.validators || [],
-      consensus_hash: bftResult.consensusResult?.consensusHash,
+      validator_nodes: (bftResult.consensusResult as any)?.validators || [],
+      consensus_hash: (bftResult.consensusResult as any)?.consensusHash,
     };
     
     this.taskConsensus.set(taskId, consensusResult);
@@ -331,7 +331,7 @@ export class ConsensusExtensionManager {
   /**
    * Cleanup old consensus results
    */
-  cleanupOldResults(retentionMs: number = 24 * 60 * 60 * 1000): number {
+  cleanupOldResults(_retentionMs: number = 24 * 60 * 60 * 1000): number {
     // For now, just clear all since we don't track timestamps
     // TODO: Add timestamp tracking to TaskConsensusResult
     const count = this.taskConsensus.size;
