@@ -59,9 +59,10 @@ export function Sidebar() {
   useEffect(() => {
     if (!user) return;
     
-    // Dev mode: skip if supabase not configured
-    if (!supabase) {
-      console.warn('[DEV MODE] Sidebar: Supabase not configured, using default free plan');
+    // Dev mode: skip if supabase not configured (local only)
+    const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (isLocalDev && !supabase) {
+      console.warn('[DEV MODE] Sidebar: Supabase not configured, using default free plan (LOCAL ONLY)');
       setCurrentPlan('free');
       return;
     }
@@ -83,9 +84,10 @@ export function Sidebar() {
   }, [user]);
 
   const handleSignOut = async () => {
-    // Dev mode: just redirect
-    if (!supabase) {
-      console.warn('[DEV MODE] Sidebar: Bypassing signOut');
+    // Dev mode: just redirect (local only)
+    const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (isLocalDev && !supabase) {
+      console.warn('[DEV MODE] Sidebar: Bypassing signOut (LOCAL ONLY)');
       window.location.href = '/';
       return;
     }

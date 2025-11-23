@@ -33,8 +33,9 @@ export function APIKeysPage() {
 
   const handleCreate = async (name: string) => {
     try {
-      // Dev mode: show warning and don't proceed
-      if (!supabase) {
+      // Dev mode: show warning and don't proceed (local only)
+      const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      if (isLocalDev && !supabase) {
         toast.error('Dev mode: API key creation disabled', {
           description: 'Connect to Supabase to create real API keys',
         });
@@ -77,8 +78,9 @@ export function APIKeysPage() {
     }
 
     try {
-      // Dev mode: show warning and don't proceed
-      if (!supabase) {
+      // Dev mode: show warning and don't proceed (local only)
+      const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      if (isLocalDev && !supabase) {
         toast.error('Dev mode: API key revocation disabled', {
           description: 'Connect to Supabase to revoke real API keys',
         });

@@ -108,9 +108,10 @@ export async function getSubscription(
   try {
     const { supabase, isSupabaseConfigured } = await import('../supabase');
     
-    // Dev mode: return mock subscription
-    if (!isSupabaseConfigured() || !supabase) {
-      console.warn('[DEV MODE] getSubscription: Returning mock free tier subscription');
+    // Dev mode: return mock subscription (local only)
+    const isLocalDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    if (isLocalDev && (!isSupabaseConfigured() || !supabase)) {
+      console.warn('[DEV MODE] getSubscription: Returning mock free tier subscription (LOCAL ONLY)');
       const now = new Date();
       const periodEnd = new Date(now);
       periodEnd.setMonth(periodEnd.getMonth() + 1);

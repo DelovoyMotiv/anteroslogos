@@ -61,9 +61,10 @@ export async function getUsageStats(
   endDate: Date
 ): Promise<UsageStats | { error: string }> {
   try {
-    // Dev mode: return mock data if supabase not configured
-    if (!supabase) {
-      console.warn('[DEV MODE] getUsageStats: Returning mock data');
+    // Dev mode: return mock data if supabase not configured (local only)
+    const isLocalDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    if (isLocalDev && !supabase) {
+      console.warn('[DEV MODE] getUsageStats: Returning mock data (LOCAL ONLY)');
       return {
         total_calls: 156,
         successful_calls: 142,
@@ -419,9 +420,10 @@ export async function getUCPTRate(
   days: number = 7
 ): Promise<number | { error: string }> {
   try {
-    // Dev mode: return mock data
-    if (!supabase) {
-      console.warn('[DEV MODE] getUCPTRate: Returning mock rate');
+    // Dev mode: return mock data (local only)
+    const isLocalDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    if (isLocalDev && !supabase) {
+      console.warn('[DEV MODE] getUCPTRate: Returning mock rate (LOCAL ONLY)');
       return 63; // 63% verified
     }
     
@@ -453,9 +455,10 @@ export async function getCurrentCycleUsage(
   userId: string
 ): Promise<UsageStats | { error: string }> {
   try {
-    // Dev mode: return mock data
-    if (!supabase) {
-      console.warn('[DEV MODE] getCurrentCycleUsage: Returning mock data');
+    // Dev mode: return mock data (local only)
+    const isLocalDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    if (isLocalDev && !supabase) {
+      console.warn('[DEV MODE] getCurrentCycleUsage: Returning mock data (LOCAL ONLY)');
       return {
         total_calls: 78,
         successful_calls: 71,

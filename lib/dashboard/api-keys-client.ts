@@ -29,9 +29,10 @@ export interface APIKey {
  */
 export async function listAPIKeys(): Promise<APIKey[] | { error: string }> {
   try {
-    // Dev mode: return mock data if supabase not configured
-    if (!supabase) {
-      console.warn('[DEV MODE] api-keys-client: Returning empty API keys list');
+    // Dev mode: return mock data if supabase not configured (local only)
+    const isLocalDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    if (isLocalDev && !supabase) {
+      console.warn('[DEV MODE] api-keys-client: Returning empty API keys list (LOCAL ONLY)');
       return [];
     }
 
@@ -67,9 +68,10 @@ export async function revokeAPIKey(
   reason?: string
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    // Dev mode: simulate success
-    if (!supabase) {
-      console.warn('[DEV MODE] api-keys-client: Simulating API key revocation');
+    // Dev mode: simulate success (local only)
+    const isLocalDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    if (isLocalDev && !supabase) {
+      console.warn('[DEV MODE] api-keys-client: Simulating API key revocation (LOCAL ONLY)');
       return { success: true };
     }
 
