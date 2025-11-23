@@ -1,7 +1,7 @@
 # Anóteros Lógos - Enterprise AI Knowledge Infrastructure
 
 ![License](https://img.shields.io/badge/License-Proprietary-red)
-![Version](https://img.shields.io/badge/version-3.1.0-blue)
+![Version](https://img.shields.io/badge/version-3.2.0-blue)
 ![Node](https://img.shields.io/badge/node-20.x-green)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)
 ![React](https://img.shields.io/badge/React-19.2-cyan)
@@ -9,8 +9,9 @@
 
 Enterprise-grade AI knowledge infrastructure platform providing cryptographically verifiable provenance, deterministic execution, and **Agent-Pay-Agent (APA) micropayments layer.** First production implementation of USDC-based micropayments for autonomous AI agent interactions on Base L2 blockchain.
 
-Production URL: https://anoteroslogos.com  
-Codebase: 178 files | 63,507 lines
+Production URL: https://anoteroslogos.com
+Deployment: Static SPA on Vercel
+Codebase: 165 files | 58,200 lines
 
 ---
 
@@ -18,18 +19,19 @@ Codebase: 178 files | 63,507 lines
 
 Enterprise platform for optimizing digital content and brand presence for AI language models. Combines real-time audit capabilities, knowledge graph extraction, citation learning, competitive intelligence, and blockchain-based micropayments for autonomous agents.
 
-**System Architecture:**
+**Core Architecture:**
 
 1. **GEO Audit Engine** - Real-time website analysis for AI visibility across Perplexity, ChatGPT, Claude, Gemini
 2. **Knowledge Graph Engine** - Self-improving semantic graph with citation learning and cross-platform syndication
 3. **Causal Citation Tracer** - Counterfactual reasoning for ROI attribution and path optimization
 4. **Agent-to-Agent Protocol** - JSON-RPC 2.0 API with Ed25519 signatures and WebSocket streaming
 5. **Agent-Pay-Agent Layer** - USDC micropayments on Base L2 with automatic detection
-6. **Agent Mesh Network** - Distributed peer discovery, capability routing, trust propagation via DHT
-7. **Byzantine Fault Tolerance** - PBFT consensus for critical operations with malicious node protection
-8. **MCP Integration** - Model Context Protocol v2.0 with isolated execution sandbox
-9. **Content Intelligence** - NLP analysis, query intent classification, competitive monitoring
-10. **Gold Standard System** - Citation prediction, learning feedback, network effects amplification
+6. **Subscription Billing System** - Freemium tier model with USDC payments for SaaS plans
+7. **Agent Mesh Network** - Distributed peer discovery, capability routing, trust propagation via DHT
+8. **Byzantine Fault Tolerance** - PBFT consensus for critical operations with malicious node protection
+9. **MCP Integration** - Model Context Protocol v2.0 with isolated execution sandbox
+10. **Content Intelligence** - NLP analysis, query intent classification, competitive monitoring
+11. **Gold Standard System** - Citation prediction, learning feedback, network effects amplification
 
 ---
 
@@ -242,7 +244,49 @@ USDC-based payments on Base L2 for autonomous agents.
 - `lib/payments/reorgMonitor.ts` - Reorg protection (363 lines)
 - `lib/payments/rpcProvider.ts` - RPC failover (363 lines)
 
-### 8. MCP Integration (1,659 lines)
+### 8. Subscription Billing System (650 lines)
+
+SaaS subscription management with USDC payments on Base L2.
+
+**Tiers:**
+- Free: 1 audit per month, basic analysis, community support
+- Starter: 10 audits per month, $49/month USDC
+- Pro: 100 audits per month, $149/month USDC
+- Enterprise: Unlimited audits, $499/month USDC
+
+**Features:**
+- Freemium tier with automatic activation for all users
+- USDC direct payment integration for paid plans
+- Automatic quota consumption after each audit
+- Subscription lifecycle management (create, activate, renew, cancel)
+- Payment detection via blockchain scanning
+- Automatic renewal invoicing 7 days before period end
+- Grace period allows 7 days after expiration before access blocking
+
+**Billing Flow:**
+```
+1. User subscribes to plan
+2. System generates USDC invoice with 7-day expiration
+3. User sends USDC to platform wallet on Base L2
+4. CRON job detects payment within 5 minutes
+5. Subscription activates immediately upon confirmation
+6. Quota becomes available for audits
+```
+
+**Database Schema:**
+- `subscription_plans` - Plan metadata and pricing
+- `user_subscriptions` - User subscription state and billing periods
+- `subscription_invoices` - USDC invoice tracking per billing cycle
+- `subscription_usage_logs` - Audit quota consumption history
+
+**Components:**
+- `lib/subscriptions/types.ts` - Zod schemas and interfaces
+- `lib/subscriptions/storage.ts` - Database operations
+- `lib/subscriptions/manager.ts` - Subscription lifecycle management
+- `lib/subscriptions/paymentDetector.ts` - Automatic payment detection
+- `lib/subscriptions/renewalEngine.ts` - Auto-renewal processing
+
+### 9. MCP Integration (1,659 lines)
 
 Model Context Protocol v2.0 with isolated execution.
 
@@ -419,10 +463,10 @@ React 19 SPA with route-based code splitting.
 - Vite 6.2
 
 **Backend:**
-- Vercel Serverless Functions
-- Supabase (PostgreSQL + Auth)
-- Redis (optional distributed caching)
-- Base L2 blockchain
+|- Supabase (PostgreSQL + Auth)
+|- Redis (optional distributed caching)
+|- Base L2 blockchain
+|- Static deployment on Vercel
 
 **AI Integration:**
 - OpenRouter API
@@ -456,6 +500,7 @@ npm run typecheck
 ```bash
 # Supabase
 NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 SUPABASE_SERVICE_ROLE_KEY=...
 
 # APA Payments
@@ -463,12 +508,12 @@ PLATFORM_WALLET_ADDRESS=0x...
 WALLET_ENCRYPTION_KEY=...
 CRON_SECRET=...
 
+# Blockchain
+BASE_RPC_URL=https://mainnet.base.org
+
 # AI Integration
 VITE_OPENROUTER_API_KEY=...
 VITE_OPENROUTER_MODEL=minimax/minimax-m2:free
-
-# Stripe (optional)
-STRIPE_SECRET_KEY=...
 ```
 
 **Database Migrations:**
@@ -482,6 +527,8 @@ psql $DATABASE_URL < supabase/migrations/006_payment_correlation_index.sql
 psql $DATABASE_URL < supabase/migrations/007_multi_tenancy_isolation.sql
 psql $DATABASE_URL < supabase/migrations/008_audit_trail_worm.sql
 psql $DATABASE_URL < supabase/migrations/009_bft_schema.sql
+psql $DATABASE_URL < supabase/migrations/010_subscription_billing.sql
+psql $DATABASE_URL < supabase/migrations/011_free_plan_auto_activation.sql
 ```
 
 ---
@@ -526,16 +573,24 @@ Enterprise: 1,000 req/min| 50,000 req/hour
 ## Project Structure
 
 ```
-api/
-  a2a/index.ts                    # A2A Protocol (545 lines)
-  mcp/route.ts                    # MCP Sandbox (624 lines)
-  goldStandard.ts                 # Gold Standard API (344 lines)
-  stripe.ts                       # Stripe integration (178 lines)
-  agent-keys.ts                   # Agent key management
-  cron/reorg-monitor/             # Blockchain reorg monitoring
+src/
+  pages/
+    HomePage.tsx                  # Platform homepage
+    GeoAuditPage.tsx             # Audit interface
+    Dashboard/                   # User portal
+    AgentIdentityPage.tsx        # AID protocol docs
+  components/                    # 33 React components
+    PaymentModal.tsx             # USDC payment UI
+    BillingPage.tsx              # Subscription management
 
 lib/
   payments/                       # APA Layer (4,700 lines)
+  subscriptions/                  # Subscription Billing (650 lines)
+    types.ts                      # Zod schemas and types
+    storage.ts                    # Database operations
+    manager.ts                    # Subscription lifecycle
+    paymentDetector.ts            # Auto-detection
+    renewalEngine.ts              # Auto-renewal
   a2a/                            # A2A Protocol (10,464 lines)
   mesh/                           # Agent Mesh Network (5,513 lines)
   bft/                            # Byzantine Fault Tolerance (2,668 lines)
@@ -623,12 +678,13 @@ supabase/migrations/
 ## Statistics
 
 **Codebase:**
-- Total files: 178
-- Total lines: 63,507
-- TypeScript: 95.2%
-- PLpgSQL: 3.9%
+- Total files: 165
+- Total lines: 58,200
+- TypeScript: 94.8%
+- PLpgSQL: 4.2%
+- CSS: 1.0%
 
-**Modules:**
+**Core Modules:**
 - A2A Protocol: 10,464 lines
 - Agent Mesh Network: 5,513 lines
 - APA Payments: 4,700 lines
@@ -640,8 +696,9 @@ supabase/migrations/
 - Citation Intelligence: 1,923 lines
 - Gold Standard: 1,832 lines
 - MCP Sandbox: 1,659 lines
+- Subscription Billing: 650 lines
 - NLU Foundation: 1,130 lines
-- Frontend: 33 components
+- Frontend: 33 React components
 
 ---
 
@@ -651,5 +708,7 @@ Proprietary - All rights reserved
 
 ---
 
-Last Updated: November 22, 2025  
-Version: 3.1.0
+Last Updated: November 23, 2025
+Version: 3.2.0
+Architecture: Static SPA on Vercel
+Payments: USDC on Base L2
