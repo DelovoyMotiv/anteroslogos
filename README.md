@@ -7,10 +7,10 @@
 ![React](https://img.shields.io/badge/React-19.2-cyan)
 ![Build](https://img.shields.io/badge/build-passing-brightgreen)
 
-Enterprise-grade AI knowledge infrastructure platform providing cryptographically verifiable provenance, deterministic execution, and **Agent-Pay-Agent (APA) micropayments layer.** First production implementation of USDC-based micropayments for autonomous AI agent interactions on Base L2 blockchain.
+AI knowledge infrastructure platform providing cryptographically verifiable provenance, deterministic execution, and **Agent-Pay-Agent (APA) micropayments layer.** First production implementation of USDC-based micropayments for autonomous AI agent interactions on Base L2 blockchain.
 
 Production URL: https://anoteroslogos.com
-Deployment: Static SPA on Vercel
+
 Codebase: 165 files | 58,200 lines
 
 ---
