@@ -1,12 +1,12 @@
 /**
- * @file api/cron/subscription-renewals/route.ts
- * @description CRON endpoint for subscription renewal processing
- * @schedule Daily at midnight UTC
- * @security Requires CRON_SECRET header
+ * @file api/cron/subscription-payments.ts
+ * @description CRON endpoint for automatic subscription payment detection
+ * @schedule Every 5 minutes
+ * @security Requires CRON_SECRET header or Vercel CRON
  */
 
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { processRenewals } from "../../../lib/subscriptions/renewalEngine";
+import { scanSubscriptionPayments } from "../../lib/subscriptions/paymentDetector";
 
 export default async function handler(
   req: VercelRequest,
@@ -20,26 +20,27 @@ export default async function handler(
   }
 
   try {
-    console.log("[CRON] Starting subscription renewal processing...");
+    console.log("[CRON] Starting subscription payment detection...");
 
-    const result = await processRenewals();
+    const result = await scanSubscriptionPayments();
 
     console.log(
-      `[CRON] Renewal processing complete: renewals=${result.renewalsGenerated}, expired=${result.subscriptionsExpired}, errors=${result.errors.length}`
+      `[CRON] Payment detection complete: scanned=${result.scanned}, detected=${result.detected}, activated=${result.activated}, errors=${result.errors.length}`
     );
 
     res.status(200).json({
       success: true,
       timestamp: new Date().toISOString(),
       results: {
-        renewalsGenerated: result.renewalsGenerated,
-        subscriptionsExpired: result.subscriptionsExpired,
+        scanned: result.scanned,
+        detected: result.detected,
+        activated: result.activated,
         errorCount: result.errors.length,
         errors: result.errors,
       },
     });
   } catch (error) {
-    console.error("[CRON] Subscription renewal processing failed:", error);
+    console.error("[CRON] Subscription payment detection failed:", error);
 
     res.status(500).json({
       success: false,

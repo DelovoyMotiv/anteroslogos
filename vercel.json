@@ -1,15 +1,11 @@
 {
   "crons": [
     {
-      "path": "/api/cron/reorg-monitor",
-      "schedule": "0 0 * * *"
-    },
-    {
-      "path": "/api/cron/subscription-payments/route",
+      "path": "/api/cron/subscription-payments",
       "schedule": "*/5 * * * *"
     },
     {
-      "path": "/api/cron/subscription-renewals/route",
+      "path": "/api/cron/subscription-renewals",
       "schedule": "0 0 * * *"
     }
   ],
