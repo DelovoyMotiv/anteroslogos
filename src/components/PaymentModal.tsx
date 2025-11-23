@@ -5,7 +5,7 @@
  */
 
 import { useState } from 'react';
-import { X, Copy, CheckCircle, AlertCircle } from 'lucide-react';
+import { X, Copy, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { QRCodeSVG } from 'qrcode.react';
 

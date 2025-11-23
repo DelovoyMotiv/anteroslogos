@@ -6,7 +6,6 @@
 
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
-import { VerifyPaymentInputSchema } from "../../lib/subscriptions/types";
 import { activateSubscription } from "../../lib/subscriptions";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -42,11 +41,36 @@ export default async function handler(
       return;
     }
 
-    // Validate input
-    const input = VerifyPaymentInputSchema.parse(req.body);
+    // Validate input - txHash is optional for auto-detection
+    const invoiceId = req.body.invoiceId as string;
+    const txHash = req.body.txHash as string | undefined;
 
-    // Verify payment and activate subscription
-    const result = await activateSubscription(input.invoiceId, input.txHash);
+    if (!invoiceId) {
+      res.status(400).json({ error: "Missing invoiceId" });
+      return;
+    }
+
+    let result;
+    if (txHash) {
+      // Explicit transaction hash provided
+      result = await activateSubscription(invoiceId, txHash);
+    } else {
+      // Auto-detect payment by scanning blockchain
+      const { detectPaymentForInvoice } = await import(
+        "../../lib/subscriptions/paymentDetector"
+      );
+      const detection = await detectPaymentForInvoice(invoiceId);
+      if (!detection.detected || !detection.txHash) {
+        res.status(400).json({
+          success: false,
+          error: "Payment not detected yet",
+          message: "Blockchain payment not yet confirmed. Please wait a few moments and try again.",
+        });
+        return;
+      }
+      // Activate with detected txHash
+      result = await activateSubscription(invoiceId, detection.txHash);
+    }
 
     res.status(200).json({
       success: true,
