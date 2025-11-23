@@ -1,7 +1,7 @@
 # Anóteros Lógos - Enterprise AI Knowledge Infrastructure
 
 ![License](https://img.shields.io/badge/License-Proprietary-red)
-![Version](https://img.shields.io/badge/version-3.2.0-blue)
+![Version](https://img.shields.io/badge/version-3.3.0-blue)
 ![Node](https://img.shields.io/badge/node-20.x-green)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)
 ![React](https://img.shields.io/badge/React-19.2-cyan)
@@ -11,7 +11,7 @@ AI knowledge infrastructure platform providing cryptographically verifiable prov
 
 Production URL: https://anoteroslogos.com
 
-Codebase: 165 files | 58,200 lines
+Codebase: 269 files | 73,107 lines
 
 ---
 
@@ -162,17 +162,29 @@ NLP analysis, competitive monitoring, query intent classification.
 - Query intent classification using feature extraction
 - Competitive positioning via citation frequency analysis
 
-### 6. A2A Protocol (10,464 lines)
+### 6. A2A Protocol (14,781 lines)
 
-JSON-RPC 2.0 API for agent-to-agent communication.
+Full Linux Foundation Agent-to-Agent Protocol v1.0 implementation with custom extensions.
 
-**Capabilities:**
-- **Authentication** - Agent Registry with trust scoring (0-100)
-- **Rate Limiting** - Token bucket per tier (10-1,000 req/min)
-- **Caching** - ETag-based HTTP 304 with 1h TTL
-- **Streaming** - WebSocket for real-time audit progress
-- **Signatures** - Ed25519 per RFC 9421 for domain verification
-- **Persistence** - Supabase PostgreSQL with 7 tables
+**Core Capabilities:**
+- **Agent Card System** - Standard discovery via `/.well-known/agent-card.json` endpoint
+- **Task Management** - ULID-based task lifecycle with structured responses and artifact handling
+- **SSE Streaming** - Server-Sent Events for real-time progress updates, heartbeats, and error notification
+- **Session Management** - Multi-task sessions with aggregated metrics and cancellation support
+- **Orchestration** - Multi-agent task chaining with sequential, parallel, and DAG execution patterns
+- **Reputation System** - Weighted scoring across success rate, cost accuracy, response time, and consensus participation
+
+**Protocol Extensions:**
+- **Payment Extension** - Integrated USDC micropayments on Base L2 with tier-based pricing and automatic verification
+- **Consensus Extension** - Byzantine fault tolerance routing for critical tasks via PBFT with 7-node quorum
+
+**Standard Compliance:**
+- Linux Foundation A2A Protocol v1.0: 14/14 core requirements
+- Agent Card format with capability registration and protocol support declaration
+- Task structure with status tracking, progress events, cost breakdown, and error handling
+- HTTP/HTTPS transport with JSON-RPC 2.0 compatibility
+- SSE streaming for partial results and real-time updates
+- Well-known endpoint discovery per RFC 8615
 
 **API Methods:**
 ```
@@ -199,12 +211,26 @@ a2a.mesh.health        Mesh network statistics
 ```
 
 **Components:**
-- `lib/a2a/protocol.ts` - JSON-RPC 2.0 (526 lines)
+- `lib/a2a/protocol.ts` - JSON-RPC 2.0 base (526 lines)
 - `lib/a2a/agentRegistry.ts` - Agent management (442 lines)
 - `lib/a2a/rateLimiter.ts` - Token bucket (264 lines)
-- `lib/a2a/ed25519Signatures.ts` - RFC 9421 (705 lines)
+- `lib/a2a/ed25519Signatures.ts` - RFC 9421 signatures (705 lines)
 - `lib/a2a/websocketServer.ts` - Real-time streaming (568 lines)
 - `lib/a2a/supabaseStorage.ts` - Persistence (668 lines)
+- `lib/a2a/agentCard.ts` - Agent card generation and validation (360 lines)
+- `lib/a2a/taskManager.ts` - ULID-based task lifecycle (513 lines)
+- `lib/a2a/streaming.ts` - SSE implementation (454 lines)
+- `lib/a2a/paymentExtension.ts` - USDC payment integration (443 lines)
+- `lib/a2a/consensusExtension.ts` - PBFT consensus routing (413 lines)
+- `lib/a2a/sessionManager.ts` - Session lifecycle management (529 lines)
+- `lib/a2a/orchestration.ts` - Multi-agent task chaining (493 lines)
+- `lib/a2a/reputation.ts` - Agent reputation scoring (428 lines)
+
+**Database Schema:**
+- `a2a_tasks` - Task execution history with JSONB params and results
+- `a2a_sessions` - Multi-task session grouping with aggregated metrics
+- `a2a_agent_reputation` - Trust scores and performance tracking
+- `a2a_task_events` - SSE event history for streaming replay
 
 ### 7. APA Micropayments (4,700 lines)
 
@@ -529,6 +555,8 @@ psql $DATABASE_URL < supabase/migrations/008_audit_trail_worm.sql
 psql $DATABASE_URL < supabase/migrations/009_bft_schema.sql
 psql $DATABASE_URL < supabase/migrations/010_subscription_billing.sql
 psql $DATABASE_URL < supabase/migrations/011_free_plan_auto_activation.sql
+psql $DATABASE_URL < supabase/migrations/012_agent_mesh_network.sql
+psql $DATABASE_URL < supabase/migrations/013_a2a_full_support.sql
 ```
 
 ---
@@ -591,7 +619,7 @@ lib/
     manager.ts                    # Subscription lifecycle
     paymentDetector.ts            # Auto-detection
     renewalEngine.ts              # Auto-renewal
-  a2a/                            # A2A Protocol (10,464 lines)
+  a2a/                            # A2A Protocol (14,781 lines)
   mesh/                           # Agent Mesh Network (5,513 lines)
   bft/                            # Byzantine Fault Tolerance (2,668 lines)
   causalTracer/                   # Citation Tracer (4,020 lines)
@@ -634,7 +662,7 @@ data/
   blogPosts.ts                  # Content marketing
 
 supabase/migrations/
-  001-009                       # Database schema (9 migrations)
+  001-013                       # Database schema (13 migrations)
 ```
 
 ---
@@ -678,14 +706,14 @@ supabase/migrations/
 ## Statistics
 
 **Codebase:**
-- Total files: 165
-- Total lines: 58,200
-- TypeScript: 94.8%
-- PLpgSQL: 4.2%
+- Total files: 269
+- Total lines: 73,107
+- TypeScript: 93.2%
+- PLpgSQL: 5.8%
 - CSS: 1.0%
 
 **Core Modules:**
-- A2A Protocol: 10,464 lines
+- A2A Protocol: 14,781 lines
 - Agent Mesh Network: 5,513 lines
 - APA Payments: 4,700 lines
 - Causal Tracer: 4,020 lines
@@ -709,6 +737,7 @@ Proprietary - All rights reserved
 ---
 
 Last Updated: November 23, 2025
-Version: 3.2.0
+Version: 3.3.0
 Architecture: Static SPA on Vercel
 Payments: USDC on Base L2
+A2A Protocol: Linux Foundation v1.0 Compliant
