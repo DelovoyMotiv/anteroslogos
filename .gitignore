@@ -59,31 +59,35 @@ Thumbs.db
 # Vercel
 .vercel
 
-# Documentation (keep only README.md, CHANGELOG.md, CONTRIBUTING.md)
+# Documentation (keep only essential)
 *.md
 !README.md
 !CHANGELOG.md
-!CONTRIBUTING.md
-!LICENSE_EXPLANATION.md
-!OPEN_GRAPH_SETUP.md
-!DNS_SETUP.md
-!VERCEL_DEPLOYMENT.md
+!LICENSE
 
-# Internal documentation (not for public repo)
+# Internal documentation (not for production)
 GOLD_STANDARD_INNOVATIONS.md
 PRODUCTION_AUDIT_REPORT.md
 PRODUCTION_IMPROVEMENTS_COMPLETE.md
+CITATION_LEARNING_ENGINE.md
+KNOWLEDGE_GRAPH_ENGINE.md
+UCPT_INFRASTRUCTURE.md
+LICENSE_EXPLANATION.md
+OPEN_GRAPH_SETUP.md
+DNS_SETUP.md
+VERCEL_DEPLOYMENT.md
+CONTRIBUTING.md
 docs/
 metadata.json
 
 # PDF reports and exports
 *.pdf
 
-# Scripts and validation
+# Scripts (only keep essential for runtime)
 scripts/
 !scripts/generateOGImage.ts
 !scripts/validateOGTags.ts
-!scripts/ed25519KeyManager.ts
+scripts/detect-watermark.ts
 *.ps1
 *.sh
 validate-*.ps1
@@ -98,3 +102,12 @@ validate-*.ps1
 # Development files
 .vercel
 *.local
+
+# Hardhat artifacts (generated, not for git)
+artifacts/
+cache/hardhat/
+hardhat.config.ts
+
+# Test files (not for production)
+test/
+tests/
