@@ -85,11 +85,11 @@ ALTER TABLE public.citation_predictions
 -- Create default tenant for each existing user
 INSERT INTO public.tenants (owner_id, name, slug)
 SELECT DISTINCT 
-  user_id,
-  COALESCE(email, 'Default Tenant'),
-  'tenant-' || user_id
-FROM public.profiles
-WHERE user_id IS NOT NULL
+  p.user_id,
+  COALESCE(p.email, 'Tenant-' || SUBSTRING(p.user_id::TEXT, 1, 8)),
+  'tenant-' || p.user_id
+FROM public.profiles p
+WHERE p.user_id IS NOT NULL
 ON CONFLICT (slug) DO NOTHING;
 
 -- Add tenant member for each owner
@@ -521,6 +521,11 @@ CREATE TRIGGER auto_fill_api_key_tenant
 
 CREATE TRIGGER auto_fill_agent_key_tenant
   BEFORE INSERT ON public.agent_keys
+  FOR EACH ROW
+  EXECUTE FUNCTION auto_fill_tenant_id();
+
+CREATE TRIGGER auto_fill_usage_event_tenant
+  BEFORE INSERT ON public.usage_events
   FOR EACH ROW
   EXECUTE FUNCTION auto_fill_tenant_id();
 

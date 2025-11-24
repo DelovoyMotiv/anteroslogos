@@ -5,14 +5,7 @@ const RUNTIME_CACHE = 'anoteros-logos-runtime';
 const PRECACHE_ASSETS = [
   '/',
   '/index.html',
-  '/index.css',
   '/favicon.svg',
-  '/apple-touch-icon-180x180.svg',
-  '/apple-touch-icon-167x167.svg',
-  '/apple-touch-icon-152x152.svg',
-  '/apple-touch-icon-120x120.svg',
-  '/apple-touch-icon-192x192.svg',
-  '/apple-touch-icon-512x512.svg',
   '/manifest.json'
 ];
 
@@ -61,7 +54,7 @@ self.addEventListener('fetch', (event) => {
                 cache.put(event.request, response);
               });
             }
-          });
+          }).catch(() => { /* Ignore background update errors */ });
         }
         return cachedResponse;
       }

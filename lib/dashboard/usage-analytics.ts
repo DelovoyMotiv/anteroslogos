@@ -4,7 +4,7 @@
  * Query aggregations and real-time usage statistics
  */
 
-import { supabase } from '../supabase';
+import { supabase, isSupabaseConfigured } from '../supabase';
 
 export interface UsageStats {
   total_calls: number;
@@ -422,9 +422,14 @@ export async function getUCPTRate(
   try {
     // Dev mode: return mock data (local only)
     const isLocalDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-    if (isLocalDev && !supabase) {
+    if (isLocalDev && (!supabase || !isSupabaseConfigured())) {
       console.warn('[DEV MODE] getUCPTRate: Returning mock rate (LOCAL ONLY)');
       return 63; // 63% verified
+    }
+
+    if (!supabase) {
+      console.error('getUCPTRate: Supabase client not available');
+      return { error: 'Database client not configured' };
     }
     
     const startDate = new Date();
@@ -457,7 +462,7 @@ export async function getCurrentCycleUsage(
   try {
     // Dev mode: return mock data (local only)
     const isLocalDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-    if (isLocalDev && !supabase) {
+    if (isLocalDev && (!supabase || !isSupabaseConfigured())) {
       console.warn('[DEV MODE] getCurrentCycleUsage: Returning mock data (LOCAL ONLY)');
       return {
         total_calls: 78,
@@ -470,6 +475,11 @@ export async function getCurrentCycleUsage(
         ucpt_verified_calls: 45,
         avg_duration_ms: 234,
       };
+    }
+
+    if (!supabase) {
+      console.error('getCurrentCycleUsage: Supabase client not available');
+      return { error: 'Database client not configured' };
     }
     
     // Get subscription to determine cycle dates

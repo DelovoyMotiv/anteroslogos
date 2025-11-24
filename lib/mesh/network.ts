@@ -446,9 +446,9 @@ export class MeshNetworkRouter {
   // =====================================================
 
   /**
-   * Broadcast update to all connected peers
+   * Broadcast sync message to mesh (general purpose)
    */
-  async broadcastUpdate(message: MeshSyncMessage): Promise<void> {
+  async broadcastSyncMessage(message: MeshSyncMessage): Promise<void> {
     console.log(`[MeshRouter] Broadcasting ${message.type} update to mesh`);
     
     const allPeers = this.dht.getAllNodes();

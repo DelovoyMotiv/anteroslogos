@@ -112,9 +112,18 @@ class DistributedWeightCache {
   }
 
   getDelta(nodeId: string, referenceEntity: string, newWeight: number): WeightDelta | null {
-    const oldWeight = this.get(nodeId, referenceEntity);
-    if (oldWeight === null) return null;
+    const key = this.computeCacheKey(nodeId, referenceEntity);
+    const entry = this.cache.get(key);
     
+    // Check if entry exists and valid (don't increment metrics)
+    if (!entry) return null;
+    
+    const now = Date.now();
+    if (now - entry.timestamp > this.ttl) {
+      return null;
+    }
+    
+    const oldWeight = entry.weight;
     const delta = Math.abs(newWeight - oldWeight);
     return {
       nodeId,
@@ -187,8 +196,8 @@ export class OffChainCausalOracle {
       // Cache miss: compute via on-chain oracle
       const weight = await calculateCausalWeight(nodeId, referenceEntity, graph);
       
-      // Store in cache
-      this.cache.set(nodeId, referenceEntity, weight, graph?.commit);
+      // Store in cache (graph commit tracking not yet implemented)
+      this.cache.set(nodeId, referenceEntity, weight, undefined);
       
       // Check if delta significant enough to gossip
       const delta = this.cache.getDelta(nodeId, referenceEntity, weight);
