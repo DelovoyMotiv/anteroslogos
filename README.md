@@ -1,17 +1,17 @@
 # Anóteros Lógos - Enterprise AI Knowledge Infrastructure
 
 ![License](https://img.shields.io/badge/License-Proprietary-red)
-![Version](https://img.shields.io/badge/version-3.5.0-blue)
+![Version](https://img.shields.io/badge/version-3.6.0-blue)
 ![Node](https://img.shields.io/badge/node-20.x-green)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)
 ![React](https://img.shields.io/badge/React-19.2-cyan)
-![Build](https://img.shields.io/badge/build-passing-brightgreen)
+![Build](https://img.shields.io/badge/APA-v1.1-brightgreen)
 
 AI knowledge infrastructure platform providing cryptographically verifiable provenance, deterministic execution, and **Agent-Pay-Agent (APA) micropayments layer.** First production implementation of USDC-based micropayments for autonomous AI agent interactions on Base L2 blockchain.
 
 Production URL: https://anoteroslogos.com
 
-Codebase: 282 files | 76,278 lines
+Codebase: 253 files | 86,448 lines
 
 ---
 
@@ -162,9 +162,9 @@ NLP analysis, competitive monitoring, query intent classification.
 - Query intent classification using feature extraction
 - Competitive positioning via citation frequency analysis
 
-### 6. A2A Protocol (14,781 lines)
+### 6. A2A Protocol (15,433 lines)
 
-Full Linux Foundation Agent-to-Agent Protocol v1.0 implementation with custom extensions.
+Full Linux Foundation Agent-to-Agent Protocol v1.0 implementation with custom extensions and persistent job queue infrastructure.
 
 **Core Capabilities:**
 - **Agent Card System** - Standard discovery via `/.well-known/agent-card.json` endpoint
@@ -225,12 +225,17 @@ a2a.mesh.health        Mesh network statistics
 - `lib/a2a/sessionManager.ts` - Session lifecycle management (529 lines)
 - `lib/a2a/orchestration.ts` - Multi-agent task chaining (493 lines)
 - `lib/a2a/reputation.ts` - Agent reputation scoring (428 lines)
+- `lib/a2a/persistentQueue.ts` - Database-backed queue with atomic dequeue (365 lines)
+- `lib/a2a/webhooks.ts` - HMAC-signed webhook delivery with retry logic (287 lines)
 
 **Database Schema:**
 - `a2a_tasks` - Task execution history with JSONB params and results
 - `a2a_sessions` - Multi-task session grouping with aggregated metrics
 - `a2a_agent_reputation` - Trust scores and performance tracking
 - `a2a_task_events` - SSE event history for streaming replay
+- `audit_jobs` - Persistent job queue with priority ordering and retry logic
+- `batch_jobs` - Batch audit tracking with progress aggregation
+- `job_webhooks` - Webhook callback management with exponential backoff
 
 ### 7. APA Micropayments (4,700 lines)
 
@@ -340,7 +345,29 @@ syncPlatforms          Real-time syndication
 - `lib/mcp/schemas.ts` - Universal schemas (528 lines)
 - `api/mcp/route.ts` - Unified endpoint (624 lines)
 
-### 9. Gold Standard System (1,832 lines)
+### 10. Analytics Infrastructure (1,337 lines)
+
+Cross-tenant analytics with industry benchmarking and percentile ranking.
+
+**Capabilities:**
+- Global audit insights via materialized views with sub-second query latency
+- Industry benchmarking with tenant metadata grouping and sample size filtering
+- Percentile ranking calculation across all tenants with performance tier classification
+- Category-specific benchmarks comparing tenant scores against global averages
+- Trend analysis with linear regression forecasting and volatility calculation
+
+**Components:**
+- `lib/insights/globalAggregator.ts` - Cross-tenant analytics engine (505 lines)
+- `supabase/migrations/016_job_queue_system.sql` - Materialized views and PostgreSQL functions (381 lines)
+- `utils/advancedAnalytics.ts` - Statistical analysis (360 lines)
+
+**Database Features:**
+- Materialized view `global_audit_insights` with automatic refresh
+- Percentile calculations for p10, p25, p50, p75, p90, p95, p99 score distribution
+- Score distribution buckets with aggregated counts per range
+- PostgreSQL functions for on-demand calculation fallback
+
+### 11. Gold Standard System (1,832 lines)
 
 Production persistence, automation, and backend services.
 
@@ -358,7 +385,7 @@ Production persistence, automation, and backend services.
 - `utils/backend/auditStorage.ts` - Audit persistence (465 lines)
 - `utils/competitiveIntelligence/realTimeMonitor.ts` - Monitoring (676 lines)
 
-### 10. Byzantine Fault Tolerance (3,180 lines)
+### 12. Byzantine Fault Tolerance (3,180 lines)
 
 Production PBFT consensus with Causal Consensus Oracle for provenance-based quorum weighting.
 
@@ -435,7 +462,7 @@ Production PBFT consensus with Causal Consensus Oracle for provenance-based quor
 - `supabase/migrations/009_bft_schema.sql` - Database schema (410 lines)
 - `supabase/migrations/20251124_tenant_isolation.sql` - Tenant RLS migration (535 lines)
 
-### 11. Agent Mesh Network (5,513 lines)
+### 13. Agent Mesh Network (5,513 lines)
 
 Decentralized peer-to-peer infrastructure for autonomous agent communication.
 
@@ -483,7 +510,7 @@ Decentralized peer-to-peer infrastructure for autonomous agent communication.
 - `lib/mesh/discovery.ts` - Peer discovery service (488 lines)
 - `lib/mesh/peerStorage.ts` - Supabase persistence (656 lines)
 
-### 12. Tenant Isolation
+### 14. Tenant Isolation
 
 Enterprise-grade multi-tenant data isolation via Row-Level Security.
 
@@ -530,7 +557,7 @@ Enterprise-grade multi-tenant data isolation via Row-Level Security.
 - `supabase/migrations/20251124_tenant_isolation.sql` - Full RLS migration (535 lines)
 - `lib/bft/__tests__/tenantIsolation.test.ts` - Isolation verification (233 lines)
 
-### 13. Frontend Application (33 components)
+### 15. Frontend Application (33 components)
 
 React 19 SPA with route-based code splitting.
 
@@ -629,6 +656,9 @@ psql $DATABASE_URL < supabase/migrations/010_subscription_billing.sql
 psql $DATABASE_URL < supabase/migrations/011_free_plan_auto_activation.sql
 psql $DATABASE_URL < supabase/migrations/012_agent_mesh_network.sql
 psql $DATABASE_URL < supabase/migrations/013_a2a_full_support.sql
+psql $DATABASE_URL < supabase/migrations/014_hotstuff_tenant_context.sql
+psql $DATABASE_URL < supabase/migrations/015_intent_payments_tenant.sql
+psql $DATABASE_URL < supabase/migrations/016_job_queue_system.sql
 ```
 
 ---
@@ -691,7 +721,11 @@ lib/
     manager.ts                    # Subscription lifecycle
     paymentDetector.ts            # Auto-detection
     renewalEngine.ts              # Auto-renewal
-  a2a/                            # A2A Protocol (14,781 lines)
+  a2a/                            # A2A Protocol (15,433 lines)
+    persistentQueue.ts            # Database-backed queue (365 lines)
+    webhooks.ts                   # HMAC webhook delivery (287 lines)
+  insights/                       # Analytics Infrastructure (505 lines)
+    globalAggregator.ts           # Cross-tenant analytics
   mesh/                           # Agent Mesh Network (5,513 lines)
   bft/                            # Byzantine Fault Tolerance with OCCO (3,460 lines)
     causalWeightOracle.ts         # Provenance weight calculation
@@ -743,7 +777,7 @@ data/
   blogPosts.ts                  # Content marketing
 
 supabase/migrations/
-  001-013                       # Database schema (13 migrations)
+  001-016                       # Database schema (16 migrations)
 ```
 
 ---
@@ -787,14 +821,14 @@ supabase/migrations/
 ## Statistics
 
 **Codebase:**
-- Total files: 282
-- Total lines: 76,278
-- TypeScript: 93.8%
-- PLpgSQL: 5.2%
+- Total files: 253
+- Total lines: 86,448
+- TypeScript: 93.2%
+- PLpgSQL: 5.8%
 - CSS: 1.0%
 
 **Core Modules:**
-- A2A Protocol: 14,781 lines
+- A2A Protocol: 15,433 lines
 - Agent Mesh Network: 5,513 lines
 - APA Payments: 4,700 lines
 - Causal Tracer: 4,020 lines
@@ -805,9 +839,10 @@ supabase/migrations/
 - Citation Intelligence: 1,923 lines
 - Gold Standard: 1,832 lines
 - MCP Sandbox: 1,659 lines
+- Analytics Infrastructure: 1,337 lines
 - UCPT Provenance Token: 1,240 lines
-- Subscription Billing: 650 lines
 - NLU Foundation: 1,130 lines
+- Subscription Billing: 650 lines
 - Frontend: 33 React components
 
 ---
@@ -819,4 +854,4 @@ Proprietary - All rights reserved
 ---
 
 Last Updated: November 24, 2025
-Version: 3.5.0
+Version: 3.6.0
