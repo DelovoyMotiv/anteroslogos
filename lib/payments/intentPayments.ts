@@ -28,6 +28,8 @@ import { createPublicClient, createWalletClient, http, type Address, type Hash, 
 import { base, baseSepolia } from 'viem/chains';
 import { privateKeyToAccount } from 'viem/accounts';
 import { ulid } from 'ulid';
+import { TenantContextManager } from '../tenancy/context';
+import { CrossTenantValidator } from '../tenancy/validator';
 
 // =====================================================
 // TYPES
@@ -38,6 +40,7 @@ import { ulid } from 'ulid';
  */
 export interface CrossChainIntent {
   intentId: string; // ULID
+  tenantId: string; // Tenant isolation
   sender: Address;
   recipient: Address;
   token: Address; // USDC
@@ -121,6 +124,7 @@ export class IntentPaymentSystem {
   private publicClient: PublicClient;
   private walletClient?: WalletClient;
   private config: PaymentConfig;
+  private tenantId: string; // Tenant isolation
   
   // Intent tracking
   private intents: Map<string, CrossChainIntent> = new Map();
@@ -131,8 +135,9 @@ export class IntentPaymentSystem {
   private lastBlockNumber: bigint = 0n;
   private reorgDetected: boolean = false;
 
-  constructor(config: PaymentConfig) {
+  constructor(config: PaymentConfig, tenantId: string) {
     this.config = config;
+    this.tenantId = tenantId;
     
     const chain = config.chainId === 8453 ? base : baseSepolia;
     
@@ -153,7 +158,7 @@ export class IntentPaymentSystem {
     // Start reorg monitoring
     this.startReorgMonitor();
     
-    console.log(`[IntentPayments] Initialized on chain ${config.chainId}`);
+    console.log(`[IntentPayments] Initialized on chain ${config.chainId} for tenant ${tenantId}`);
   }
 
   // =====================================================
@@ -177,6 +182,14 @@ export class IntentPaymentSystem {
       throw new Error('Circuit breaker: reorg detected, payments suspended');
     }
     
+    // Validate tenant context
+    const ctx = TenantContextManager.getInstance();
+    const currentTenant = ctx.getTenantIdOrNull();
+    
+    if (currentTenant && this.tenantId !== currentTenant) {
+      throw new Error('Tenant context mismatch');
+    }
+    
     const intentId = ulid();
     const nonce = this.getNonce(sender);
     const deadline = BigInt(Math.floor(Date.now() / 1000) + this.config.intentExpirySeconds);
@@ -186,6 +199,7 @@ export class IntentPaymentSystem {
     
     const intent: CrossChainIntent = {
       intentId,
+      tenantId: this.tenantId, // Inject tenant ID
       sender,
       recipient,
       token: this.config.usdcAddress,
@@ -260,6 +274,21 @@ export class IntentPaymentSystem {
     const intent = this.intents.get(intentId);
     if (!intent) {
       throw new Error(`Intent ${intentId} not found`);
+    }
+    
+    // Validate cross-tenant access
+    if (intent.tenantId !== this.tenantId) {
+      const validator = CrossTenantValidator.getInstance();
+      const canAccess = await validator.validateCrossTenantAccess(
+        this.tenantId,
+        intent.tenantId,
+        'payment_intent',
+        intentId
+      );
+      
+      if (!canAccess) {
+        throw new Error('Cross-tenant payment forbidden');
+      }
     }
     
     const execution = this.executions.get(intentId)!;

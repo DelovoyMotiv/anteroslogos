@@ -26,6 +26,8 @@ import type { MeshNetworkRouter, MeshNode } from '../mesh/network';
 import { createOCCOOracle, type OCCOOracle, type ValidatorWeight } from './occoOracle';
 import { createBlockchainIntegration, type BlockchainIntegration, type BlockchainConfig } from './blockchainIntegration';
 import type { Address } from 'viem';
+import { TenantContextManager } from '../tenancy/context';
+import { CrossTenantValidator } from '../tenancy/validator';
 
 // =====================================================
 // TYPES
@@ -36,6 +38,7 @@ export type ConsensusOperation = 'PAYMENT_VERIFY' | 'REPUTATION_UPDATE' | 'AUDIT
 
 export interface HotstuffProposal {
   proposalId: string; // ULID
+  tenantId: string; // Tenant isolation
   viewNumber: number;
   height: number; // Block height
   operation: ConsensusOperation;
@@ -335,6 +338,14 @@ export class HotstuffConsensus {
       throw new Error('Only leader can propose');
     }
     
+    // Extract tenant context
+    const ctx = TenantContextManager.getInstance();
+    const tenantId = ctx.getTenantIdOrNull();
+    
+    if (!tenantId) {
+      throw new Error('Cannot propose without tenant context');
+    }
+    
     const proposalId = ulid();
     const parentHash = this.committedQC 
       ? this.computeProposalHash(this.proposals.get(this.committedQC.proposalId)!)
@@ -342,6 +353,7 @@ export class HotstuffConsensus {
     
     const proposal: HotstuffProposal = {
       proposalId,
+      tenantId, // Inject tenant ID
       viewNumber: this.currentView,
       height: this.currentHeight + 1,
       operation,
@@ -479,21 +491,34 @@ export class HotstuffConsensus {
     const proposal = this.proposals.get(proposalId);
     if (!proposal) return;
     
-    console.log(`[HotStuff] Executing proposal ${proposalId}, operation=${proposal.operation}`);
+    // Validate tenant context
+    const ctx = TenantContextManager.getInstance();
+    const currentTenant = ctx.getTenantIdOrNull();
+    
+    if (currentTenant && proposal.tenantId !== currentTenant) {
+      console.error(
+        `[HotStuff] Tenant mismatch: proposal=${proposal.tenantId}, current=${currentTenant}`
+      );
+      // Report Byzantine behavior
+      await this.reportByzantineEvidence(proposal);
+      return;
+    }
+    
+    console.log(`[HotStuff] Executing proposal ${proposalId}, operation=${proposal.operation}, tenant=${proposal.tenantId}`);
     
     // Execute based on operation type
     switch (proposal.operation) {
       case 'PAYMENT_VERIFY':
-        // TODO: Verify payment on Base L2
+        await this.verifyPaymentWithTenant(proposal.payload, proposal.tenantId);
         break;
       case 'REPUTATION_UPDATE':
-        // TODO: Update trust scores
+        await this.updateReputationWithTenant(proposal.payload, proposal.tenantId);
         break;
       case 'AUDIT_DEEP':
-        // TODO: Trigger deep audit
+        await this.triggerDeepAuditWithTenant(proposal.payload, proposal.tenantId);
         break;
       case 'MESH_TOPOLOGY':
-        // TODO: Update mesh topology
+        await this.updateMeshTopologyWithTenant(proposal.payload, proposal.tenantId);
         break;
     }
     
@@ -502,6 +527,48 @@ export class HotstuffConsensus {
     
     // Reset view timeout
     this.resetViewTimeout();
+  }
+
+  /**
+   * Report Byzantine evidence for tenant violation
+   */
+  private async reportByzantineEvidence(proposal: HotstuffProposal): Promise<void> {
+    try {
+      const validator = CrossTenantValidator.getInstance();
+      await validator.reportIsolationViolation({
+        violatorId: proposal.proposerId,
+        tenantId: proposal.tenantId,
+        resourceType: 'consensus_proposal',
+        resourceId: proposal.proposalId,
+        attemptedAction: 'cross_tenant_consensus',
+        severity: 'critical',
+      });
+    } catch (error) {
+      console.error('[HotStuff] Failed to report Byzantine evidence:', error);
+    }
+  }
+
+  /**
+   * Tenant-aware operation handlers
+   */
+  private async verifyPaymentWithTenant(payload: unknown, tenantId: string): Promise<void> {
+    // TODO: Verify payment on Base L2 within tenant context
+    console.log(`[HotStuff] Verifying payment for tenant ${tenantId}`);
+  }
+
+  private async updateReputationWithTenant(payload: unknown, tenantId: string): Promise<void> {
+    // TODO: Update trust scores within tenant context
+    console.log(`[HotStuff] Updating reputation for tenant ${tenantId}`);
+  }
+
+  private async triggerDeepAuditWithTenant(payload: unknown, tenantId: string): Promise<void> {
+    // TODO: Trigger deep audit within tenant context
+    console.log(`[HotStuff] Triggering deep audit for tenant ${tenantId}`);
+  }
+
+  private async updateMeshTopologyWithTenant(payload: unknown, tenantId: string): Promise<void> {
+    // TODO: Update mesh topology within tenant context
+    console.log(`[HotStuff] Updating mesh topology for tenant ${tenantId}`);
   }
 
   // =====================================================
@@ -579,6 +646,7 @@ export class HotstuffConsensus {
   private computeProposalHash(proposal: HotstuffProposal): string {
     const data = JSON.stringify({
       proposalId: proposal.proposalId,
+      tenantId: proposal.tenantId,
       viewNumber: proposal.viewNumber,
       height: proposal.height,
       operation: proposal.operation,
