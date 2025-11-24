@@ -46,6 +46,45 @@ TEST_URL=https://anoteroslogos.com npm run test:agent-gateway
 
 **Total: 10 unit tests**
 
+## 1-Step Handshake Tests
+
+Tests for pre-signed challenge in AID generation response.
+
+### Running Tests
+
+```bash
+# Local development (requires running server)
+npm run dev
+# In another terminal:
+npm run test:1step-handshake
+
+# Production
+TEST_URL=https://anoteroslogos.com npm run test:1step-handshake
+```
+
+### Test Coverage
+
+1. **POST /api/public-aid**
+   - ✓ Response includes challenge, challengeSignature, challengeExpiresAt
+   - ✓ Field formats are correct (64-char hex, 128-char hex, timestamp)
+   - ✓ challengeExpiresAt is ~5 minutes from now
+
+2. **Pre-Signed Challenge Verification**
+   - ✓ Signature is valid for challenge and publicKey
+   - ✓ Modified challenge fails verification
+   - ✓ Wrong public key fails verification
+   - ✓ Multiple AIDs produce unique challenges
+
+3. **Agent Self-Verification**
+   - ✓ Agent can sign/verify its own challenge
+   - ✓ Server pre-signed challenge is valid
+
+4. **Backward Compatibility**
+   - ✓ All existing fields present (aid, publicKey, privateKey, manifest, expiresIn)
+   - ✓ New fields added without breaking changes
+
+**Total: 8 unit tests**
+
 ## E2E Tests (Manual)
 
 Since there is no Playwright setup, E2E tests should be run manually:

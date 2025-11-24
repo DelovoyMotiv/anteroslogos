@@ -12,6 +12,7 @@
     "test:schema": "node scripts/test-schema-generator.js",
     "test:mcp": "npx tsx scripts/test-mcp.ts",
     "test:agent-gateway": "npx tsx tests/agent-gateway.test.ts",
+    "test:1step-handshake": "npx tsx tests/1step-handshake.test.ts",
     "og:generate": "npx tsx scripts/generateOGImage.ts",
     "og:validate": "npx tsx scripts/validateOGTags.ts",
     "og:check": "npm run og:generate && npm run og:validate"

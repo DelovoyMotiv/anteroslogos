@@ -79,6 +79,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const expiresAt = Date.now() + 60 * 60 * 1000; // 1 hour
     privateKeyCache.set(aid, { key: privateKeyHex, expiresAt });
 
+    // 1-step handshake: Generate pre-signed challenge
+    const challenge = randomBytes(32).toString('hex');
+    const challengeBytes = Buffer.from(challenge, 'hex');
+    const challengeSignature = ed25519.sign(challengeBytes, privateKey);
+    const challengeSignatureHex = Buffer.from(challengeSignature).toString('hex');
+    const challengeExpiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes
+
     // Generate manifest
     const manifest = {
       v: '1.1',
@@ -95,7 +102,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       publicKey: publicKeyHex,
       privateKey: privateKeyHex,
       manifest,
-      expiresIn: 3600
+      expiresIn: 3600,
+      challenge,
+      challengeSignature: challengeSignatureHex,
+      challengeExpiresAt
     });
   } catch (error) {
     console.error('AID generation error:', error);
