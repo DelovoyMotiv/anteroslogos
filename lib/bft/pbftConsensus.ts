@@ -464,9 +464,11 @@ export class PBFTConsensus {
         let causalWeight = 0;
         if (this.causalGraph) {
           try {
+            // Dynamic reference entity based on graph domain
+            const referenceEntity = this.causalGraph.domain || 'consensus_reference';
             causalWeight = await calculateCausalWeight(
               node.nodeId,
-              'consensus_reference', // Reference entity for consensus domain
+              referenceEntity,
               this.causalGraph
             );
           } catch (error) {
@@ -477,7 +479,7 @@ export class PBFTConsensus {
         const totalWeight = 
           trustScore * 0.4 +
           normalizedStake * 0.3 +
-          rttScore * -0.2 + // Negative: lower RTT = higher score
+          rttScore * 0.2 + // Higher rttScore (lower RTT) = higher weight
           causalWeight * 0.1;
         
         return { node, score: totalWeight };

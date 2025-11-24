@@ -4,7 +4,6 @@
  */
 
 import { calculateCausalWeight } from '../causalWeightOracle';
-import type { CausalGraph, CausalNode, CausalEdge } from '../../../types/causalTracer.types';
 
 // Test runner
 let passed = 0;

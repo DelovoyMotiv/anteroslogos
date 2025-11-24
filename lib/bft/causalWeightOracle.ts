@@ -23,10 +23,27 @@ interface CacheEntry {
   timestamp: number;
 }
 
+interface CacheMetrics {
+  hits: number;
+  misses: number;
+  evictions: number;
+  avgCalculationTimeMs: number;
+}
+
 class LRUCache {
   private cache: Map<string, CacheEntry> = new Map();
   private readonly maxSize: number;
   private readonly ttl: number;
+  private lockMap: Map<string, Promise<number>> = new Map(); // For concurrent access
+  
+  // Telemetry
+  private metrics: CacheMetrics = {
+    hits: 0,
+    misses: 0,
+    evictions: 0,
+    avgCalculationTimeMs: 0,
+  };
+  private calculationTimes: number[] = [];
 
   constructor(maxSize: number = 10000, ttl: number = 30000) {
     this.maxSize = maxSize;
@@ -35,13 +52,19 @@ class LRUCache {
 
   get(key: string): number | null {
     const entry = this.cache.get(key);
-    if (!entry) return null;
+    if (!entry) {
+      this.metrics.misses++;
+      return null;
+    }
     
     const now = Date.now();
     if (now - entry.timestamp > this.ttl) {
       this.cache.delete(key);
+      this.metrics.misses++;
       return null;
     }
+    
+    this.metrics.hits++;
     
     // Move to end (LRU)
     this.cache.delete(key);
@@ -58,10 +81,53 @@ class LRUCache {
       const firstKey = this.cache.keys().next().value;
       if (firstKey !== undefined) {
         this.cache.delete(firstKey);
+        this.metrics.evictions++;
       }
     }
     
     this.cache.set(key, { weight, timestamp: now });
+  }
+  
+  recordCalculationTime(ms: number): void {
+    this.calculationTimes.push(ms);
+    if (this.calculationTimes.length > 100) {
+      this.calculationTimes.shift(); // Keep last 100
+    }
+    this.metrics.avgCalculationTimeMs = 
+      this.calculationTimes.reduce((a, b) => a + b, 0) / this.calculationTimes.length;
+  }
+  
+  getMetrics(): CacheMetrics & { hitRate: number; size: number } {
+    const total = this.metrics.hits + this.metrics.misses;
+    return {
+      ...this.metrics,
+      hitRate: total > 0 ? this.metrics.hits / total : 0,
+      size: this.cache.size,
+    };
+  }
+  
+  async getOrCompute(key: string, computeFn: () => Promise<number>): Promise<number> {
+    // Check cache first
+    const cached = this.get(key);
+    if (cached !== null) return cached;
+    
+    // Check if already computing (prevent duplicate work)
+    const existingLock = this.lockMap.get(key);
+    if (existingLock) return existingLock;
+    
+    // Compute with lock
+    const promise = (async () => {
+      try {
+        const result = await computeFn();
+        this.set(key, result);
+        return result;
+      } finally {
+        this.lockMap.delete(key);
+      }
+    })();
+    
+    this.lockMap.set(key, promise);
+    return promise;
   }
 }
 
@@ -111,57 +177,77 @@ export async function calculateCausalWeight(
 ): Promise<number> {
   const cacheKey = `${nodeId}:${referenceEntity}`;
   
-  // Check cache
-  const cached = cacheInstance.get(cacheKey);
-  if (cached !== null) {
-    return cached;
-  }
-  
-  try {
-    // Fetch or use provided graph
-    if (!graph) {
-      // Fallback: no graph available, return 0
-      console.warn(`[CCO] No causal graph available for ${nodeId}`);
+  // Use thread-safe getOrCompute
+  return cacheInstance.getOrCompute(cacheKey, async () => {
+    const startTime = performance.now();
+    
+    try {
+      // Validate graph availability
+      if (!graph) {
+        console.warn(`[CCO] No causal graph available for ${nodeId}`);
+        return 0;
+      }
+      
+      // Validate graph structure
+      if (graph.nodeCount === 0 || graph.edgeCount === 0) {
+        console.warn(`[CCO] Empty graph for ${nodeId}`);
+        return 0;
+      }
+      
+      // Validate reference entity exists in graph (either as node or in labels)
+      const hasReferenceEntity = Array.from(graph.nodes.values()).some(
+        n => n.label.toLowerCase().includes(referenceEntity.toLowerCase()) ||
+             n.id === referenceEntity
+      );
+      
+      if (!hasReferenceEntity) {
+        console.warn(`[CCO] Reference entity '${referenceEntity}' not found in graph`);
+        return 0;
+      }
+      
+      // Trace path from reference entity
+      const result = await traceCitationPath(
+        referenceEntity,
+        graph,
+        [],
+        { maxPathLength: 10, maxPathsToExplore: 100 }
+      );
+      
+      if (!result.topPath || result.paths.length === 0) {
+        return 0;
+      }
+      
+      const topPath = result.topPath;
+      
+      // Find maximum observed path length across all paths
+      const maxObservedPathLength = Math.max(...result.paths.map(p => p.length));
+      
+      // Normalize path length: longer paths = more provenance
+      const normalizedPathLength = maxObservedPathLength > 0 
+        ? topPath.length / maxObservedPathLength 
+        : 0;
+      
+      // Calculate provenance score
+      const provenanceScore = calculateProvenanceScore(topPath);
+      
+      // Final causal weight
+      const causalWeight = normalizedPathLength * provenanceScore;
+      
+      return causalWeight;
+      
+    } catch (error) {
+      console.error(`[CCO] Error calculating causal weight for ${nodeId}:`, error);
       return 0;
+    } finally {
+      const elapsed = performance.now() - startTime;
+      cacheInstance.recordCalculationTime(elapsed);
     }
-    
-    // Trace path from node to reference entity
-    const result = await traceCitationPath(
-      referenceEntity,
-      graph,
-      [],
-      { maxPathLength: 10, maxPathsToExplore: 100 }
-    );
-    
-    if (!result.topPath || result.paths.length === 0) {
-      // No path found
-      cacheInstance.set(cacheKey, 0);
-      return 0;
-    }
-    
-    const topPath = result.topPath;
-    
-    // Find maximum observed path length across all paths
-    const maxObservedPathLength = Math.max(...result.paths.map(p => p.length));
-    
-    // Normalize path length: longer paths = more provenance
-    const normalizedPathLength = maxObservedPathLength > 0 
-      ? topPath.length / maxObservedPathLength 
-      : 0;
-    
-    // Calculate provenance score
-    const provenanceScore = calculateProvenanceScore(topPath);
-    
-    // Final causal weight
-    const causalWeight = normalizedPathLength * provenanceScore;
-    
-    // Cache result
-    cacheInstance.set(cacheKey, causalWeight);
-    
-    return causalWeight;
-    
-  } catch (error) {
-    console.error(`[CCO] Error calculating causal weight for ${nodeId}:`, error);
-    return 0;
-  }
+  });
+}
+
+/**
+ * Get cache metrics for monitoring
+ */
+export function getCCOMetrics(): CacheMetrics & { hitRate: number; size: number } {
+  return cacheInstance.getMetrics();
 }
