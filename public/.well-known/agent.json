@@ -14,6 +14,7 @@
       "a2a.discover",
       "a2a.capabilities"
     ],
+    "capabilitiesUrl": "/api/capabilities",
     "vendor": "Anóteros Lógos",
     "homepage": "https://anoteroslogos.com",
     "documentation": "https://anoteroslogos.com/knowledge-base",

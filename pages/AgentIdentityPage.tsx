@@ -7,12 +7,14 @@
  * Standards: AID v1.1, A2A v1.0.0, MCP v2.0, RFC 8615, RFC 9421
  */
 
+import { useEffect } from 'react';
 import SEOHead from '../components/SEOHead';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { SchemaBlock } from '../components/AgentDocs/SchemaBlock';
 import { CodeSample } from '../components/AgentDocs/CodeSample';
 import { InteractiveExplorer } from '../components/AgentDocs/InteractiveExplorer';
+import { CopyButton, QRCodeDisplay, ChallengeTester } from '../components/AgentDocs/AgentGatewayUI';
 import {
   Network, Shield, Code, Terminal, Zap, Database,
   CheckCircle2, AlertTriangle, Clock, Lock, Key, FileJson,
@@ -20,6 +22,52 @@ import {
 } from 'lucide-react';
 
 const AgentIdentityPage = () => {
+  // Add machine-readable metadata to <head>
+  useEffect(() => {
+    // Link rel for agent manifest
+    const manifestLink = document.createElement('link');
+    manifestLink.rel = 'agent-manifest';
+    manifestLink.href = '/.well-known/agent.json';
+    document.head.appendChild(manifestLink);
+
+    // Meta tag for capabilities
+    const capabilitiesMeta = document.createElement('meta');
+    capabilitiesMeta.name = 'agent-capabilities';
+    capabilitiesMeta.content = '/api/capabilities';
+    document.head.appendChild(capabilitiesMeta);
+
+    // JSON-LD structured data
+    const jsonLdScript = document.createElement('script');
+    jsonLdScript.type = 'application/ld+json';
+    jsonLdScript.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'SoftwareApplication',
+      'name': 'Anóteros Lógos Agent API',
+      'applicationCategory': 'DeveloperApplication',
+      'operatingSystem': 'All',
+      'offers': {
+        '@type': 'Offer',
+        'price': '0',
+        'priceCurrency': 'USD'
+      },
+      'featureList': [
+        'A2A Protocol v1.0',
+        'MCP v2.0 Integration',
+        'Ed25519 Authentication',
+        'Public AID Generation',
+        'Challenge-Response Auth',
+        'OpenAPI 3.1 Spec'
+      ]
+    });
+    document.body.appendChild(jsonLdScript);
+
+    return () => {
+      document.head.removeChild(manifestLink);
+      document.head.removeChild(capabilitiesMeta);
+      document.body.removeChild(jsonLdScript);
+    };
+  }, []);
+
   return (
     <>
       <SEOHead
@@ -82,6 +130,9 @@ const AgentIdentityPage = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <a href="#protocol-discovery" className="text-xs text-brand-accent hover:text-blue-400 transition-colors font-medium">
                 → Protocol Discovery
+              </a>
+              <a href="#agent-gateway" className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors font-medium">
+                → Agent Gateway (New)
               </a>
               <a href="#a2a-protocol" className="text-xs text-brand-accent hover:text-blue-400 transition-colors font-medium">
                 → A2A Protocol v1.0
@@ -333,6 +384,207 @@ console.log(agentCard.extensions.payment); // USDC on Base L2`
                     <span className="text-brand-accent">6.</span>
                     <span>Initiate A2A connection to discovered endpoint</span>
                   </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Agent Gateway Section (NEW) */}
+          <section id="agent-gateway" className="mb-16">
+            <div className="flex items-center gap-3 mb-6">
+              <Key className="w-8 h-8 text-emerald-400" />
+              <h2 className="text-3xl font-bold text-white">Agent Gateway v1.0</h2>
+              <span className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded text-xs font-semibold text-emerald-400">
+                NEW
+              </span>
+            </div>
+
+            <p className="text-white/70 mb-6">
+              Stateless, machine-first agent authentication and discovery. Generate credentials, verify signatures, and explore capabilities—all without human intervention.
+            </p>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+              <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Lock className="w-5 h-5 text-brand-accent" />
+                  <h3 className="text-base font-semibold text-white">Public AID Generation</h3>
+                </div>
+                <p className="text-sm text-white/60 mb-2">Ed25519 keypair generation</p>
+                <code className="text-xs text-brand-accent font-mono">POST /api/public-aid</code>
+                <p className="text-xs text-white/50 mt-2">10 req/min per IP</p>
+              </div>
+
+              <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Shield className="w-5 h-5 text-purple-400" />
+                  <h3 className="text-base font-semibold text-white">Challenge-Response</h3>
+                </div>
+                <p className="text-sm text-white/60 mb-2">Ed25519 signature verification</p>
+                <code className="text-xs text-purple-400 font-mono">GET/POST /api/challenge</code>
+                <p className="text-xs text-white/50 mt-2">20 req/min per IP</p>
+              </div>
+
+              <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <FileJson className="w-5 h-5 text-green-400" />
+                  <h3 className="text-base font-semibold text-white">Tool Capabilities</h3>
+                </div>
+                <p className="text-sm text-white/60 mb-2">OpenAPI 3.1 merged spec</p>
+                <code className="text-xs text-green-400 font-mono">GET /api/capabilities</code>
+                <p className="text-xs text-white/50 mt-2">Cached, no limit</p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              {/* Public AID Generation */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">1. Generate Agent Identity (AID)</h3>
+                <p className="text-sm text-white/70 mb-4">
+                  Create Ed25519 keypair without authentication. Private key cached in-memory for 1 hour.
+                </p>
+
+                <CodeSample
+                  title="POST /api/public-aid"
+                  samples={[
+                    {
+                      language: 'bash',
+                      code: `curl -X POST https://anoteroslogos.com/api/public-aid \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "name": "MyAgent",
+    "description": "Optional description",
+    "capabilities": ["geo.audit"]
+  }'`
+                    },
+                    {
+                      language: 'typescript',
+                      code: `const aid = await fetch('https://anoteroslogos.com/api/public-aid', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    name: 'MyAgent',
+    capabilities: ['geo.audit']
+  })
+}).then(r => r.json());
+
+console.log(aid.aid); // aid://myagent/...
+console.log(aid.publicKey); // 64-char hex
+console.log(aid.privateKey); // 64-char hex (store securely!)`
+                    },
+                    {
+                      language: 'python',
+                      code: `import requests
+
+res = requests.post(
+    'https://anoteroslogos.com/api/public-aid',
+    json={
+        'name': 'MyAgent',
+        'capabilities': ['geo.audit']
+    }
+)
+aid = res.json()
+print(aid['aid'])
+print(aid['publicKey'])`
+                    }
+                  ]}
+                />
+
+                <div className="mt-4 flex items-center gap-3">
+                  <CopyButton 
+                    text="https://anoteroslogos.com/api/public-aid" 
+                    label="Copy Endpoint" 
+                  />
+                </div>
+              </div>
+
+              {/* Capabilities Endpoint */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">2. Fetch Tool Capabilities</h3>
+                <p className="text-sm text-white/70 mb-4">
+                  OpenAPI 3.1 spec merging all MCP tools (OpenAI, Claude, Grok formats).
+                </p>
+
+                <CodeSample
+                  title="GET /api/capabilities"
+                  samples={[
+                    {
+                      language: 'bash',
+                      code: `curl https://anoteroslogos.com/api/capabilities`
+                    },
+                    {
+                      language: 'typescript',
+                      code: `const caps = await fetch('https://anoteroslogos.com/api/capabilities')
+  .then(r => r.json());
+
+console.log(caps.paths); // All tool endpoints
+console.log(caps.components.schemas); // Parameter schemas`
+                    }
+                  ]}
+                />
+
+                <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                  <CopyButton 
+                    text="https://anoteroslogos.com/api/capabilities" 
+                    label="Copy Endpoint" 
+                  />
+                  <QRCodeDisplay url="https://anoteroslogos.com/.well-known/agent.json" />
+                </div>
+              </div>
+
+              {/* Challenge Simulator */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">3. Test Challenge-Response Auth</h3>
+                <p className="text-sm text-white/70 mb-4">
+                  Interactive simulator for Ed25519 signature verification.
+                </p>
+
+                <ChallengeTester />
+              </div>
+
+              {/* Integration Flow */}
+              <div className="bg-gradient-to-br from-brand-accent/10 via-purple-600/10 to-pink-600/10 border border-brand-accent/20 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <Terminal className="w-5 h-5" />
+                  Complete Integration Flow
+                </h3>
+                <ol className="space-y-3 text-sm text-white/70">
+                  <li className="flex gap-3">
+                    <span className="text-brand-accent font-mono">1.</span>
+                    <span><strong className="text-white">Discovery:</strong> Fetch <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">/.well-known/agent.json</code></span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-brand-accent font-mono">2.</span>
+                    <span><strong className="text-white">Capabilities:</strong> GET <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">/api/capabilities</code></span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-brand-accent font-mono">3.</span>
+                    <span><strong className="text-white">Generate AID:</strong> POST <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">/api/public-aid</code></span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-brand-accent font-mono">4.</span>
+                    <span><strong className="text-white">Get Challenge:</strong> GET <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">/api/challenge?aid=...</code></span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-brand-accent font-mono">5.</span>
+                    <span><strong className="text-white">Sign:</strong> Use private key to sign challenge with Ed25519</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-brand-accent font-mono">6.</span>
+                    <span><strong className="text-white">Verify:</strong> POST <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">/api/challenge</code> with signature</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-brand-accent font-mono">7.</span>
+                    <span><strong className="text-white">Use API:</strong> Call protected endpoints with verified credentials</span>
+                  </li>
+                </ol>
+                <div className="mt-4">
+                  <a 
+                    href="/docs/agent-gateway.md" 
+                    className="inline-flex items-center gap-2 text-sm text-brand-accent hover:text-blue-400 transition-colors font-medium"
+                  >
+                    <BookOpen className="w-4 h-4" />
+                    View Full Documentation →
+                  </a>
                 </div>
               </div>
             </div>
