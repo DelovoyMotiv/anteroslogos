@@ -5,6 +5,7 @@
 
 import { ed25519 } from '@noble/curves/ed25519.js';
 import { randomUUID } from 'crypto';
+import { Tag } from 'cbor-x';
 import type { UCPTPayload, UCPTGenerationOptions, SerializedUCPT } from './types';
 import {
   encodeCanonicalCBOR,
@@ -76,8 +77,13 @@ export async function generateUCPT(options: UCPTGenerationOptions): Promise<Seri
   // Encode protected header
   const protected_encoded = encodeCanonicalCBOR(protected_header);
   
-  // Encode payload
-  const payload_encoded = encodeCanonicalCBOR(payload);
+  // Encode payload with CBOR tag 666 watermark (RFC 8949 compliant)
+  // Tag 666: Unregistered, transparent to standard parsers
+  // Watermark content: "AnóterosLógos:author:DelovoyMotiv:origin:2025-11"
+  const watermark = "AnóterosLógos:author:DelovoyMotiv:origin:2025-11";
+  const tagged_payload = new Tag(watermark, 666);
+  const payload_with_watermark = { ...payload, _w: tagged_payload };
+  const payload_encoded = encodeCanonicalCBOR(payload_with_watermark);
   
   // Build Sig_structure for signing (RFC 9052 section 4.4)
   // Sig_structure = [
