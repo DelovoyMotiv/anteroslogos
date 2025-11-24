@@ -1,6 +1,11 @@
 /**
  * AID (Agent Identity & Discovery) Protocol Detection
  * Checks domains for AI agent support via DNS TXT records and HTTPS well-known endpoints
+ * 
+ * Enhanced with:
+ * - Tenant isolation validation
+ * - AID registry integration for cryptographic ownership verification
+ * - Cross-tenant federation checks
  */
 
 export interface AIDAgentInfo {
@@ -41,6 +46,11 @@ export interface AIDAgentInfo {
       requests_per_hour: number;
     };
   };
+  // Tenant isolation fields
+  tenantId?: string;
+  verified?: boolean;
+  registeredInRegistry?: boolean;
+  federationAllowed?: boolean;
   errors: string[];
   warnings: string[];
 }
@@ -299,7 +309,66 @@ function extractAgentMetadata(data: any): Partial<AIDAgentInfo> {
 }
 
 /**
+ * Verify AID ownership via AID registry
+ * Checks if AID URI is registered and owned by claimed tenant
+ */
+export async function verifyAIDOwnership(
+  aidUri: string,
+  claimedTenantId: string
+): Promise<{ verified: boolean; error?: string; tenantId?: string }> {
+  try {
+    // Dynamic import to avoid circular dependency
+    const { lookupAgent } = await import('../lib/tenancy/aidRegistry');
+
+    const result = await lookupAgent(aidUri);
+
+    if (!result.found) {
+      return {
+        verified: false,
+        error: 'AID URI not found in registry',
+      };
+    }
+
+    if (!result.registration) {
+      return {
+        verified: false,
+        error: 'Invalid registry response',
+      };
+    }
+
+    // Verify ownership
+    if (result.registration.tenantId !== claimedTenantId) {
+      return {
+        verified: false,
+        error: 'AID URI ownership mismatch - possible spoofing',
+        tenantId: result.registration.tenantId,
+      };
+    }
+
+    // Check verification status
+    if (!result.registration.verified) {
+      return {
+        verified: false,
+        error: 'AID URI not verified in registry',
+        tenantId: result.registration.tenantId,
+      };
+    }
+
+    return {
+      verified: true,
+      tenantId: result.registration.tenantId,
+    };
+  } catch (error) {
+    return {
+      verified: false,
+      error: `Ownership verification failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    };
+  }
+}
+
+/**
  * Main function: Discover AID agent for a domain
+ * Enhanced with tenant isolation and registry verification
  */
 export async function discoverAIDAgent(url: string): Promise<AIDAgentInfo> {
   const result: AIDAgentInfo = {
@@ -379,6 +448,35 @@ export async function discoverAIDAgent(url: string): Promise<AIDAgentInfo> {
       }
       if (!result.endpoint) {
         result.errors.push('Agent endpoint missing');
+      }
+
+      // Check if agent is registered in AID registry
+      // Extract potential AID URI from domain
+      const potentialAidUri = result.agentName 
+        ? `aid://${domain}/agent/${result.agentName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+        : null;
+
+      if (potentialAidUri) {
+        try {
+          const { lookupAgent } = await import('../lib/tenancy/aidRegistry');
+          const registryLookup = await lookupAgent(potentialAidUri);
+
+          if (registryLookup.found && registryLookup.registration) {
+            result.registeredInRegistry = true;
+            result.verified = registryLookup.registration.verified;
+            result.tenantId = registryLookup.registration.tenantId;
+            result.federationAllowed = registryLookup.allowedByFederation;
+
+            if (!result.verified) {
+              result.warnings.push('Agent found in registry but not verified');
+            }
+          } else {
+            result.registeredInRegistry = false;
+            result.warnings.push('Agent not registered in AID registry - ownership cannot be verified');
+          }
+        } catch (error) {
+          result.warnings.push('Failed to check AID registry');
+        }
       }
     }
 

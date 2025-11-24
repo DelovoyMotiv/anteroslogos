@@ -9,8 +9,17 @@
  * @standards AsyncLocalStorage (Node.js 16+), Zero-trust architecture
  */
 
-import { AsyncLocalStorage } from 'node:async_hooks';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+
+// Conditional import of AsyncLocalStorage (Node.js only)
+let AsyncLocalStorage: any;
+try {
+  // @ts-ignore
+  AsyncLocalStorage = require('node:async_hooks').AsyncLocalStorage;
+} catch {
+  // Browser environment - AsyncLocalStorage not available
+  console.warn('[TenantContext] AsyncLocalStorage not available in browser environment');
+}
 
 // =====================================================
 // TYPES
@@ -38,8 +47,9 @@ export interface TenantValidationResult {
 /**
  * AsyncLocalStorage for tenant context
  * Maintains tenant_id across async call stack without explicit passing
+ * Falls back to null if not available (browser environment)
  */
-const tenantContextStorage = new AsyncLocalStorage<TenantContext>();
+const tenantContextStorage: any = AsyncLocalStorage ? new AsyncLocalStorage() : null;
 
 // =====================================================
 // TENANT CONTEXT MANAGER
@@ -72,7 +82,7 @@ export class TenantContextManager {
    * @returns Current tenant context or null if not set
    */
   public getCurrentContext(): TenantContext | null {
-    return tenantContextStorage.getStore() || null;
+    return tenantContextStorage ? tenantContextStorage.getStore() || null : null;
   }
 
   /**
@@ -105,6 +115,11 @@ export class TenantContextManager {
     context: TenantContext,
     fn: () => Promise<T>
   ): Promise<T> {
+    if (!tenantContextStorage) {
+      // Browser environment - just run the function without context isolation
+      console.warn('[TenantContext] Running without AsyncLocalStorage isolation');
+      return fn();
+    }
     return tenantContextStorage.run(context, fn);
   }
 

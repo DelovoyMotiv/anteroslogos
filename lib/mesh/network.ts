@@ -1,6 +1,6 @@
 /**
  * Agent Mesh Network Router
- * Production-grade P2P routing with DHT-based peer discovery
+ * Production-grade P2P routing with DHT-based peer discovery and tenant isolation
  * 
  * Features:
  * - DHT-based peer discovery (Kademlia)
@@ -10,14 +10,17 @@
  * - APA micropayments integration (USDC pricing)
  * - WebSocket streaming for real-time updates
  * - Multi-hop routing with path optimization
+ * - **Tenant isolation** with federation modes (private/federated/public)
+ * - Cross-tenant routing validation via OCCO oracle
  * 
  * Integration:
  * - Uses lib/a2a/agentRegistry for trust scores
  * - Uses lib/a2a/protocol for JSON-RPC 2.0 messaging
  * - Uses lib/mesh/dht for peer discovery
+ * - Uses lib/tenancy/validator for cross-tenant access control
  * 
  * @module lib/mesh/network
- * @version 1.0.0
+ * @version 2.0.0
  */
 
 import { agentRegistry } from '../a2a/agentRegistry';
@@ -43,6 +46,9 @@ export const MeshNodeSchema = z.object({
   lastSeen: z.number(),
   rtt: z.number().optional(),
   failureCount: z.number().default(0),
+  // Tenant isolation fields
+  tenantId: z.string().optional(),
+  isolationMode: z.enum(['private', 'federated', 'public']).default('private'),
   metadata: z.object({
     version: z.string().optional(),
     publicKey: z.string().optional(),
@@ -53,6 +59,9 @@ export const MeshNodeSchema = z.object({
       amount: z.number(),
     }).optional(),
     agentRegistryId: z.string().optional(), // Link to agentRegistry
+    // Tenant federation
+    verified: z.boolean().optional(), // Verified in AID registry
+    allowedPartners: z.array(z.string()).optional(), // Tenant IDs allowed for federation
   }).optional(),
 });
 
@@ -77,6 +86,9 @@ export interface RoutingOptions {
   excludeNodes?: string[]; // Exclude node IDs
   timeout?: number; // Request timeout in ms (default: 30000)
   retries?: number; // Number of retries (default: 2)
+  // Tenant isolation
+  allowCrossTenant?: boolean; // Allow cross-tenant routing (default: false)
+  requiredTenantId?: string; // Only route to nodes in this tenant
 }
 
 /**
@@ -141,6 +153,7 @@ export class MeshNetworkRouter {
   private dht?: IDHTAdapter;
   private localAidUri: string;
   private localNodeId: string;
+  private localTenantId?: string;
   private circuitBreakers: Map<string, CircuitBreakerState> = new Map();
   private initialized: boolean = false;
   
@@ -152,8 +165,29 @@ export class MeshNetworkRouter {
     this.localAidUri = localAidUri;
     this.localNodeId = bytesToHex(sha256(new TextEncoder().encode(localAidUri)));
     
+    // Extract tenant ID from context (optional - for isolation)
+    this.initializeTenantContext().catch(err => {
+      console.warn('[MeshRouter] Could not initialize tenant context:', err);
+    });
+    
     console.log(`[MeshRouter] Initialized for ${localAidUri}`);
     console.log(`[MeshRouter] Using ${config.useLibp2p !== false ? 'libp2p' : 'legacy'} DHT`);
+  }
+
+  /**
+   * Initialize tenant context for isolation
+   */
+  private async initializeTenantContext(): Promise<void> {
+    try {
+      const { getCurrentTenantIdOrNull } = await import('../tenancy/context');
+      this.localTenantId = getCurrentTenantIdOrNull() || undefined;
+      if (this.localTenantId) {
+        console.log(`[MeshRouter] Tenant isolation enabled: ${this.localTenantId}`);
+      }
+    } catch (error) {
+      // Tenant isolation not available - continue without it
+      console.debug('[MeshRouter] Tenant isolation not available');
+    }
   }
 
   /**
@@ -198,8 +232,9 @@ export class MeshNetworkRouter {
 
   /**
    * Discover peers with specific capability
+   * Filters by tenant isolation if enabled
    */
-  async discoverPeers(capability: string, maxPeers: number = 10): Promise<MeshNode[]> {
+  async discoverPeers(capability: string, maxPeers: number = 10, options?: { allowCrossTenant?: boolean }): Promise<MeshNode[]> {
     if (!this.initialized || !this.dht) {
       throw new Error('MeshRouter not initialized. Call initialize() first.');
     }
@@ -215,10 +250,15 @@ export class MeshNetworkRouter {
     );
     
     // Filter by circuit breaker state
-    const availableNodes = meshNodes.filter(node => {
+    let availableNodes = meshNodes.filter(node => {
       const breaker = this.getCircuitBreaker(node.nodeId);
       return breaker.state !== 'open';
     });
+
+    // Filter by tenant isolation
+    if (this.localTenantId && !options?.allowCrossTenant) {
+      availableNodes = await this.filterByTenantIsolation(availableNodes);
+    }
     
     console.log(`[MeshRouter] Found ${availableNodes.length} available peers`);
     
@@ -226,7 +266,57 @@ export class MeshNetworkRouter {
   }
 
   /**
-   * Enrich UnifiedDHTNode with agentRegistry data
+   * Filter nodes by tenant isolation rules
+   * Only returns nodes that are accessible based on federation policies
+   */
+  private async filterByTenantIsolation(nodes: MeshNode[]): Promise<MeshNode[]> {
+    if (!this.localTenantId) {
+      return nodes; // No tenant context - allow all
+    }
+
+    try {
+      const { validateMeshRouting } = await import('../tenancy/validator');
+
+      const validatedNodes = await Promise.all(
+        nodes.map(async (node) => {
+          // Same tenant = always allowed
+          if (node.tenantId === this.localTenantId) {
+            return node;
+          }
+
+          // Cross-tenant - validate via federation policy
+          if (node.tenantId) {
+            const validation = await validateMeshRouting(this.localTenantId!, node.tenantId);
+            if (validation.allowed) {
+              return node;
+            }
+          } else {
+            // Node without tenant ID - allow if public mode
+            if (node.isolationMode === 'public') {
+              return node;
+            }
+          }
+
+          return null;
+        })
+      );
+
+      const allowedNodes = validatedNodes.filter((n): n is MeshNode => n !== null);
+
+      const filtered = nodes.length - allowedNodes.length;
+      if (filtered > 0) {
+        console.log(`[MeshRouter] Filtered ${filtered} nodes due to tenant isolation`);
+      }
+
+      return allowedNodes;
+    } catch (error) {
+      console.warn('[MeshRouter] Tenant validation failed, allowing all nodes:', error);
+      return nodes;
+    }
+  }
+
+  /**
+   * Enrich UnifiedDHTNode with agentRegistry data and tenant isolation info
    */
   private async enrichNodeWithRegistry(dhtNode: UnifiedDHTNode): Promise<MeshNode> {
     // Try to find agent in registry by AID URI
@@ -235,9 +325,12 @@ export class MeshNetworkRouter {
       a.name === dhtNode.aidUri
     );
 
+    const metadata = dhtNode.metadata as any;
     const meshNode: MeshNode = {
       ...dhtNode,
       trustScore: agent ? agent.trust_score : dhtNode.trustScore,
+      tenantId: metadata?.tenantId as string | undefined,
+      isolationMode: (metadata?.isolationMode as 'private' | 'federated' | 'public') || 'private',
       metadata: dhtNode.metadata ? {
         ...dhtNode.metadata,
         costPerCall: dhtNode.metadata.costPerCall ? {
