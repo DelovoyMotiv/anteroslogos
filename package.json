@@ -36,7 +36,7 @@
     "@noble/curves": "^2.0.1",
     "@noble/ed25519": "^3.0.0",
     "@noble/hashes": "^2.0.1",
-    "@nomicfoundation/hardhat-toolbox": "^6.1.0",
+    "@openzeppelin/contracts": "^5.4.0",
     "@stripe/stripe-js": "^8.5.2",
     "@supabase/auth-helpers-react": "^0.5.0",
     "@supabase/ssr": "^0.7.0",
@@ -72,7 +72,7 @@
     "wagmi": "^2.12.17",
     "web-vitals": "^5.1.0",
     "ws": "^8.18.3",
-    "zod": "^4.1.12"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
@@ -97,5 +97,8 @@
     "typescript": "~5.8.2",
     "typescript-eslint": "^8.0.0",
     "vite": "^6.2.0"
+  },
+  "overrides": {
+    "zod": "^3.25.76"
   }
 }

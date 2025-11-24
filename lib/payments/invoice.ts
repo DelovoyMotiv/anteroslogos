@@ -12,7 +12,6 @@ import { createHash } from "node:crypto";
 import { z } from "zod";
 import {
   InvoiceCreateInputSchema,
-  InvoiceSchema,
   InvoiceStatusSchema,
   type Invoice,
   type InvoiceStatus,
@@ -443,7 +442,7 @@ export async function createInvoice(
     updatedAt: new Date(insertedRow.updated_at),
   };
 
-  return InvoiceSchema.parse(invoice);
+  return invoice;
 }
 
 /**
@@ -480,7 +479,7 @@ export async function getInvoice(invoiceId: string): Promise<Invoice | null> {
     updatedAt: new Date(row.updated_at),
   };
 
-  return InvoiceSchema.parse(invoice);
+  return invoice;
 }
 
 /**
@@ -523,7 +522,7 @@ export async function getInvoiceByTransaction(
     updatedAt: new Date(row.updated_at),
   };
 
-  return InvoiceSchema.parse(invoice);
+  return invoice;
 }
 
 /**
@@ -617,7 +616,7 @@ export async function updateInvoice(
     updatedAt: new Date(updatedRow.updated_at),
   };
 
-  return InvoiceSchema.parse(invoice);
+  return invoice;
 }
 
 /**
@@ -681,7 +680,7 @@ export async function listInvoicesForUser(
       createdAt: new Date(row.created_at),
       updatedAt: new Date(row.updated_at),
     };
-    return InvoiceSchema.parse(invoice);
+    return invoice;
   });
 }
 
@@ -737,5 +736,5 @@ export async function findPendingInvoiceByMemo(
     updatedAt: new Date(row.updated_at),
   };
 
-  return InvoiceSchema.parse(invoice);
+  return invoice;
 }
