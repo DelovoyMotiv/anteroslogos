@@ -35,6 +35,7 @@ import { BFTStorage, getBFTStorage } from './storage';
 import { MeshNetworkRouter } from '../mesh/network';
 import type { MeshNode } from '../mesh/network';
 import { calculateCausalWeight } from './causalWeightOracle';
+import { offChainOracle } from './offChainOracle';
 import type { CausalGraph } from '../../types/causalTracer.types';
 
 // =====================================================
@@ -460,19 +461,27 @@ export class PBFTConsensus {
         const normalizedStake = stake ? Math.min(stake.stakedAmount / 1000, 1) : 0;
         const rttScore = node.rtt ? Math.max(0, 1 - (node.rtt / 1000)) : 0;
         
-        // Causal Consensus Oracle: provenance-based weight
+        // Off-Chain Causal Oracle: cache-first with fallback
         let causalWeight = 0;
         if (this.causalGraph) {
           try {
-            // Dynamic reference entity based on graph domain
             const referenceEntity = this.causalGraph.domain || 'consensus_reference';
-            causalWeight = await calculateCausalWeight(
+            causalWeight = await offChainOracle.getCausalWeight(
               node.nodeId,
               referenceEntity,
               this.causalGraph
             );
           } catch (error) {
-            console.warn(`[PBFT] Failed to calculate causal weight for ${node.nodeId}`);
+            console.warn(`[PBFT] Off-chain oracle failed for ${node.nodeId}, using fallback`);
+            try {
+              causalWeight = await calculateCausalWeight(
+                node.nodeId,
+                referenceEntity,
+                this.causalGraph
+              );
+            } catch (fallbackError) {
+              console.warn(`[PBFT] Fallback causal weight calculation failed for ${node.nodeId}`);
+            }
           }
         }
         

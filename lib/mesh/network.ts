@@ -600,6 +600,45 @@ export class MeshNetworkRouter {
   }
 
   // =====================================================
+  // GOSSIP PROTOCOL
+  // =====================================================
+
+  /**
+   * Broadcast update to mesh network (gossip protocol)
+   */
+  async broadcastUpdate(message: any): Promise<void> {
+    const peers = await this.discoverPeers('bft.gossip', 20);
+    
+    if (peers.length === 0) {
+      console.warn('[MeshRouter] No peers with bft.gossip capability');
+      return;
+    }
+    
+    const gossipMessage = {
+      jsonrpc: '2.0',
+      method: 'a2a.mesh.gossip',
+      params: message,
+      id: `gossip_${Date.now()}`,
+    };
+    
+    // Fire-and-forget broadcasts
+    const promises = peers.map(async peer => {
+      try {
+        await fetch(peer.endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(gossipMessage),
+          signal: AbortSignal.timeout(5000),
+        });
+      } catch (error) {
+        this.recordFailure(peer.nodeId);
+      }
+    });
+    
+    await Promise.allSettled(promises);
+  }
+
+  // =====================================================
   // STATISTICS & MONITORING
   // =====================================================
 
