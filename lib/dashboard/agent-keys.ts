@@ -1,16 +1,20 @@
 // @ts-nocheck
 /**
  * Agent Keys Management
- * Ed25519 keypair generation and AID protocol integration
+ * Ed25519 keypair generation and AID protocol integration with tenant isolation
  */
 
 import { supabase } from '../supabase';
 import { ed25519 } from '@noble/curves/ed25519.js';
 import { randomBytes } from '@noble/hashes/utils.js';
+import { registerAgent } from '../tenancy/aidRegistry';
+import { getCurrentTenantId, getCurrentTenantIdOrNull } from '../tenancy/context';
 
 export interface AgentKey {
   id: string;
   user_id: string;
+  tenant_id?: string; // Tenant isolation
+  aid_registry_id?: string; // Link to aid_registry
   name: string;
   aid_uri: string;
   public_key: string; // Base64
@@ -25,6 +29,9 @@ export interface AgentKey {
 
 export interface GenerateAgentKeyParams {
   name: string;
+  agentDescription?: string;
+  endpoint?: string;
+  capabilities?: string[];
   permissions?: string[];
   domain?: string;
 }
@@ -168,6 +175,12 @@ export async function generateAgentKey(
       return { error: `Plan limit reached: ${planLimits[profile.current_plan as keyof typeof planLimits]} agent keys max` };
     }
 
+    // Get tenant ID from context
+    const tenantId = getCurrentTenantIdOrNull();
+    if (!tenantId) {
+      return { error: 'Tenant context required for agent key creation' };
+    }
+
     // Generate Ed25519 keypair
     const { privateKey, publicKey } = generateEd25519Keypair();
     const publicKeyBase64 = Buffer.from(publicKey).toString('base64');
@@ -176,14 +189,41 @@ export async function generateAgentKey(
     const domain = params.domain || await getUserDomain(user.id);
     const aidUri = generateAIDUri(params.name, domain);
 
+    // Validate AID URI format
+    if (!validateAIDUri(aidUri)) {
+      return { error: 'Invalid AID URI format generated' };
+    }
+
     // Default permissions
     const permissions = params.permissions || ['mcp:execute'];
 
-    // Insert into database
+    // Register agent in AID registry (tenant-scoped)
+    const registryResult = await registerAgent({
+      agentName: params.name,
+      aidUri,
+      publicKeyEd25519: publicKeyBase64,
+      agentDescription: params.agentDescription,
+      endpoint: params.endpoint,
+      capabilities: params.capabilities,
+      permissions,
+      metadata: {
+        domain,
+        generated_at: new Date().toISOString(),
+        user_id: user.id,
+      },
+    });
+
+    if ('error' in registryResult) {
+      return { error: `AID registration failed: ${registryResult.error}` };
+    }
+
+    // Insert into agent_keys table with aid_registry_id link
     const { data: agentKey, error: insertError } = await supabase
       .from('agent_keys')
       .insert({
         user_id: user.id,
+        tenant_id: tenantId,
+        aid_registry_id: registryResult.id,
         name: params.name,
         aid_uri: aidUri,
         public_key: publicKeyBase64,
@@ -192,6 +232,7 @@ export async function generateAgentKey(
         metadata: {
           domain,
           generated_at: new Date().toISOString(),
+          aid_registry_id: registryResult.id,
         },
       })
       .select()
@@ -223,7 +264,8 @@ export async function generateAgentKey(
 }
 
 /**
- * List all Agent Keys for authenticated user
+ * List all Agent Keys for authenticated user in current tenant
+ * Tenant isolation via RLS policies
  */
 export async function listAgentKeys(): Promise<AgentKey[] | { error: string }> {
   try {
@@ -232,10 +274,17 @@ export async function listAgentKeys(): Promise<AgentKey[] | { error: string }> {
       return { error: 'Unauthorized' };
     }
 
+    const tenantId = getCurrentTenantIdOrNull();
+    if (!tenantId) {
+      return { error: 'Tenant context required' };
+    }
+
+    // RLS policies will automatically filter by tenant_id
     const { data: keys, error } = await supabase
       .from('agent_keys')
       .select('*')
       .eq('user_id', user.id)
+      .eq('tenant_id', tenantId)
       .eq('revoked', false)
       .order('created_at', { ascending: false });
 
@@ -349,19 +398,48 @@ export function verifyEd25519Signature(
 
 /**
  * Get Agent Key by AID URI (for external validation)
+ * Respects tenant isolation - only returns keys from:
+ * 1. Current tenant
+ * 2. Verified federated tenants (via AID registry)
  */
 export async function getAgentKeyByAID(
   aidUri: string
 ): Promise<AgentKey | null> {
   try {
+    // Validate AID URI format first
+    if (!validateAIDUri(aidUri)) {
+      return null;
+    }
+
+    // Query with RLS - will respect tenant isolation
     const { data: key, error } = await supabase
       .from('agent_keys')
       .select('*')
       .eq('aid_uri', aidUri)
       .eq('revoked', false)
-      .single();
+      .maybeSingle();
 
-    if (error || !key) return null;
+    if (error || !key) {
+      return null;
+    }
+
+    // Additional validation: check AID registry for verification status
+    const currentTenantId = getCurrentTenantIdOrNull();
+    if (currentTenantId && key.tenant_id !== currentTenantId) {
+      // Cross-tenant access - must verify via AID registry
+      const { data: registry } = await supabase
+        .from('aid_registry')
+        .select('verified, status')
+        .eq('aid_uri', aidUri)
+        .eq('status', 'active')
+        .maybeSingle();
+
+      if (!registry || !registry.verified) {
+        // Not verified - deny access
+        return null;
+      }
+    }
+
     return key;
   } catch (error) {
     console.error('getAgentKeyByAID error:', error);
