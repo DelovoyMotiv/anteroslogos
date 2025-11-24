@@ -34,6 +34,8 @@ import {
 import { BFTStorage, getBFTStorage } from './storage';
 import { MeshNetworkRouter } from '../mesh/network';
 import type { MeshNode } from '../mesh/network';
+import { calculateCausalWeight } from './causalWeightOracle';
+import type { CausalGraph } from '../../types/causalTracer.types';
 
 // =====================================================
 // PBFT CONSENSUS ENGINE
@@ -43,6 +45,7 @@ export class PBFTConsensus {
   private nodeId: string;
   private meshRouter: MeshNetworkRouter;
   private storage: BFTStorage;
+  private causalGraph?: CausalGraph;
   
   // View state
   private viewState: ViewState;
@@ -62,11 +65,13 @@ export class PBFTConsensus {
   constructor(
     nodeId: string,
     meshRouter: MeshNetworkRouter,
-    storage?: BFTStorage
+    storage?: BFTStorage,
+    causalGraph?: CausalGraph
   ) {
     this.nodeId = nodeId;
     this.meshRouter = meshRouter;
     this.storage = storage || getBFTStorage();
+    this.causalGraph = causalGraph;
     
     // Initialize view state
     this.viewState = {
@@ -446,24 +451,36 @@ export class PBFTConsensus {
     // Filter by circuit breaker
     const availablePeers = eligibleMeshPeers.filter(p => !this.isCircuitOpen(p.nodeId));
     
-    // Sort by: trust score (40%) + stake amount (30%) + RTT (20%) + Byzantine reputation (10%)
+    // Sort by: trust (40%) + stake (30%) + RTT (-20%) + causal weight (10%)
     const nodesWithScores = await Promise.all(
       availablePeers.map(async (node) => {
         const stake = eligibleStakes.find(s => s.nodeId === node.nodeId);
-        const byzantineReputation = await this.storage.getByzantineReputation(node.nodeId);
         
         const trustScore = node.trustScore / 100; // Normalize to 0-1
-        const stakeScore = stake ? Math.min(stake.stakedAmount / 1000, 1) : 0; // Normalize (1000 USDC = max)
-        const rttScore = node.rtt ? Math.max(0, 1 - (node.rtt / 1000)) : 0; // Lower RTT = better
-        const byzantineScore = byzantineReputation / 100; // Normalize to 0-1
+        const normalizedStake = stake ? Math.min(stake.stakedAmount / 1000, 1) : 0;
+        const rttScore = node.rtt ? Math.max(0, 1 - (node.rtt / 1000)) : 0;
         
-        const compositeScore = 
+        // Causal Consensus Oracle: provenance-based weight
+        let causalWeight = 0;
+        if (this.causalGraph) {
+          try {
+            causalWeight = await calculateCausalWeight(
+              node.nodeId,
+              'consensus_reference', // Reference entity for consensus domain
+              this.causalGraph
+            );
+          } catch (error) {
+            console.warn(`[PBFT] Failed to calculate causal weight for ${node.nodeId}`);
+          }
+        }
+        
+        const totalWeight = 
           trustScore * 0.4 +
-          stakeScore * 0.3 +
-          rttScore * 0.2 +
-          byzantineScore * 0.1;
+          normalizedStake * 0.3 +
+          rttScore * -0.2 + // Negative: lower RTT = higher score
+          causalWeight * 0.1;
         
-        return { node, score: compositeScore };
+        return { node, score: totalWeight };
       })
     );
     
