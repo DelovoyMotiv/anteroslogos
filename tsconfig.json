@@ -38,6 +38,13 @@
     "dist",
     "scripts",
     "api",
-    "tests"
+    "tests",
+    "test",
+    "hardhat.config.ts",
+    "lib/consensus",
+    "lib/mesh/dhtLibp2p.ts",
+    "lib/mesh/dhtAdapter.ts",
+    "lib/payments/intentPayments.ts",
+    "contracts"
   ]
 }

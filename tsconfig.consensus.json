@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "strict": false
+  },
+  "include": [
+    "lib/consensus/**/*",
+    "lib/mesh/dhtLibp2p.ts",
+    "lib/mesh/dhtAdapter.ts",
+    "lib/payments/intentPayments.ts",
+    "hardhat.config.ts",
+    "scripts/deploy-slashing.ts",
+    "test/**/*"
+  ]
+}

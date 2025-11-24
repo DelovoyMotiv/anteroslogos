@@ -20,9 +20,12 @@
  * @version 1.0.0
  */
 
-import { DistributedHashTable, DHTNode, generateNodeId } from './dht';
 import { agentRegistry } from '../a2a/agentRegistry';
 import { z } from 'zod';
+import type { IDHTAdapter, UnifiedDHTNode } from './dhtAdapter';
+import { createDHTAdapter } from './dhtAdapter';
+import { bytesToHex } from '@noble/hashes/utils.js';
+import { sha256 } from '@noble/hashes/sha2.js';
 
 // =====================================================
 // TYPE DEFINITIONS
@@ -43,6 +46,8 @@ export const MeshNodeSchema = z.object({
   metadata: z.object({
     version: z.string().optional(),
     publicKey: z.string().optional(),
+    address: z.string().optional(), // Ethereum address
+    stake: z.number().optional(), // USDC stake
     costPerCall: z.object({
       token: z.literal('USDC'),
       amount: z.number(),
@@ -52,6 +57,14 @@ export const MeshNodeSchema = z.object({
 });
 
 export type MeshNode = z.infer<typeof MeshNodeSchema>;
+
+/**
+ * DHT Configuration
+ */
+export interface DHTConfig {
+  useLibp2p?: boolean; // Use libp2p DHT (default: true)
+  port?: number; // P2P port (default: auto)
+}
 
 /**
  * Routing options
@@ -125,21 +138,58 @@ interface CircuitBreakerState {
 // =====================================================
 
 export class MeshNetworkRouter {
-  private dht: DistributedHashTable;
+  private dht?: IDHTAdapter;
   private localAidUri: string;
   private localNodeId: string;
   private circuitBreakers: Map<string, CircuitBreakerState> = new Map();
+  private initialized: boolean = false;
   
   // Circuit breaker configuration
   private readonly FAILURE_THRESHOLD = 5;
   private readonly TIMEOUT_MS = 60000; // 1 minute
 
-  constructor(localAidUri: string) {
+  constructor(localAidUri: string, private config: DHTConfig = {}) {
     this.localAidUri = localAidUri;
-    this.localNodeId = generateNodeId(localAidUri);
-    this.dht = new DistributedHashTable(localAidUri);
+    this.localNodeId = bytesToHex(sha256(new TextEncoder().encode(localAidUri)));
     
     console.log(`[MeshRouter] Initialized for ${localAidUri}`);
+    console.log(`[MeshRouter] Using ${config.useLibp2p !== false ? 'libp2p' : 'legacy'} DHT`);
+  }
+
+  /**
+   * Initialize DHT (must be called before use)
+   */
+  async initialize(): Promise<void> {
+    if (this.initialized) {
+      console.warn('[MeshRouter] Already initialized');
+      return;
+    }
+
+    console.log('[MeshRouter] Initializing DHT...');
+    this.dht = await createDHTAdapter(
+      this.localAidUri,
+      this.config.useLibp2p !== false,
+      this.config.port
+    );
+    this.initialized = true;
+    console.log('[MeshRouter] DHT initialized');
+  }
+
+  /**
+   * Stop mesh router and DHT
+   */
+  async stop(): Promise<void> {
+    if (this.dht) {
+      await this.dht.stop();
+      console.log('[MeshRouter] Stopped');
+    }
+  }
+
+  /**
+   * Get nodeId
+   */
+  get nodeId(): string {
+    return this.localNodeId;
   }
 
   // =====================================================
@@ -150,12 +200,16 @@ export class MeshNetworkRouter {
    * Discover peers with specific capability
    */
   async discoverPeers(capability: string, maxPeers: number = 10): Promise<MeshNode[]> {
+    if (!this.initialized || !this.dht) {
+      throw new Error('MeshRouter not initialized. Call initialize() first.');
+    }
+
     console.log(`[MeshRouter] Discovering peers with capability: ${capability}`);
     
-    // Search local DHT
-    const dhtNodes = this.dht.findNodesByCapability(capability, maxPeers);
+    // Search DHT via adapter
+    const dhtNodes = await this.dht.findNodesByCapability(capability, maxPeers);
     
-    // Convert DHTNode to MeshNode (add agentRegistry data if available)
+    // Convert UnifiedDHTNode to MeshNode (add agentRegistry data if available)
     const meshNodes = await Promise.all(
       dhtNodes.map(node => this.enrichNodeWithRegistry(node))
     );
@@ -172,9 +226,9 @@ export class MeshNetworkRouter {
   }
 
   /**
-   * Enrich DHTNode with agentRegistry data
+   * Enrich UnifiedDHTNode with agentRegistry data
    */
-  private async enrichNodeWithRegistry(dhtNode: DHTNode): Promise<MeshNode> {
+  private async enrichNodeWithRegistry(dhtNode: UnifiedDHTNode): Promise<MeshNode> {
     // Try to find agent in registry by AID URI
     const agent = agentRegistry.list().find(a => 
       a.webhook_url === dhtNode.endpoint || 
@@ -224,8 +278,12 @@ export class MeshNetworkRouter {
   /**
    * Add peer to routing table (from announcement or discovery)
    */
-  addPeer(announcement: PeerAnnouncement): boolean {
-    const dhtNode: DHTNode = {
+  async addPeer(announcement: PeerAnnouncement): Promise<boolean> {
+    if (!this.initialized || !this.dht) {
+      throw new Error('MeshRouter not initialized. Call initialize() first.');
+    }
+
+    const dhtNode: UnifiedDHTNode = {
       nodeId: announcement.nodeId,
       aidUri: announcement.aidUri,
       endpoint: announcement.endpoint,
@@ -240,7 +298,7 @@ export class MeshNetworkRouter {
       },
     };
 
-    const added = this.dht.addNode(dhtNode);
+    const added = await this.dht.addNode(dhtNode);
     
     if (added) {
       console.log(`[MeshRouter] Added peer ${announcement.aidUri} with capabilities: ${announcement.capabilities.join(', ')}`);
@@ -388,8 +446,8 @@ export class MeshNetworkRouter {
         
         const rtt = Date.now() - startTime;
         
-        // Update DHT with RTT
-        this.dht.updateNodeRTT(peer.nodeId, rtt);
+        // Update peer RTT (stored in circuit breaker for now)
+        peer.rtt = rtt;
         
         // Success - close circuit breaker
         this.recordSuccess(peer.nodeId);
@@ -409,7 +467,6 @@ export class MeshNetworkRouter {
         
         // Record failure
         this.recordFailure(peer.nodeId);
-        this.dht.markNodeFailure(peer.nodeId);
         
         // Try next peer
         continue;
@@ -449,9 +506,14 @@ export class MeshNetworkRouter {
    * Broadcast sync message to mesh (general purpose)
    */
   async broadcastSyncMessage(message: MeshSyncMessage): Promise<void> {
+    if (!this.initialized || !this.dht) {
+      throw new Error('MeshRouter not initialized. Call initialize() first.');
+    }
+
     console.log(`[MeshRouter] Broadcasting ${message.type} update to mesh`);
     
-    const allPeers = this.dht.getAllNodes();
+    // Get all nodes from all capabilities
+    const allPeers = await this.dht.findClosestNodes(this.localNodeId, 100);
     
     // Send actual network calls to all active peers
     const results = await Promise.allSettled(
@@ -495,7 +557,13 @@ export class MeshNetworkRouter {
    * Sync with specific peer
    */
   async syncWithPeer(peerId: string, data: any): Promise<boolean> {
-    const peer = this.dht.getNode(peerId);
+    if (!this.initialized || !this.dht) {
+      throw new Error('MeshRouter not initialized. Call initialize() first.');
+    }
+
+    // Find peer in DHT
+    const peers = await this.dht.findClosestNodes(peerId, 1);
+    const peer = peers.find(p => p.nodeId === peerId);
     
     if (!peer) {
       console.error(`[MeshRouter] Peer not found: ${peerId}`);
@@ -646,21 +714,31 @@ export class MeshNetworkRouter {
    * Get mesh network statistics
    */
   getStats(): {
-    dht: any;
+    dht: {
+      nodeCount: number;
+    };
     circuitBreakers: {
       total: number;
       open: number;
       halfOpen: number;
       closed: number;
     };
-    peers: {
-      total: number;
-      byCapability: Record<string, number>;
-      avgTrustScore: number;
-      avgRtt: number;
-    };
   } {
-    const dhtStats = this.dht.getStats();
+    if (!this.initialized || !this.dht) {
+      return {
+        dht: { nodeCount: 0 },
+        circuitBreakers: {
+          total: 0,
+          open: 0,
+          halfOpen: 0,
+          closed: 0,
+        },
+      };
+    }
+
+    const dhtStats = {
+      nodeCount: this.dht.getNodeCount(),
+    };
     
     const circuitBreakerStats = {
       total: this.circuitBreakers.size,
@@ -669,65 +747,10 @@ export class MeshNetworkRouter {
       closed: Array.from(this.circuitBreakers.values()).filter(b => b.state === 'closed').length,
     };
 
-    const allPeers = this.dht.getAllNodes();
-    const capabilityCount: Record<string, number> = {};
-    
-    allPeers.forEach(peer => {
-      peer.capabilities.forEach(cap => {
-        capabilityCount[cap] = (capabilityCount[cap] || 0) + 1;
-      });
-    });
-
-    const avgTrustScore = allPeers.length > 0
-      ? allPeers.reduce((sum, p) => sum + p.trustScore, 0) / allPeers.length
-      : 0;
-
-    const peersWithRtt = allPeers.filter(p => p.rtt !== undefined);
-    const avgRtt = peersWithRtt.length > 0
-      ? peersWithRtt.reduce((sum, p) => sum + p.rtt!, 0) / peersWithRtt.length
-      : 0;
-
     return {
       dht: dhtStats,
       circuitBreakers: circuitBreakerStats,
-      peers: {
-        total: allPeers.length,
-        byCapability: capabilityCount,
-        avgTrustScore,
-        avgRtt,
-      },
     };
-  }
-
-  /**
-   * Get all peers
-   */
-  getPeers(): MeshNode[] {
-    return this.dht.getAllNodes() as MeshNode[];
-  }
-
-  /**
-   * Get peer by ID
-   */
-  getPeer(nodeId: string): MeshNode | null {
-    return this.dht.getNode(nodeId) as MeshNode | null;
-  }
-
-  /**
-   * Remove peer
-   */
-  removePeer(nodeId: string): boolean {
-    this.circuitBreakers.delete(nodeId);
-    return this.dht.removeNode(nodeId);
-  }
-
-  /**
-   * Stop mesh router (cleanup)
-   */
-  stop(): void {
-    console.log('[MeshRouter] Stopping...');
-    this.dht.stop();
-    this.circuitBreakers.clear();
   }
 
   /**
@@ -750,12 +773,12 @@ let globalMeshRouter: MeshNetworkRouter | null = null;
 /**
  * Get or create global mesh router instance
  */
-export function getMeshRouter(aidUri?: string): MeshNetworkRouter {
+export function getMeshRouter(aidUri?: string, config?: DHTConfig): MeshNetworkRouter {
   if (!globalMeshRouter) {
     if (!aidUri) {
       aidUri = process.env.VITE_APP_URL || 'agent://anoteroslogos.com';
     }
-    globalMeshRouter = new MeshNetworkRouter(aidUri);
+    globalMeshRouter = new MeshNetworkRouter(aidUri, config);
   }
   return globalMeshRouter;
 }
@@ -768,10 +791,14 @@ export async function initializeMeshRouter(config: {
   capabilities: string[];
   costPerCall?: { token: 'USDC'; amount: number };
   bootstrapNodes?: string[];
+  dhtConfig?: DHTConfig;
 }): Promise<MeshNetworkRouter> {
   console.log('[MeshRouter] Initializing mesh network...');
   
-  const router = getMeshRouter(config.aidUri);
+  const router = getMeshRouter(config.aidUri, config.dhtConfig);
+  
+  // Initialize DHT
+  await router.initialize();
   
   // Announce self to network
   await router.announceSelf(config.capabilities, config.costPerCall);
@@ -800,7 +827,7 @@ export async function initializeMeshRouter(config: {
           const data = await response.json();
           if (data.result?.peers) {
             for (const peer of data.result.peers) {
-              router.addPeer({
+              await router.addPeer({
                 nodeId: peer.node_id,
                 aidUri: peer.aid_uri,
                 endpoint: peer.endpoint,
