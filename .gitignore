@@ -111,3 +111,4 @@ hardhat.config.ts
 # Test files (not for production)
 test/
 tests/
+**/__tests__/
