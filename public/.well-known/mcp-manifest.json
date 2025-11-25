@@ -1,21 +1,44 @@
 {
-  "version": "2.0.0",
-  "name": "anteroslogos-graph-tools",
-  "displayName": "Anóteros Lógos Graph Tools",
-  "description": "Graph Tool #1 for AI Agents - GEO audit, knowledge graphs, citation prediction, and federated authority with Zero-Knowledge Proofs",
+  "$schema": "https://modelcontextprotocol.io/schema/mcp-manifest.json",
+  "version": "2.1.0",
+  "protocolVersion": "2024-11-05",
+  "name": "anteroslogos-mcp-server",
+  "displayName": "Anóteros Lógos MCP Server",
+  "description": "Enterprise MCP Server for GEO audit, knowledge graphs, citation prediction, and federated authority with Zero-Knowledge Proofs. Graph Tool #1 for AI Agents.",
   "protocol": "mcp",
-  "mcpVersion": "2.0",
+  "transport": {
+    "type": "http",
+    "url": "https://anoteroslogos.com/api/mcp"
+  },
+  "serverInfo": {
+    "name": "anteroslogos-mcp-server",
+    "version": "2.1.0"
+  },
+  "capabilities": {
+    "tools": {
+      "listChanged": false
+    },
+    "resources": {
+      "subscribe": false,
+      "listChanged": false
+    },
+    "prompts": {
+      "listChanged": false
+    },
+    "logging": {}
+  },
   "vendor": {
     "name": "Anóteros Lógos",
     "url": "https://anoteroslogos.com",
     "contact": "https://anoteroslogos.com/#contact",
-    "documentation": "https://anoteroslogos.com/docs/mcp"
+    "documentation": "https://anoteroslogos.com/agent-identity"
   },
   "endpoints": {
     "production": {
       "url": "https://anoteroslogos.com/api/mcp",
       "ws": "wss://anoteroslogos.com/api/mcp/stream",
-      "openapi": "https://anoteroslogos.com/api/mcp?format=openapi"
+      "openapi": "https://anoteroslogos.com/api/mcp?format=openapi",
+      "jsonrpc": "https://anoteroslogos.com/api/mcp"
     },
     "development": {
       "url": "http://localhost:5173/api/mcp",
@@ -198,9 +221,117 @@
     "ccpa": true,
     "soc2": "in_progress"
   },
+  "resources": [
+    {
+      "uri": "anoteroslogos://docs/agent-identity",
+      "name": "Agent Identity Documentation",
+      "description": "Complete guide for AI agent integration with Ed25519 authentication",
+      "mimeType": "text/markdown"
+    },
+    {
+      "uri": "anoteroslogos://docs/geo-audit",
+      "name": "GEO Audit Documentation",
+      "description": "How to perform Generative Engine Optimization audits",
+      "mimeType": "text/markdown"
+    },
+    {
+      "uri": "anoteroslogos://schemas/tools",
+      "name": "Tool Schemas",
+      "description": "OpenAPI 3.1 schemas for all available tools",
+      "mimeType": "application/json"
+    },
+    {
+      "uri": "anoteroslogos://config/agent",
+      "name": "Agent Configuration",
+      "description": "Current agent.json configuration",
+      "mimeType": "application/json"
+    }
+  ],
+  "prompts": [
+    {
+      "name": "geo_audit_analysis",
+      "description": "Analyze GEO audit results and provide actionable recommendations",
+      "arguments": [
+        {
+          "name": "url",
+          "description": "Website URL to analyze",
+          "required": true
+        },
+        {
+          "name": "focus_area",
+          "description": "Specific area to focus on (schema, authority, citations, content)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "citation_optimization",
+      "description": "Generate content recommendations to improve AI citation probability",
+      "arguments": [
+        {
+          "name": "url",
+          "description": "Website URL to optimize",
+          "required": true
+        },
+        {
+          "name": "target_platforms",
+          "description": "Target AI platforms (comma-separated: claude,chatgpt,perplexity)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "knowledge_graph_query",
+      "description": "Query and analyze knowledge graph for a domain",
+      "arguments": [
+        {
+          "name": "domain",
+          "description": "Domain to analyze",
+          "required": true
+        },
+        {
+          "name": "entity_types",
+          "description": "Entity types to extract (comma-separated)",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "implementation": {
+    "jsonRpc": {
+      "methods": [
+        "initialize",
+        "tools/list",
+        "tools/call",
+        "resources/list",
+        "resources/read",
+        "prompts/list",
+        "prompts/get",
+        "ping"
+      ]
+    },
+    "httpFormats": {
+      "openai": "GET /api/mcp?format=openai",
+      "claude": "GET /api/mcp?format=claude",
+      "mcp": "GET /api/mcp?format=mcp"
+    }
+  },
+  "claude_desktop": {
+    "command": "npx",
+    "args": ["-y", "@anthropic-ai/mcp-client", "https://anoteroslogos.com/api/mcp"],
+    "env": {},
+    "config_snippet": {
+      "mcpServers": {
+        "anteroslogos": {
+          "url": "https://anoteroslogos.com/api/mcp",
+          "transport": "http"
+        }
+      }
+    }
+  },
   "metadata": {
     "established": "2025",
-    "last_updated": "2025-11-20",
+    "last_updated": "2025-11-25",
     "status": "production",
     "uptime_target": "99.9%",
     "support": "https://anoteroslogos.com/#contact"

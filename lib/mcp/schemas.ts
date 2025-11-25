@@ -350,11 +350,49 @@ export function toOpenAIFunction(tool: ToolDefinition): any { // eslint-disable-
 }
 
 /**
- * Convert to Claude Tools format
- * Returns any for compatibility with Anthropic SDK types
+ * Claude 3.5+ cache_control options for tool caching
  */
-export function toClaudeTool(tool: ToolDefinition): any { // eslint-disable-line @typescript-eslint/no-explicit-any
-  return {
+export interface ClaudeCacheControl {
+  type: 'ephemeral';
+}
+
+/**
+ * Claude 3.5+ tool format with cache_control support
+ */
+export interface ClaudeToolSchema {
+  name: string;
+  description: string;
+  input_schema: {
+    type: 'object';
+    properties: Record<string, {
+      type: string;
+      description: string;
+      enum?: string[];
+    }>;
+    required: string[];
+  };
+  cache_control?: ClaudeCacheControl;
+}
+
+/**
+ * Convert to Claude Tools format with Claude 3.5+ features
+ * Supports:
+ * - cache_control for prompt caching (reduces latency up to 80%)
+ * - tool_choice support
+ * - Extended input_schema with nested types
+ * 
+ * @param tool - Tool definition
+ * @param options - Additional options for Claude 3.5+ features
+ * @returns Claude tool schema compatible with Anthropic SDK
+ */
+export function toClaudeTool(
+  tool: ToolDefinition, 
+  options?: { 
+    enableCache?: boolean; 
+    cacheType?: 'ephemeral';
+  }
+): ClaudeToolSchema {
+  const claudeTool: ClaudeToolSchema = {
     name: tool.name,
     description: tool.description,
     input_schema: {
@@ -366,12 +404,52 @@ export function toClaudeTool(tool: ToolDefinition): any { // eslint-disable-line
             type: param.type,
             description: param.description,
             ...(param.enum ? { enum: param.enum } : {}),
+            ...(param.items ? { items: toParameterSchema(param.items) } : {}),
+            ...(param.properties ? {
+              properties: Object.fromEntries(
+                Object.entries(param.properties).map(([key, val]) => [key, toParameterSchema(val)])
+              )
+            } : {}),
           },
         ])
       ),
       required: tool.parameters.filter(p => p.required).map(p => p.name),
     },
   };
+  
+  // Add cache_control for Claude 3.5+ prompt caching
+  // This enables up to 80% latency reduction for cached tool definitions
+  if (options?.enableCache !== false) {
+    claudeTool.cache_control = {
+      type: options?.cacheType || 'ephemeral',
+    };
+  }
+  
+  return claudeTool;
+}
+
+/**
+ * Generate tool_choice configuration for Claude 3.5+
+ * Allows forcing specific tool usage
+ */
+export function createClaudeToolChoice(toolName?: string): {
+  type: 'auto' | 'any' | 'tool';
+  name?: string;
+} {
+  if (!toolName) {
+    return { type: 'auto' };
+  }
+  return {
+    type: 'tool',
+    name: toolName,
+  };
+}
+
+/**
+ * Export all Claude tools with cache_control enabled
+ */
+export function exportClaudeTools(options?: { enableCache?: boolean }): ClaudeToolSchema[] {
+  return Object.values(GRAPH_TOOLS).map(tool => toClaudeTool(tool, options));
 }
 
 /**
@@ -568,7 +646,7 @@ export function exportAllTools(): {
   
   return {
     openai: tools.map(toOpenAIFunction),
-    claude: tools.map(toClaudeTool),
+    claude: tools.map(tool => toClaudeTool(tool)),
     grok: tools.map(toGrokTool),
     openapi: generateOpenAPISpec(),
   };

@@ -1,0 +1,98 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schema/claude-desktop-config.json",
+  "version": "1.0",
+  "description": "Claude Desktop configuration for Anóteros Lógos MCP Server integration",
+  "instructions": {
+    "windows": "Add this configuration to %APPDATA%\\Claude\\claude_desktop_config.json",
+    "macos": "Add this configuration to ~/Library/Application Support/Claude/claude_desktop_config.json",
+    "linux": "Add this configuration to ~/.config/Claude/claude_desktop_config.json"
+  },
+  "mcpServers": {
+    "anteroslogos": {
+      "url": "https://anoteroslogos.com/api/mcp",
+      "transport": "http",
+      "description": "Anóteros Lógos - GEO audit, knowledge graphs, citation prediction",
+      "capabilities": {
+        "tools": true,
+        "resources": true,
+        "prompts": true
+      },
+      "metadata": {
+        "vendor": "Anóteros Lógos",
+        "website": "https://anoteroslogos.com",
+        "documentation": "https://anoteroslogos.com/agent-identity"
+      }
+    }
+  },
+  "usage": {
+    "tools": [
+      {
+        "name": "auditSite",
+        "example": "Audit https://example.com for AI visibility"
+      },
+      {
+        "name": "getGraph",
+        "example": "Build knowledge graph for https://example.com"
+      },
+      {
+        "name": "predictCitation",
+        "example": "Predict citation probability for https://example.com on Claude"
+      },
+      {
+        "name": "synthesizeNode",
+        "example": "Generate content recommendations for https://example.com"
+      },
+      {
+        "name": "causal_citation_trace",
+        "example": "Trace why Claude would cite https://example.com for 'best AI practices'"
+      },
+      {
+        "name": "predictive_synthesis",
+        "example": "Create content plan to increase visibility by 25% for https://example.com"
+      },
+      {
+        "name": "federated_authority_boost",
+        "example": "Generate ZKP authority proof for https://example.com"
+      }
+    ],
+    "prompts": [
+      {
+        "name": "geo_audit_analysis",
+        "example": "/prompt geo_audit_analysis url=https://example.com focus_area=schema"
+      },
+      {
+        "name": "citation_optimization",
+        "example": "/prompt citation_optimization url=https://example.com target_platforms=claude,perplexity"
+      },
+      {
+        "name": "knowledge_graph_query",
+        "example": "/prompt knowledge_graph_query domain=example.com entity_types=Organization,Product"
+      }
+    ],
+    "resources": [
+      {
+        "uri": "anoteroslogos://docs/agent-identity",
+        "description": "Read agent integration documentation"
+      },
+      {
+        "uri": "anoteroslogos://schemas/tools",
+        "description": "Get tool schemas in OpenAI/Claude format"
+      }
+    ]
+  },
+  "quickStart": {
+    "steps": [
+      "1. Copy the mcpServers section to your Claude Desktop config",
+      "2. Restart Claude Desktop",
+      "3. Type 'Audit https://yoursite.com for AI visibility' to test"
+    ],
+    "fullConfig": {
+      "mcpServers": {
+        "anteroslogos": {
+          "url": "https://anoteroslogos.com/api/mcp",
+          "transport": "http"
+        }
+      }
+    }
+  }
+}
