@@ -2002,19 +2002,22 @@ print(f"GEO Score: {audit['score']}")`
             </div>
           </section>
 
-          {/* Section 3: MCP Protocol - Simplified summary for space */}
+          {/* Section 3: MCP Protocol */}
           <section id="mcp-protocol" className="mb-16">
             <div className="flex items-center gap-3 mb-6">
               <Database className="w-8 h-8 text-purple-400" />
               <h2 className="text-3xl font-bold text-white">MCP Protocol (Model Context Protocol v2.0)</h2>
+              <span className="px-3 py-1 bg-purple-500/10 border border-purple-500/30 rounded text-xs font-semibold text-purple-400">
+                Enhanced
+              </span>
             </div>
 
             <p className="text-white/70 mb-6">
-              Tool integration protocol for LLMs. OpenAI/Claude/Grok compatible. Supports streaming, UCPT provenance, and Zero-Knowledge Proofs.
+              Tool integration protocol for LLMs with Anthropic Advanced Tool Use (2025-11-20) compatibility. OpenAI/Claude/Grok formats, streaming, UCPT provenance, semantic tool search, and programmatic execution in isolated sandbox.
             </p>
 
             <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-6 mb-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Available Tools (7 total, 3 unique)</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">Available Tools (8 total, 3 unique + 1 execution)</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="border-l-2 border-brand-accent pl-4">
                   <code className="text-sm font-mono text-brand-accent">auditSite</code>
@@ -2034,22 +2037,184 @@ print(f"GEO Score: {audit['score']}")`
                 </div>
                 <div className="border-l-2 border-pink-400 pl-4">
                   <code className="text-sm font-mono text-pink-400">causal_citation_trace</code>
-                  <p className="text-xs text-white/60 mt-1">🌟 UNIQUE: Causal reasoning for citations</p>
+                  <p className="text-xs text-white/60 mt-1">UNIQUE: Causal reasoning for citations</p>
                 </div>
                 <div className="border-l-2 border-indigo-400 pl-4">
                   <code className="text-sm font-mono text-indigo-400">predictive_synthesis</code>
-                  <p className="text-xs text-white/60 mt-1">🌟 UNIQUE: Visibility impact prediction</p>
+                  <p className="text-xs text-white/60 mt-1">UNIQUE: Visibility impact prediction</p>
                 </div>
                 <div className="border-l-2 border-emerald-400 pl-4">
                   <code className="text-sm font-mono text-emerald-400">federated_authority_boost</code>
-                  <p className="text-xs text-white/60 mt-1">🌟 UNIQUE: ZKP authority verification</p>
+                  <p className="text-xs text-white/60 mt-1">UNIQUE: ZKP authority verification</p>
+                </div>
+                <div className="border-l-2 border-cyan-400 pl-4">
+                  <code className="text-sm font-mono text-cyan-400">execute_code</code>
+                  <p className="text-xs text-white/60 mt-1">NEW: Sandbox execution with tool bindings</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+            <div className="space-y-6">
+              {/* Advanced Tool Use Section */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">Anthropic Advanced Tool Use (2025-11-20)</h3>
+                <p className="text-sm text-white/70 mb-4">
+                  Production implementation of Anthropic Advanced Tool Use standard with semantic search, programmatic execution, and enhanced LLM guidance.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+                      <Code className="w-4 h-4 text-brand-accent" />
+                      Tool Search
+                    </h4>
+                    <code className="text-xs text-brand-accent font-mono">GET /api/tools/search</code>
+                    <p className="text-xs text-white/60 mt-2">Semantic BM25 search across OpenAI/Claude/Grok schemas with Fuse.js ranking</p>
+                  </div>
+
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+                      <Cpu className="w-4 h-4 text-purple-400" />
+                      Programmatic Execution
+                    </h4>
+                    <code className="text-xs text-purple-400 font-mono">POST /api/mcp/programmatic</code>
+                    <p className="text-xs text-white/60 mt-2">JavaScript execution in isolated-vm sandbox (128MB, 60s max) with pre-bound tool functions</p>
+                  </div>
+
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+                      <FileJson className="w-4 h-4 text-green-400" />
+                      Input Examples
+                    </h4>
+                    <code className="text-xs text-green-400 font-mono">input_examples[]</code>
+                    <p className="text-xs text-white/60 mt-2">3 examples per tool in schemas for improved LLM parameter understanding</p>
+                  </div>
+                </div>
+
+                <CodeSample
+                  title="Tool Search Example"
+                  samples={[
+                    {
+                      language: 'bash',
+                      code: `curl "https://anoteroslogos.com/api/tools/search?query=audit&limit=3"`
+                    },
+                    {
+                      language: 'typescript',
+                      code: `const tools = await fetch(
+  'https://anoteroslogos.com/api/tools/search?query=citation&limit=5'
+).then(r => r.json());
+
+console.log(tools.results.length); // Ranked by relevance
+tools.results.forEach(t => {
+  console.log(t.tool.function.name, '-', t.relevance);
+});`
+                    }
+                  ]}
+                />
+
+                <div className="mt-4">
+                  <CodeSample
+                    title="Programmatic Execution with Sandbox (Requires anthropic-beta header)"
+                    samples={[
+                      {
+                        language: 'typescript',
+                        code: `const result = await fetch(
+  'https://anoteroslogos.com/api/mcp/programmatic',
+  {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'anthropic-beta': 'advanced-tool-use-2025-11-20',
+      'x-tenant-id': 'your_tenant_id'
+    },
+    body: JSON.stringify({
+      code: \`
+        const audit = await call_tool('auditSite', { 
+          url: 'https://example.com' 
+        });
+        const path = await get_causal_path('AI optimization');
+        return { score: audit.geoScore, pathLength: path.length };
+      \`,
+      language: 'javascript',
+      timeout: 30000
+    })
+  }
+).then(r => r.json());
+
+console.log(result.result); // Execution result
+console.log(result.logs);   // Console output
+console.log(result.ucpt);   // Cryptographic proof`
+                      },
+                      {
+                        language: 'python',
+                        code: `import requests
+
+result = requests.post(
+    'https://anoteroslogos.com/api/mcp/programmatic',
+    headers={
+        'anthropic-beta': 'advanced-tool-use-2025-11-20',
+        'x-tenant-id': 'your_tenant_id'
+    },
+    json={
+        'code': '''
+const [audit, graph] = await Promise.all([
+    call_tool('auditSite', {url: 'https://example.com'}),
+    call_tool('getGraph', {url: 'https://example.com'})
+]);
+return {score: audit.geoScore, entities: graph.entities.length};
+        ''',
+        'language': 'javascript'
+    }
+).json()
+
+print(result['result'])
+print(f"Execution time: {result['executionTime']}ms")`
+                      }
+                    ]}
+                  />
+                </div>
+
+                <div className="mt-4 bg-purple-500/10 border border-purple-500/30 rounded-lg p-4">
+                  <div className="flex items-start gap-2">
+                    <Shield className="w-4 h-4 text-purple-400 mt-0.5" />
+                    <div className="text-sm text-purple-300">
+                      <strong>Sandbox Security:</strong> Isolated execution with 128MB memory limit, 60s max timeout, no file system or network access. Pre-bound functions: <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">call_tool(name, params)</code>, <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">get_causal_path(query)</code>, <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">get_ucpt_proof()</code>. All executions generate UCPT cryptographic proof for auditability.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tool Schemas Access */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">Tool Schemas & Manifests</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-white mb-2">OpenAI Format</h4>
+                    <code className="text-xs text-brand-accent font-mono">/.well-known/mcp-tools-openai.json</code>
+                    <p className="text-xs text-white/60 mt-2">Function calling schema with input_examples</p>
+                  </div>
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-white mb-2">Claude Format</h4>
+                    <code className="text-xs text-green-400 font-mono">/.well-known/mcp-tools-claude.json</code>
+                    <p className="text-xs text-white/60 mt-2">Anthropic tool schema format</p>
+                  </div>
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-white mb-2">Grok Format</h4>
+                    <code className="text-xs text-purple-400 font-mono">/.well-known/mcp-tools-grok.json</code>
+                    <p className="text-xs text-white/60 mt-2">X.ai Grok schema format</p>
+                  </div>
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-white mb-2">Unified Capabilities</h4>
+                    <code className="text-xs text-orange-400 font-mono">/.well-known/capabilities.json</code>
+                    <p className="text-xs text-white/60 mt-2">Merged spec with all tools and endpoints</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
               <p className="text-sm text-blue-300">
-                <strong>MCP Manifest:</strong> <a href="/.well-known/mcp-manifest.json" target="_blank" className="underline hover:text-blue-200">/.well-known/mcp-manifest.json</a> contains complete tool schemas, authentication, rate limits, and integration patterns for LangChain, AutoGen, CrewAI, LangGraph.
+                <strong>Complete Documentation:</strong> <a href="/docs/advanced-tool-use.md" target="_blank" className="underline hover:text-blue-200">docs/advanced-tool-use.md</a> contains full specification of Anthropic Advanced Tool Use integration, security considerations, performance characteristics, and testing guides.
               </p>
             </div>
           </section>
