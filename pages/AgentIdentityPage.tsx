@@ -280,9 +280,12 @@ print(agent_info)`
                 </div>
 
                 <div className="mt-6">
-                  <h4 className="text-lg font-semibold text-white mb-3">Linux Foundation Agent Card</h4>
+                  <h4 className="text-lg font-semibold text-white mb-2">Agent Card</h4>
+                  <p className="text-xs text-white/50 mb-3">
+                    Linux Foundation A2A Protocol v1.0 standard
+                  </p>
                   <p className="text-sm text-white/70 mb-4">
-                    Standard A2A Protocol v1.0 discovery format with extensions for payment and consensus verification.
+                    Standard discovery format with extensions for payment and consensus verification. Provides structured agent metadata for autonomous discovery and integration.
                   </p>
                   
                   <CodeSample

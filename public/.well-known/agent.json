@@ -10,9 +10,14 @@
     "capabilities": [
       "geo.audit.request",
       "geo.audit.batch",
+      "geo.audit.stream",
       "geo.insights.global",
       "a2a.discover",
-      "a2a.capabilities"
+      "a2a.capabilities",
+      "a2a.mesh.discover",
+      "a2a.mesh.announce",
+      "a2a.mesh.sync",
+      "a2a.mesh.health"
     ],
     "capabilitiesUrl": "/api/capabilities",
     "vendor": "Anóteros Lógos",

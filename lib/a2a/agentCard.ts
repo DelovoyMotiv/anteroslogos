@@ -122,8 +122,10 @@ export class AgentCardManager {
         A2AMethod.STATUS,
         'knowledge.graph.query',
         'citation.predict',
-        'agent.mesh.discover',
-        'agent.mesh.announce',
+        'a2a.mesh.discover',
+        'a2a.mesh.announce',
+        'a2a.mesh.sync',
+        'a2a.mesh.health',
       ],
       
       // Protocols
