@@ -13,6 +13,10 @@
     "types": [
       "node"
     ],
+    "typeRoots": [
+      "./types",
+      "./node_modules/@types"
+    ],
     "moduleResolution": "bundler",
     "isolatedModules": true,
     "moduleDetection": "force",
@@ -38,6 +42,7 @@
     "dist",
     "scripts",
     "api",
+    "app/api",
     "tests",
     "test",
     "**/__tests__/**",

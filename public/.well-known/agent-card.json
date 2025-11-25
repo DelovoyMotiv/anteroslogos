@@ -1,25 +1,28 @@
 {
   "id": "agent://anoteroslogos.com/geo-audit",
   "name": "Anóteros Lógos GEO Audit Agent",
-  "version": "1.0.0",
-  "description": "Enterprise AI knowledge infrastructure platform providing GEO audits, knowledge graph extraction, citation prediction, and blockchain-based micropayments",
+  "version": "2.1.0",
+  "description": "Enterprise AI knowledge infrastructure platform providing GEO audits, knowledge graph extraction, citation prediction, Ed25519 identity management, and USDC micropayments on Base L2",
   "capabilities": [
     "a2a.discover",
     "a2a.capabilities",
+    "a2a.ping",
+    "a2a.status",
     "geo.audit.request",
     "geo.audit.status",
     "geo.audit.result",
     "geo.audit.batch",
+    "geo.audit.stream",
     "geo.insights.global",
     "geo.insights.industry",
     "geo.insights.domain",
-    "geo.audit.stream",
-    "a2a.subscribe",
-    "a2a.unsubscribe",
-    "a2a.ping",
-    "a2a.status",
     "knowledge.graph.query",
     "citation.predict",
+    "identity.generate",
+    "identity.challenge",
+    "identity.verify",
+    "a2a.subscribe",
+    "a2a.unsubscribe",
     "a2a.mesh.discover",
     "a2a.mesh.announce",
     "a2a.mesh.sync",
@@ -33,13 +36,31 @@
   "endpoints": {
     "http": "https://anoteroslogos.com/api/a2a",
     "websocket": "wss://anoteroslogos.com/api/a2a/ws",
-    "stream": "https://anoteroslogos.com/api/a2a/stream"
+    "stream": "https://anoteroslogos.com/api/a2a/stream",
+    "identity": {
+      "generate": "https://anoteroslogos.com/api/public-aid",
+      "challenge": "https://anoteroslogos.com/api/challenge"
+    },
+    "capabilities": "https://anoteroslogos.com/api/capabilities",
+    "toolSearch": "https://anoteroslogos.com/api/tools/search"
   },
   "authentication": [
     "bearer",
     "api_key",
     "ed25519"
   ],
+  "identity": {
+    "algorithm": "Ed25519",
+    "keyFormat": "hex",
+    "challengeTTL": 300,
+    "jwtTTL": 86400,
+    "flow": {
+      "step1": "POST /api/public-aid to generate keypair",
+      "step2": "GET /api/challenge?aid=... to get challenge",
+      "step3": "Sign challenge with Ed25519 private key",
+      "step4": "POST /api/challenge with signature to verify"
+    }
+  },
   "pricing": {
     "model": "pay-per-request",
     "currency": "USDC",
@@ -50,6 +71,7 @@
     "payment": {
       "supported": true,
       "network": "base-l2",
+      "chainId": 8453,
       "token": "USDC"
     },
     "verification": {
@@ -58,11 +80,13 @@
       "quorum_size": 7
     },
     "provenance": {
-      "supported": false
+      "supported": true,
+      "method": "ucpt",
+      "algorithm": "COSE_Sign1"
     }
   },
   "metadata": {
-    "version_code": "3.2.0",
+    "version_code": "3.3.0",
     "deployment": "vercel-static",
     "language": "typescript",
     "rate_limits": {
@@ -77,10 +101,12 @@
       "citation-prediction",
       "byzantine-consensus",
       "usdc-micropayments",
-      "agent-mesh-network"
+      "agent-mesh-network",
+      "ed25519-identity",
+      "challenge-response-auth"
     ],
     "contact": "https://anoteroslogos.com/contact",
-    "documentation": "https://anoteroslogos.com/docs",
+    "documentation": "https://anoteroslogos.com/agent-identity",
     "status_page": "https://anoteroslogos.com/status"
   }
 }

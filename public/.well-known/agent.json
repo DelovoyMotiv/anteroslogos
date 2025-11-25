@@ -1,19 +1,26 @@
 {
   "v": "1.1",
-  "p": ["a2a", "http"],
+  "p": ["a2a", "http", "mcp"],
   "u": "https://anoteroslogos.com/api/a2a",
   "s": "geoaudit",
   "a": {
     "name": "Anóteros Lógos GEO Agent",
-    "description": "Generative Engine Optimization audit and analysis agent. Provides comprehensive GEO scoring, competitive intelligence, and AI visibility optimization recommendations.",
-    "version": "2.0.0",
+    "description": "Enterprise AI Knowledge Infrastructure Platform. Provides GEO audits, knowledge graph extraction, citation prediction, Ed25519 identity management, and USDC micropayments on Base L2.",
+    "version": "2.1.0",
     "capabilities": [
+      "a2a.discover",
+      "a2a.capabilities",
+      "a2a.ping",
+      "a2a.status",
       "geo.audit.request",
       "geo.audit.batch",
       "geo.audit.stream",
       "geo.insights.global",
-      "a2a.discover",
-      "a2a.capabilities",
+      "knowledge.graph.query",
+      "citation.predict",
+      "identity.generate",
+      "identity.challenge",
+      "identity.verify",
       "a2a.mesh.discover",
       "a2a.mesh.announce",
       "a2a.mesh.sync",
@@ -22,7 +29,7 @@
     "capabilitiesUrl": "/api/capabilities",
     "vendor": "Anóteros Lógos",
     "homepage": "https://anoteroslogos.com",
-    "documentation": "https://anoteroslogos.com/knowledge-base",
+    "documentation": "https://anoteroslogos.com/agent-identity",
     "contact": "https://anoteroslogos.com/#contact"
   },
   "d": "anoteroslogos.com",
@@ -39,6 +46,12 @@
   },
   "toolSearchEndpoint": "/api/tools/search",
   "deferToolLoading": true,
+  "identity": {
+    "generateEndpoint": "/api/public-aid",
+    "challengeEndpoint": "/api/challenge",
+    "algorithm": "Ed25519",
+    "keyFormat": "hex"
+  },
   "metadata": {
     "organization": "Anóteros Lógos",
     "industry": "Generative Engine Optimization",
@@ -49,7 +62,9 @@
       "Schema.org Architecture",
       "E-E-A-T Signal Development",
       "AI Crawler Optimization",
-      "Citation Probability Enhancement"
+      "Citation Probability Enhancement",
+      "Agent Identity Management",
+      "Blockchain Micropayments"
     ],
     "pricing": {
       "free": {
@@ -74,17 +89,30 @@
         "methods": [
           "a2a.discover",
           "a2a.capabilities",
+          "a2a.ping",
+          "a2a.status",
           "geo.audit.request",
           "geo.audit.batch",
-          "a2a.ping",
-          "a2a.status"
+          "knowledge.graph.query",
+          "citation.predict"
         ]
+      },
+      "mcp": {
+        "version": "2.0.0",
+        "endpoint": "https://anoteroslogos.com/api/mcp",
+        "programmaticEndpoint": "https://anoteroslogos.com/api/mcp/programmatic"
       },
       "http": {
         "version": "1.1",
         "endpoint": "https://anoteroslogos.com",
         "methods": ["GET", "POST"]
       }
+    },
+    "payment": {
+      "network": "base-l2",
+      "chainId": 8453,
+      "token": "USDC",
+      "model": "pay-per-request"
     }
   }
 }
