@@ -1,0 +1,41 @@
+{
+  "version": "1.1.0",
+  "protocol": "A2A v1.0",
+  "advanced_tool_use": "2025-11-20",
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "execute_code",
+        "description": "Execute JavaScript code in isolated sandbox with pre-bound tool functions. Supports async/await and parallel tool calls. Requires anthropic-beta: advanced-tool-use-2025-11-20 header.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "description": "JavaScript code to execute. Available bindings: call_tool(name, params), get_causal_path(query), get_ucpt_proof()"
+            },
+            "timeout": {
+              "type": "number",
+              "description": "Execution timeout in milliseconds (max 60000)"
+            }
+          },
+          "required": ["code"]
+        },
+        "input_examples": [
+          {"code": "const result = await call_tool('auditSite', {url: 'https://example.com'}); return result.score;"},
+          {"code": "const [graph, citation] = await Promise.all([call_tool('getGraph', {url: 'https://site.com'}), call_tool('predictCitation', {url: 'https://site.com', platform: 'Claude'})]); return {graph, citation};"},
+          {"code": "const path = await get_causal_path('machine learning best practices'); const proof = await get_ucpt_proof(); return {path, proof};", "timeout": 45000}
+        ]
+      }
+    }
+  ],
+  "endpoints": {
+    "toolSearch": "/api/tools/search",
+    "programmaticExecution": "/api/mcp/programmatic"
+  },
+  "features": {
+    "deferToolLoading": true,
+    "betaCompatibility": ["advanced-tool-use-2025-11-20"]
+  }
+}

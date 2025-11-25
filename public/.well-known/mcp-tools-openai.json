@@ -19,7 +19,12 @@
         "required": [
           "url"
         ]
-      }
+      },
+      "input_examples": [
+        {"url": "https://example.com", "useAI": false},
+        {"url": "https://techblog.io/article", "useAI": true},
+        {"url": "https://ecommerce-store.com"}
+      ]
     }
   },
   {
@@ -38,7 +43,12 @@
         "required": [
           "url"
         ]
-      }
+      },
+      "input_examples": [
+        {"url": "https://wikipedia.org/wiki/Machine_Learning"},
+        {"url": "https://research-paper-site.edu/paper123"},
+        {"url": "https://news.com/latest-article"}
+      ]
     }
   },
   {
@@ -69,7 +79,12 @@
         "required": [
           "url"
         ]
-      }
+      },
+      "input_examples": [
+        {"url": "https://example.com", "platform": "ChatGPT"},
+        {"url": "https://docs-site.io", "platform": "all"},
+        {"url": "https://blog.company.com/post", "platform": "Claude"}
+      ]
     }
   },
   {
@@ -96,7 +111,12 @@
         "required": [
           "url"
         ]
-      }
+      },
+      "input_examples": [
+        {"url": "https://example.com", "targetKeywords": ["AI optimization", "SEO"]},
+        {"url": "https://blog.site.com"},
+        {"url": "https://product.io/landing", "targetKeywords": ["machine learning", "automation", "AI tools"]}
+      ]
     }
   },
   {
@@ -120,7 +140,12 @@
           "url",
           "query"
         ]
-      }
+      },
+      "input_examples": [
+        {"url": "https://example.com", "query": "What is machine learning?"},
+        {"url": "https://research.edu/papers/ai", "query": "latest advances in neural networks"},
+        {"url": "https://docs.framework.io", "query": "how to implement authentication"}
+      ]
     }
   },
   {
@@ -144,7 +169,12 @@
           "url",
           "targetIncrease"
         ]
-      }
+      },
+      "input_examples": [
+        {"url": "https://example.com", "targetIncrease": 25},
+        {"url": "https://blog.startup.io", "targetIncrease": 50},
+        {"url": "https://ecommerce.com/product", "targetIncrease": 15}
+      ]
     }
   },
   {
@@ -167,7 +197,12 @@
         "required": [
           "url"
         ]
-      }
+      },
+      "input_examples": [
+        {"url": "https://example.com", "includePrivateData": false},
+        {"url": "https://verified-authority.io", "includePrivateData": true},
+        {"url": "https://enterprise-site.com"}
+      ]
     }
   }
 ]

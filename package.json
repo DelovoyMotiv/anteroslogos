@@ -46,6 +46,7 @@
     "dotenv": "^17.2.3",
     "ethers": "^6.15.0",
     "express": "^5.1.0",
+    "fuse.js": "^7.1.0",
     "hardhat": "^3.0.15",
     "html2canvas": "^1.4.1",
     "ioredis": "^5.8.2",

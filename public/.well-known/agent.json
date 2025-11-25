@@ -37,10 +37,13 @@
     "icon": "https://anoteroslogos.com/favicon.ico",
     "color": "#3b82f6"
   },
+  "toolSearchEndpoint": "/api/tools/search",
+  "deferToolLoading": true,
   "metadata": {
     "organization": "Anóteros Lógos",
     "industry": "Generative Engine Optimization",
     "established": "2025",
+    "anthropic_advanced_tool_use": "2025-11-20",
     "specialization": [
       "AI Search Optimization",
       "Schema.org Architecture",
