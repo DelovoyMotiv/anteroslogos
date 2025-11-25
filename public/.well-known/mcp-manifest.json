@@ -1,7 +1,7 @@
 {
   "$schema": "https://modelcontextprotocol.io/schema/mcp-manifest.json",
   "version": "2.1.0",
-  "protocolVersion": "2024-11-05",
+  "protocolVersion": "2025-06-18",
   "name": "anteroslogos-mcp-server",
   "displayName": "Anóteros Lógos MCP Server",
   "description": "Enterprise MCP Server for GEO audit, knowledge graphs, citation prediction, and federated authority with Zero-Knowledge Proofs. Graph Tool #1 for AI Agents.",
@@ -25,7 +25,8 @@
     "prompts": {
       "listChanged": false
     },
-    "logging": {}
+    "logging": {},
+    "completions": {}
   },
   "vendor": {
     "name": "Anóteros Lógos",
@@ -250,6 +251,7 @@
   "prompts": [
     {
       "name": "geo_audit_analysis",
+      "title": "GEO Audit Analysis",
       "description": "Analyze GEO audit results and provide actionable recommendations",
       "arguments": [
         {
@@ -266,6 +268,7 @@
     },
     {
       "name": "citation_optimization",
+      "title": "Citation Optimization",
       "description": "Generate content recommendations to improve AI citation probability",
       "arguments": [
         {
@@ -282,6 +285,7 @@
     },
     {
       "name": "knowledge_graph_query",
+      "title": "Knowledge Graph Query",
       "description": "Query and analyze knowledge graph for a domain",
       "arguments": [
         {

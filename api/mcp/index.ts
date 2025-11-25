@@ -40,16 +40,17 @@ interface JsonRpcResponse {
   };
 }
 
-// MCP Server Info
+// MCP Server Info (Protocol Version 2025-06-18)
 const MCP_SERVER_INFO = {
   name: 'anteroslogos-mcp-server',
   version: '2.1.0',
-  protocolVersion: '2024-11-05',
+  protocolVersion: '2025-06-18',
   capabilities: {
     tools: { listChanged: false },
     resources: { subscribe: false, listChanged: false },
     prompts: { listChanged: false },
     logging: {},
+    completions: {},
   },
   instructions: `Anóteros Lógos MCP Server provides GEO audit, knowledge graph, and citation prediction tools for AI visibility optimization. Use tools/list to discover available tools, then tools/call to execute them.`,
 };
@@ -61,6 +62,7 @@ const MCP_SERVER_INFO = {
 function getMcpTools() {
   return Object.entries(GRAPH_TOOLS).map(([_key, tool]) => ({
     name: tool.name,
+    title: tool.name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()), // MCP 2025-06-18: title field
     description: tool.description,
     inputSchema: {
       type: 'object' as const,
@@ -117,6 +119,7 @@ const MCP_RESOURCES = [
 const MCP_PROMPTS = [
   {
     name: 'geo_audit_analysis',
+    title: 'GEO Audit Analysis', // MCP 2025-06-18: title field
     description: 'Analyze GEO audit results and provide actionable recommendations',
     arguments: [
       {
@@ -133,6 +136,7 @@ const MCP_PROMPTS = [
   },
   {
     name: 'citation_optimization',
+    title: 'Citation Optimization', // MCP 2025-06-18: title field
     description: 'Generate content recommendations to improve AI citation probability',
     arguments: [
       {
@@ -149,6 +153,7 @@ const MCP_PROMPTS = [
   },
   {
     name: 'knowledge_graph_query',
+    title: 'Knowledge Graph Query', // MCP 2025-06-18: title field
     description: 'Query and analyze knowledge graph for a domain',
     arguments: [
       {
@@ -446,10 +451,10 @@ async function handlePromptsGet(params: Record<string, unknown>): Promise<unknow
 // =====================================================
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS
+  // CORS + MCP 2025-06-18 headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, anthropic-beta, x-anthropic-beta');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, MCP-Protocol-Version, Mcp-Session-Id, anthropic-beta, x-anthropic-beta');
   
   if (req.method === 'OPTIONS') {
     return res.status(204).end();
