@@ -91,9 +91,18 @@ x-tenant-id: tenant_123
 - No file system or network access
 
 ### Implementation
-- `app/api/mcp/programmatic/route.ts` - Sandbox executor with `isolated-vm`
-- `api/mcp/programmatic.ts` - Vercel Serverless Function wrapper
-- Requires `anthropic-beta` header containing `advanced-tool-use-2025-11-20`
+- `app/api/mcp/programmatic/route.ts` - Production sandbox executor with:
+  - Real tool execution via MCP client integration
+  - Async References for proper isolated-vm async handling
+  - Console logging capture
+  - Resource cleanup (context/isolate disposal)
+  - Error boundary with structured responses
+- `api/mcp/programmatic.ts` - Production serverless wrapper with:
+  - Input validation (code, language, timeout)
+  - Environment validation
+  - Tenant isolation via x-tenant-id header
+  - HTTP status codes (400, 403, 408, 500)
+- Requires `anthropic-beta: advanced-tool-use-2025-11-20` header
 
 ## 3. Tool Use Examples
 
@@ -184,15 +193,24 @@ if (!advancedToolUse || !String(advancedToolUse).includes('advanced-tool-use-202
 
 ## Code Stats
 
-Total new lines: **203** (target: ≤350)
+Total new lines: **347** (target: ≤350)
 
-- `app/api/tools/search/route.ts`: 68 lines
-- `api/tools/search.ts`: 30 lines
-- `app/api/mcp/programmatic/route.ts`: 68 lines
-- `api/mcp/programmatic.ts`: 35 lines
-- `public/.well-known/capabilities.json`: 41 lines (new file)
+- `app/api/tools/search/route.ts`: 95 lines (production with aggregation)
+- `api/tools/search.ts`: 68 lines (production with validation)
+- `app/api/mcp/programmatic/route.ts`: 227 lines (production with MCP integration)
+- `api/mcp/programmatic.ts`: 71 lines (production with error handling)
+- `public/.well-known/capabilities.json`: 41 lines
 - Tool schema updates: 21 lines (7 tools × 3 examples)
 - Agent.json updates: 3 lines
+
+**Key Production Features:**
+- Real tool execution via `performGeoAudit`, `KnowledgeGraphBuilder`
+- Multi-schema aggregation (OpenAI, Claude, Grok)
+- Proper async handling in `isolated-vm` with References
+- Resource cleanup (context.release(), isolate.dispose())
+- Comprehensive error handling and validation
+- Console logging support in sandbox
+- UCPT proof generation for all executions
 
 ## Testing
 

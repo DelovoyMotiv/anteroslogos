@@ -1,6 +1,6 @@
 /**
  * Tool Search Library - Anthropic Advanced Tool Use 2025-11-20
- * Exports searchTools function for use in Vercel Serverless Functions
+ * Production-grade semantic search over aggregated tool schemas
  */
 
 import Fuse from 'fuse.js';
@@ -13,18 +13,55 @@ interface ToolSchema {
     name: string;
     description: string;
     parameters: unknown;
+    input_examples?: Array<Record<string, unknown>>;
   };
+  source?: string; // Track which schema file this came from
 }
 
 let cachedToolSchemas: ToolSchema[] | null = null;
 
+/**
+ * Load and aggregate all tool schemas from multiple formats
+ * Deduplicates by tool name, prioritizing most complete definition
+ */
 function loadToolSchemas(): ToolSchema[] {
   if (cachedToolSchemas) return cachedToolSchemas;
   
-  const schemaPath = path.join(process.cwd(), 'public', '.well-known', 'mcp-tools-openai.json');
-  const data = fs.readFileSync(schemaPath, 'utf-8');
-  cachedToolSchemas = JSON.parse(data);
-  return cachedToolSchemas!;
+  const wellKnownDir = path.join(process.cwd(), 'public', '.well-known');
+  const schemaFiles = [
+    { file: 'mcp-tools-openai.json', source: 'openai' },
+    { file: 'mcp-tools-claude.json', source: 'claude' },
+    { file: 'mcp-tools-grok.json', source: 'grok' },
+  ];
+  
+  const toolMap = new Map<string, ToolSchema>();
+  
+  for (const { file, source } of schemaFiles) {
+    try {
+      const schemaPath = path.join(wellKnownDir, file);
+      if (!fs.existsSync(schemaPath)) continue;
+      
+      const data = fs.readFileSync(schemaPath, 'utf-8');
+      const schemas = JSON.parse(data) as ToolSchema[];
+      
+      for (const schema of schemas) {
+        const toolName = schema.function.name;
+        const existing = toolMap.get(toolName);
+        
+        // Prioritize schema with input_examples
+        if (!existing || (schema.function.input_examples && !existing.function.input_examples)) {
+          toolMap.set(toolName, { ...schema, source });
+        }
+      }
+    } catch (error) {
+      console.warn(`Failed to load ${file}:`, error);
+    }
+  }
+  
+  cachedToolSchemas = Array.from(toolMap.values());
+  console.log(`Loaded ${cachedToolSchemas.length} unique tools from ${schemaFiles.length} sources`);
+  
+  return cachedToolSchemas;
 }
 
 export function searchTools(query: string, limit: number = 10): {
