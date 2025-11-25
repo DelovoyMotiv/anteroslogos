@@ -1,17 +1,17 @@
 # Anóteros Lógos - Enterprise AI Knowledge Infrastructure
 
 ![License](https://img.shields.io/badge/License-Proprietary-red)
-![Version](https://img.shields.io/badge/version-3.6.0-blue)
+![Version](https://img.shields.io/badge/version-3.7.0-blue)
 ![Node](https://img.shields.io/badge/node-20.x-green)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)
 ![React](https://img.shields.io/badge/React-19.2-cyan)
-![Build](https://img.shields.io/badge/APA-v1.1-brightgreen)
+![Build](https://img.shields.io/badge/Anthropic--ATU-2025--11--20-brightgreen)
 
 AI knowledge infrastructure platform providing cryptographically verifiable provenance, deterministic execution, and **Agent-Pay-Agent (APA) micropayments layer.** First production implementation of USDC-based micropayments for autonomous AI agent interactions on Base L2 blockchain.
 
 Production URL: https://anoteroslogos.com
 
-Codebase: 253 files | 86,448 lines
+Codebase: 267 files | 86,800 lines
 
 ---
 
@@ -29,7 +29,7 @@ Enterprise platform for optimizing digital content and brand presence for AI lan
 6. **Subscription Billing System** - Freemium tier model with USDC payments for SaaS plans
 7. **Agent Mesh Network** - Distributed peer discovery, capability routing, trust propagation via DHT
 8. **Byzantine Fault Tolerance** - PBFT consensus with Causal Consensus Oracle for provenance-based quorum weighting
-9. **MCP Integration** - Model Context Protocol v2.0 with isolated execution sandbox
+9. **MCP Integration** - Model Context Protocol v2.0 with isolated execution sandbox and Anthropic Advanced Tool Use support
 10. **Content Intelligence** - NLP analysis, query intent classification, competitive monitoring
 11. **Gold Standard System** - Citation prediction, learning feedback, network effects amplification
 
@@ -317,17 +317,20 @@ SaaS subscription management with USDC payments on Base L2.
 - `lib/subscriptions/paymentDetector.ts` - Automatic payment detection
 - `lib/subscriptions/renewalEngine.ts` - Auto-renewal processing
 
-### 9. MCP Integration (1,659 lines)
+### 9. MCP Integration (2,006 lines)
 
-Model Context Protocol v2.0 with isolated execution.
+Model Context Protocol v2.0 with isolated execution and Anthropic Advanced Tool Use compatibility.
 
 **Capabilities:**
-- isolated-vm sandbox (256MB heap, 2s timeout)
+- isolated-vm sandbox (128MB heap, 60s max timeout)
 - Ed25519 signature verification
 - Universal tool schemas (OpenAI/Claude/Grok formats)
 - Real-time streaming via SSE
-- Memory leak prevention
+- Resource management with automatic cleanup
 - Billing hooks
+- Tool search endpoint with semantic BM25 ranking
+- Programmatic code execution with pre-bound MCP functions
+- Input examples in tool schemas for improved LLM guidance
 
 **Tool Catalog:**
 ```
@@ -338,12 +341,25 @@ trackCitation          Citation monitoring
 learnFromCitations     Feedback loop
 discoverAgent          AID protocol detection
 syncPlatforms          Real-time syndication
+execute_code           Sandbox execution with tool bindings
 ```
+
+**Anthropic Advanced Tool Use (2025-11-20):**
+- Tool search via GET /api/tools/search with Fuse.js semantic matching
+- Programmatic execution via POST /api/mcp/programmatic with sandbox isolation
+- Async function bridges for call_tool, get_causal_path, get_ucpt_proof
+- Console logging support with log capture
+- Multi-schema aggregation with deduplication
+- Beta header gating for opt-in security
 
 **Components:**
 - `lib/mcp/sandbox.ts` - Enterprise sandbox (507 lines)
 - `lib/mcp/schemas.ts` - Universal schemas (528 lines)
 - `api/mcp/route.ts` - Unified endpoint (624 lines)
+- `app/api/tools/search/route.ts` - Tool search library (95 lines)
+- `api/tools/search.ts` - Search endpoint (68 lines)
+- `app/api/mcp/programmatic/route.ts` - Sandbox executor (227 lines)
+- `api/mcp/programmatic.ts` - Programmatic endpoint (71 lines)
 
 ### 10. Analytics Infrastructure (1,337 lines)
 
