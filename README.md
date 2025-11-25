@@ -5,7 +5,7 @@
 ![Node](https://img.shields.io/badge/node-20.x-green)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)
 ![React](https://img.shields.io/badge/React-19.2-cyan)
-![Build](https://img.shields.io/badge/Anthropic--ATU-2025--11--20-brightgreen)
+![Build](https://img.shields.io/badge/APA-v1.1-brightgreen)
 
 AI knowledge infrastructure platform providing cryptographically verifiable provenance, deterministic execution, and **Agent-Pay-Agent (APA) micropayments layer.** First production implementation of USDC-based micropayments for autonomous AI agent interactions on Base L2 blockchain.
 
