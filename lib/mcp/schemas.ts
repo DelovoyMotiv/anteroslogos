@@ -24,18 +24,23 @@ export interface ToolParameter {
   properties?: Record<string, ToolParameter>;
 }
 
+export interface ToolExample {
+  input: Record<string, unknown>;
+  output: unknown;
+}
+
 export interface ToolDefinition {
   name: string;
   description: string;
   parameters: ToolParameter[];
+  title?: string; // Human-readable title (MCP 2025-06-18)
+  defer_loading?: boolean; // Advanced Tool Use: load on demand
+  allowed_callers?: string[]; // e.g. ['code_execution_20250825']
   returns?: {
     type: string;
     description: string;
   };
-  examples?: Array<{
-    input: Record<string, unknown>; // Generic input for schema examples
-    output: unknown; // Generic output for schema examples
-  }>;
+  examples?: ToolExample[];
 }
 
 // =====================================================
@@ -44,6 +49,8 @@ export interface ToolDefinition {
 
 export const GRAPH_TOOLS: Record<string, ToolDefinition> = {
   auditSite: {
+    defer_loading: false,
+    title: 'GEO Audit',
     name: 'auditSite',
     description: 'Perform comprehensive GEO audit on a website to analyze AI visibility and optimization',
     parameters: [
@@ -79,6 +86,8 @@ export const GRAPH_TOOLS: Record<string, ToolDefinition> = {
   
   getGraph: {
     name: 'getGraph',
+    title: 'Build Knowledge Graph',
+    defer_loading: false,
     description: 'Build knowledge graph from website content, extracting entities, relationships, and claims',
     parameters: [
       {
@@ -96,6 +105,8 @@ export const GRAPH_TOOLS: Record<string, ToolDefinition> = {
   
   predictCitation: {
     name: 'predictCitation',
+    title: 'Predict Citation Probability',
+    defer_loading: true,
     description: 'Predict likelihood of website being cited by AI platforms (ChatGPT, Perplexity, Claude, etc.)',
     parameters: [
       {
@@ -120,6 +131,9 @@ export const GRAPH_TOOLS: Record<string, ToolDefinition> = {
   
   synthesizeNode: {
     name: 'synthesizeNode',
+    title: 'Synthesize Content Node',
+    defer_loading: true,
+    allowed_callers: ['code_execution_20250825'],
     description: 'Generate optimized content recommendations to improve AI visibility',
     parameters: [
       {
@@ -150,6 +164,9 @@ export const GRAPH_TOOLS: Record<string, ToolDefinition> = {
   // NEW UNIQUE TOOLS
   causal_citation_trace: {
     name: 'causal_citation_trace',
+    title: 'Causal Citation Trace',
+    defer_loading: true,
+    allowed_callers: ['code_execution_20250825'],
     description: 'Trace exact causal path in knowledge graph explaining why LLM would cite this site for given query. Returns full causal explanation with platform-specific reasoning, competitive analysis, and improvement recommendations.',
     parameters: [
       {
@@ -231,6 +248,9 @@ export const GRAPH_TOOLS: Record<string, ToolDefinition> = {
   
   predictive_synthesis: {
     name: 'predictive_synthesis',
+    title: 'Predictive Synthesis',
+    defer_loading: true,
+    allowed_callers: ['code_execution_20250825'],
     description: 'Synthesize new content recommendations that will increase visibility by X%',
     parameters: [
       {
@@ -277,6 +297,9 @@ export const GRAPH_TOOLS: Record<string, ToolDefinition> = {
   
   federated_authority_boost: {
     name: 'federated_authority_boost',
+    title: 'Federated Authority Proof',
+    defer_loading: true,
+    allowed_callers: ['code_execution_20250825'],
     description: 'Generate ZKP (Zero-Knowledge Proof) that site participates in federated authority graph',
     parameters: [
       {
@@ -309,6 +332,53 @@ export const GRAPH_TOOLS: Record<string, ToolDefinition> = {
       },
     ],
   },
+};
+
+// =====================================================
+// INFRA TOOLS (Advanced Tool Use)
+// =====================================================
+
+export const INFRA_TOOLS: Record<string, ToolDefinition> = {
+  code_execution: {
+    name: 'code_execution',
+    title: 'Code Execution',
+    description: 'Execute orchestration code in an isolated sandbox (code_execution_20250825).',
+    defer_loading: false,
+    parameters: [
+      { name: 'code', type: 'string', description: 'JavaScript code to execute', required: true },
+      { name: 'language', type: 'string', description: 'Execution language', required: false, enum: ['javascript'] },
+      { name: 'timeout_ms', type: 'number', description: 'Max execution time in milliseconds', required: false },
+      { name: 'files', type: 'array', description: 'In-memory files (path, content)', required: false, items: { name: 'file', type: 'object', description: 'File', required: true, properties: { path: { name: 'path', type: 'string', description: 'Path', required: true }, content: { name: 'content', type: 'string', description: 'Content', required: true } } } },
+    ],
+    returns: { type: 'object', description: 'Final program output with stdout/logs' },
+    examples: [
+      { input: { code: "const x=21*2; console.log('ok'); return x;", language: 'javascript' }, output: { stdout: 'ok', result: 42 } }
+    ],
+  },
+  
+  tool_search_tool_regex: {
+    name: 'tool_search_tool_regex',
+    title: 'Tool Search (Regex)',
+    description: 'Search available tools by name/description using regex with optional filters.',
+    defer_loading: false,
+    parameters: [
+      { name: 'query', type: 'string', description: 'Search query (regex supported)', required: true },
+      { name: 'top_k', type: 'number', description: 'Max results', required: false },
+      { name: 'filters', type: 'object', description: 'Optional filters', required: false, properties: {
+        server: { name: 'server', type: 'string', description: 'Server name', required: false },
+        name_prefix: { name: 'name_prefix', type: 'string', description: 'Tool name prefix', required: false }
+      } }
+    ],
+    returns: { type: 'object', description: 'Array of tool references ranked by score' },
+    examples: [
+      { input: { query: 'graph|citation', top_k: 5 }, output: { tool_refs: [{ name: 'getGraph', score: 0.93 }] } }
+    ],
+  },
+};
+
+export const ALL_TOOLS: Record<string, ToolDefinition> = {
+  ...INFRA_TOOLS,
+  ...GRAPH_TOOLS,
 };
 
 // =====================================================
@@ -416,15 +486,19 @@ export function toClaudeTool(
       required: tool.parameters.filter(p => p.required).map(p => p.name),
     },
   };
-  
+  // Non-standard Anthropic metadata used by advanced tool use
+  // These keys are passed through and ignored by clients that don't support them
+  (claudeTool as any).defer_loading = tool.defer_loading ?? true;
+  if (tool.allowed_callers) (claudeTool as any).allowed_callers = tool.allowed_callers;
+  if (tool.examples?.length) (claudeTool as any).input_examples = tool.examples.map(e => e.input);
+
   // Add cache_control for Claude 3.5+ prompt caching
-  // This enables up to 80% latency reduction for cached tool definitions
   if (options?.enableCache !== false) {
     claudeTool.cache_control = {
       type: options?.cacheType || 'ephemeral',
     };
   }
-  
+
   return claudeTool;
 }
 
@@ -449,7 +523,7 @@ export function createClaudeToolChoice(toolName?: string): {
  * Export all Claude tools with cache_control enabled
  */
 export function exportClaudeTools(options?: { enableCache?: boolean }): ClaudeToolSchema[] {
-  return Object.values(GRAPH_TOOLS).map(tool => toClaudeTool(tool, options));
+  return Object.values(ALL_TOOLS).map(tool => toClaudeTool(tool, options));
 }
 
 /**
@@ -642,7 +716,7 @@ export function exportAllTools(): {
   grok: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
   openapi: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 } {
-  const tools = Object.values(GRAPH_TOOLS);
+  const tools = Object.values(ALL_TOOLS);
   
   return {
     openai: tools.map(toOpenAIFunction),

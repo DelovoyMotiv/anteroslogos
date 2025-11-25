@@ -96,49 +96,74 @@
   },
   "tools": [
     {
+      "name": "tool_search_tool_regex",
+      "category": "infrastructure",
+      "description": "Search available tools by name/description (regex)",
+      "unique": false,
+      "defer_loading": false
+    },
+    {
+      "name": "code_execution",
+      "category": "infrastructure",
+      "description": "Execute orchestration code in isolated sandbox (code_execution_20250825)",
+      "unique": true,
+      "defer_loading": false
+    },
+    {
       "name": "auditSite",
       "category": "geo-audit",
       "description": "Comprehensive GEO audit for AI visibility analysis",
-      "unique": false
+      "unique": false,
+      "defer_loading": false
     },
     {
       "name": "getGraph",
       "category": "knowledge-graph",
       "description": "Build knowledge graph with entities and relationships",
-      "unique": false
+      "unique": false,
+      "defer_loading": false
     },
     {
       "name": "predictCitation",
       "category": "citation-analysis",
       "description": "Predict citation probability across AI platforms",
-      "unique": false
+      "unique": false,
+      "defer_loading": true
     },
     {
       "name": "synthesizeNode",
       "category": "content-optimization",
       "description": "Generate content recommendations for AI visibility",
-      "unique": false
+      "unique": false,
+      "defer_loading": true,
+      "allowed_callers": ["code_execution_20250825"]
     },
     {
       "name": "causal_citation_trace",
       "category": "advanced-analytics",
       "description": "Trace exact causal path explaining why LLM would cite site",
       "unique": true,
-      "novelty": "Only tool providing causal reasoning chains for citation decisions"
+      "novelty": "Only tool providing causal reasoning chains for citation decisions",
+      "defer_loading": true,
+      "allowed_callers": ["code_execution_20250825"]
     },
     {
       "name": "predictive_synthesis",
       "category": "advanced-analytics",
       "description": "Synthesize content plan to achieve specific visibility increase",
       "unique": true,
-      "novelty": "First tool to predict exact visibility impact with confidence scores"
+      "novelty": "First tool to predict exact visibility impact with confidence scores",
+      "defer_loading": true,
+      "allowed_callers": ["code_execution_20250825"]
     },
     {
       "name": "federated_authority_boost",
       "category": "zkp-authority",
       "description": "Generate ZKP proof of federated authority participation",
       "unique": true,
-      "novelty": "Only tool using Zero-Knowledge Proofs for authority verification without revealing private data"
+      "novelty": "Only tool using Zero-Knowledge Proofs for authority verification without revealing private data",
+      "defer_loading": true,
+      "allowed_callers": ["code_execution_20250825"]
     }
   ],
   "rateLimits": {

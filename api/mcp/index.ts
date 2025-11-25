@@ -16,7 +16,9 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { GRAPH_TOOLS, toClaudeTool, toOpenAIFunction } from '../../lib/mcp/schemas';
+import { ALL_TOOLS, INFRA_TOOLS, toClaudeTool, toOpenAIFunction } from '../../lib/mcp/schemas';
+import { createClient } from '@supabase/supabase-js';
+import { executeProgrammatic } from '../../app/api/mcp/programmatic/route';
 
 // =====================================================
 // MCP PROTOCOL TYPES (2024-11-05 Spec)
@@ -60,7 +62,7 @@ const MCP_SERVER_INFO = {
 // =====================================================
 
 function getMcpTools() {
-  return Object.entries(GRAPH_TOOLS).map(([_key, tool]) => ({
+  return Object.entries(ALL_TOOLS).map(([_key, tool]) => ({
     name: tool.name,
     title: tool.name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()), // MCP 2025-06-18: title field
     description: tool.description,
@@ -184,6 +186,48 @@ async function executeToolCall(
     let result: unknown;
     
     switch (name) {
+      case 'tool_search_tool_regex': {
+        const query = String(args.query || '').trim();
+        const topK = Number(args.top_k || 5);
+        if (!query) throw new Error('Missing required parameter: query');
+        const regex = new RegExp(query, 'i');
+        const matches = Object.values(ALL_TOOLS)
+          .filter(t => regex.test(t.name) || regex.test(t.description || '') || regex.test(t.title || ''))
+          .map(t => ({
+            name: t.name,
+            title: t.title || t.name,
+            short_description: t.description,
+            defer_loading: t.defer_loading ?? true,
+            score: Math.min(0.99, 0.5 + (t.title && regex.test(t.title) ? 0.3 : 0) + (regex.test(t.name) ? 0.2 : 0)),
+          }))
+          .sort((a, b) => b.score - a.score)
+          .slice(0, topK);
+        result = { tool_refs: matches };
+        break;
+      }
+
+      case 'code_execution': {
+        const code = args.code as string;
+        const language = (args.language as string) || 'javascript';
+        const timeout = typeof args.timeout_ms === 'number' ? (args.timeout_ms as number) : undefined;
+        if (!code) throw new Error('Missing required parameter: code');
+        if (language !== 'javascript') throw new Error('Only javascript language is supported');
+        // Prepare Supabase client and tenant
+        const tenantId = String((args.tenant_id as string) || 'default');
+        if (!process.env.VITE_SUPABASE_URL || !process.env.VITE_SUPABASE_ANON_KEY) {
+          throw new Error('Supabase environment variables not configured');
+        }
+        const supabase = createClient(
+          process.env.VITE_SUPABASE_URL as string,
+          process.env.VITE_SUPABASE_ANON_KEY as string
+        );
+        const { result: programResult, ucpt, executionTime, logs } = await executeProgrammatic(
+          { code, language: 'javascript', timeout }, supabase, tenantId
+        );
+        result = { stdout: logs.join('\n'), result: programResult, ucpt, executionTimeMs: executionTime };
+        break;
+      }
+
       case 'auditSite': {
         const url = args.url as string;
         if (!url) throw new Error('Missing required parameter: url');
@@ -246,6 +290,14 @@ async function executeToolCall(
       case 'causal_citation_trace':
       case 'predictive_synthesis':
       case 'federated_authority_boost': {
+        // Enforce allowed_callers policy: these heavy tools must be called from code_execution
+        const allowedFromCode = ['synthesizeNode', 'causal_citation_trace', 'predictive_synthesis', 'federated_authority_boost'];
+        if (allowedFromCode.includes(name)) {
+          const caller = (args.caller as any)?.type;
+          if (caller !== 'code_execution_20250825' && caller !== 'code_execution') {
+            throw new Error(`Tool ${name} must be invoked via Programmatic Tool Calling (caller=code_execution_20250825).`);
+          }
+        }
         result = {
           tool: name,
           args,
@@ -466,9 +518,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     
     switch (format) {
       case 'openai':
-        return res.status(200).json(Object.values(GRAPH_TOOLS).map(toOpenAIFunction));
+        return res.status(200).json(Object.values(ALL_TOOLS).map(toOpenAIFunction));
       case 'claude':
-        return res.status(200).json(Object.values(GRAPH_TOOLS).map(toClaudeTool));
+        return res.status(200).json(Object.values(ALL_TOOLS).map(tool => toClaudeTool(tool)));
       case 'mcp':
         return res.status(200).json({
           serverInfo: MCP_SERVER_INFO,
