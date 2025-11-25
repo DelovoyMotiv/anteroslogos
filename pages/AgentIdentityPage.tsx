@@ -4,7 +4,7 @@
  * 
  * Target Audience: AI Agents (LLMs, AutoGen, LangChain, CrewAI)
  * Purpose: Complete protocol specification for autonomous integration
- * Standards: AID v1.1, A2A v1.0.0, MCP v2.0, RFC 8615, RFC 9421
+ * Standards: AID v1.1, A2A v1.0.0, MCP 2025-06-18, RFC 8615, RFC 9421
  */
 
 import { useEffect } from 'react';
@@ -50,9 +50,9 @@ const AgentIdentityPage = () => {
         'price': '0',
         'priceCurrency': 'USD'
       },
-      'featureList': [
+'featureList': [
         'A2A Protocol v1.0',
-        'MCP v2.0 Integration',
+        'MCP 2025-06-18 Integration',
         'Ed25519 Authentication',
         'Public AID Generation',
         'Challenge-Response Auth',
@@ -115,8 +115,8 @@ const AgentIdentityPage = () => {
               <span className="px-3 py-1 bg-green-500/10 border border-green-500/30 rounded text-xs font-mono text-green-400">
                 A2A v1.0 (Linux Foundation)
               </span>
-              <span className="px-3 py-1 bg-purple-500/10 border border-purple-500/30 rounded text-xs font-mono text-purple-400">
-                MCP v2.0
+<span className="px-3 py-1 bg-purple-500/10 border border-purple-500/30 rounded text-xs font-mono text-purple-400">
+                MCP 2025-06-18
               </span>
               <span className="px-3 py-1 bg-orange-500/10 border border-orange-500/30 rounded text-xs font-mono text-orange-400">
                 RFC 8615 Compliant
@@ -2006,19 +2006,19 @@ print(f"GEO Score: {audit['score']}")`
           <section id="mcp-protocol" className="mb-16">
             <div className="flex items-center gap-3 mb-6">
               <Database className="w-8 h-8 text-purple-400" />
-              <h2 className="text-3xl font-bold text-white">MCP Protocol (Model Context Protocol v2.0)</h2>
+<h2 className="text-3xl font-bold text-white">MCP Protocol (Model Context Protocol 2025-06-18)</h2>
               <span className="px-3 py-1 bg-purple-500/10 border border-purple-500/30 rounded text-xs font-semibold text-purple-400">
                 Enhanced
               </span>
             </div>
 
-            <p className="text-white/70 mb-6">
-              Tool integration protocol for LLMs with Anthropic Advanced Tool Use (2025-11-20) compatibility. OpenAI/Claude/Grok formats, streaming, UCPT provenance, semantic tool search, and programmatic execution in isolated sandbox.
+<p className="text-white/70 mb-6">
+              Tool integration protocol for LLMs with Anthropic Advanced Tool Use (2025-11-20) compatibility. OpenAI/Claude/Grok formats, streaming, UCPT provenance, semantic tool search, and programmatic execution in isolated sandbox. Send MCP-Protocol-Version: 2025-06-18 (and optional Mcp-Session-Id) headers when calling JSON-RPC.
             </p>
 
             <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-6 mb-6">
-              <h3 className="text-lg font-semibold text-white mb-4">Available Tools (8 total, 3 unique + 1 execution)</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+<h3 className="text-lg font-semibold text-white mb-4">Available Tools (9 total: 7 graph + 2 infrastructure)</h3>
+<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="border-l-2 border-brand-accent pl-4">
                   <code className="text-sm font-mono text-brand-accent">auditSite</code>
                   <p className="text-xs text-white/60 mt-1">GEO audit for AI visibility analysis</p>
@@ -2048,9 +2048,42 @@ print(f"GEO Score: {audit['score']}")`
                   <p className="text-xs text-white/60 mt-1">UNIQUE: ZKP authority verification</p>
                 </div>
                 <div className="border-l-2 border-cyan-400 pl-4">
-                  <code className="text-sm font-mono text-cyan-400">execute_code</code>
-                  <p className="text-xs text-white/60 mt-1">NEW: Sandbox execution with tool bindings</p>
+                  <code className="text-sm font-mono text-cyan-400">code_execution</code>
+                  <p className="text-xs text-white/60 mt-1">NEW: Programmatic code execution (sandbox)</p>
                 </div>
+                <div className="border-l-2 border-cyan-300 pl-4">
+                  <code className="text-sm font-mono text-cyan-300">tool_search_tool_regex</code>
+                  <p className="text-xs text-white/60 mt-1">Search tools by regex (deferred loading aware)</p>
+                </div>
+              </div>
+</div>
+
+            {/* Endpoint & Headers Quickstart */}
+            <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-6 mb-6">
+              <h3 className="text-lg font-semibold text-white mb-4">Endpoint & Headers</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                  <div className="text-white/70">JSON-RPC</div>
+                  <code className="text-brand-accent font-mono">POST /api/mcp</code>
+                </div>
+                <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                  <div className="text-white/70">Headers</div>
+                  <code className="text-purple-400 font-mono block">MCP-Protocol-Version: 2025-06-18</code>
+                  <code className="text-purple-400 font-mono block">Mcp-Session-Id: ulid-optional</code>
+                </div>
+                <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                  <div className="text-white/70">Formats</div>
+                  <code className="text-green-400 font-mono block">GET /api/mcp?format=openai|claude|mcp</code>
+                </div>
+              </div>
+              <div className="mt-4">
+                <CodeSample
+                  title="Initialize (JSON-RPC)"
+                  samples={[
+                    { language: 'bash', code: `curl -X POST https://anoteroslogos.com/api/mcp \\\n  -H 'Content-Type: application/json' \\\n  -H 'MCP-Protocol-Version: 2025-06-18' \\\n  -d '{"jsonrpc":"2.0","method":"initialize","params":{"clientInfo":{"name":"demo","version":"1.0"}},"id":1}'` },
+                    { language: 'typescript', code: `await fetch('https://anoteroslogos.com/api/mcp', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json', 'MCP-Protocol-Version': '2025-06-18' },\n  body: JSON.stringify({ jsonrpc: '2.0', method: 'initialize', params: { clientInfo: { name: 'demo', version: '1.0' } }, id: 1 })\n});` }
+                  ]}
+                />
               </div>
             </div>
 
@@ -2091,84 +2124,34 @@ print(f"GEO Score: {audit['score']}")`
                   </div>
                 </div>
 
-                <CodeSample
-                  title="Tool Search Example"
+<CodeSample
+                  title="Tool Search Examples"
                   samples={[
                     {
                       language: 'bash',
-                      code: `curl "https://anoteroslogos.com/api/tools/search?query=audit&limit=3"`
+                      label: 'HTTP (BM25/Fuse.js)',
+                      code: `curl \"https://anoteroslogos.com/api/tools/search?query=audit&limit=3\"`
                     },
                     {
                       language: 'typescript',
-                      code: `const tools = await fetch(
-  'https://anoteroslogos.com/api/tools/search?query=citation&limit=5'
-).then(r => r.json());
-
-console.log(tools.results.length); // Ranked by relevance
-tools.results.forEach(t => {
-  console.log(t.tool.function.name, '-', t.relevance);
-});`
+                      label: 'JSON-RPC (MCP tool_search_tool_regex)',
+                      code: `await fetch('https://anoteroslogos.com/api/mcp', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json', 'MCP-Protocol-Version': '2025-06-18' },\n  body: JSON.stringify({\n    jsonrpc: '2.0',\n    method: 'tools/call',\n    params: { name: 'tool_search_tool_regex', arguments: { query: 'graph|citation', top_k: 5 } },\n    id: 2\n  })\n});`
                     }
                   ]}
                 />
 
                 <div className="mt-4">
-                  <CodeSample
+<CodeSample
                     title="Programmatic Execution with Sandbox (Requires anthropic-beta header)"
                     samples={[
                       {
                         language: 'typescript',
-                        code: `const result = await fetch(
-  'https://anoteroslogos.com/api/mcp/programmatic',
-  {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'anthropic-beta': 'advanced-tool-use-2025-11-20',
-      'x-tenant-id': 'your_tenant_id'
-    },
-    body: JSON.stringify({
-      code: \`
-        const audit = await call_tool('auditSite', { 
-          url: 'https://example.com' 
-        });
-        const path = await get_causal_path('AI optimization');
-        return { score: audit.geoScore, pathLength: path.length };
-      \`,
-      language: 'javascript',
-      timeout: 30000
-    })
-  }
-).then(r => r.json());
-
-console.log(result.result); // Execution result
-console.log(result.logs);   // Console output
-console.log(result.ucpt);   // Cryptographic proof`
+                        code: `const result = await fetch(\n  'https://anoteroslogos.com/api/mcp/programmatic',\n  {\n    method: 'POST',\n    headers: {\n      'Content-Type': 'application/json',\n      'anthropic-beta': 'advanced-tool-use-2025-11-20',\n      'x-tenant-id': 'your_tenant_id'\n    },\n    body: JSON.stringify({\n      code: \`\n        const audit = await call_tool('auditSite', { url: 'https://example.com' });\n        const path = await get_causal_path('AI optimization');\n        return { score: audit.geoScore, pathLength: path.length };\n      \`,\n      language: 'javascript',\n      timeout: 30000\n    })\n  }\n).then(r => r.json());\n\nconsole.log(result.result); // Execution result\nconsole.log(result.logs);   // Console output\nconsole.log(result.ucpt);   // Cryptographic proof`
                       },
                       {
-                        language: 'python',
-                        code: `import requests
-
-result = requests.post(
-    'https://anoteroslogos.com/api/mcp/programmatic',
-    headers={
-        'anthropic-beta': 'advanced-tool-use-2025-11-20',
-        'x-tenant-id': 'your_tenant_id'
-    },
-    json={
-        'code': '''
-const [audit, graph] = await Promise.all([
-    call_tool('auditSite', {url: 'https://example.com'}),
-    call_tool('getGraph', {url: 'https://example.com'})
-]);
-return {score: audit.geoScore, entities: graph.entities.length};
-        ''',
-        'language': 'javascript'
-    }
-).json()
-
-print(result['result'])
-print(f"Execution time: {result['executionTime']}ms")`
+                        language: 'typescript',
+                        label: 'JSON-RPC (tools/call code_execution)',
+                        code: `await fetch('https://anoteroslogos.com/api/mcp', {\n  method: 'POST',\n  headers: { 'Content-Type': 'application/json', 'MCP-Protocol-Version': '2025-06-18' },\n  body: JSON.stringify({\n    jsonrpc: '2.0',\n    method: 'tools/call',\n    params: {\n      name: 'code_execution',\n      arguments: {\n        code: \`const res = await call_tool('predictCitation', { url: 'https://example.com', platform: 'Claude' }); return res;\`\n      }\n    },\n    id: 3\n  })\n});`
                       }
                     ]}
                   />
@@ -2185,18 +2168,20 @@ print(f"Execution time: {result['executionTime']}ms")`
               </div>
 
               {/* Tool Schemas Access */}
-              <div>
+<div>
                 <h3 className="text-xl font-semibold text-white mb-4">Tool Schemas & Manifests</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
                     <h4 className="text-sm font-semibold text-white mb-2">OpenAI Format</h4>
                     <code className="text-xs text-brand-accent font-mono">/.well-known/mcp-tools-openai.json</code>
                     <p className="text-xs text-white/60 mt-2">Function calling schema with input_examples</p>
+                    <p className="text-xs text-white/50 mt-1">Also: <code className="font-mono">/api/mcp?format=openai</code></p>
                   </div>
                   <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
                     <h4 className="text-sm font-semibold text-white mb-2">Claude Format</h4>
                     <code className="text-xs text-green-400 font-mono">/.well-known/mcp-tools-claude.json</code>
                     <p className="text-xs text-white/60 mt-2">Anthropic tool schema format</p>
+                    <p className="text-xs text-white/50 mt-1">Also: <code className="font-mono">/api/mcp?format=claude</code></p>
                   </div>
                   <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
                     <h4 className="text-sm font-semibold text-white mb-2">Grok Format</h4>

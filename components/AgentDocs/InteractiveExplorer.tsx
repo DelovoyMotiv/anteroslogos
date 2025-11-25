@@ -72,10 +72,10 @@ const API_METHODS: ApiMethod[] = [
     endpoint: '/.well-known/capabilities.json',
     method: 'GET',
   },
-  {
+{
     id: 'mcp-manifest.json',
     name: '.well-known/mcp-manifest.json',
-    description: 'MCP v2.0 manifest',
+    description: 'MCP 2025-06-18 manifest',
     category: 'discovery',
     endpoint: '/.well-known/mcp-manifest.json',
     method: 'GET',
