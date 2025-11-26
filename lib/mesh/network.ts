@@ -631,8 +631,7 @@ export class MeshNetworkRouter {
     if (options?.filter === 'ucpt-capable') {
       // Filter for nodes that support UCPT cascade (indicated by capability)
       targetPeers = allPeers.filter(peer => 
-        peer.capabilities?.includes('ucpt-cascade') ||
-        peer.capabilities?.includes('provenance-cascade')
+        peer.capabilities?.includes('a2a.mesh.cascade')
       );
       console.log(`[MeshRouter] Filtered to ${targetPeers.length} UCPT-capable peers`);
     }

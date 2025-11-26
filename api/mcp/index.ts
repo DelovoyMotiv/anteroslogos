@@ -21,6 +21,9 @@ import { createClient } from '@supabase/supabase-js';
 import { executeProgrammatic } from '../../app/api/mcp/programmatic/route';
 import { MeshNetworkRouter, type UCPTCascadeMessage } from '../../lib/mesh/network';
 import type { SerializedUCPT } from '../../lib/ucpt/types';
+import { performGeoAudit } from '../../utils/geoAuditEnhanced';
+import { KnowledgeGraphBuilder } from '../../utils/knowledgeGraph/builder';
+import { CitationPredictionEngine } from '../../utils/citationPrediction/engine';
 
 // =====================================================
 // MCP PROTOCOL TYPES (2024-11-05 Spec)
@@ -291,19 +294,19 @@ async function executeToolCall(
 
       case 'auditSite': {
         const url = args.url as string;
+        const useAI = Boolean(args.useAI || false);
         if (!url) throw new Error('Missing required parameter: url');
         
-        // Simplified audit for MCP - returns structured result
+        // Production GEO audit
+        const auditResult = await performGeoAudit(url, { useAI });
         result = {
-          url,
-          geoScore: 75 + Math.random() * 20, // Placeholder - real impl uses performGeoAudit
-          grade: 'B+',
-          timestamp: new Date().toISOString(),
-          recommendations: [
-            'Add FAQ schema markup',
-            'Improve E-E-A-T signals',
-            'Optimize for AI crawlers',
-          ],
+          url: auditResult.url,
+          geoScore: auditResult.geoScore,
+          grade: auditResult.grade,
+          timestamp: auditResult.timestamp,
+          recommendations: auditResult.recommendations || [],
+          scores: auditResult.scores,
+          metrics: auditResult.metrics,
         };
         break;
       }
@@ -312,15 +315,20 @@ async function executeToolCall(
         const url = args.url as string;
         if (!url) throw new Error('Missing required parameter: url');
         
-        result = {
-          url,
-          entities: [
-            { id: 'e1', type: 'Organization', name: new URL(url).hostname },
-          ],
-          relationships: [],
-          claims: [],
-          metadata: { extracted: new Date().toISOString() },
-        };
+        // Production knowledge graph extraction
+        const domain = new URL(url).hostname;
+        const builder = new KnowledgeGraphBuilder(domain);
+        
+        // Fetch HTML
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch URL: ${response.status} ${response.statusText}`);
+        }
+        const html = await response.text();
+        
+        // Build graph
+        const graph = await builder.buildFromHTML(html, url);
+        result = graph;
         break;
       }
       
@@ -329,20 +337,38 @@ async function executeToolCall(
         const platform = (args.platform as string) || 'all';
         if (!url) throw new Error('Missing required parameter: url');
         
-        const predictions: Record<string, number> = {
-          Claude: 0.72 + Math.random() * 0.15,
-          ChatGPT: 0.65 + Math.random() * 0.15,
-          Perplexity: 0.78 + Math.random() * 0.15,
-          Gemini: 0.60 + Math.random() * 0.15,
-          Grok: 0.55 + Math.random() * 0.15,
+        // Production citation prediction
+        // First, extract knowledge graph
+        const domain = new URL(url).hostname;
+        const builder = new KnowledgeGraphBuilder(domain);
+        const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch URL: ${response.status} ${response.statusText}`);
+        }
+        const html = await response.text();
+        const graph = await builder.buildFromHTML(html, url);
+        
+        // Predict citations
+        const engine = new CitationPredictionEngine();
+        const prediction = await engine.predictCitations(graph, { contentUrl: url });
+        
+        // Format response
+        const platformPredictions: Record<string, number> = {
+          Claude: prediction.platform_predictions.claude.probability,
+          ChatGPT: prediction.platform_predictions.chatgpt.probability,
+          Perplexity: prediction.platform_predictions.perplexity.probability,
+          Gemini: prediction.platform_predictions.gemini.probability,
+          Meta: prediction.platform_predictions.meta.probability,
         };
         
         result = {
           url,
           platform,
-          predictions: platform === 'all' ? predictions : { [platform]: predictions[platform] || 0.5 },
-          confidence: 0.85,
+          predictions: platform === 'all' ? platformPredictions : { [platform]: platformPredictions[platform] || 0 },
+          confidence: prediction.confidence,
           timestamp: new Date().toISOString(),
+          overall_probability: prediction.overall_probability,
+          optimization_actions: prediction.optimization_actions,
         };
         break;
       }
