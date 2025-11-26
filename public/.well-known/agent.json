@@ -24,7 +24,8 @@
       "a2a.mesh.discover",
       "a2a.mesh.announce",
       "a2a.mesh.sync",
-      "a2a.mesh.health"
+      "a2a.mesh.health",
+      "a2a.mesh.cascade"
     ],
     "capabilitiesUrl": "/api/capabilities",
     "vendor": "Anóteros Lógos",
@@ -100,7 +101,10 @@
       "mcp": {
         "version": "2.0.0",
         "endpoint": "https://anoteroslogos.com/api/mcp",
-        "programmaticEndpoint": "https://anoteroslogos.com/api/mcp/programmatic"
+        "programmaticEndpoint": "https://anoteroslogos.com/api/mcp/programmatic",
+        "supportsCascade": true,
+        "cascadeHeader": "x-mesh-broadcast: true",
+        "cascadeReward": "priority routing + reduced latency"
       },
       "http": {
         "version": "1.1",

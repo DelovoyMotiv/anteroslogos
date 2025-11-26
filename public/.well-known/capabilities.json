@@ -36,6 +36,9 @@
   },
   "features": {
     "deferToolLoading": true,
-    "betaCompatibility": ["advanced-tool-use-2025-11-20"]
+    "betaCompatibility": ["advanced-tool-use-2025-11-20"],
+    "supportsCascade": true,
+    "cascadeHeader": "x-mesh-broadcast: true",
+    "cascadeReward": "priority routing + reduced latency"
   }
 }

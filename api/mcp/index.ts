@@ -19,6 +19,8 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { ALL_TOOLS, INFRA_TOOLS, toClaudeTool, toOpenAIFunction } from '../../lib/mcp/schemas';
 import { createClient } from '@supabase/supabase-js';
 import { executeProgrammatic } from '../../app/api/mcp/programmatic/route';
+import { MeshNetworkRouter, type UCPTCascadeMessage } from '../../lib/mesh/network';
+import type { SerializedUCPT } from '../../lib/ucpt/types';
 
 // =====================================================
 // MCP PROTOCOL TYPES (2024-11-05 Spec)
@@ -176,9 +178,62 @@ const MCP_PROMPTS = [
 // TOOL EXECUTION
 // =====================================================
 
+// Mesh router instance for cascade broadcast
+let meshRouter: MeshNetworkRouter | null = null;
+
+function getMeshRouter(): MeshNetworkRouter {
+  if (!meshRouter) {
+    const localAid = process.env.AGENT_AID || 'aid://anoteroslogos.com/geo-audit';
+    meshRouter = new MeshNetworkRouter(localAid, { useLibp2p: true });
+  }
+  return meshRouter;
+}
+
+/**
+ * Broadcast UCPT token via Provenance Cascade if x-mesh-broadcast header is present
+ */
+async function broadcastUCPTCascade(
+  ucpt: SerializedUCPT,
+  toolName: string,
+  sourceAid: string
+): Promise<void> {
+  const router = getMeshRouter();
+  
+  // Ensure router is initialized
+  if (!(router as any).initialized) {
+    try {
+      await router.initialize();
+    } catch (error) {
+      console.error('[ProvCascade] Failed to initialize mesh router:', error);
+      return; // Silently skip cascade on init failure
+    }
+  }
+  
+  const cascadeMsg: UCPTCascadeMessage = {
+    type: 'ucpt-cascade',
+    ucpt: ucpt.token,
+    sourceAid,
+    tool: toolName,
+    ttl: 7,
+    timestamp: Date.now(),
+  };
+  
+  try {
+    const { sent, failed } = await router.broadcast(cascadeMsg, {
+      maxHops: 7,
+      filter: 'ucpt-capable',
+    });
+    console.log(`[ProvCascade] ${toolName}: broadcast to ${sent} peers (${failed} failed)`);
+  } catch (error) {
+    console.error('[ProvCascade] Broadcast failed:', error);
+    // Don't throw - cascade is best-effort
+  }
+}
+
 async function executeToolCall(
   name: string,
-  args: Record<string, unknown>
+  args: Record<string, unknown>,
+  request?: VercelRequest
 ): Promise<{ content: Array<{ type: string; text: string }>; isError?: boolean }> {
   const startTime = Date.now();
   
@@ -225,6 +280,12 @@ async function executeToolCall(
           { code, language: 'javascript', timeout }, supabase, tenantId
         );
         result = { stdout: logs.join('\n'), result: programResult, ucpt, executionTimeMs: executionTime };
+        
+        // Provenance Cascade: broadcast UCPT if x-mesh-broadcast header is true
+        if (ucpt && request?.headers['x-mesh-broadcast'] === 'true') {
+          const sourceAid = process.env.AGENT_AID || 'aid://anoteroslogos.com/geo-audit';
+          await broadcastUCPTCascade(ucpt, name, sourceAid);
+        }
         break;
       }
 
@@ -362,7 +423,7 @@ async function handleToolsList(): Promise<unknown> {
   };
 }
 
-async function handleToolsCall(params: Record<string, unknown>): Promise<unknown> {
+async function handleToolsCall(params: Record<string, unknown>, req?: VercelRequest): Promise<unknown> {
   const name = params.name as string;
   const args = (params.arguments as Record<string, unknown>) || {};
   
@@ -370,7 +431,7 @@ async function handleToolsCall(params: Record<string, unknown>): Promise<unknown
     throw { code: -32602, message: 'Missing required parameter: name' };
   }
   
-  return executeToolCall(name, args);
+  return executeToolCall(name, args, req);
 }
 
 async function handleResourcesList(): Promise<unknown> {
@@ -582,7 +643,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         break;
       
       case 'tools/call':
-        response.result = await handleToolsCall(params);
+        response.result = await handleToolsCall(params, req);
         break;
       
       case 'resources/list':

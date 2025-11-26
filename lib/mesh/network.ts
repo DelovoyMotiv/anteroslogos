@@ -135,6 +135,20 @@ export interface MeshSyncMessage {
 }
 
 /**
+ * UCPT Cascade Message - Viral provenance distribution
+ * Automatically propagates UCPT tokens through mesh network
+ */
+export interface UCPTCascadeMessage {
+  type: 'ucpt-cascade';
+  ucpt: string; // base64url-encoded COSE_Sign1 token
+  sourceAid: string; // Originating agent AID URI
+  tool: string; // Tool name that generated the UCPT
+  ttl: number; // Hops remaining (0-7)
+  timestamp: number; // Unix timestamp (ms)
+  signature?: string; // Optional Ed25519 signature
+}
+
+/**
  * Circuit breaker state
  */
 interface CircuitBreakerState {
@@ -596,7 +610,72 @@ export class MeshNetworkRouter {
   // =====================================================
 
   /**
+   * Broadcast message to mesh with filters
+   * Supports both sync messages and UCPT cascade
+   */
+  async broadcast(
+    message: MeshSyncMessage | UCPTCascadeMessage, 
+    options?: { maxHops?: number; filter?: string }
+  ): Promise<{ sent: number; failed: number }> {
+    if (!this.initialized || !this.dht) {
+      throw new Error('MeshRouter not initialized. Call initialize() first.');
+    }
+
+    console.log(`[MeshRouter] Broadcasting ${message.type} to mesh (maxHops: ${options?.maxHops || 'unlimited'})`);
+    
+    // Get all nodes from DHT
+    const allPeers = await this.dht.findClosestNodes(this.localNodeId, 100);
+    
+    // Apply capability filter if specified
+    let targetPeers = allPeers;
+    if (options?.filter === 'ucpt-capable') {
+      // Filter for nodes that support UCPT cascade (indicated by capability)
+      targetPeers = allPeers.filter(peer => 
+        peer.capabilities?.includes('ucpt-cascade') ||
+        peer.capabilities?.includes('provenance-cascade')
+      );
+      console.log(`[MeshRouter] Filtered to ${targetPeers.length} UCPT-capable peers`);
+    }
+    
+    // Send to all target peers
+    const results = await Promise.allSettled(
+      targetPeers.map(async peer => {
+        try {
+          const response = await fetch(peer.endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'User-Agent': 'AnoterosLogos-MeshRouter/2.0',
+            },
+            body: JSON.stringify({
+              jsonrpc: '2.0',
+              method: message.type === 'ucpt-cascade' ? 'a2a.mesh.cascade' : 'a2a.mesh.sync',
+              params: message,
+              id: `broadcast_${Date.now()}`,
+            }),
+            signal: AbortSignal.timeout(10000),
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+        } catch (error) {
+          console.error(`[MeshRouter] Failed to broadcast to ${peer.aidUri}:`, error);
+          throw error;
+        }
+      })
+    );
+    
+    const sent = results.filter(r => r.status === 'fulfilled').length;
+    const failed = results.filter(r => r.status === 'rejected').length;
+    console.log(`[MeshRouter] Broadcast completed: ${sent} sent, ${failed} failed`);
+    
+    return { sent, failed };
+  }
+
+  /**
    * Broadcast sync message to mesh (general purpose)
+   * Backward compatibility wrapper
    */
   async broadcastSyncMessage(message: MeshSyncMessage): Promise<void> {
     if (!this.initialized || !this.dht) {
