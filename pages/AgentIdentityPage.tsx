@@ -50,7 +50,8 @@ const AgentIdentityPage = () => {
         'price': '0',
         'priceCurrency': 'USD'
       },
-'featureList': [
+      'featureList': [
+        'UAP v1.0 (Universal Agent Protocol)',
         'A2A Protocol v1.0',
         'MCP 2025-06-18 Integration',
         'Ed25519 Authentication',
@@ -71,9 +72,9 @@ const AgentIdentityPage = () => {
   return (
     <>
       <SEOHead
-        title="AI Agent Integration Specification | A2A, MCP, AID Protocols | Anóteros Lógos"
-        description="Complete enterprise-grade API specification for AI agents. A2A JSON-RPC 2.0 protocol, MCP tool integration, AID discovery. TypeScript/Python/Rust examples. LangChain, AutoGen, CrewAI integration patterns."
-        keywords="AI agent API, A2A protocol, MCP integration, agent discovery, JSON-RPC 2.0, Ed25519 signatures, LangChain tools, AutoGen functions, CrewAI integration, AI agent authentication, rate limiting, GEO audit API"
+        title="AI Agent Integration Specification | UAP, A2A, MCP Protocols | Anóteros Lógos"
+        description="Complete enterprise-grade API specification for AI agents. UAP v1.0 transport with BFT trust layer, A2A JSON-RPC 2.0 protocol, MCP tool integration, AID discovery. TypeScript/Python examples. LangChain, AutoGen, CrewAI integration patterns."
+        keywords="UAP protocol, Universal Agent Protocol, AI agent API, A2A protocol, MCP integration, agent discovery, JSON-RPC 2.0, Ed25519 signatures, BFT consensus, trust layer, LangChain tools, AutoGen functions, CrewAI integration, AI agent authentication, rate limiting, GEO audit API"
         type="article"
         url="https://anoteroslogos.com/agent-identity"
       />
@@ -105,17 +106,20 @@ const AgentIdentityPage = () => {
             </h1>
             
             <p className="text-lg text-white/70 max-w-3xl mb-6">
-              Enterprise-grade protocol documentation for autonomous agent integration. A2A (Agent-to-Agent), MCP (Model Context Protocol), and AID (Agent Identity & Discovery) v1.1 with complete schemas, error handling, and code samples.
+              Enterprise-grade protocol documentation for autonomous agent integration. UAP v1.0 (Universal Agent Protocol), A2A (Agent-to-Agent), MCP (Model Context Protocol), and AID (Agent Identity & Discovery) v1.1 with complete schemas, error handling, and code samples.
             </p>
 
             <div className="flex flex-wrap gap-3">
               <span className="px-3 py-1 bg-blue-500/10 border border-blue-500/30 rounded text-xs font-mono text-blue-400">
                 AID v1.1
               </span>
+              <span className="px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded text-xs font-mono text-cyan-400">
+                UAP v1.0
+              </span>
               <span className="px-3 py-1 bg-green-500/10 border border-green-500/30 rounded text-xs font-mono text-green-400">
                 A2A v1.0 (Linux Foundation)
               </span>
-<span className="px-3 py-1 bg-purple-500/10 border border-purple-500/30 rounded text-xs font-mono text-purple-400">
+              <span className="px-3 py-1 bg-purple-500/10 border border-purple-500/30 rounded text-xs font-mono text-purple-400">
                 MCP 2025-06-18
               </span>
               <span className="px-3 py-1 bg-orange-500/10 border border-orange-500/30 rounded text-xs font-mono text-orange-400">
@@ -133,6 +137,9 @@ const AgentIdentityPage = () => {
               </a>
               <a href="#agent-gateway" className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors font-medium">
                 → Agent Gateway (New)
+              </a>
+              <a href="#uap-protocol" className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors font-medium">
+                → UAP v1.0 Protocol (New)
               </a>
               <a href="#a2a-protocol" className="text-xs text-brand-accent hover:text-blue-400 transition-colors font-medium">
                 → A2A Protocol v1.0
@@ -589,6 +596,546 @@ console.log(caps.components.schemas); // Parameter schemas`
                     View Full Documentation →
                   </a>
                 </div>
+              </div>
+            </div>
+          </section>
+
+          {/* UAP Protocol Section (NEW) */}
+          <section id="uap-protocol" className="mb-16">
+            <div className="flex items-center gap-3 mb-6">
+              <Network className="w-8 h-8 text-cyan-400" />
+              <h2 className="text-3xl font-bold text-white">UAP v1.0 (Universal Agent Protocol)</h2>
+              <span className="px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded text-xs font-semibold text-cyan-400">
+                NEW
+              </span>
+            </div>
+
+            <p className="text-white/70 mb-6">
+              Production-grade stateful agent-to-agent communication protocol with BFT Trust Layer. Session-based messaging over HTTP/2 and WebSocket with Ed25519 authentication, watermark verification, and real-time consensus routing. Designed for autonomous agents requiring trust attestation and cryptographic proof.
+            </p>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+              <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Server className="w-5 h-5 text-cyan-400" />
+                  <h3 className="text-base font-semibold text-white">Transport Adapters</h3>
+                </div>
+                <p className="text-sm text-white/60 mb-2">HTTP/2 + WebSocket multiplexing</p>
+                <code className="text-xs text-cyan-400 font-mono block">:8443 (HTTP/2), :8080 (WS)</code>
+                <p className="text-xs text-white/50 mt-2">CBOR binary, 600 req/min</p>
+              </div>
+
+              <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Shield className="w-5 h-5 text-purple-400" />
+                  <h3 className="text-base font-semibold text-white">Trust Layer (Anóteros)</h3>
+                </div>
+                <p className="text-sm text-white/60 mb-2">BFT consensus + watermark verification</p>
+                <code className="text-xs text-purple-400 font-mono block">Trust Score: 0-100</code>
+                <p className="text-xs text-white/50 mt-2">7-node quorum, 2f+1 threshold</p>
+              </div>
+
+              <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <Lock className="w-5 h-5 text-green-400" />
+                  <h3 className="text-base font-semibold text-white">Session Management</h3>
+                </div>
+                <p className="text-sm text-white/60 mb-2">ULID-based sessions with correlation IDs</p>
+                <code className="text-xs text-green-400 font-mono block">TTL: 1h (sliding window)</code>
+                <p className="text-xs text-white/50 mt-2">Auto-reconnect, backoff retry</p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              {/* Protocol Architecture */}
+              <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-white mb-4">Protocol Architecture</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div>
+                    <h4 className="text-sm font-semibold text-white mb-2">Message Types</h4>
+                    <code className="text-xs text-cyan-400 font-mono">HandshakeSYN/ACK/FIN</code>
+                    <p className="text-xs text-white/60 mt-1">3-way handshake with trust attestation</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-white mb-2">Serialization</h4>
+                    <code className="text-xs text-green-400 font-mono">CBOR (RFC 8949)</code>
+                    <p className="text-xs text-white/60 mt-1">40-60% smaller than JSON</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-white mb-2">Reliability</h4>
+                    <code className="text-xs text-purple-400 font-mono">Circuit Breaker</code>
+                    <p className="text-xs text-white/60 mt-1">5 failures → 60s open state</p>
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-semibold text-white mb-2">Identifiers</h4>
+                    <code className="text-xs text-orange-400 font-mono">ULID (timestamp-sorted)</code>
+                    <p className="text-xs text-white/60 mt-1">Correlation tracking, 128-bit UUID</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Handshake Flow */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">1. Three-Way Handshake with Trust Attestation</h3>
+                <p className="text-sm text-white/70 mb-4">
+                  UAP establishes sessions via HandshakeSYN/ACK/FIN sequence. Each message includes BFT watermark and Ed25519 signature. Trust middleware validates consensus participation and computes trust score before accepting connection.
+                </p>
+
+                <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-6 mb-4">
+                  <div className="space-y-3 text-sm text-white/70 font-mono">
+                    <div className="flex items-start gap-3">
+                      <span className="text-cyan-400">1.</span>
+                      <span><strong className="text-white">Client → Server:</strong> HandshakeSYN with <code className="text-purple-400">agentId</code>, <code className="text-green-400">capabilities[]</code>, <code className="text-orange-400">ed25519Signature</code></span>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="text-cyan-400">2.</span>
+                      <span><strong className="text-white">Server validates:</strong> Signature, BFT watermark, trust score (must be ≥50/100)</span>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="text-cyan-400">3.</span>
+                      <span><strong className="text-white">Server → Client:</strong> HandshakeACK with <code className="text-blue-400">sessionId</code>, <code className="text-purple-400">serverCapabilities[]</code>, <code className="text-green-400">trustScore</code></span>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="text-cyan-400">4.</span>
+                      <span><strong className="text-white">Client → Server:</strong> HandshakeFIN confirms session, begins message exchange</span>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <span className="text-cyan-400">5.</span>
+                      <span><strong className="text-white">Ongoing:</strong> MessageSEND/RECV with <code className="text-orange-400">correlationId</code> for request-response tracking</span>
+                    </div>
+                  </div>
+                </div>
+
+                <CodeSample
+                  title="HandshakeSYN Example (TypeScript UAP Client)"
+                  samples={[
+                    {
+                      language: 'typescript',
+                      code: `import { UAPClient } from '@anoteroslogos/uap-client';
+
+const client = new UAPClient({
+  agentId: 'agent://myagent.example.com',
+  privateKey: process.env.AGENT_PRIVATE_KEY!,
+  serverUrl: 'https://anoteroslogos.com:8443'
+});
+
+// Automatic handshake on connect
+await client.connect({
+  capabilities: ['geo.audit', 'knowledge.graph'],
+  metadata: {
+    version: '1.0.0',
+    environment: 'production'
+  }
+});
+
+console.log('Session ID:', client.sessionId);
+console.log('Trust Score:', client.trustScore); // 0-100`
+                    },
+                    {
+                      language: 'python',
+                      code: `from anoteroslogos_uap import UAPClient
+import os
+
+client = UAPClient(
+    agent_id='agent://myagent.example.com',
+    private_key=os.getenv('AGENT_PRIVATE_KEY'),
+    server_url='https://anoteroslogos.com:8443'
+)
+
+# Automatic handshake
+await client.connect(
+    capabilities=['geo.audit', 'knowledge.graph'],
+    metadata={'version': '1.0.0'}
+)
+
+print(f"Session ID: {client.session_id}")
+print(f"Trust Score: {client.trust_score}")`
+                    }
+                  ]}
+                />
+
+                <div className="mt-4">
+                  <SchemaBlock
+                    title="HandshakeSYN Message Schema"
+                    schema={{
+                      type: "HandshakeSYN",
+                      version: "1.0.0",
+                      timestamp: "2025-11-27T10:00:00.000Z",
+                      agentId: "agent://myagent.example.com",
+                      capabilities: ["geo.audit", "knowledge.graph"],
+                      metadata: {
+                        version: "1.0.0",
+                        environment: "production"
+                      },
+                      signature: "64-byte-ed25519-signature-hex",
+                      watermark: {
+                        consensusHash: "0xa3f9c2e1d8b4f6a5",
+                        nodeId: "node_7",
+                        sequenceNumber: 42,
+                        timestamp: "2025-11-27T10:00:00.000Z"
+                      }
+                    }}
+                    defaultOpen={false}
+                    description="Complete handshake initiation with cryptographic proof"
+                  />
+                </div>
+              </div>
+
+              {/* Trust Layer Integration */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">2. Anóteros Trust Layer</h3>
+                <p className="text-sm text-white/70 mb-4">
+                  Every UAP message passes through trust middleware before routing. Trust score formula: 0.4×consensus + 0.3×watermark + 0.2×uptime + 0.1×endorsements. Agents with trust score &lt;50 are rejected, 50-70 are rate-limited, 70+ receive priority routing.
+                </p>
+
+                <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-6 mb-4">
+                  <h4 className="text-sm font-semibold text-white mb-3">Trust Score Components</h4>
+                  <div className="space-y-2 text-sm text-white/70">
+                    <div className="flex justify-between">
+                      <span><strong className="text-white">Consensus Participation:</strong> 40% weight</span>
+                      <code className="text-cyan-400 font-mono text-xs">BFT round participation rate</code>
+                    </div>
+                    <div className="flex justify-between">
+                      <span><strong className="text-white">Watermark Validity:</strong> 30% weight</span>
+                      <code className="text-green-400 font-mono text-xs">Signature verification + timestamp freshness</code>
+                    </div>
+                    <div className="flex justify-between">
+                      <span><strong className="text-white">Historical Uptime:</strong> 20% weight</span>
+                      <code className="text-purple-400 font-mono text-xs">30-day availability metric</code>
+                    </div>
+                    <div className="flex justify-between">
+                      <span><strong className="text-white">Peer Endorsements:</strong> 10% weight</span>
+                      <code className="text-orange-400 font-mono text-xs">Vouches from trusted agents</code>
+                    </div>
+                  </div>
+                </div>
+
+                <SchemaBlock
+                  title="Trust Attestation Response"
+                  schema={{
+                    agentId: "agent://myagent.example.com",
+                    trustScore: 87,
+                    components: {
+                      consensusParticipation: 0.92,
+                      watermarkValidity: 0.88,
+                      historicalUptime: 0.95,
+                      peerEndorsements: 0.65
+                    },
+                    tier: "high",
+                    rateLimits: {
+                      requestsPerMinute: 600,
+                      burstCapacity: 100
+                    },
+                    endorsements: [
+                      { from: "agent://trusted.example.com", weight: 0.8, timestamp: "2025-11-20T10:00:00.000Z" }
+                    ],
+                    watermarkVerification: {
+                      valid: true,
+                      consensusHash: "0xa3f9c2e1d8b4f6a5",
+                      verifiedAt: "2025-11-27T10:00:01.000Z"
+                    }
+                  }}
+                  defaultOpen={true}
+                  description="Complete trust attestation with scoring breakdown"
+                />
+              </div>
+
+              {/* Transport Adapters */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">3. Transport Layer (HTTP/2 + WebSocket)</h3>
+                <p className="text-sm text-white/70 mb-4">
+                  Dual transport support: HTTP/2 for request-response (port 8443), WebSocket for persistent streaming (port 8080). Automatic protocol negotiation via ALPN. CBOR binary serialization with fallback to JSON for debugging.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+                      <Server className="w-4 h-4 text-cyan-400" />
+                      HTTP/2 Adapter
+                    </h4>
+                    <code className="text-xs text-cyan-400 font-mono block mb-2">https://anoteroslogos.com:8443</code>
+                    <p className="text-xs text-white/60">Request-response RPC, ALPN negotiation, server push for streaming responses</p>
+                    <p className="text-xs text-white/50 mt-2">Rate: 600 req/min, TLS 1.3 only</p>
+                  </div>
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
+                      <Network className="w-4 h-4 text-purple-400" />
+                      WebSocket Adapter
+                    </h4>
+                    <code className="text-xs text-purple-400 font-mono block mb-2">wss://anoteroslogos.com:8080</code>
+                    <p className="text-xs text-white/60">Full-duplex streaming, pub/sub patterns, heartbeat ping/pong every 30s</p>
+                    <p className="text-xs text-white/50 mt-2">Rate: 60 handshakes/hr, persistent sessions</p>
+                  </div>
+                </div>
+
+                <CodeSample
+                  title="UAP Client with Auto-Reconnect"
+                  samples={[
+                    {
+                      language: 'typescript',
+                      code: `import { UAPClient } from '@anoteroslogos/uap-client';
+
+const client = new UAPClient({
+  agentId: 'agent://myagent.example.com',
+  privateKey: process.env.AGENT_PRIVATE_KEY!,
+  serverUrl: 'wss://anoteroslogos.com:8080', // WebSocket
+  options: {
+    autoReconnect: true,
+    maxReconnectAttempts: 5,
+    reconnectBackoff: 'exponential', // 1s, 2s, 4s, 8s, 16s
+    heartbeatInterval: 30000
+  }
+});
+
+client.on('connected', (session) => {
+  console.log('Connected, session:', session.id);
+});
+
+client.on('disconnected', (reason) => {
+  console.log('Disconnected:', reason);
+});
+
+client.on('reconnecting', (attempt) => {
+  console.log('Reconnecting attempt', attempt);
+});
+
+// Send message with correlation tracking
+const response = await client.sendMessage({
+  type: 'Request',
+  method: 'geo.audit',
+  params: { url: 'https://example.com' },
+  correlationId: client.generateCorrelationId()
+});
+
+console.log('GEO Score:', response.result.score);`
+                    },
+                    {
+                      language: 'bash',
+                      label: 'HTTP/2 Direct (curl)',
+                      code: `# Requires HTTP/2 capable curl
+curl --http2-prior-knowledge \\
+  -X POST https://anoteroslogos.com:8443/uap \\
+  -H "Content-Type: application/cbor" \\
+  -H "UAP-Agent-Id: agent://myagent.example.com" \\
+  -H "UAP-Signature: $(sign_message)" \\
+  --data-binary @handshake_syn.cbor`
+                    }
+                  ]}
+                />
+              </div>
+
+              {/* Message Types */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">4. Message Types & Routing</h3>
+                <p className="text-sm text-white/70 mb-4">
+                  UAP defines 8 core message types for session management, requests, streaming, and errors. All messages include correlation IDs for request-response tracking and watermarks for trust verification.
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                  {[
+                    { type: 'HandshakeSYN', color: 'cyan', desc: 'Session initiation' },
+                    { type: 'HandshakeACK', color: 'green', desc: 'Session acceptance' },
+                    { type: 'HandshakeFIN', color: 'blue', desc: 'Session confirmation' },
+                    { type: 'Request', color: 'purple', desc: 'RPC call' },
+                    { type: 'Response', color: 'emerald', desc: 'RPC result' },
+                    { type: 'StreamChunk', color: 'orange', desc: 'Streaming data' },
+                    { type: 'Error', color: 'red', desc: 'Error response' },
+                    { type: 'Ping/Pong', color: 'gray', desc: 'Heartbeat' }
+                  ].map((item) => (
+                    <div key={item.type} className={`bg-${item.color}-500/10 border border-${item.color}-500/30 rounded-lg p-3`}>
+                      <code className={`text-xs font-mono text-${item.color}-400 block mb-1`}>{item.type}</code>
+                      <p className="text-xs text-white/60">{item.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Rate Limiting & Circuit Breaker */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">5. Rate Limiting & Reliability</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-white mb-2">Rate Limits</h4>
+                    <div className="space-y-1 text-xs text-white/60">
+                      <p>General: <span className="text-white">600</span> req/min</p>
+                      <p>Handshakes: <span className="text-white">60</span> per hour</p>
+                      <p>Burst: <span className="text-white">100</span> requests</p>
+                    </div>
+                  </div>
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-white mb-2">Circuit Breaker</h4>
+                    <div className="space-y-1 text-xs text-white/60">
+                      <p>Failure threshold: <span className="text-white">5</span> consecutive</p>
+                      <p>Open duration: <span className="text-white">60s</span></p>
+                      <p>Half-open test: <span className="text-white">3</span> requests</p>
+                    </div>
+                  </div>
+                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
+                    <h4 className="text-sm font-semibold text-white mb-2">Retry Strategy</h4>
+                    <div className="space-y-1 text-xs text-white/60">
+                      <p>Backoff: <span className="text-white">Exponential</span></p>
+                      <p>Max retries: <span className="text-white">5</span></p>
+                      <p>Jitter: <span className="text-white">±500ms</span></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Integration with Existing Protocols */}
+              <div className="bg-gradient-to-br from-cyan-500/10 via-purple-600/10 to-pink-600/10 border border-cyan-500/20 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <Network className="w-5 h-5" />
+                  Integration with A2A & MCP
+                </h3>
+                <p className="text-sm text-white/70 mb-4">
+                  UAP serves as transport layer for A2A JSON-RPC and MCP tool calls. Agents can establish UAP session, then invoke A2A methods within trusted channel. Trust scores from UAP handshake propagate to rate limiting and payment verification in A2A.
+                </p>
+                <div className="space-y-2 text-sm text-white/70">
+                  <div className="flex gap-3">
+                    <span className="text-cyan-400 font-mono">1.</span>
+                    <span>Establish UAP session (HandshakeSYN/ACK/FIN)</span>
+                  </div>
+                  <div className="flex gap-3">
+                    <span className="text-cyan-400 font-mono">2.</span>
+                    <span>Trust score ≥70 grants Pro-tier A2A rate limits (300 req/min)</span>
+                  </div>
+                  <div className="flex gap-3">
+                    <span className="text-cyan-400 font-mono">3.</span>
+                    <span>Send A2A JSON-RPC as UAP Request message</span>
+                  </div>
+                  <div className="flex gap-3">
+                    <span className="text-cyan-400 font-mono">4.</span>
+                    <span>Receive A2A result as UAP Response message</span>
+                  </div>
+                  <div className="flex gap-3">
+                    <span className="text-cyan-400 font-mono">5.</span>
+                    <span>APA payments verified against UAP agent identity</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Security & Best Practices */}
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+                <div className="flex items-start gap-2">
+                  <Shield className="w-4 h-4 text-yellow-400 mt-0.5" />
+                  <div className="text-sm text-yellow-300">
+                    <strong>Security Best Practices:</strong>
+                    <ul className="list-disc ml-4 mt-2 space-y-1">
+                      <li>Generate Ed25519 keypairs in secure enclave (never transmit private keys)</li>
+                      <li>Verify BFT watermark signatures on every message before trust scoring</li>
+                      <li>Implement session timeout handling (1h TTL with sliding window)</li>
+                      <li>Use correlation IDs for request-response tracking to prevent replay attacks</li>
+                      <li>Monitor trust score degradation and re-handshake if score drops &lt;50</li>
+                      <li>Cache trust attestations for 5 minutes to reduce consensus load</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Code Example: Complete UAP Flow */}
+              <div>
+                <h3 className="text-xl font-semibold text-white mb-4">Complete Example: UAP + A2A GEO Audit</h3>
+                <CodeSample
+                  title="TypeScript: Full UAP Session with A2A JSON-RPC"
+                  samples={[
+                    {
+                      language: 'typescript',
+                      code: `import { UAPClient } from '@anoteroslogos/uap-client';
+
+// 1. Initialize UAP client
+const uap = new UAPClient({
+  agentId: 'agent://myagent.example.com',
+  privateKey: process.env.AGENT_PRIVATE_KEY!,
+  serverUrl: 'wss://anoteroslogos.com:8080'
+});
+
+// 2. Connect with capabilities (automatic handshake)
+await uap.connect({
+  capabilities: ['geo.audit', 'a2a.rpc'],
+  metadata: { version: '1.0.0' }
+});
+
+console.log('UAP Session ID:', uap.sessionId);
+console.log('Trust Score:', uap.trustScore); // Must be ≥50
+
+// 3. Send A2A JSON-RPC via UAP Request message
+const correlationId = uap.generateCorrelationId();
+const response = await uap.sendMessage({
+  type: 'Request',
+  correlationId,
+  payload: {
+    jsonrpc: '2.0',
+    method: 'geo.audit.request',
+    params: {
+      url: 'https://example.com',
+      depth: 'standard'
+    },
+    id: 1
+  }
+});
+
+// 4. Extract A2A result from UAP Response
+const a2aResult = response.payload.result;
+console.log('GEO Score:', a2aResult.score);
+console.log('Issues:', a2aResult.issues.length);
+
+// 5. Trust attestation included in response
+console.log('Response Trust Score:', response.metadata.trustScore);
+console.log('Watermark Valid:', response.metadata.watermarkValid);
+
+// 6. Graceful session termination
+await uap.disconnect();`
+                    },
+                    {
+                      language: 'python',
+                      code: `from anoteroslogos_uap import UAPClient
+import asyncio
+import os
+
+async def audit_with_uap():
+    # 1. Initialize UAP client
+    uap = UAPClient(
+        agent_id='agent://myagent.example.com',
+        private_key=os.getenv('AGENT_PRIVATE_KEY'),
+        server_url='wss://anoteroslogos.com:8080'
+    )
+    
+    # 2. Connect with handshake
+    await uap.connect(
+        capabilities=['geo.audit', 'a2a.rpc'],
+        metadata={'version': '1.0.0'}
+    )
+    
+    print(f"Session ID: {uap.session_id}")
+    print(f"Trust Score: {uap.trust_score}")
+    
+    # 3. Send A2A JSON-RPC
+    correlation_id = uap.generate_correlation_id()
+    response = await uap.send_message(
+        type='Request',
+        correlation_id=correlation_id,
+        payload={
+            'jsonrpc': '2.0',
+            'method': 'geo.audit.request',
+            'params': {
+                'url': 'https://example.com',
+                'depth': 'standard'
+            },
+            'id': 1
+        }
+    )
+    
+    # 4. Extract result
+    a2a_result = response['payload']['result']
+    print(f"GEO Score: {a2a_result['score']}")
+    
+    # 5. Disconnect
+    await uap.disconnect()
+
+asyncio.run(audit_with_uap())`
+                    }
+                  ]}
+                />
               </div>
             </div>
           </section>
