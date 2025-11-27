@@ -1,17 +1,17 @@
 # Anóteros Lógos - Enterprise AI Knowledge Infrastructure
 
 ![License](https://img.shields.io/badge/License-Proprietary-red)
-![Version](https://img.shields.io/badge/version-3.7.0-blue)
+![Version](https://img.shields.io/badge/version-3.8.0-blue)
 ![Node](https://img.shields.io/badge/node-20.x-green)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)
 ![React](https://img.shields.io/badge/React-19.2-cyan)
-![Build](https://img.shields.io/badge/APA-v1.1-brightgreen)
+![Build](https://img.shields.io/badge/UAP-v1.0-brightgreen)
 
 AI knowledge infrastructure platform providing cryptographically verifiable provenance, deterministic execution, and **Agent-Pay-Agent (APA) micropayments layer.** First production implementation of USDC-based micropayments for autonomous AI agent interactions on Base L2 blockchain.
 
 Production URL: https://anoteroslogos.com
 
-Codebase: 267 files | 86,800 lines
+Codebase: 284 files | 94,400 lines
 
 ---
 
@@ -25,13 +25,14 @@ Enterprise platform for optimizing digital content and brand presence for AI lan
 2. **Knowledge Graph Engine** - Self-improving semantic graph with citation learning and cross-platform syndication
 3. **Causal Citation Tracer** - Counterfactual reasoning for ROI attribution and path optimization
 4. **Agent-to-Agent Protocol** - JSON-RPC 2.0 API with Ed25519 signatures and WebSocket streaming
-5. **Agent-Pay-Agent Layer** - USDC micropayments on Base L2 with automatic detection
-6. **Subscription Billing System** - Freemium tier model with USDC payments for SaaS plans
-7. **Agent Mesh Network** - Distributed peer discovery, capability routing, trust propagation via DHT
-8. **Byzantine Fault Tolerance** - PBFT consensus with Causal Consensus Oracle for provenance-based quorum weighting
-9. **MCP Integration** - Model Context Protocol v2.0 with isolated execution sandbox and Anthropic Advanced Tool Use support
-10. **Content Intelligence** - NLP analysis, query intent classification, competitive monitoring
-11. **Gold Standard System** - Citation prediction, learning feedback, network effects amplification
+5. **Universal Agent Protocol** - UAP v1.0 transport layer with cryptographic trust attestation
+6. **Agent-Pay-Agent Layer** - USDC micropayments on Base L2 with automatic detection
+7. **Subscription Billing System** - Freemium tier model with USDC payments for SaaS plans
+8. **Agent Mesh Network** - Distributed peer discovery, capability routing, trust propagation via DHT
+9. **Byzantine Fault Tolerance** - PBFT consensus with Causal Consensus Oracle for provenance-based quorum weighting
+10. **MCP Integration** - Model Context Protocol v2.0 with isolated execution sandbox and Anthropic Advanced Tool Use support
+11. **Content Intelligence** - NLP analysis, query intent classification, competitive monitoring
+12. **Gold Standard System** - Citation prediction, learning feedback, network effects amplification
 
 ---
 
@@ -162,7 +163,54 @@ NLP analysis, competitive monitoring, query intent classification.
 - Query intent classification using feature extraction
 - Competitive positioning via citation frequency analysis
 
-### 6. A2A Protocol (15,433 lines)
+### 6. Universal Agent Protocol (7,100 lines)
+
+Production-grade UAP v1.0 implementation with proprietary trust layer.
+
+**Core Capabilities:**
+- HTTP/2 transport on port 8443 with bidirectional streaming
+- WebSocket transport on port 8080 for real-time communication
+- Cryptographic trust attestation via BFT watermark verification
+- Client SDK with automatic reconnection and session management
+- Rate limiting with token bucket algorithm
+- Circuit breaker pattern with exponential backoff
+- Correlation ID tracking for request-response matching
+
+**Trust Layer:**
+- BFT watermark ledger verification via PBFT consensus
+- Trust score computation: 0.4×consensus + 0.3×watermark + 0.2×uptime + 0.1×endorsements
+- Ed25519 cryptographic signatures on all attestations
+- Byzantine behavior detection and automatic rejection
+- Tenant isolation with cross-tenant access validation
+
+**Transport Architecture:**
+- Message router with Zod schema validation
+- Rate limits: 600 requests/min, 60 handshakes/hour
+- Circuit breaker: 5 failures trigger exponential backoff (1s to 60s)
+- Graceful shutdown with SIGINT/SIGTERM handlers
+
+**Client Features:**
+- Connection manager with heartbeat and RTT tracking
+- Session manager implementing full handshake protocol
+- Auto-reconnect with exponential backoff on failures
+- Correlation ID matching for async request-response
+
+**Components:**
+- `src/protocols/uap/types.ts` - Complete type system (476 lines)
+- `src/protocols/uap/constants.ts` - Protocol constants (314 lines)
+- `src/protocols/uap/schemas.ts` - Zod validation (359 lines)
+- `src/core/trust/middleware.ts` - Trust verification (461 lines)
+- `src/core/trust/ledger.ts` - Watermark ledger client (429 lines)
+- `src/protocols/uap/transport/messageRouter.ts` - Message routing (503 lines)
+- `src/protocols/uap/transport/http2Adapter.ts` - HTTP/2 transport (433 lines)
+- `src/protocols/uap/transport/wsAdapter.ts` - WebSocket transport (449 lines)
+- `src/protocols/uap/client/connectionManager.ts` - Connection handling (494 lines)
+- `src/protocols/uap/client/sessionManager.ts` - Session lifecycle (264 lines)
+- `src/protocols/uap/client/uapClient.ts` - High-level client (277 lines)
+- `src/protocols/uap/server.ts` - Server initialization (243 lines)
+- `src/protocols/uap/discovery.ts` - Mesh network integration (312 lines)
+
+### 7. A2A Protocol (15,433 lines)
 
 Full Linux Foundation Agent-to-Agent Protocol v1.0 implementation with custom extensions and persistent job queue infrastructure.
 
@@ -237,7 +285,7 @@ a2a.mesh.health        Mesh network statistics
 - `batch_jobs` - Batch audit tracking with progress aggregation
 - `job_webhooks` - Webhook callback management with exponential backoff
 
-### 7. APA Micropayments (4,700 lines)
+### 8. APA Micropayments (4,700 lines)
 
 USDC-based payments on Base L2 for autonomous agents.
 
@@ -275,7 +323,7 @@ USDC-based payments on Base L2 for autonomous agents.
 - `lib/payments/reorgMonitor.ts` - Reorg protection (363 lines)
 - `lib/payments/rpcProvider.ts` - RPC failover (363 lines)
 
-### 8. Subscription Billing System (650 lines)
+### 9. Subscription Billing System (650 lines)
 
 SaaS subscription management with USDC payments on Base L2.
 
@@ -317,7 +365,7 @@ SaaS subscription management with USDC payments on Base L2.
 - `lib/subscriptions/paymentDetector.ts` - Automatic payment detection
 - `lib/subscriptions/renewalEngine.ts` - Auto-renewal processing
 
-### 9. MCP Integration (2,006 lines)
+### 10. MCP Integration (2,006 lines)
 
 Model Context Protocol v2.0 with isolated execution and Anthropic Advanced Tool Use compatibility.
 
@@ -361,7 +409,7 @@ execute_code           Sandbox execution with tool bindings
 - `app/api/mcp/programmatic/route.ts` - Sandbox executor (227 lines)
 - `api/mcp/programmatic.ts` - Programmatic endpoint (71 lines)
 
-### 10. Analytics Infrastructure (1,337 lines)
+### 11. Analytics Infrastructure (1,337 lines)
 
 Cross-tenant analytics with industry benchmarking and percentile ranking.
 
@@ -383,7 +431,7 @@ Cross-tenant analytics with industry benchmarking and percentile ranking.
 - Score distribution buckets with aggregated counts per range
 - PostgreSQL functions for on-demand calculation fallback
 
-### 11. Gold Standard System (1,832 lines)
+### 12. Gold Standard System (1,832 lines)
 
 Production persistence, automation, and backend services.
 
@@ -401,7 +449,7 @@ Production persistence, automation, and backend services.
 - `utils/backend/auditStorage.ts` - Audit persistence (465 lines)
 - `utils/competitiveIntelligence/realTimeMonitor.ts` - Monitoring (676 lines)
 
-### 12. Byzantine Fault Tolerance (3,180 lines)
+### 13. Byzantine Fault Tolerance (3,180 lines)
 
 Production PBFT consensus with Causal Consensus Oracle for provenance-based quorum weighting.
 
@@ -478,7 +526,7 @@ Production PBFT consensus with Causal Consensus Oracle for provenance-based quor
 - `supabase/migrations/009_bft_schema.sql` - Database schema (410 lines)
 - `supabase/migrations/20251124_tenant_isolation.sql` - Tenant RLS migration (535 lines)
 
-### 13. Agent Mesh Network (5,513 lines)
+### 14. Agent Mesh Network (5,513 lines)
 
 Decentralized peer-to-peer infrastructure for autonomous agent communication.
 
@@ -526,7 +574,7 @@ Decentralized peer-to-peer infrastructure for autonomous agent communication.
 - `lib/mesh/discovery.ts` - Peer discovery service (488 lines)
 - `lib/mesh/peerStorage.ts` - Supabase persistence (656 lines)
 
-### 14. Tenant Isolation
+### 15. Tenant Isolation
 
 Enterprise-grade multi-tenant data isolation via Row-Level Security.
 
@@ -573,7 +621,7 @@ Enterprise-grade multi-tenant data isolation via Row-Level Security.
 - `supabase/migrations/20251124_tenant_isolation.sql` - Full RLS migration (535 lines)
 - `lib/bft/__tests__/tenantIsolation.test.ts` - Isolation verification (233 lines)
 
-### 15. Frontend Application (33 components)
+### 16. Frontend Application (33 components)
 
 React 19 SPA with route-based code splitting.
 
@@ -758,6 +806,29 @@ lib/
   aiSyndication/                  # Platform sync (558 lines)
   nlu/                            # NLU Foundation (1,130 lines)
 
+src/
+  protocols/uap/                  # Universal Agent Protocol (7,100 lines)
+    types.ts                      # Complete type system (476 lines)
+    constants.ts                  # Protocol constants (314 lines)
+    schemas.ts                    # Zod validation (359 lines)
+    server.ts                     # Server initialization (243 lines)
+    discovery.ts                  # Mesh integration (312 lines)
+    transport/                    # Transport layer (2,229 lines)
+      messageRouter.ts            # Message routing (503 lines)
+      http2Adapter.ts             # HTTP/2 transport (433 lines)
+      wsAdapter.ts                # WebSocket transport (449 lines)
+      rateLimiter.ts              # Token bucket (299 lines)
+      circuitBreaker.ts           # Exponential backoff (374 lines)
+      uapServer.ts                # Server orchestration (342 lines)
+    client/                       # Client SDK (1,064 lines)
+      connectionManager.ts        # Connection handling (494 lines)
+      sessionManager.ts           # Session lifecycle (264 lines)
+      uapClient.ts                # High-level API (277 lines)
+  core/trust/                     # Trust Layer (1,197 lines)
+    middleware.ts                 # Trust verification (461 lines)
+    ledger.ts                     # Watermark ledger (429 lines)
+    types.ts                      # Attestation types (307 lines)
+
 utils/
   geoAuditEnhanced.ts            # Audit engine (2,131 lines)
   knowledgeGraph/                 # KG engine (2,376 lines)
@@ -837,14 +908,15 @@ supabase/migrations/
 ## Statistics
 
 **Codebase:**
-- Total files: 253
-- Total lines: 86,448
-- TypeScript: 93.2%
-- PLpgSQL: 5.8%
+- Total files: 284
+- Total lines: 94,426
+- TypeScript: 93.5%
+- PLpgSQL: 5.5%
 - CSS: 1.0%
 
 **Core Modules:**
 - A2A Protocol: 15,433 lines
+- Universal Agent Protocol: 7,100 lines
 - Agent Mesh Network: 5,513 lines
 - APA Payments: 4,700 lines
 - Causal Tracer: 4,020 lines
@@ -869,5 +941,5 @@ Proprietary - All rights reserved
 
 ---
 
-Last Updated: November 24, 2025
-Version: 3.6.0
+Last Updated: November 27, 2025
+Version: 3.8.0
