@@ -28,6 +28,7 @@ import { RejectionReason } from './types';
 import { TRUST_CONFIG } from '../../protocols/uap/constants';
 import { getLedgerClient, WatermarkLedgerClient } from './ledger';
 import { loadUCPTKeypair } from '../../../lib/ucpt/keys';
+import { cccLedger } from '../ccc/ledger';
 
 // =====================================================
 // TRUST MIDDLEWARE CLASS
@@ -111,7 +112,7 @@ export class TrustMiddleware {
           agentDid,
           RejectionReason.BYZANTINE_BEHAVIOR,
           `Agent has ${history.byzantineIncidents} Byzantine incident(s)`,
-          this.computeTrustScore(history).finalScore
+          (await this.computeTrustScore(history, agentDid)).finalScore
         );
 
         return {
@@ -131,7 +132,7 @@ export class TrustMiddleware {
           agentDid,
           RejectionReason.SLASHED_AGENT,
           `Agent has been slashed ${history.slashingEvents} time(s)`,
-          this.computeTrustScore(history).finalScore
+          (await this.computeTrustScore(history, agentDid)).finalScore
         );
 
         return {
@@ -145,8 +146,8 @@ export class TrustMiddleware {
         };
       }
 
-      // Step 5: Compute trust score
-      const trustScore = this.computeTrustScore(history);
+      // Step 5: Compute trust score (now async with CCC)
+      const trustScore = await this.computeTrustScore(history, agentDid);
 
       // Step 6: Check minimum threshold
       const minScore = options?.minTrustScore || TRUST_CONFIG.MIN_TRUST_SCORE;
@@ -234,9 +235,9 @@ export class TrustMiddleware {
 
   /**
    * Compute trust score from history
-   * Weighted formula: 0.4*consensus + 0.3*watermark + 0.2*uptime + 0.1*endorsements
+   * Weighted formula: 0.35*consensus + 0.25*watermark + 0.15*uptime + 0.10*endorsements + 0.15*causalContribution
    */
-  private computeTrustScore(history: any): TrustScoreComponents {
+  private async computeTrustScore(history: any, agentDid: DIDString): Promise<TrustScoreComponents> {
     // Consensus participation score (0-100)
     const consensusParticipation = Math.min(100, (history.totalRounds / 1000) * 100);
 
@@ -252,18 +253,23 @@ export class TrustMiddleware {
     // Peer endorsements score (0-100, assuming max 100 endorsements)
     const peerEndorsements = Math.min(100, history.peerEndorsements);
 
-    // Weighted final score
+    // CCC causal contribution score (0-100)
+    const causalContribution = await this.computeCCCContributionScore(agentDid);
+
+    // Weighted final score (adjusted weights to total 1.0 with CCC)
     const finalScore =
-      TRUST_CONFIG.WEIGHT_CONSENSUS * consensusParticipation +
-      TRUST_CONFIG.WEIGHT_WATERMARK * watermarkValidity +
-      TRUST_CONFIG.WEIGHT_UPTIME * networkUptime +
-      TRUST_CONFIG.WEIGHT_ENDORSEMENTS * peerEndorsements;
+      0.35 * consensusParticipation +
+      0.25 * watermarkValidity +
+      0.15 * networkUptime +
+      0.10 * peerEndorsements +
+      0.15 * causalContribution;
 
     return {
       consensusParticipation: Math.round(consensusParticipation * 100) / 100,
       watermarkValidity: Math.round(watermarkValidity * 100) / 100,
       networkUptime: Math.round(networkUptime * 100) / 100,
       peerEndorsements: Math.round(peerEndorsements * 100) / 100,
+      causalContribution: Math.round(causalContribution * 100) / 100,
       finalScore: Math.round(finalScore * 100) / 100,
       computedAt: new Date().toISOString(),
     };
@@ -353,6 +359,63 @@ export class TrustMiddleware {
     } catch (error) {
       console.error('[TrustMiddleware] Proof verification failed:', error);
       return false;
+    }
+  }
+
+  /**
+   * Compute CCC causal contribution score (0-100)
+   * 
+   * Formula:
+   * - Base score from total CCC earned (logarithmic scale)
+   * - Bonus for staked CCC (demonstrates commitment)
+   * - Bonus for recent activity (last 30 days)
+   * - Penalty for low balance (hoarding vs contributing)
+   */
+  private async computeCCCContributionScore(agentDid: DIDString): Promise<number> {
+    try {
+      const account = await cccLedger.getAccount(agentDid);
+      
+      // Base score from lifetime earnings (log scale, 0-40 points)
+      // 1000 CCC earned = 30 points, 10000 CCC = 40 points
+      const earningsScore = account.totalEarned > 0
+        ? Math.min(40, Math.log10(account.totalEarned + 1) * 13.33)
+        : 0;
+
+      // Staking bonus (0-30 points)
+      // Staking shows commitment to platform
+      const stakingScore = Math.min(30, (account.stakedBalance / 100) * 30);
+
+      // Activity bonus (0-20 points)
+      // Recent transactions show active participation
+      const recentActivity = await this.getRecentCCCActivity(agentDid);
+      const activityScore = Math.min(20, recentActivity * 4); // 5+ activities = max
+
+      // Endorsement bonus (0-10 points)
+      const endorsementScore = Math.min(10, account.endorsementWeight);
+
+      const totalScore = earningsScore + stakingScore + activityScore + endorsementScore;
+      
+      return Math.min(100, totalScore);
+    } catch (error) {
+      console.warn(`[TrustMiddleware] Failed to compute CCC score for ${agentDid}:`, error);
+      return 0; // Default to 0 if CCC account doesn't exist
+    }
+  }
+
+  /**
+   * Get count of recent CCC transactions (last 30 days)
+   */
+  private async getRecentCCCActivity(agentDid: DIDString): Promise<number> {
+    try {
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const { transactions } = await cccLedger.queryTransactions({
+        agentId: agentDid,
+        startDate: thirtyDaysAgo,
+        limit: 100
+      });
+      return transactions.length;
+    } catch (error) {
+      return 0;
     }
   }
 

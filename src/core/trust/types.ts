@@ -95,6 +95,9 @@ export interface TrustScoreComponents {
   /** Peer endorsements score (0-100) */
   peerEndorsements: number;
   
+  /** CCC causal contribution score (0-100) */
+  causalContribution: number;
+  
   /** Final weighted score (0-100) */
   finalScore: number;
   
