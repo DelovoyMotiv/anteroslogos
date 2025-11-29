@@ -51,6 +51,7 @@
     "lib/mesh/dhtLibp2p.ts",
     "lib/mesh/dhtAdapter.ts",
     "lib/payments/intentPayments.ts",
-    "contracts"
+    "contracts",
+    "packages"
   ]
 }
