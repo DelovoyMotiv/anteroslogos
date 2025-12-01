@@ -71,26 +71,34 @@
     <priority>0.7</priority>
   </url>
 
+  <!-- Pricing Page -->
+  <url>
+    <loc>https://anoteroslogos.com/pricing</loc>
+    <lastmod>2025-12-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.95</priority>
+  </url>
+
   <!-- Knowledge Base - Comprehensive GEO Glossary -->
   <url>
     <loc>https://anoteroslogos.com/knowledge-base</loc>
-    <lastmod>2025-11-01</lastmod>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.95</priority>
   </url>
 
-  <!-- GEO vs SEO Comparison - Core Methodology -->
+  <!-- GEO vs SEO Comparison (redirects to /knowledge-base/geo-vs-seo) -->
   <url>
-    <loc>https://anoteroslogos.com/geo-vs-seo</loc>
-    <lastmod>2025-01-30</lastmod>
+    <loc>https://anoteroslogos.com/knowledge-base/geo-vs-seo</loc>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>1.0</priority>
+    <priority>0.9</priority>
   </url>
 
-  <!-- GEO Audit Tool - Interactive Analysis -->
+  <!-- Method Page (previously geo-audit, now canonical) -->
   <url>
-    <loc>https://anoteroslogos.com/geo-audit</loc>
-    <lastmod>2025-11-04</lastmod>
+    <loc>https://anoteroslogos.com/method</loc>
+    <lastmod>2025-12-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>

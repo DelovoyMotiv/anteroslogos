@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoadingSpinner from './components/LoadingSpinner';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { IOSInstallPrompt } from './components/IOSInstallPrompt';
@@ -7,8 +7,8 @@ import { IOSInstallPrompt } from './components/IOSInstallPrompt';
 // Lazy load all route components for optimal bundle splitting
 const HomePage = lazy(() => import('./pages/HomePage'));
 const KnowledgeBasePage = lazy(() => import('./pages/KnowledgeBasePage'));
-const GeoVsSeoPage = lazy(() => import('./pages/GeoVsSeoPage'));
 const GeoAuditPage = lazy(() => import('./pages/GeoAuditPage'));
+const PricingPage = lazy(() => import('./pages/PricingPage'));
 const Blog = lazy(() => import('./pages/Blog'));
 const BlogPost = lazy(() => import('./pages/BlogPost'));
 const AuthorPage = lazy(() => import('./pages/Author'));
@@ -38,9 +38,13 @@ const App: React.FC = () => {
                 <Suspense fallback={<LoadingSpinner />}>
                     <Routes>
                         <Route path="/" element={<HomePage />} />
+                        <Route path="/pricing" element={<PricingPage />} />
                         <Route path="/knowledge-base" element={<KnowledgeBasePage />} />
-                        <Route path="/geo-vs-seo" element={<GeoVsSeoPage />} />
-                        <Route path="/geo-audit" element={<GeoAuditPage />} />
+                        
+                        {/* 301 Redirects */}
+                        <Route path="/geo-vs-seo" element={<Navigate to="/knowledge-base/geo-vs-seo" replace />} />
+                        <Route path="/geo-audit" element={<Navigate to="/method" replace />} />
+                        <Route path="/method" element={<GeoAuditPage />} />
                         <Route path="/blog" element={<Blog />} />
                         <Route path="/blog/:slug" element={<BlogPost />} />
                         <Route path="/author/:slug" element={<AuthorPage />} />
