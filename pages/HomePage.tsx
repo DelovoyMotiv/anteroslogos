@@ -4,7 +4,7 @@ import Hero from '../components/Hero';
 import TheShift from '../components/TheShift';
 import Philosophy from '../components/Philosophy';
 import Stats from '../components/Stats';
-import NicosiaMethod from '../components/NicosiaMethod';
+import Method from '../components/Method';
 import ClientProfile from '../components/ClientProfile';
 import FAQ from '../components/FAQ';
 import Team from '../components/Team';
@@ -17,7 +17,7 @@ import CookieConsent from '../components/CookieConsent';
 const HomePage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     
-    const nicosiaMethodRef = useRef<HTMLElement | null>(null);
+    const methodRef = useRef<HTMLElement | null>(null);
     const philosophyRef = useRef<HTMLElement | null>(null);
     const clientProfileRef = useRef<HTMLElement | null>(null);
     const faqRef = useRef<HTMLElement | null>(null);
@@ -44,16 +44,16 @@ const HomePage: React.FC = () => {
         <div className="bg-brand-bg text-brand-text font-sans antialiased">
             <DigitalBackground />
             <Header 
-                onMethodClick={() => handleScrollTo(nicosiaMethodRef)}
+                onMethodClick={() => handleScrollTo(methodRef)}
                 onClientsClick={() => handleScrollTo(clientProfileRef)}
                 onContactClick={handleOpenModal}
             />
             <main>
-                <Hero onScrollClick={() => handleScrollTo(nicosiaMethodRef)} />
+                <Hero onScrollClick={() => handleScrollTo(methodRef)} />
                 <TheShift />
                 <Philosophy ref={philosophyRef} />
                 <Stats />
-                <NicosiaMethod ref={nicosiaMethodRef} />
+                <Method ref={methodRef} />
                 <ClientProfile ref={clientProfileRef} />
                 <Team />
                 <FAQ ref={faqRef} onCTAClick={handleOpenModal} />
@@ -61,7 +61,7 @@ const HomePage: React.FC = () => {
             </main>
             <Footer 
                 onPhilosophyClick={() => handleScrollTo(philosophyRef)}
-                onMethodClick={() => handleScrollTo(nicosiaMethodRef)}
+                onMethodClick={() => handleScrollTo(methodRef)}
                 onClientsClick={() => handleScrollTo(clientProfileRef)}
                 onFAQClick={() => handleScrollTo(faqRef)}
                 onContactClick={handleOpenModal}
