@@ -51,7 +51,7 @@ export enum A2AMethod {
 export const A2ARequestSchema = z.object({
   jsonrpc: z.literal('2.0'),
   method: z.nativeEnum(A2AMethod),
-  params: z.record(z.string(), z.any()).optional(),
+  params: z.record(z.string(), z.unknown()).optional(),
   id: z.union([z.string(), z.number()]).optional(),
 });
 
@@ -62,11 +62,11 @@ export type A2ARequest = z.infer<typeof A2ARequestSchema>;
  */
 export const A2AResponseSchema = z.object({
   jsonrpc: z.literal('2.0'),
-  result: z.any().optional(),
+  result: z.unknown().optional(),
   error: z.object({
     code: z.number(),
     message: z.string(),
-    data: z.any().optional(),
+    data: z.unknown().optional(),
   }).optional(),
   id: z.union([z.string(), z.number(), z.null()]),
 });
@@ -86,7 +86,7 @@ export const AuditRequestParamsSchema = z.object({
     priority: z.enum(['low', 'normal', 'high']).default('normal'),
     callback_url: z.string().url().optional(),
   }).optional(),
-  metadata: z.record(z.string(), z.any()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type AuditRequestParams = z.infer<typeof AuditRequestParamsSchema>;
@@ -111,7 +111,7 @@ export type BatchAuditParams = z.infer<typeof BatchAuditParamsSchema>;
  */
 export const SubscribeParamsSchema = z.object({
   event: z.enum(['audit.progress', 'audit.complete', 'insights.update']),
-  filter: z.record(z.string(), z.any()).optional(),
+  filter: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type SubscribeParams = z.infer<typeof SubscribeParamsSchema>;
