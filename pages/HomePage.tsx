@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Header from '../components/Header';
 import Hero from '../components/Hero';
 import TheShift from '../components/TheShift';
-import Philosophy from '../components/Philosophy';
+import Process from '../components/Process';
 import Stats from '../components/Stats';
 import Method from '../components/Method';
 import ClientProfile from '../components/ClientProfile';
@@ -18,7 +18,7 @@ const HomePage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     
     const methodRef = useRef<HTMLElement | null>(null);
-    const philosophyRef = useRef<HTMLElement | null>(null);
+    const processRef = useRef<HTMLElement | null>(null);
     const clientProfileRef = useRef<HTMLElement | null>(null);
     const faqRef = useRef<HTMLElement | null>(null);
 
@@ -51,7 +51,7 @@ const HomePage: React.FC = () => {
             <main>
                 <Hero onScrollClick={() => handleScrollTo(methodRef)} />
                 <TheShift />
-                <Philosophy ref={philosophyRef} />
+                <Process ref={processRef} />
                 <Stats />
                 <Method ref={methodRef} />
                 <ClientProfile ref={clientProfileRef} />
@@ -60,7 +60,7 @@ const HomePage: React.FC = () => {
                 <FinalCTA onCTAClick={handleOpenModal} />
             </main>
             <Footer 
-                onPhilosophyClick={() => handleScrollTo(philosophyRef)}
+                onPhilosophyClick={() => handleScrollTo(processRef)}
                 onMethodClick={() => handleScrollTo(methodRef)}
                 onClientsClick={() => handleScrollTo(clientProfileRef)}
                 onFAQClick={() => handleScrollTo(faqRef)}
