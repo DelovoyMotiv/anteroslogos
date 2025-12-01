@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Logo } from './Icons';
 import { useAuth } from '../lib/dashboard/auth-guard';
 import { LogOut, LayoutDashboard, ChevronDown } from 'lucide-react';
+import { GlitchText } from './GlitchText';
 
 interface HeaderProps {
     onMethodClick?: () => void;
@@ -19,6 +20,7 @@ const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick }, ref) => 
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
+    const [hoveredItem, setHoveredItem] = useState<string | null>(null);
     const isHomePage = location.pathname === '/';
 
     const handleLogoClick = () => {
@@ -85,13 +87,19 @@ const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick }, ref) => 
                                     item.onClick?.();
                                 }
                             }}
+                            onMouseEnter={() => setHoveredItem(item.label)}
+                            onMouseLeave={() => setHoveredItem(null)}
                             className={`transition-colors duration-300 text-sm font-medium relative group py-2 whitespace-nowrap ${
                                 'highlight' in item && item.highlight 
                                     ? 'text-brand-accent hover:text-blue-400 font-semibold' 
                                     : 'text-brand-text/80 hover:text-white'
                             }`}
                         >
-                            {item.label}
+                            <GlitchText 
+                                text={item.label} 
+                                isHovered={hoveredItem === item.label}
+                                className="inline-block"
+                            />
                             <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-brand-accent transition-all duration-300 group-hover:w-full"></span>
                         </button>
                     ))}
