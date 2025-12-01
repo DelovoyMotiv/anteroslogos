@@ -45,9 +45,34 @@ class WebSocketConnectionManager {
   // Connection timeout: 60 seconds
   private connectionTimeout = 60000;
   
+  private heartbeatTimer: NodeJS.Timeout | null = null;
+  
   constructor() {
     // Start heartbeat checker
-    setInterval(() => this.checkHeartbeats(), this.heartbeatInterval);
+    this.heartbeatTimer = setInterval(() => this.checkHeartbeats(), this.heartbeatInterval);
+  }
+  
+  /**
+   * Stop connection manager
+   */
+  stop(): void {
+    if (this.heartbeatTimer) {
+      clearInterval(this.heartbeatTimer);
+      this.heartbeatTimer = null;
+      console.log('[WebSocketManager] Heartbeat timer stopped');
+    }
+    
+    // Close all connections
+    for (const connection of this.connections.values()) {
+      try {
+        connection.socket.close();
+      } catch (error) {
+        console.error(`[WebSocketManager] Error closing connection ${connection.id}:`, error);
+      }
+    }
+    
+    this.connections.clear();
+    this.subscriptions.clear();
   }
   
   /**

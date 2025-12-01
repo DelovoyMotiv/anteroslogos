@@ -260,12 +260,24 @@ class CacheStorage {
 const cacheStorage = new CacheStorage();
 
 // Auto-cleanup every 5 minutes
-setInterval(() => {
+let cacheCleanupTimer: NodeJS.Timeout | null = null;
+cacheCleanupTimer = setInterval(() => {
   const evicted = cacheStorage.cleanup();
   if (evicted > 0) {
     console.log(`🧹 Evicted ${evicted} expired cache entries`);
   }
 }, 5 * 60 * 1000);
+
+/**
+ * Stop cache cleanup timer
+ */
+export function stopCacheCleanup(): void {
+  if (cacheCleanupTimer) {
+    clearInterval(cacheCleanupTimer);
+    cacheCleanupTimer = null;
+    console.log('🛑 Cache cleanup timer stopped');
+  }
+}
 
 // =====================================================
 // PUBLIC API
