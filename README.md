@@ -1,7 +1,7 @@
 # Anóteros Lógos - Enterprise AI Knowledge Infrastructure
 
 ![License](https://img.shields.io/badge/License-Proprietary-red)
-![Version](https://img.shields.io/badge/version-3.8.2-blue)
+![Version](https://img.shields.io/badge/version-3.8.4-blue)
 ![Node](https://img.shields.io/badge/node-20.x-green)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)
 ![React](https://img.shields.io/badge/React-19.2-cyan)
@@ -11,7 +11,7 @@ AI knowledge infrastructure platform providing cryptographically verifiable prov
 
 Production URL: https://anoteroslogos.com
 
-Codebase: 276 files | 95,900 lines
+Codebase: 372 files | 108,800 lines
 
 ---
 
@@ -34,6 +34,7 @@ Enterprise platform for optimizing digital content and brand presence for AI lan
 11. **MCP Integration** - Model Context Protocol v2.0 with isolated execution sandbox and Anthropic Advanced Tool Use support
 12. **Content Intelligence** - NLP analysis, query intent classification, competitive monitoring
 13. **Gold Standard System** - Citation prediction, learning feedback, network effects amplification
+14. **TypeScript SDK** - Production-grade client library with resilience patterns and type-safe API integration
 
 ---
 
@@ -655,7 +656,39 @@ Enterprise-grade multi-tenant data isolation via Row-Level Security.
 - `supabase/migrations/20251124_tenant_isolation.sql` - Full RLS migration (535 lines)
 - `lib/bft/__tests__/tenantIsolation.test.ts` - Isolation verification (233 lines)
 
-### 17. Frontend Application (33 components)
+### 17. TypeScript SDK (1,784 lines)
+
+Official client library for programmatic API access.
+
+**Capabilities:**
+- Type-safe API integration with Zod runtime validation
+- Automatic retry with exponential backoff and jitter
+- Circuit breaker pattern with per-service isolation
+- Idempotency layer with request deduplication
+- HTTP transport with configurable timeout handling
+- Browser and Node.js compatibility with dynamic imports
+- Service modules for Audit, Knowledge Graph, Citation, and CCC operations
+
+**Resilience Features:**
+- Retry policy with 3 attempts and exponential backoff (base 2s, max 30s)
+- Circuit breaker with 5-failure threshold and 60s cooldown period
+- Idempotency cache with LRU eviction (1000 entry limit, 24h TTL)
+- Request timeout enforcement via AbortController with cleanup
+- Cross-platform hash generation (Web Crypto API, Node.js crypto, FNV-1a fallback)
+
+**Components:**
+- `packages/sdk/src/client.ts` - Main client initialization (172 lines)
+- `packages/sdk/src/transport/http.ts` - HTTP adapter with timeout handling (161 lines)
+- `packages/sdk/src/resilience/factory.ts` - Isolated circuit breakers (80 lines)
+- `packages/sdk/src/resilience/retry.ts` - Exponential backoff (82 lines)
+- `packages/sdk/src/resilience/circuit-breaker.ts` - Fault isolation (114 lines)
+- `packages/sdk/src/resilience/idempotency.ts` - Request deduplication (159 lines)
+- `packages/sdk/src/services/audit.ts` - GEO Audit integration (103 lines)
+- `packages/sdk/src/services/knowledge-graph.ts` - Knowledge Graph operations (87 lines)
+- `packages/sdk/src/services/citation.ts` - Citation Intelligence (73 lines)
+- `packages/sdk/src/services/ccc.ts` - CCC balance and transfer (67 lines)
+
+### 18. Frontend Application (33 components)
 
 React 19 SPA with route-based code splitting.
 
@@ -905,6 +938,29 @@ data/
 
 supabase/migrations/
   001-016                       # Database schema (16 migrations)
+
+packages/sdk/                   # TypeScript SDK (1,784 lines)
+  src/
+    client.ts                   # Main client (172 lines)
+    transport/
+      http.ts                   # HTTP adapter (161 lines)
+    resilience/
+      factory.ts                # Circuit breaker factory (80 lines)
+      retry.ts                  # Exponential backoff (82 lines)
+      circuit-breaker.ts        # Fault isolation (114 lines)
+      idempotency.ts            # Request deduplication (159 lines)
+    services/
+      audit.ts                  # GEO Audit (103 lines)
+      knowledge-graph.ts        # Knowledge Graph (87 lines)
+      citation.ts               # Citation Intelligence (73 lines)
+      ccc.ts                    # CCC operations (67 lines)
+    types/
+      audit.ts                  # Audit schemas (167 lines)
+      knowledge-graph.ts        # Graph schemas (85 lines)
+      citation.ts               # Citation schemas (59 lines)
+      ccc.ts                    # CCC schemas (46 lines)
+    errors/
+      index.ts                  # Error hierarchy (109 lines)
 ```
 
 ---
@@ -948,11 +1004,11 @@ supabase/migrations/
 ## Statistics
 
 **Codebase:**
-- Total files: 276
-- Total lines: 95,900
-- TypeScript: 93.5%
-- PLpgSQL: 5.5%
-- CSS: 1.0%
+- Total files: 372
+- Total lines: 108,800
+- TypeScript: 94.2%
+- PLpgSQL: 5.0%
+- CSS: 0.8%
 
 **Core Modules:**
 - A2A Protocol: 15,433 lines
@@ -965,6 +1021,7 @@ supabase/migrations/
 - Content Intelligence: 2,210 lines
 - GEO Audit: 2,131 lines
 - Citation Intelligence: 1,923 lines
+- TypeScript SDK: 1,784 lines
 - Gold Standard: 1,832 lines
 - MCP Sandbox: 1,659 lines
 - Causal Contribution Credits: 1,469 lines
@@ -982,5 +1039,5 @@ Proprietary - All rights reserved
 
 ---
 
-Last Updated: November 28, 2025
-Version: 3.8.2
+Last Updated: December 1, 2025
+Version: 3.8.4
