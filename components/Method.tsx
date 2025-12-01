@@ -4,12 +4,10 @@ import { Database, Shield, Network, Boxes } from 'lucide-react';
 
 interface Pillar {
     icon: React.ElementType;
-    badge: string;
     title: string;
     userFacing: string;
     systems: Array<{
         name: string;
-        lines: number;
         description: string;
     }>;
     technologies: Array<{
@@ -24,28 +22,23 @@ const Method = forwardRef<HTMLElement>((_props, ref) => {
     const pillars: Pillar[] = [
         {
             icon: Database,
-            badge: '10,450 lines',
             title: 'Knowledge Infrastructure',
             userFacing: 'Real-time website analysis and knowledge graph extraction optimized for AI retrieval systems.',
             systems: [
                 {
                     name: 'GEO Audit Engine',
-                    lines: 2131,
                     description: 'Multi-platform scoring across Perplexity, ChatGPT, Claude, and Gemini with Schema.org parsing and NER'
                 },
                 {
                     name: 'Knowledge Graph Engine',
-                    lines: 2376,
                     description: 'Self-learning semantic graphs with bidirectional citation feedback and cross-platform authority propagation'
                 },
                 {
                     name: 'Causal Citation Tracer',
-                    lines: 4020,
                     description: 'Counterfactual simulation using BFS/DFS + A* pathfinding for ROI attribution and visibility prediction'
                 },
                 {
                     name: 'Citation Intelligence',
-                    lines: 1923,
                     description: 'ML-based probability scoring with ensemble models and continuous retraining from citation feedback'
                 }
             ],
@@ -59,28 +52,23 @@ const Method = forwardRef<HTMLElement>((_props, ref) => {
         },
         {
             icon: Shield,
-            badge: '3,180 lines',
             title: 'Cryptographic Provenance',
             userFacing: 'First production implementation of cryptographically verifiable provenance tokens for AI agent interactions.',
             systems: [
                 {
                     name: 'UCPT Tokens',
-                    lines: 658,
                     description: 'RFC 9052 COSE_Sign1 + RFC 8949 CBOR with Ed25519 signatures and SHA3-512 hashing for replay protection'
                 },
                 {
                     name: 'Byzantine Fault Tolerance',
-                    lines: 3180,
                     description: 'PBFT consensus with 7-node quorum tolerating f=2 Byzantine nodes using Castro & Liskov algorithm'
                 },
                 {
                     name: 'Causal Consensus Oracle',
-                    lines: 254,
                     description: 'Provenance-based voting weight calculated from knowledge graph depth with 95% cache hit rate'
                 },
                 {
                     name: 'Off-Chain Oracle',
-                    lines: 280,
                     description: '10x throughput improvement via distributed LRU cache with mesh gossip protocol broadcasting'
                 }
             ],
@@ -95,33 +83,27 @@ const Method = forwardRef<HTMLElement>((_props, ref) => {
         },
         {
             icon: Network,
-            badge: '27,602 lines',
             title: 'Autonomous Agent Economy',
             userFacing: 'Production micropayments on Base L2 with contribution-based rewards solving the agent ecosystem cold-start problem.',
             systems: [
                 {
                     name: 'APA Micropayments',
-                    lines: 4700,
                     description: 'USDC invoicing on Base L2 with automatic detection, double-entry bookkeeping, and reorg protection'
                 },
                 {
                     name: 'Universal Agent Protocol',
-                    lines: 7100,
                     description: 'HTTP/2 + WebSocket transport with cryptographic trust attestation and circuit breaker patterns'
                 },
                 {
                     name: 'A2A Protocol',
-                    lines: 15433,
                     description: 'Full Linux Foundation compliance (14/14 requirements) with JSON-RPC 2.0 and SSE streaming'
                 },
                 {
                     name: 'Causal Contribution Credits',
-                    lines: 1469,
                     description: 'Graph-theoretic reward computation with discount tiers from Bronze (25%) to Platinum (90%)'
                 },
                 {
                     name: 'Mesh Network',
-                    lines: 5513,
                     description: 'Kademlia DHT with 160-bit node IDs, XOR distance metric, and capability-based routing'
                 }
             ],
@@ -136,23 +118,19 @@ const Method = forwardRef<HTMLElement>((_props, ref) => {
         },
         {
             icon: Boxes,
-            badge: '2,006 lines',
             title: 'Enterprise Integration',
             userFacing: 'Direct LLM integration through industry-standard protocols with isolated execution and semantic tool discovery.',
             systems: [
                 {
                     name: 'MCP Integration',
-                    lines: 2006,
                     description: 'Model Context Protocol v2.0 with isolated-vm sandbox (128MB heap, 60s timeout) and automatic cleanup'
                 },
                 {
                     name: 'Anthropic Advanced Tool Use',
-                    lines: 227,
                     description: 'Programmatic execution with semantic BM25 tool search and async function bridges'
                 },
                 {
                     name: 'TypeScript SDK',
-                    lines: 843,
                     description: 'Production-grade client with resilience patterns, circuit breakers, and exponential backoff'
                 }
             ],
@@ -201,9 +179,7 @@ const Method = forwardRef<HTMLElement>((_props, ref) => {
                         </h2>
                         
                         <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/70 max-w-3xl mx-auto leading-relaxed">
-                            Production-grade AI knowledge platform built on{' '}
-                            <span className="text-brand-accent font-semibold">108,800 lines</span> of TypeScript across{' '}
-                            <span className="text-white font-semibold">14 major systems</span>.
+                            Production-grade AI knowledge platform powering verifiable citations across generative engines.
                         </p>
                     </div>
                 </AnimatedSection>
@@ -224,16 +200,13 @@ const Method = forwardRef<HTMLElement>((_props, ref) => {
 
                                 <div className="relative z-10">
                                     {/* Header */}
-                                    <div className="flex items-start justify-between mb-6">
+                                    <div className="flex items-start mb-6">
                                         <div className="relative">
                                             <div className="absolute inset-0 bg-brand-accent/30 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                                             <div className="relative w-16 h-16 rounded-xl bg-brand-accent/10 border border-brand-accent/20 flex items-center justify-center group-hover:bg-brand-accent/20 group-hover:border-brand-accent/40 group-hover:scale-110 transition-all duration-300">
                                                 <pillar.icon className="h-8 w-8 text-brand-accent" />
                                             </div>
                                         </div>
-                                        <span className="text-xs font-mono text-brand-accent/60 px-3 py-1.5 rounded-full bg-brand-accent/10 border border-brand-accent/20">
-                                            {pillar.badge}
-                                        </span>
                                     </div>
 
                                     {/* Title */}
@@ -251,12 +224,9 @@ const Method = forwardRef<HTMLElement>((_props, ref) => {
                                         <div className="text-xs font-mono uppercase text-brand-accent/40 mb-3">Core Systems</div>
                                         {pillar.systems.map((system) => (
                                             <div key={system.name} className="group/system">
-                                                <div className="flex items-baseline gap-2 mb-1">
+                                                <div className="mb-1">
                                                     <span className="text-sm font-semibold text-white/90 group-hover/system:text-brand-accent transition-colors">
                                                         {system.name}
-                                                    </span>
-                                                    <span className="text-xs font-mono text-brand-accent/50">
-                                                        {system.lines.toLocaleString()} lines
                                                     </span>
                                                 </div>
                                                 <p className="text-xs text-white/50 leading-relaxed">
@@ -301,30 +271,6 @@ const Method = forwardRef<HTMLElement>((_props, ref) => {
                         </AnimatedSection>
                     ))}
                 </div>
-
-                {/* Platform Stats */}
-                <AnimatedSection delay={400}>
-                    <div className="mt-16 p-8 rounded-2xl bg-gradient-to-br from-brand-accent/5 to-transparent border border-brand-accent/10">
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                            <div className="text-center">
-                                <div className="text-3xl md:text-4xl font-bold text-brand-accent mb-2">372</div>
-                                <div className="text-xs text-white/50 uppercase tracking-wider font-mono">Files</div>
-                            </div>
-                            <div className="text-center">
-                                <div className="text-3xl md:text-4xl font-bold text-brand-accent mb-2">108.8K</div>
-                                <div className="text-xs text-white/50 uppercase tracking-wider font-mono">Lines of Code</div>
-                            </div>
-                            <div className="text-center">
-                                <div className="text-3xl md:text-4xl font-bold text-brand-accent mb-2">14</div>
-                                <div className="text-xs text-white/50 uppercase tracking-wider font-mono">Major Systems</div>
-                            </div>
-                            <div className="text-center">
-                                <div className="text-3xl md:text-4xl font-bold text-brand-accent mb-2">7</div>
-                                <div className="text-xs text-white/50 uppercase tracking-wider font-mono">PBFT Consensus Nodes</div>
-                            </div>
-                        </div>
-                    </div>
-                </AnimatedSection>
             </div>
         </section>
     );
