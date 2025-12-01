@@ -75,21 +75,33 @@ interface GlitchTextProps {
  * - Progressive character resolution (left to right wave effect)
  * - Proper cleanup on unmount and state changes
  * - Zero mock data: real Greek alphabet mapping
+ * - Auto-resolve: after glitch completes, automatically returns to English
  */
 export const GlitchText: React.FC<GlitchTextProps> = ({ text, isHovered, className = '' }) => {
     const [displayText, setDisplayText] = useState(text);
     const rafIdRef = useRef<number | null>(null);
+    const timeoutIdRef = useRef<number | null>(null);
     const startTimeRef = useRef<number>(0);
-    const phaseRef = useRef<'glitching' | 'resolving' | 'idle'>('idle');
+    const phaseRef = useRef<'glitching' | 'resolving' | 'holding' | 'idle'>('idle');
+    const isHoveredRef = useRef(isHovered);
     
     // Memoize character array to avoid recreating on every render
     const chars = useMemo(() => text.split(''), [text]);
 
+    // Keep hover state in ref for access in animate loop
     useEffect(() => {
-        // Cancel any ongoing animation
+        isHoveredRef.current = isHovered;
+    }, [isHovered]);
+
+    useEffect(() => {
+        // Cancel any ongoing animation and timeouts
         if (rafIdRef.current !== null) {
             cancelAnimationFrame(rafIdRef.current);
             rafIdRef.current = null;
+        }
+        if (timeoutIdRef.current !== null) {
+            clearTimeout(timeoutIdRef.current);
+            timeoutIdRef.current = null;
         }
 
         if (isHovered) {
@@ -99,7 +111,7 @@ export const GlitchText: React.FC<GlitchTextProps> = ({ text, isHovered, classNa
             animate();
         } else {
             // Resolve back to original text
-            if (phaseRef.current === 'glitching') {
+            if (phaseRef.current === 'glitching' || phaseRef.current === 'holding') {
                 phaseRef.current = 'resolving';
                 startTimeRef.current = performance.now();
                 animate();
@@ -115,6 +127,10 @@ export const GlitchText: React.FC<GlitchTextProps> = ({ text, isHovered, classNa
                 cancelAnimationFrame(rafIdRef.current);
                 rafIdRef.current = null;
             }
+            if (timeoutIdRef.current !== null) {
+                clearTimeout(timeoutIdRef.current);
+                timeoutIdRef.current = null;
+            }
         };
     }, [isHovered, text]);
 
@@ -123,8 +139,8 @@ export const GlitchText: React.FC<GlitchTextProps> = ({ text, isHovered, classNa
         const phase = phaseRef.current;
 
         if (phase === 'glitching') {
-            // Glitch phase: 0-600ms, rapid random Greek letters
-            if (elapsed < 600) {
+            // Glitch phase: 0-400ms, rapid random Greek letters
+            if (elapsed < 400) {
                 const newText = chars.map((char, index) => {
                     // Progressive wave: characters glitch in sequence
                     const charStartDelay = index * 30; // 30ms per character
@@ -152,8 +168,20 @@ export const GlitchText: React.FC<GlitchTextProps> = ({ text, isHovered, classNa
                 setDisplayText(newText);
                 rafIdRef.current = requestAnimationFrame(animate);
             } else {
-                // Glitch complete, hold glitched state
-                phaseRef.current = 'idle';
+                // Glitch complete, hold briefly then auto-resolve
+                phaseRef.current = 'holding';
+                startTimeRef.current = performance.now();
+                rafIdRef.current = requestAnimationFrame(animate);
+            }
+        } else if (phase === 'holding') {
+            // Hold glitched state for 200ms, then auto-resolve back to English
+            if (elapsed < 200) {
+                rafIdRef.current = requestAnimationFrame(animate);
+            } else {
+                // Start auto-resolve back to original
+                phaseRef.current = 'resolving';
+                startTimeRef.current = performance.now();
+                rafIdRef.current = requestAnimationFrame(animate);
             }
         } else if (phase === 'resolving') {
             // Resolve phase: 0-400ms, progressive restoration to original
@@ -198,7 +226,21 @@ export const GlitchText: React.FC<GlitchTextProps> = ({ text, isHovered, classNa
             } else {
                 // Resolution complete
                 setDisplayText(text);
-                phaseRef.current = 'idle';
+                
+                // If still hovering, restart glitch after brief pause
+                if (isHoveredRef.current) {
+                    phaseRef.current = 'idle';
+                    // Brief pause (300ms) before restarting glitch cycle
+                    timeoutIdRef.current = window.setTimeout(() => {
+                        if (isHoveredRef.current && phaseRef.current === 'idle') {
+                            phaseRef.current = 'glitching';
+                            startTimeRef.current = performance.now();
+                            animate();
+                        }
+                    }, 300);
+                } else {
+                    phaseRef.current = 'idle';
+                }
             }
         }
     };
