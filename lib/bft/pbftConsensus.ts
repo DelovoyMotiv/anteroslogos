@@ -642,17 +642,38 @@ export class PBFTConsensus {
    */
   private async waitForConsensus(requestId: string): Promise<ConsensusResult> {
     return new Promise((resolve) => {
-      const checkInterval = setInterval(() => {
+      let checkInterval: NodeJS.Timeout | null = null;
+      let timeoutHandle: NodeJS.Timeout | null = null;
+      
+      // Overall timeout for wait operation
+      timeoutHandle = setTimeout(() => {
+        if (checkInterval) clearInterval(checkInterval);
+        const round = this.activeRounds.get(requestId);
+        resolve({
+          success: false,
+          requestId,
+          viewNumber: round?.viewNumber || this.viewState.viewNumber,
+          sequenceNumber: round?.sequenceNumber || this.viewState.sequenceNumber,
+          quorumNodes: round?.quorumNodes || [],
+          commitsReceived: round?.commits.size || 0,
+          status: 'TIMEOUT',
+          error: 'Wait for consensus timed out',
+        });
+      }, PBFT_PARAMS.CONSENSUS_TIMEOUT + 1000);
+      
+      checkInterval = setInterval(() => {
         const round = this.activeRounds.get(requestId);
         if (!round) {
-          clearInterval(checkInterval);
+          if (checkInterval) clearInterval(checkInterval);
+          if (timeoutHandle) clearTimeout(timeoutHandle);
           resolve(this.createFailureResult(requestId, 'Round not found'));
           return;
         }
         
         const requiredCommits = 2 * PBFT_PARAMS.FAULT_TOLERANCE + 1;
         if (round.commits.size >= requiredCommits && round.status === 'COMMITTED') {
-          clearInterval(checkInterval);
+          if (checkInterval) clearInterval(checkInterval);
+          if (timeoutHandle) clearTimeout(timeoutHandle);
           resolve({
             success: true,
             requestId,
@@ -668,7 +689,8 @@ export class PBFTConsensus {
         }
         
         if (round.status === 'FAILED' || round.status === 'TIMEOUT') {
-          clearInterval(checkInterval);
+          if (checkInterval) clearInterval(checkInterval);
+          if (timeoutHandle) clearTimeout(timeoutHandle);
           resolve({
             success: false,
             requestId,
@@ -694,12 +716,45 @@ export class PBFTConsensus {
     
     console.log(`[PBFT] Executing request ${round.requestId}`);
     
-    round.status = 'COMMITTED';
-    round.committedAt = Date.now();
-    this.viewState.lastCommitted = round.sequenceNumber;
-    
-    // TODO: Actually execute the operation (payment verify, reputation update, etc.)
-    // For now: just mark as committed
+    try {
+      // Store consensus result in database
+      await this.storage.recordConsensusResult({
+        requestId: round.requestId,
+        operation: round.request.operation,
+        digest: round.digest,
+        quorumNodes: round.quorumNodes,
+        commitsReceived: round.commits.size,
+        status: 'COMMITTED',
+        payload: round.request.payload,
+        clientId: round.request.clientId,
+        executionTimeMs: Date.now() - round.startTime,
+      });
+      
+      round.status = 'COMMITTED';
+      round.committedAt = Date.now();
+      this.viewState.lastCommitted = round.sequenceNumber;
+      
+      console.log(`[PBFT] Successfully executed and recorded request ${round.requestId}`);
+    } catch (error) {
+      console.error(`[PBFT] Failed to execute request ${round.requestId}:`, error);
+      round.status = 'FAILED';
+      
+      // Attempt to record failure
+      try {
+        await this.storage.recordConsensusResult({
+          requestId: round.requestId,
+          operation: round.request.operation,
+          digest: round.digest,
+          quorumNodes: round.quorumNodes,
+          commitsReceived: round.commits.size,
+          status: 'FAILED',
+          payload: round.request.payload,
+          clientId: round.request.clientId,
+        });
+      } catch (storageError) {
+        console.error(`[PBFT] Failed to record failure for ${round.requestId}:`, storageError);
+      }
+    }
   }
 
   /**
