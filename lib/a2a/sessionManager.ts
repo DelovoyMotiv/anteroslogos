@@ -51,10 +51,10 @@ export const SessionSchema = z.object({
   }).optional(),
   
   // Session-level Extensions
-  extensions: z.record(z.string(), z.any()).optional(),
+  extensions: z.record(z.string(), z.unknown()).optional(),
   
   // Metadata
-  metadata: z.record(z.string(), z.any()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type Session = z.infer<typeof SessionSchema>;
@@ -64,7 +64,7 @@ export const CreateSessionRequestSchema = z.object({
   user_id: z.string(),
   name: z.string().optional(),
   description: z.string().optional(),
-  metadata: z.record(z.string(), z.any()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type CreateSessionRequest = z.infer<typeof CreateSessionRequestSchema>;
@@ -467,7 +467,7 @@ export function createSessionWithTask(
   agentId: string,
   userId: string,
   capability: string,
-  params: Record<string, any>,
+  params: Record<string, unknown>,
   sessionName?: string
 ): { session: Session; task: Task } {
   // Create session
@@ -498,8 +498,8 @@ export function createSessionWithTask(
  */
 export function aggregateSessionResults(sessionId: string): {
   success: boolean;
-  results: any[];
-  errors: any[];
+  results: unknown[];
+  errors: unknown[];
   metrics: Session['metrics'];
 } {
   const tasks = sessionManager.getSessionTasks(sessionId);

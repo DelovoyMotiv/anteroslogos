@@ -143,9 +143,11 @@ async function extractTenantContext(
   options: MiddlewareOptions
 ): Promise<TenantContext | null> {
   // 1. JWT claims (Supabase Auth)
-  const jwtContext = TenantContextManager.fromJWT(req.user);
-  if (jwtContext) {
-    return jwtContext;
+  if (req.user && typeof req.user === 'object') {
+    const jwtContext = TenantContextManager.fromJWT(req.user as Record<string, unknown>);
+    if (jwtContext) {
+      return jwtContext;
+    }
   }
 
   // 2. X-Tenant-ID header (API keys, service-to-service)

@@ -12,9 +12,16 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 // Conditional import of AsyncLocalStorage (Node.js only)
-let AsyncLocalStorage: any;
+type AsyncLocalStorageClass<T> = {
+  new(): {
+    getStore(): T | undefined;
+    run<R>(store: T, callback: () => R): R;
+  };
+};
+
+let AsyncLocalStorage: AsyncLocalStorageClass<TenantContext> | null = null;
 try {
-  // @ts-ignore
+  // @ts-ignore - dynamic require for Node.js environment
   AsyncLocalStorage = require('node:async_hooks').AsyncLocalStorage;
 } catch {
   // Browser environment - AsyncLocalStorage not available
@@ -49,7 +56,10 @@ export interface TenantValidationResult {
  * Maintains tenant_id across async call stack without explicit passing
  * Falls back to null if not available (browser environment)
  */
-const tenantContextStorage: any = AsyncLocalStorage ? new AsyncLocalStorage() : null;
+const tenantContextStorage: {
+  getStore(): TenantContext | undefined;
+  run<R>(store: TenantContext, callback: () => R): R;
+} | null = AsyncLocalStorage ? new AsyncLocalStorage() : null;
 
 // =====================================================
 // TENANT CONTEXT MANAGER
@@ -206,8 +216,12 @@ export class TenantContextManager {
         return 'private';
       }
 
-      const settings = data.settings as any;
-      return settings?.federation_mode || 'private';
+      const settings = data.settings as Record<string, unknown> | null;
+      const federationMode = settings?.federation_mode;
+      if (federationMode === 'private' || federationMode === 'federated' || federationMode === 'public') {
+        return federationMode;
+      }
+      return 'private';
     } catch {
       return 'private';
     }
@@ -246,11 +260,16 @@ export class TenantContextManager {
    * Create tenant context from JWT payload
    * Extracts tenant_id from Supabase JWT metadata
    */
-  public static fromJWT(jwtPayload: any): TenantContext | null {
-    const tenantId =
-      jwtPayload?.app_metadata?.tenant_id ||
-      jwtPayload?.user_metadata?.tenant_id;
-    const userId = jwtPayload?.sub;
+  public static fromJWT(jwtPayload: Record<string, unknown>): TenantContext | null {
+    // Type guard for nested metadata
+    const appMetadata = jwtPayload?.app_metadata as Record<string, unknown> | undefined;
+    const userMetadata = jwtPayload?.user_metadata as Record<string, unknown> | undefined;
+    
+    const tenantId = 
+      (typeof appMetadata?.tenant_id === 'string' ? appMetadata.tenant_id : undefined) ||
+      (typeof userMetadata?.tenant_id === 'string' ? userMetadata.tenant_id : undefined);
+    
+    const userId = typeof jwtPayload?.sub === 'string' ? jwtPayload.sub : undefined;
 
     if (!tenantId) {
       return null;

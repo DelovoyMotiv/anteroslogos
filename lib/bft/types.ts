@@ -71,7 +71,7 @@ export type PBFTMessage = z.infer<typeof PBFTMessageSchema>;
 export const ConsensusRequestSchema = z.object({
   requestId: z.string().regex(/^[0-9A-HJKMNP-TV-Z]{26}$/), // ULID
   operation: z.enum(['PAYMENT_VERIFY', 'REPUTATION_UPDATE', 'AUDIT_DEEP', 'MESH_TOPOLOGY_CHANGE']),
-  payload: z.any(),
+  payload: z.record(z.string(), z.unknown()),
   clientId: z.string(), // Node ID of requester
   clientSignature: z.string(), // Ed25519 signature of payload
   timestamp: z.number().int().positive(),

@@ -355,7 +355,7 @@ export class BFTRouter {
   /**
    * Analyze operation to determine routing strategy
    */
-  private analyzeOperation(operation: string, payload: any): OperationMetadata {
+  private analyzeOperation(operation: string, payload: Record<string, unknown>): OperationMetadata {
     const requiresConsensusFlag = requiresConsensus(operation);
     
     let criticalityScore = 0;
@@ -363,7 +363,8 @@ export class BFTRouter {
     
     // Calculate criticality based on operation type and payload
     if (operation === 'PAYMENT_VERIFY') {
-      paymentAmount = payload.amount || 0;
+      const amount = payload.amount;
+      paymentAmount = typeof amount === 'number' ? amount : 0;
       // Payments >10 USDC are critical
       criticalityScore = (paymentAmount && paymentAmount > 10) ? 100 : 50;
     } else if (operation === 'REPUTATION_UPDATE') {
@@ -600,11 +601,31 @@ export class BFTRouter {
   }> {
     const storageHealthy = await this.storage.healthCheck();
     
+    // Consensus health: check if view state is accessible and primary is assigned
+    const consensusHealthy = (() => {
+      try {
+        const viewState = this.consensus.getViewState();
+        return viewState.primary !== '' && viewState.viewNumber >= 0;
+      } catch {
+        return false;
+      }
+    })();
+    
+    // Mesh network health: check if router has active quorum nodes
+    const meshHealthy = (() => {
+      try {
+        const state = this.consensus.getViewState();
+        return state.replicas.length >= 3; // At least 3 replicas for f=1 tolerance
+      } catch {
+        return false;
+      }
+    })();
+    
     return {
       bftRouter: true,
-      consensus: true, // TODO: add consensus health check
+      consensus: consensusHealthy,
       storage: storageHealthy,
-      meshNetwork: true, // TODO: check mesh network connectivity
+      meshNetwork: meshHealthy,
     };
   }
 }
