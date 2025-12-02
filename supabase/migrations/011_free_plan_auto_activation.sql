@@ -61,18 +61,20 @@ $$;
 COMMENT ON FUNCTION public.auto_activate_free_plan IS 'Automatically activates FREE subscription for new users (freemium model)';
 
 -- =====================================================
--- TRIGGER: on_auth_user_created
+-- TRIGGER: on_auth_user_created_activate_plan
 -- Purpose: Execute auto_activate_free_plan after user registration
+-- Note: Renamed to avoid conflict with migration 001 trigger
+-- Execution order: 1) handle_new_user (profile) 2) auto_activate_free_plan (subscription)
 -- =====================================================
 
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+DROP TRIGGER IF EXISTS on_auth_user_created_activate_plan ON auth.users;
 
-CREATE TRIGGER on_auth_user_created
+CREATE TRIGGER on_auth_user_created_activate_plan
   AFTER INSERT ON auth.users
   FOR EACH ROW
   EXECUTE FUNCTION public.auto_activate_free_plan();
 
-COMMENT ON TRIGGER on_auth_user_created ON auth.users IS 'Activates FREE plan subscription for new users';
+COMMENT ON TRIGGER on_auth_user_created_activate_plan ON auth.users IS 'Activates FREE plan subscription for new users (runs after profile creation)';
 
 -- =====================================================
 -- UPDATE: Platform wallet address for all operations

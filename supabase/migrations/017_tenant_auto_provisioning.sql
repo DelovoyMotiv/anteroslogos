@@ -68,10 +68,8 @@ BEGIN
     NOW()
   );
   
-  -- Link tenant to user's profile
-  UPDATE public.profiles
-  SET tenant_id = v_tenant_id
-  WHERE id = NEW.id;
+  -- Note: tenant_id in profiles is populated via fill_tenant_id() trigger from migration 007
+  -- No manual UPDATE needed here
   
   RAISE NOTICE 'Tenant provisioned: % (%) for user %', v_tenant_name, v_tenant_id, NEW.id;
   
@@ -137,5 +135,15 @@ BEGIN
     RAISE EXCEPTION 'tenant_members table not found. Please run migration 007_multi_tenancy_isolation.sql first.';
   END IF;
   
-  RAISE NOTICE 'Migration 017 completed successfully. Tenant auto-provisioning enabled.';
+  -- Verify tenant_id column exists in profiles
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'profiles' 
+      AND column_name = 'tenant_id' 
+      AND table_schema = 'public'
+  ) THEN
+    RAISE EXCEPTION 'tenant_id column not found in profiles table. Please run migration 007_multi_tenancy_isolation.sql first.';
+  END IF;
+  
+  RAISE NOTICE '✅ Migration 017 completed successfully. Tenant auto-provisioning enabled.';
 END $$;
