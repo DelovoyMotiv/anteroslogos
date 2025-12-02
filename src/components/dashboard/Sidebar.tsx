@@ -17,6 +17,7 @@ import {
   LogOut,
   Shield,
   FileText,
+  Search,
 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../lib/dashboard/auth-guard';
@@ -30,6 +31,7 @@ interface NavItem {
 // Main navigation items
 const mainNav: NavItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Audit', href: '/dashboard/audit', icon: Search },
   { name: 'API Keys', href: '/dashboard/api-keys', icon: Key },
   { name: 'Agent Keys', href: '/dashboard/agent-keys', icon: Cpu },
   { name: 'Usage', href: '/dashboard/usage', icon: BarChart3 },
