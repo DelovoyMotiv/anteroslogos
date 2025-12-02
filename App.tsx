@@ -4,7 +4,7 @@ import LoadingSpinner from './components/LoadingSpinner';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { AuthErrorBoundary } from './src/components/auth/AuthErrorBoundary';
 import { IOSInstallPrompt } from './components/IOSInstallPrompt';
-import { logConfig, validateConfig, config } from './lib/config/env';
+import { logConfig, validateConfig } from './lib/config/env';
 
 // Lazy load all route components for optimal bundle splitting
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -46,13 +46,15 @@ const App: React.FC = () => {
         
         // Validate configuration
         const validation = validateConfig();
-        if (!validation.valid) {
+        
+        // Log errors (critical)
+        if (validation.errors.length > 0) {
             console.error('❌ Configuration errors:', validation.errors);
-            
-            // In production, show critical config errors to user
-            if (config.isProduction && validation.errors.length > 0) {
-                console.error('Production configuration is invalid. Please check environment variables.');
-            }
+        }
+        
+        // Log warnings (non-critical)
+        if (validation.warnings.length > 0) {
+            console.warn('⚠️ Configuration warnings:', validation.warnings);
         }
     }, []);
 

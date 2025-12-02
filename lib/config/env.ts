@@ -37,18 +37,7 @@ function getEnv(key: string, fallback?: string): string {
   return value;
 }
 
-/**
- * Get required environment variable (throws if not set)
- */
-function getRequiredEnv(key: string): string {
-  const value = import.meta.env[key];
-  
-  if (value === undefined || value === '') {
-    throw new Error(`Required environment variable ${key} is not set`);
-  }
-  
-  return value;
-}
+// Removed getRequiredEnv - app now works without Supabase credentials
 
 /**
  * Detect current environment
@@ -127,13 +116,9 @@ function getSiteUrl(): string {
 const env = detectEnvironment();
 
 export const config: EnvConfig = {
-  // Supabase (required in production)
-  supabaseUrl: env.isProduction 
-    ? getRequiredEnv('VITE_SUPABASE_URL')
-    : getEnv('VITE_SUPABASE_URL', ''),
-  supabaseAnonKey: env.isProduction
-    ? getRequiredEnv('VITE_SUPABASE_ANON_KEY')
-    : getEnv('VITE_SUPABASE_ANON_KEY', ''),
+  // Supabase (optional - app works without auth if not configured)
+  supabaseUrl: getEnv('VITE_SUPABASE_URL', ''),
+  supabaseAnonKey: getEnv('VITE_SUPABASE_ANON_KEY', ''),
   
   // Auth
   authRedirectUrl: getAuthRedirectUrl(),
@@ -146,22 +131,23 @@ export const config: EnvConfig = {
 /**
  * Validate configuration on startup
  */
-export function validateConfig(): { valid: boolean; errors: string[] } {
+export function validateConfig(): { valid: boolean; errors: string[]; warnings: string[] } {
   const errors: string[] = [];
+  const warnings: string[] = [];
   
-  // Production checks
+  // Production checks (warnings only - app still works)
   if (config.isProduction) {
     if (!config.supabaseUrl) {
-      errors.push('VITE_SUPABASE_URL is required in production');
+      warnings.push('VITE_SUPABASE_URL not set - authentication features disabled');
     }
     if (!config.supabaseAnonKey) {
-      errors.push('VITE_SUPABASE_ANON_KEY is required in production');
+      warnings.push('VITE_SUPABASE_ANON_KEY not set - authentication features disabled');
     }
     if (!config.siteUrl || config.siteUrl.includes('localhost')) {
-      errors.push('VITE_SITE_URL must be production URL');
+      warnings.push('VITE_SITE_URL not properly configured - using current origin');
     }
     if (!config.authRedirectUrl || config.authRedirectUrl.includes('localhost')) {
-      errors.push('VITE_AUTH_REDIRECT_URL must be production URL');
+      warnings.push('VITE_AUTH_REDIRECT_URL not properly configured');
     }
   }
   
@@ -183,6 +169,7 @@ export function validateConfig(): { valid: boolean; errors: string[] } {
   return {
     valid: errors.length === 0,
     errors,
+    warnings,
   };
 }
 
