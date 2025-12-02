@@ -5,10 +5,12 @@
 
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../types/database.types';
+import type { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
+import { config } from './config/env';
 
-// Environment variables validation
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Environment variables from centralized config
+const supabaseUrl = config.supabaseUrl;
+const supabaseAnonKey = config.supabaseAnonKey;
 
 // Check if Supabase is configured
 const isConfigured = !!(supabaseUrl && supabaseAnonKey);
@@ -45,7 +47,7 @@ export const supabase = isConfigured ? createClient<Database>(supabaseUrl!, supa
       eventsPerSecond: 10,
     },
   },
-}) : null as any;
+}) : null;
 
 /**
  * Check if Supabase client is properly configured
@@ -57,7 +59,8 @@ export function isSupabaseConfigured(): boolean {
 /**
  * Get current authenticated user
  */
-export async function getCurrentUser() {
+export async function getCurrentUser(): Promise<User | null> {
+  if (!isConfigured || !supabase) return null;
   try {
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error) throw error;
@@ -72,12 +75,13 @@ export async function getCurrentUser() {
  * Sign up new user with email/password
  */
 export async function signUpWithEmail(email: string, password: string) {
+  if (!isConfigured || !supabase) return { user: null, error: new Error('Supabase not configured') };
   try {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: config.authRedirectUrl,
       },
     });
     if (error) throw error;
@@ -92,6 +96,7 @@ export async function signUpWithEmail(email: string, password: string) {
  * Sign in existing user with email/password
  */
 export async function signInWithEmail(email: string, password: string) {
+  if (!isConfigured || !supabase) return { user: null, session: null, error: new Error('Supabase not configured') };
   try {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
@@ -109,11 +114,16 @@ export async function signInWithEmail(email: string, password: string) {
  * Sign in with OAuth provider (Google, GitHub, etc.)
  */
 export async function signInWithOAuth(provider: 'google' | 'github' | 'twitter') {
+  if (!isConfigured || !supabase) return { url: null, error: new Error('Supabase not configured') };
   try {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: config.authRedirectUrl,
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
       },
     });
     if (error) throw error;
@@ -128,6 +138,7 @@ export async function signInWithOAuth(provider: 'google' | 'github' | 'twitter')
  * Sign out current user
  */
 export async function signOut() {
+  if (!isConfigured || !supabase) return { error: new Error('Supabase not configured') };
   try {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
@@ -142,9 +153,10 @@ export async function signOut() {
  * Reset password for user
  */
 export async function resetPassword(email: string) {
+  if (!isConfigured || !supabase) return { error: new Error('Supabase not configured') };
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/reset-password`,
+      redirectTo: `${config.siteUrl}/auth/reset-password`,
     });
     if (error) throw error;
     return { error: null };
@@ -158,6 +170,7 @@ export async function resetPassword(email: string) {
  * Update user password
  */
 export async function updatePassword(newPassword: string) {
+  if (!isConfigured || !supabase) return { error: new Error('Supabase not configured') };
   try {
     const { error } = await supabase.auth.updateUser({
       password: newPassword,
@@ -173,9 +186,9 @@ export async function updatePassword(newPassword: string) {
 /**
  * Listen to auth state changes
  */
-export function onAuthStateChange(callback: (event: string, session: any) => void) {
+export function onAuthStateChange(callback: (event: AuthChangeEvent, session: Session | null) => void) {
   if (!isConfigured || !supabase) return { data: { subscription: { unsubscribe: () => {} } } };
-  return supabase.auth.onAuthStateChange((event: any, session: any) => {
+  return supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
     callback(event, session);
   });
 }

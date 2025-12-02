@@ -7,7 +7,8 @@
 
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
-let fpPromise: Promise<any> | null = null;
+// FingerprintJS returns dynamic result, using generic Promise
+let fpPromise: ReturnType<typeof FingerprintJS.load> | null = null;
 
 /**
  * Initialize FingerprintJS (call once on app load)
@@ -31,6 +32,10 @@ export async function getDeviceFingerprint(): Promise<{
   try {
     if (!fpPromise) {
       await initFingerprint();
+    }
+
+    if (!fpPromise) {
+      throw new Error('Failed to initialize fingerprint');
     }
 
     const fp = await fpPromise;

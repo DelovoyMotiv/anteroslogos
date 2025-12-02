@@ -29,6 +29,10 @@ export class GoldStandardPersistence {
   }
 
   private async initializeUserId(): Promise<void> {
+    if (!supabase) {
+      this.userId = null;
+      return;
+    }
     const { data: { user } } = await supabase.auth.getUser();
     this.userId = user?.id || null;
   }
@@ -158,6 +162,10 @@ export class GoldStandardPersistence {
 
   async loadCitations(kgDomain?: string): Promise<Citation[]> {
     const userId = await this.ensureUserId();
+
+    if (!supabase) {
+      return [];
+    }
 
     let query = supabase
       .from('citations')

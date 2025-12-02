@@ -6,7 +6,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase, isSupabaseConfigured } from '../supabase';
-import type { User } from '@supabase/supabase-js';
+import type { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
+import { logAuthEvent } from '../auth/auditLogger';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -25,31 +26,13 @@ export function AuthGuard({
 }: AuthGuardProps) {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<User | null>(null);
+  const [emailVerified, setEmailVerified] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // DEV MODE: Only bypass auth in local development (not production)
-    const isLocalDev = import.meta.env.DEV || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    
-    if (isLocalDev && (!isSupabaseConfigured() || !supabase)) {
-      console.warn('[DEV MODE] Supabase not configured - bypassing authentication (LOCAL ONLY)');
-      // Create mock user for dev mode
-      const mockUser = {
-        id: 'dev-user-mock-id',
-        email: 'dev@localhost',
-        aud: 'authenticated',
-        role: 'authenticated',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      } as User;
-      setUser(mockUser);
-      setLoading(false);
-      return;
-    }
-    
-    // Production: Redirect to login if Supabase not configured
+    // PRODUCTION: Require Supabase configuration (no mock users)
     if (!isSupabaseConfigured() || !supabase) {
-      console.error('Supabase not configured in production');
+      console.error('Supabase not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.');
       setLoading(false);
       if (requireAuth) {
         navigate(redirectTo, { replace: true });
@@ -58,27 +41,82 @@ export function AuthGuard({
     }
 
     // Check initial session
-    supabase.auth.getSession().then(({ data: { session } }: any) => {
-      setUser(session?.user ?? null);
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error('Failed to get session:', error.message);
+      }
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      setEmailVerified(!!currentUser?.email_confirmed_at);
       setLoading(false);
 
       if (requireAuth && !session) {
         navigate(redirectTo, { replace: true });
+        return;
+      }
+
+      // Check email verification for dashboard routes
+      if (requireAuth && currentUser && !currentUser.email_confirmed_at) {
+        navigate('/auth/verify-email', { 
+          replace: true, 
+          state: { email: currentUser.email } 
+        });
       }
     });
 
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
-      setUser(session?.user ?? null);
+    } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      setEmailVerified(!!currentUser?.email_confirmed_at);
+
+      // Handle session expiry/logout
+      if (event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+        if (event === 'SIGNED_OUT') {
+          console.log('User signed out or session expired');
+        }
+      }
 
       if (requireAuth && !session) {
-        navigate(redirectTo, { replace: true });
+        navigate(redirectTo, { 
+          replace: true,
+          state: { message: event === 'SIGNED_OUT' ? 'Session expired. Please log in again.' : undefined }
+        });
+        return;
+      }
+
+      // Check email verification for dashboard routes
+      if (requireAuth && currentUser && !currentUser.email_confirmed_at) {
+        navigate('/auth/verify-email', { 
+          replace: true, 
+          state: { email: currentUser.email } 
+        });
       }
     });
 
-    return () => subscription.unsubscribe();
+    // Set up token refresh check (check every 5 minutes)
+    const refreshInterval = setInterval(async () => {
+      if (!supabase) return;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session && session.expires_at) {
+        const expiresAt = new Date(session.expires_at * 1000);
+        const now = new Date();
+        const timeUntilExpiry = expiresAt.getTime() - now.getTime();
+        
+        // Refresh if less than 5 minutes until expiry
+        if (timeUntilExpiry < 5 * 60 * 1000 && timeUntilExpiry > 0) {
+          console.log('Refreshing session token...');
+          await supabase.auth.refreshSession();
+        }
+      }
+    }, 5 * 60 * 1000); // Check every 5 minutes
+
+    return () => {
+      subscription.unsubscribe();
+      clearInterval(refreshInterval);
+    };
   }, [requireAuth, redirectTo, navigate]);
 
   if (loading) {
@@ -87,6 +125,11 @@ export function AuthGuard({
 
   if (requireAuth && !user) {
     return null; // Redirecting
+  }
+
+  // Check email verification
+  if (requireAuth && user && !emailVerified) {
+    return null; // Redirecting to verify-email
   }
 
   return <>{children}</>;
@@ -114,40 +157,25 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // DEV MODE: Only create mock user in local development (not production)
-    const isLocalDev = import.meta.env.DEV || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    
-    if (isLocalDev && (!isSupabaseConfigured() || !supabase)) {
-      console.warn('[DEV MODE] useAuth: Supabase not configured - using mock user (LOCAL ONLY)');
-      const mockUser = {
-        id: 'dev-user-mock-id',
-        email: 'dev@localhost',
-        aud: 'authenticated',
-        role: 'authenticated',
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      } as User;
-      setUser(mockUser);
-      setLoading(false);
-      return;
-    }
-    
-    // Production: No mock user, require real authentication
+    // PRODUCTION: Require Supabase configuration (no mock users)
     if (!isSupabaseConfigured() || !supabase) {
-      console.error('Supabase not configured in production');
+      console.error('Supabase not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.');
       setUser(null);
       setLoading(false);
       return;
     }
 
-    supabase.auth.getUser().then(({ data: { user } }: any) => {
+    supabase.auth.getUser().then(({ data: { user }, error }) => {
+      if (error) {
+        console.error('Failed to get user:', error.message);
+      }
       setUser(user);
       setLoading(false);
     });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+    } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
       setUser(session?.user ?? null);
       setLoading(false);
     });
@@ -159,21 +187,40 @@ export function useAuth() {
     if (!isSupabaseConfigured() || !supabase) {
       throw new Error('Supabase not configured');
     }
+    
+    await logAuthEvent('login_attempt', null, { email });
+    
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
+    
+    if (error) {
+      await logAuthEvent('login_failure', null, { email, error: error.message });
+      throw error;
+    }
+    
+    await logAuthEvent('login_success', data.user?.id || null, { email });
     return data;
   };
 
-  const signUp = async (email: string, password: string, metadata?: Record<string, any>) => {
+  const signUp = async (email: string, password: string, metadata?: Record<string, unknown>) => {
     if (!isSupabaseConfigured() || !supabase) {
       throw new Error('Supabase not configured');
     }
+    
+    await logAuthEvent('signup_attempt', null, { email });
+    
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { data: metadata },
     });
-    if (error) throw error;
+    
+    if (error) {
+      await logAuthEvent('signup_failure', null, { email, error: error.message });
+      throw error;
+    }
+    
+    await logAuthEvent('signup_success', data.user?.id || null, { email });
+    await logAuthEvent('email_verification_sent', data.user?.id || null, { email });
     return data;
   };
 
@@ -193,7 +240,14 @@ export function useAuth() {
     if (!isSupabaseConfigured() || !supabase) {
       throw new Error('Supabase not configured');
     }
+    
+    const { data: { user } } = await supabase.auth.getUser();
     const { error } = await supabase.auth.signOut();
+    
+    if (!error) {
+      await logAuthEvent('logout', user?.id || null, {});
+    }
+    
     if (error) throw error;
   };
 
@@ -201,10 +255,18 @@ export function useAuth() {
     if (!isSupabaseConfigured() || !supabase) {
       throw new Error('Supabase not configured');
     }
+    
+    await logAuthEvent('password_reset_request', null, { email });
+    
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/reset-password`,
     });
-    if (error) throw error;
+    
+    if (error) {
+      await logAuthEvent('password_reset_failure', null, { email, error: error.message });
+      throw error;
+    }
+    
     return data;
   };
 
@@ -212,13 +274,22 @@ export function useAuth() {
     if (!isSupabaseConfigured() || !supabase) {
       throw new Error('Supabase not configured');
     }
+    
+    await logAuthEvent('oauth_attempt', null, { provider });
+    
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
-    if (error) throw error;
+    
+    if (error) {
+      await logAuthEvent('oauth_failure', null, { provider, error: error.message });
+      throw error;
+    }
+    
+    // Success will be logged in callback page
     return data;
   };
 

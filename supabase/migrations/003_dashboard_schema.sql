@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS public.api_keys (
 );
 
 -- Indexes
-CREATE INDEX idx_api_keys_user_id ON public.api_keys(user_id) WHERE revoked = FALSE AND deleted_at IS NULL;
+CREATE INDEX idx_api_keys_user_id ON public.api_keys(user_id) WHERE revoked = FALSE;
 CREATE INDEX idx_api_keys_hash ON public.api_keys(key_hash) WHERE revoked = FALSE;
 CREATE INDEX idx_api_keys_expires ON public.api_keys(expires_at) WHERE revoked = FALSE AND expires_at IS NOT NULL;
 CREATE INDEX idx_api_keys_last_used ON public.api_keys(last_used_at DESC NULLS LAST);

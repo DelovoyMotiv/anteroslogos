@@ -130,6 +130,10 @@ export async function getSubscription(
       } as USDCSubscription;
     }
     
+    if (!supabase) {
+      return { error: 'Supabase not configured' };
+    }
+    
     const { data, error } = await supabase
       .from('user_subscriptions')
       .select('*')
@@ -157,6 +161,10 @@ export async function getPendingInvoices(
 ): Promise<SubscriptionInvoice[] | { error: string }> {
   try {
     const { supabase } = await import('../supabase');
+    
+    if (!supabase) {
+      return { error: 'Supabase not configured' };
+    }
     
     // Get all subscription IDs for user
     const { data: subscriptions, error: subError } = await supabase
@@ -225,6 +233,10 @@ export async function getUsageStats(
 export async function getPlatformWalletAddress(): Promise<string> {
   try {
     const { supabase } = await import('../supabase');
+    
+    if (!supabase) {
+      return '0x8dc66e84c31fe4dd455e1b32fe42d42d026abb93';
+    }
     
     const { data, error } = await supabase.rpc('get_platform_wallet_address');
 

@@ -6,9 +6,12 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../../lib/dashboard/auth-guard';
-import { Mail, Lock, ArrowRight, Check } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Check, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Logo } from '../../../components/Icons';
+import { checkRateLimit, recordAttempt, resetRateLimit, getRateLimitMessage } from '../../../lib/auth/rateLimiter';
+import { logAuthEvent } from '../../../lib/auth/auditLogger';
+import { Spinner } from '../../components/auth/SkeletonLoader';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -21,6 +24,8 @@ export function LoginPage() {
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [mode, setMode] = useState<'password' | 'magic'>('password');
   const [oauthLoading, setOauthLoading] = useState(false);
+  const [rateLimitError, setRateLimitError] = useState<string | null>(null);
+  const [attemptsRemaining, setAttemptsRemaining] = useState<number | null>(null);
 
   const redirectTo = searchParams.get('redirect') || '/dashboard';
 
@@ -31,13 +36,42 @@ export function LoginPage() {
       return;
     }
 
+    // Check rate limit before attempting login
+    const rateLimit = await checkRateLimit(email, 'login');
+    if (!rateLimit.allowed) {
+      const message = getRateLimitMessage(rateLimit);
+      setRateLimitError(message);
+      toast.error(message);
+      await logAuthEvent('rate_limit_exceeded', 'login', { email });
+      return;
+    }
+
+    // Update remaining attempts display
+    setAttemptsRemaining(rateLimit.remaining);
+    setRateLimitError(null);
+
     setLoading(true);
     try {
+      await logAuthEvent('login_attempt', 'email', { email });
       await signIn(email, password);
+      
+      // Success - reset rate limit
+      await resetRateLimit(email, 'login');
+      await logAuthEvent('login_success', 'email', { email });
+      
       toast.success('Welcome back!');
       navigate(redirectTo);
     } catch (error: any) {
       console.error('Login error:', error);
+      
+      // Record failed attempt
+      await recordAttempt(email, 'login');
+      await logAuthEvent('login_failure', 'email', { email, error: error.message });
+      
+      // Update remaining attempts
+      const updatedLimit = await checkRateLimit(email, 'login');
+      setAttemptsRemaining(updatedLimit.remaining);
+      
       toast.error(error.message || 'Invalid credentials');
     } finally {
       setLoading(false);
@@ -51,13 +85,28 @@ export function LoginPage() {
       return;
     }
 
+    // Check rate limit
+    const rateLimit = await checkRateLimit(email, 'login');
+    if (!rateLimit.allowed) {
+      const message = getRateLimitMessage(rateLimit);
+      setRateLimitError(message);
+      toast.error(message);
+      await logAuthEvent('rate_limit_exceeded', 'magic_link', { email });
+      return;
+    }
+
     setLoading(true);
     try {
+      await logAuthEvent('magic_link_request', 'email', { email });
       await signInWithMagicLink(email);
+      await logAuthEvent('magic_link_success', 'email', { email });
+      
       setMagicLinkSent(true);
       toast.success('Magic link sent! Check your email.');
     } catch (error: any) {
       console.error('Magic link error:', error);
+      await recordAttempt(email, 'login');
+      await logAuthEvent('login_failure', 'magic_link', { email, error: error.message });
       toast.error(error.message || 'Failed to send magic link');
     } finally {
       setLoading(false);
@@ -65,12 +114,24 @@ export function LoginPage() {
   };
 
   const handleGoogleLogin = async () => {
+    // Rate limit OAuth by IP (use empty string as identifier)
+    const rateLimit = await checkRateLimit('oauth', 'oauth');
+    if (!rateLimit.allowed) {
+      const message = getRateLimitMessage(rateLimit);
+      toast.error(message);
+      await logAuthEvent('rate_limit_exceeded', 'oauth', { provider: 'google' });
+      return;
+    }
+
     setOauthLoading(true);
     try {
+      await logAuthEvent('oauth_attempt', 'google', {});
       await signInWithOAuth('google');
       // Redirect happens automatically via Supabase
     } catch (error: any) {
       console.error('Google login error:', error);
+      await recordAttempt('oauth', 'oauth');
+      await logAuthEvent('oauth_failure', 'google', { error: error.message });
       toast.error(error.message || 'Failed to sign in with Google');
       setOauthLoading(false);
     }
@@ -96,6 +157,19 @@ export function LoginPage() {
             <p className="text-zinc-400 text-xs">
               Sign in to continue building
             </p>
+            {rateLimitError && (
+              <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-red-400">{rateLimitError}</p>
+              </div>
+            )}
+            {attemptsRemaining !== null && attemptsRemaining <= 2 && !rateLimitError && (
+              <div className="mt-3 p-2.5 bg-yellow-500/10 border border-yellow-500/20 rounded">
+                <p className="text-xs text-yellow-400">
+                  ⚠️ {attemptsRemaining} {attemptsRemaining === 1 ? 'attempt' : 'attempts'} remaining before temporary lockout
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Google OAuth */}
@@ -111,7 +185,14 @@ export function LoginPage() {
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
-            {oauthLoading ? 'Redirecting...' : 'Continue with Google'}
+            {oauthLoading ? (
+              <>
+                <Spinner size="sm" />
+                Redirecting...
+              </>
+            ) : (
+              'Continue with Google'
+            )}
           </button>
 
           {/* Divider */}
@@ -196,14 +277,17 @@ export function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 bg-brand-accent hover:bg-blue-500 text-white text-sm font-medium rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center mt-6"
+                className="w-full py-2.5 bg-brand-accent hover:bg-blue-500 text-white text-sm font-medium rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 mt-6"
               >
                 {loading ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <>
+                    <Spinner size="sm" />
+                    Signing in...
+                  </>
                 ) : (
                   <>
                     Sign in
-                    <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </>
                 )}
               </button>
@@ -239,10 +323,13 @@ export function LoginPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-2.5 bg-gradient-to-r from-brand-accent to-purple-600 text-white text-sm font-medium rounded hover:from-blue-500 hover:to-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center mt-6"
+                    className="w-full py-2.5 bg-gradient-to-r from-brand-accent to-purple-600 text-white text-sm font-medium rounded hover:from-blue-500 hover:to-purple-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 mt-6"
                   >
                     {loading ? (
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <>
+                        <Spinner size="sm" />
+                        Sending...
+                      </>
                     ) : (
                       'Send magic link'
                     )}

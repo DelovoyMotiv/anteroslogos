@@ -1,8 +1,10 @@
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoadingSpinner from './components/LoadingSpinner';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { AuthErrorBoundary } from './src/components/auth/AuthErrorBoundary';
 import { IOSInstallPrompt } from './components/IOSInstallPrompt';
+import { logConfig, validateConfig, config } from './lib/config/env';
 
 // Lazy load all route components for optimal bundle splitting
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -30,8 +32,30 @@ const DashboardSettings = lazy(() => import('./src/pages/dashboard/SettingsPage'
 // Auth pages
 const LoginPage = lazy(() => import('./src/pages/auth/LoginPage'));
 const SignupPage = lazy(() => import('./src/pages/auth/SignupPage'));
+const CallbackPage = lazy(() => import('./src/pages/auth/CallbackPage'));
+const ForgotPasswordPage = lazy(() => import('./src/pages/auth/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('./src/pages/auth/ResetPasswordPage'));
+const VerifyEmailPage = lazy(() => import('./src/pages/auth/VerifyEmailPage'));
+const OnboardingPage = lazy(() => import('./src/pages/dashboard/OnboardingPage'));
 
 const App: React.FC = () => {
+    // Initialize and validate environment configuration on mount
+    useEffect(() => {
+        // Log configuration (development only)
+        logConfig();
+        
+        // Validate configuration
+        const validation = validateConfig();
+        if (!validation.valid) {
+            console.error('❌ Configuration errors:', validation.errors);
+            
+            // In production, show critical config errors to user
+            if (config.isProduction && validation.errors.length > 0) {
+                console.error('Production configuration is invalid. Please check environment variables.');
+            }
+        }
+    }, []);
+
     return (
         <ErrorBoundary>
             <Router>
@@ -53,11 +77,18 @@ const App: React.FC = () => {
                         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                         <Route path="/cookie-policy" element={<CookiePolicyPage />} />
                         
-                        {/* Auth Routes */}
-                        <Route path="/auth/login" element={<LoginPage />} />
-                        <Route path="/auth/signup" element={<SignupPage />} />
-                        <Route path="/login" element={<LoginPage />} />
-                        <Route path="/signup" element={<SignupPage />} />
+                        {/* Auth Routes (wrapped in AuthErrorBoundary) */}
+                        <Route path="/auth/login" element={<AuthErrorBoundary><LoginPage /></AuthErrorBoundary>} />
+                        <Route path="/auth/signup" element={<AuthErrorBoundary><SignupPage /></AuthErrorBoundary>} />
+                        <Route path="/auth/callback" element={<AuthErrorBoundary><CallbackPage /></AuthErrorBoundary>} />
+                        <Route path="/auth/forgot-password" element={<AuthErrorBoundary><ForgotPasswordPage /></AuthErrorBoundary>} />
+                        <Route path="/auth/reset-password" element={<AuthErrorBoundary><ResetPasswordPage /></AuthErrorBoundary>} />
+                        <Route path="/auth/verify-email" element={<AuthErrorBoundary><VerifyEmailPage /></AuthErrorBoundary>} />
+                        <Route path="/login" element={<AuthErrorBoundary><LoginPage /></AuthErrorBoundary>} />
+                        <Route path="/signup" element={<AuthErrorBoundary><SignupPage /></AuthErrorBoundary>} />
+                        
+                        {/* Onboarding */}
+                        <Route path="/onboarding" element={<OnboardingPage />} />
                         
                         {/* Dashboard Routes (with Layout) */}
                         <Route path="/dashboard" element={<DashboardLayout />}>

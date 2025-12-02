@@ -106,7 +106,7 @@ export async function checkSignupRateLimit(
   try {
     const { data, error } = await getSupabase().rpc('check_signup_rate_limit', {
       p_ip_address: ipAddress
-    }) as { data: any; error: any };
+    });
 
     if (error) {
       console.error('Error checking signup rate limit:', error);
@@ -146,7 +146,7 @@ export async function recordSignupAttempt(
       p_ip_address: input.ipAddress,
       p_email: input.email,
       p_user_agent: input.userAgent || null
-    }) as { error: any };
+    });
 
     if (error) {
       console.error('Error recording signup attempt:', error);
@@ -171,7 +171,7 @@ export async function checkAuditCooldown(
   try {
     const { data, error } = await getSupabase().rpc('check_audit_cooldown', {
       p_user_id: userId
-    }) as { data: any; error: any };
+    });
 
     if (error) {
       console.error('Error checking audit cooldown:', error);
@@ -232,7 +232,7 @@ export async function checkFingerprintAbuse(
   try {
     const { data, error } = await getSupabase().rpc('check_fingerprint_abuse', {
       p_fingerprint: fingerprint
-    }) as { data: any; error: any };
+    });
 
     if (error) {
       console.error('Error checking fingerprint abuse:', error);
@@ -274,7 +274,7 @@ export async function recordDeviceFingerprint(
       p_confidence_score: input.confidenceScore || null,
       p_ip_address: input.ipAddress || null,
       p_user_agent: input.userAgent || null
-    }) as { data: any; error: any };
+    });
 
     if (error) {
       console.error('Error recording device fingerprint:', error);

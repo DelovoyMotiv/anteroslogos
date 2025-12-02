@@ -80,6 +80,13 @@ CONTRIBUTING.md
 docs/
 metadata.json
 
+# Auth system development docs (not for production)
+docs/AUTH_SYSTEM_COMPLETE.md
+docs/AUTH_SYSTEM_AUDIT_COMPLETE.md
+docs/AUTH_DEPLOYMENT_QUICKSTART.md
+docs/RATE_LIMITING.md
+docs/DEPLOYMENT_OAUTH.md
+
 # PDF reports and exports
 *.pdf
 

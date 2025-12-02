@@ -6,9 +6,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../lib/dashboard/auth-guard';
-import { Mail, Lock, User, ArrowRight, Check } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, Check, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Logo } from '../../../components/Icons';
+import { checkRateLimit, recordAttempt, getRateLimitMessage } from '../../../lib/auth/rateLimiter';
+import { logAuthEvent } from '../../../lib/auth/auditLogger';
+import { Spinner } from '../../components/auth/SkeletonLoader';
 
 export function SignupPage() {
   const { signUp, signInWithOAuth } = useAuth();
@@ -23,6 +26,7 @@ export function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [oauthLoading, setOauthLoading] = useState(false);
+  const [rateLimitError, setRateLimitError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,16 +47,35 @@ export function SignupPage() {
       return;
     }
 
+    // Check rate limit
+    const rateLimit = await checkRateLimit(formData.email, 'signup');
+    if (!rateLimit.allowed) {
+      const message = getRateLimitMessage(rateLimit);
+      setRateLimitError(message);
+      toast.error(message);
+      await logAuthEvent('rate_limit_exceeded', 'signup', { email: formData.email });
+      return;
+    }
+
+    setRateLimitError(null);
     setLoading(true);
     try {
+      await logAuthEvent('signup_attempt', 'email', { email: formData.email });
       await signUp(formData.email, formData.password, {
         full_name: formData.fullName,
       });
       
+      await logAuthEvent('signup_success', 'email', { email: formData.email });
       setSuccess(true);
       toast.success('Account created! Check your email to verify.');
     } catch (error: any) {
       console.error('Signup error:', error);
+      
+      await recordAttempt(formData.email, 'signup');
+      await logAuthEvent('signup_failure', 'email', { 
+        email: formData.email, 
+        error: error.message 
+      });
       
       if (error.message?.includes('already registered')) {
         toast.error('Email already registered. Try logging in.');
@@ -65,12 +88,24 @@ export function SignupPage() {
   };
 
   const handleGoogleSignup = async () => {
+    // Rate limit OAuth
+    const rateLimit = await checkRateLimit('oauth', 'oauth');
+    if (!rateLimit.allowed) {
+      const message = getRateLimitMessage(rateLimit);
+      toast.error(message);
+      await logAuthEvent('rate_limit_exceeded', 'oauth', { provider: 'google' });
+      return;
+    }
+
     setOauthLoading(true);
     try {
+      await logAuthEvent('oauth_attempt', 'google', {});
       await signInWithOAuth('google');
       // Redirect happens automatically via Supabase
     } catch (error: any) {
       console.error('Google signup error:', error);
+      await recordAttempt('oauth', 'oauth');
+      await logAuthEvent('oauth_failure', 'google', { error: error.message });
       toast.error(error.message || 'Failed to sign up with Google');
       setOauthLoading(false);
     }
@@ -126,6 +161,12 @@ export function SignupPage() {
             <p className="text-zinc-400 text-xs">
               Free forever • No credit card required
             </p>
+            {rateLimitError && (
+              <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                <p className="text-xs text-red-400">{rateLimitError}</p>
+              </div>
+            )}
           </div>
 
           {/* Google OAuth */}
@@ -141,7 +182,14 @@ export function SignupPage() {
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
-            {oauthLoading ? 'Redirecting...' : 'Continue with Google'}
+            {oauthLoading ? (
+              <>
+                <Spinner size="sm" />
+                Redirecting...
+              </>
+            ) : (
+              'Continue with Google'
+            )}
           </button>
 
           {/* Divider */}
@@ -232,14 +280,17 @@ export function SignupPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 bg-brand-accent hover:bg-blue-500 text-white text-sm font-medium rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center mt-6"
+              className="w-full py-2.5 bg-brand-accent hover:bg-blue-500 text-white text-sm font-medium rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 mt-6"
             >
               {loading ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <>
+                  <Spinner size="sm" />
+                  Creating account...
+                </>
               ) : (
                 <>
                   Create account
-                  <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </>
               )}
             </button>

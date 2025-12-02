@@ -176,6 +176,12 @@ export async function saveAuditToCloud(result: AuditResult): Promise<{ success: 
     // Convert to database format
     const auditData = convertToDbFormat(result, user?.id || null);
     
+    if (!supabase) {
+      console.warn('Supabase not configured, saving to localStorage only');
+      saveToLocalStorage(result);
+      return { success: false, error: 'Supabase not configured' };
+    }
+    
     // Insert to Supabase
     const { data, error } = await supabase
       .from('audits')
@@ -221,6 +227,10 @@ export async function getCloudAuditHistory(limit: number = 50): Promise<AuditRow
       return [];
     }
     
+    if (!supabase) {
+      return [];
+    }
+    
     const { data, error } = await supabase
       .from('audits')
       .select('*')
@@ -254,6 +264,10 @@ export async function getCloudUrlHistory(url: string): Promise<AuditRow[]> {
     }
     
     const normalizedUrl = normalizeUrl(url);
+    
+    if (!supabase) {
+      return [];
+    }
     
     const { data, error } = await supabase
       .from('audits')
@@ -333,6 +347,10 @@ export async function getUserProfile() {
       return null;
     }
     
+    if (!supabase) {
+      return null;
+    }
+    
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -360,6 +378,10 @@ export async function getUserAuditSummary() {
     const user = await getCurrentUser();
     
     if (!user) {
+      return null;
+    }
+    
+    if (!supabase) {
       return null;
     }
     
@@ -433,6 +455,10 @@ export async function syncLocalStorageToCloud(): Promise<{ synced: number; error
     const localHistory = JSON.parse(stored);
     let synced = 0;
     let errors = 0;
+    
+    if (!supabase) {
+      return { synced: 0, errors: 0 };
+    }
     
     for (const item of localHistory) {
       // Check if already exists in cloud

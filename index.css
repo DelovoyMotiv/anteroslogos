@@ -110,3 +110,24 @@ body {
 .animate-slide-up {
   animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+@keyframes draw-line {
+  from {
+    width: 0;
+    opacity: 0;
+  }
+  to {
+    width: 100%;
+    opacity: 1;
+  }
+}
