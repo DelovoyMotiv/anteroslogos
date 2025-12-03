@@ -126,6 +126,13 @@ KNOWLEDGE_GRAPH_ENGINE.md
 UCPT_INFRASTRUCTURE.md
 SUBSCRIPTION_SYSTEM_README.md
 PRODUCTION_IMPROVEMENTS_COMPLETE.md
+PRODUCTION_CLEANUP_REPORT.md
+
+# Development configuration files (not needed in production)
+hardhat.config.ts
+vitest.any-audit.config.ts
+vitest.config.ts
+vitest.todo-audit.config.ts
 
 # Integration guides
 *INTEGRATION_GUIDE.md
