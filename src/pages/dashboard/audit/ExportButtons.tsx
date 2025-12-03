@@ -3,7 +3,7 @@
  * Export audit report in multiple formats: JSON, CSV, PDF
  */
 
-import { Download, FileJson, FileSpreadsheet, FileText } from 'lucide-react';
+import { FileJson, FileSpreadsheet, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import type { AuditResult } from '../../../../utils/geoAuditEnhanced';
 
