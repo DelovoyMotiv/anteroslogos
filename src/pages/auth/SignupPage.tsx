@@ -32,11 +32,17 @@ export function SignupPage() {
   useEffect(() => {
     const checkConfig = async () => {
       const { isSupabaseConfigured } = await import('../../../lib/supabase');
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      
       if (!isSupabaseConfigured()) {
         console.error('[SignupPage] Supabase not configured!');
+        console.error('[SignupPage] Check .env.local for VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY');
         toast.error('Authentication service not configured. Please contact support.');
       } else {
-        console.log('[SignupPage] Supabase configured successfully');
+        console.log('[SignupPage] ✅ Supabase configured successfully');
+        if (supabaseUrl) {
+          console.log('[SignupPage] Supabase URL:', supabaseUrl.substring(0, 30) + '...');
+        }
       }
     };
     checkConfig();
@@ -74,7 +80,7 @@ export function SignupPage() {
       const message = getRateLimitMessage(rateLimit);
       setRateLimitError(message);
       toast.error(message);
-      await logAuthEvent('rate_limit_exceeded', 'signup', { email: formData.email });
+      await logAuthEvent('rate_limit_exceeded', null, { email: formData.email, action: 'signup' });
       console.warn('[SignupPage] Rate limit exceeded');
       return;
     }
@@ -84,34 +90,63 @@ export function SignupPage() {
     setRateLimitError(null);
     setLoading(true);
     try {
-      await logAuthEvent('signup_attempt', 'email', { email: formData.email });
-      console.log('[SignupPage] Calling signUp function');
+      await logAuthEvent('signup_attempt', null, { email: formData.email });
+      console.log('[SignupPage] Calling signUp function with:', {
+        email: formData.email,
+        fullName: formData.fullName,
+        passwordLength: formData.password.length
+      });
       
       const result = await signUp(formData.email, formData.password, {
         full_name: formData.fullName,
       });
       
-      console.log('[SignupPage] SignUp result:', result);
-      
-      await logAuthEvent('signup_success', 'email', { email: formData.email });
-      setSuccess(true);
-      toast.success('Account created! Check your email to verify.');
-      console.log('[SignupPage] Signup successful');
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to create account';
-      console.error('[SignupPage] Signup error:', error);
-      console.error('[SignupPage] Error message:', errorMessage);
-      
-      await recordAttempt(formData.email, 'signup');
-      await logAuthEvent('signup_failure', 'email', { 
-        email: formData.email, 
-        error: errorMessage 
+      console.log('[SignupPage] SignUp result:', {
+        user: result.user ? {
+          id: result.user.id,
+          email: result.user.email,
+          emailConfirmed: result.user.email_confirmed_at
+        } : null,
+        session: result.session ? 'exists' : 'null'
       });
       
-      if (errorMessage.includes('already registered')) {
-        toast.error('Email already registered. Try logging in.');
+      if (result.user) {
+        await logAuthEvent('signup_success', result.user.id, { email: formData.email });
+        setSuccess(true);
+        toast.success('Account created! Check your email to verify.');
+        console.log('[SignupPage] ✅ Signup successful - user ID:', result.user.id);
       } else {
-        toast.error(errorMessage);
+        throw new Error('Signup succeeded but no user returned');
+      }
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create account';
+      console.error('[SignupPage] ❌ Signup error:', error);
+      console.error('[SignupPage] Error type:', error?.constructor?.name);
+      console.error('[SignupPage] Error message:', errorMessage);
+      
+      // Log full error object for debugging
+      if (error && typeof error === 'object') {
+        console.error('[SignupPage] Error details:', JSON.stringify(error, null, 2));
+      }
+      
+      await recordAttempt(formData.email, 'signup');
+      await logAuthEvent('signup_failure', null, { 
+        email: formData.email, 
+        error: errorMessage,
+        errorType: error?.constructor?.name || 'Unknown'
+      });
+      
+      // Better error messages
+      if (errorMessage.includes('already registered') || errorMessage.includes('already exists')) {
+        toast.error('Email already registered. Try logging in.');
+      } else if (errorMessage.includes('Invalid email')) {
+        toast.error('Please enter a valid email address.');
+      } else if (errorMessage.includes('Password')) {
+        toast.error('Password must be at least 8 characters.');
+      } else if (errorMessage.includes('not configured')) {
+        toast.error('Authentication service not configured. Please contact support.');
+      } else {
+        toast.error(`Signup failed: ${errorMessage}`);
       }
     } finally {
       setLoading(false);
@@ -125,20 +160,21 @@ export function SignupPage() {
     if (!rateLimit.allowed) {
       const message = getRateLimitMessage(rateLimit);
       toast.error(message);
-      await logAuthEvent('rate_limit_exceeded', 'oauth', { provider: 'google' });
+      await logAuthEvent('rate_limit_exceeded', null, { provider: 'google', action: 'oauth' });
       return;
     }
 
     setOauthLoading(true);
     try {
-      await logAuthEvent('oauth_attempt', 'google', {});
+      await logAuthEvent('oauth_attempt', null, { provider: 'google' });
       await signInWithOAuth('google');
       // Redirect happens automatically via Supabase
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to sign up with Google';
       console.error('Google signup error:', errorMessage);
       await recordAttempt('oauth', 'oauth');
-      await logAuthEvent('oauth_failure', 'google', { 
+      await logAuthEvent('oauth_failure', null, { 
+        provider: 'google',
         error: errorMessage 
       });
       toast.error(errorMessage);
