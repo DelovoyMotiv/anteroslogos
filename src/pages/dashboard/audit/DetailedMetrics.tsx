@@ -3,11 +3,19 @@
  * Shows comprehensive metrics for each category
  */
 
-import { FileText, Link as LinkIcon, Code, Zap, CheckCircle, XCircle } from 'lucide-react';
+import { FileText, Link as LinkIcon, Code, Zap, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import type { AuditResult } from '../../../../utils/geoAuditEnhanced';
 
 interface DetailedMetricsProps {
   result: AuditResult;
+}
+
+// Helper function to get score color
+function getScoreColor(score: number): string {
+  if (score >= 80) return 'text-emerald-400';
+  if (score >= 60) return 'text-yellow-400';
+  if (score >= 40) return 'text-orange-400';
+  return 'text-red-400';
 }
 
 export function DetailedMetrics({ result }: DetailedMetricsProps) {
@@ -304,6 +312,117 @@ export function DetailedMetrics({ result }: DetailedMetricsProps) {
             <MetricItem label="Viewport" value={result.details.technicalSEO.viewport} />
             <MetricItem label="Charset" value={result.details.technicalSEO.charset} />
             <MetricItem label="Language" value={result.details.technicalSEO.lang} />
+          </div>
+        )}
+      </MetricSection>
+
+      {/* AID Protocol Detailed */}
+      <MetricSection
+        title="AID Protocol Discovery"
+        icon={<Zap className="w-4 h-4" />}
+      >
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <MetricItem 
+            label="Detection Status" 
+            value={result.details.aidAgent.detected ? 'Detected' : 'Not Detected'}
+            valueColor={result.details.aidAgent.detected ? 'text-emerald-400' : 'text-red-400'}
+          />
+          <MetricItem 
+            label="Discovery Method" 
+            value={result.details.aidAgent.discoveryMethod.toUpperCase()}
+          />
+          {result.details.aidAgent.version && (
+            <MetricItem 
+              label="Protocol Version" 
+              value={result.details.aidAgent.version}
+            />
+          )}
+          <MetricItem 
+            label="Score" 
+            value={result.scores.aidAgent.toFixed(1)}
+            valueColor={getScoreColor(result.scores.aidAgent)}
+          />
+        </div>
+
+        {/* Protocols Supported */}
+        {result.details.aidAgent.protocols && result.details.aidAgent.protocols.length > 0 && (
+          <div className="mt-3 pt-3 border-t border-slate-700/50">
+            <div className="text-[10px] font-mono text-slate-500 uppercase tracking-wider mb-2">
+              Supported Protocols
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {result.details.aidAgent.protocols.map((protocol) => (
+                <span key={protocol} className="text-xs bg-blue-500/10 border border-blue-500/30 px-2 py-1 rounded text-blue-400">
+                  {protocol.toUpperCase()}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Endpoint Info */}
+        {result.details.aidAgent.endpoint && (
+          <div className="mt-3 pt-3 border-t border-slate-700/50">
+            <MetricItem 
+              label="Endpoint URL" 
+              value={result.details.aidAgent.endpoint}
+            />
+            {result.details.aidAgent.agentName && (
+              <MetricItem 
+                label="Service Name" 
+                value={result.details.aidAgent.agentName}
+              />
+            )}
+          </div>
+        )}
+
+        {/* Capabilities */}
+        {result.details.aidAgent.capabilities && result.details.aidAgent.capabilities.length > 0 && (
+          <div className="mt-3 pt-3 border-t border-slate-700/50">
+            <div className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider mb-2">
+              Capabilities
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {result.details.aidAgent.capabilities.map((cap, idx) => (
+                <span key={idx} className="text-xs bg-emerald-500/10 border border-emerald-500/30 px-2 py-1 rounded text-emerald-400">
+                  {cap}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Errors */}
+        {result.details.aidAgent.errors && result.details.aidAgent.errors.length > 0 && (
+          <div className="mt-3 pt-3 border-t border-slate-700/50">
+            <div className="text-[10px] font-mono text-red-400 uppercase tracking-wider mb-2">
+              Errors
+            </div>
+            <div className="space-y-1">
+              {result.details.aidAgent.errors.map((error, idx) => (
+                <div key={idx} className="text-xs text-red-400 flex items-start gap-2">
+                  <XCircle className="w-3 h-3 flex-shrink-0 mt-0.5" />
+                  <span>{error}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Warnings */}
+        {result.details.aidAgent.warnings && result.details.aidAgent.warnings.length > 0 && (
+          <div className="mt-3 pt-3 border-t border-slate-700/50">
+            <div className="text-[10px] font-mono text-yellow-400 uppercase tracking-wider mb-2">
+              Warnings
+            </div>
+            <div className="space-y-1">
+              {result.details.aidAgent.warnings.map((warning, idx) => (
+                <div key={idx} className="text-xs text-yellow-400 flex items-start gap-2">
+                  <AlertCircle className="w-3 h-3 flex-shrink-0 mt-0.5" />
+                  <span>{warning}</span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </MetricSection>
