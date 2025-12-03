@@ -334,13 +334,110 @@ export function AuditPage() {
             </div>
           </div>
 
-          {/* Category Scores Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+          {/* Category Scores Grid - ALL 11 CATEGORIES */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2">
             <ScoreCard label="Schema" score={result.scores.schemaMarkup} />
             <ScoreCard label="Meta Tags" score={result.scores.metaTags} />
             <ScoreCard label="AI Crawlers" score={result.scores.aiCrawlers} />
             <ScoreCard label="E-E-A-T" score={result.scores.eeat} />
+            <ScoreCard label="Structure" score={result.scores.structure} />
+            <ScoreCard label="Performance" score={result.scores.performance} />
             <ScoreCard label="Content" score={result.scores.contentQuality} />
+            <ScoreCard label="Citation" score={result.scores.citationPotential} />
+            <ScoreCard label="Technical SEO" score={result.scores.technicalSEO} />
+            <ScoreCard label="Link Analysis" score={result.scores.linkAnalysis} />
+            <ScoreCard label="AID Agent" score={result.scores.aidAgent} />
+          </div>
+
+          {/* Detailed Category Analysis */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Schema Markup Details */}
+            <CategoryDetail
+              title="Schema Markup"
+              score={result.scores.schemaMarkup}
+              issues={result.details.schemaMarkup.issues}
+              strengths={result.details.schemaMarkup.strengths}
+            />
+
+            {/* Meta Tags Details */}
+            <CategoryDetail
+              title="Meta Tags"
+              score={result.scores.metaTags}
+              issues={result.details.metaTags.issues}
+              strengths={result.details.metaTags.strengths}
+            />
+
+            {/* AI Crawlers Details */}
+            <CategoryDetail
+              title="AI Crawlers"
+              score={result.scores.aiCrawlers}
+              issues={result.details.aiCrawlers.issues}
+              strengths={result.details.aiCrawlers.strengths}
+            />
+
+            {/* E-E-A-T Details */}
+            <CategoryDetail
+              title="E-E-A-T Signals"
+              score={result.scores.eeat}
+              issues={result.details.eeat.issues}
+              strengths={result.details.eeat.strengths}
+            />
+
+            {/* Structure Details */}
+            <CategoryDetail
+              title="HTML Structure"
+              score={result.scores.structure}
+              issues={result.details.structure.issues}
+              strengths={result.details.structure.strengths}
+            />
+
+            {/* Performance Details */}
+            <CategoryDetail
+              title="Performance"
+              score={result.scores.performance}
+              issues={result.details.performance.issues}
+              strengths={result.details.performance.strengths}
+            />
+
+            {/* Content Quality Details */}
+            <CategoryDetail
+              title="Content Quality"
+              score={result.scores.contentQuality}
+              issues={result.details.contentQuality.issues}
+              strengths={result.details.contentQuality.strengths}
+            />
+
+            {/* Citation Potential Details */}
+            <CategoryDetail
+              title="Citation Potential"
+              score={result.scores.citationPotential}
+              issues={result.details.citationPotential.issues}
+              strengths={result.details.citationPotential.strengths}
+            />
+
+            {/* Technical SEO Details */}
+            <CategoryDetail
+              title="Technical SEO"
+              score={result.scores.technicalSEO}
+              issues={result.details.technicalSEO.issues}
+              strengths={result.details.technicalSEO.strengths}
+            />
+
+            {/* Link Analysis Details */}
+            <CategoryDetail
+              title="Link Analysis"
+              score={result.scores.linkAnalysis}
+              issues={result.details.linkAnalysis.issues}
+              strengths={result.details.linkAnalysis.strengths}
+            />
+
+            {/* AID Agent Details */}
+            <CategoryDetail
+              title="AID Agent Support"
+              score={result.scores.aidAgent}
+              issues={result.details.aidAgent.errors || []}
+              strengths={result.details.aidAgent.detected ? ['AID protocol detected'] : []}
+            />
           </div>
 
           {/* Recommendations */}
@@ -353,7 +450,7 @@ export function AuditPage() {
                 </h3>
               </div>
               <div className="space-y-2">
-                {result.recommendations.slice(0, 5).map((rec, idx) => (
+                {result.recommendations.slice(0, 10).map((rec, idx) => (
                   <div
                     key={idx}
                     className="bg-black/30 border border-slate-800/30 p-3"
@@ -379,6 +476,11 @@ export function AuditPage() {
                         <p className="text-xs text-slate-500 mt-1">
                           {rec.description}
                         </p>
+                        {rec.impact && (
+                          <p className="text-xs text-blue-400 mt-1">
+                            Impact: {rec.impact}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -467,6 +569,87 @@ function ScoreCard({ label, score }: { label: string; score: number }) {
       <div className={`text-2xl font-bold font-mono ${getColor(score)}`}>
         {score.toFixed(0)}
       </div>
+    </div>
+  );
+}
+
+/**
+ * Category Detail Component - Shows issues and strengths for each category
+ */
+function CategoryDetail({ 
+  title, 
+  score, 
+  issues, 
+  strengths 
+}: { 
+  title: string; 
+  score: number; 
+  issues: string[]; 
+  strengths: string[]; 
+}) {
+  const getColor = (s: number) => {
+    if (s >= 80) return 'text-emerald-400';
+    if (s >= 60) return 'text-yellow-400';
+    if (s >= 40) return 'text-orange-400';
+    return 'text-red-400';
+  };
+
+  const getBorderColor = (s: number) => {
+    if (s >= 80) return 'border-emerald-500/30';
+    if (s >= 60) return 'border-yellow-500/30';
+    if (s >= 40) return 'border-orange-500/30';
+    return 'border-red-500/30';
+  };
+
+  return (
+    <div className={`bg-black/20 border ${getBorderColor(score)} p-4`}>
+      <div className="flex items-center justify-between mb-3">
+        <h4 className="text-xs font-mono text-slate-300 uppercase tracking-wider">
+          {title}
+        </h4>
+        <span className={`text-lg font-bold font-mono ${getColor(score)}`}>
+          {score.toFixed(0)}
+        </span>
+      </div>
+
+      {/* Strengths */}
+      {strengths.length > 0 && (
+        <div className="mb-3">
+          <div className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider mb-1.5">
+            ✓ Strengths
+          </div>
+          <ul className="space-y-1">
+            {strengths.map((strength, idx) => (
+              <li key={idx} className="text-xs text-slate-400 flex items-start gap-2">
+                <CheckCircle className="w-3 h-3 text-emerald-500 flex-shrink-0 mt-0.5" />
+                <span>{strength}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Issues */}
+      {issues.length > 0 && (
+        <div>
+          <div className="text-[10px] font-mono text-red-400 uppercase tracking-wider mb-1.5">
+            ⚠ Issues
+          </div>
+          <ul className="space-y-1">
+            {issues.map((issue, idx) => (
+              <li key={idx} className="text-xs text-slate-500 flex items-start gap-2">
+                <AlertCircle className="w-3 h-3 text-red-500 flex-shrink-0 mt-0.5" />
+                <span>{issue}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* No issues or strengths */}
+      {issues.length === 0 && strengths.length === 0 && (
+        <p className="text-xs text-slate-600 italic">No detailed information available</p>
+      )}
     </div>
   );
 }
