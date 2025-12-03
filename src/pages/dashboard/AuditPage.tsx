@@ -28,6 +28,7 @@ import { ScoreBreakdownChart } from './audit/ScoreBreakdownChart';
 import { CategoryScoresChart } from './audit/CategoryScoresChart';
 import { InsightsPanel } from './audit/InsightsPanel';
 import { ExportButtons } from './audit/ExportButtons';
+import { DetailedMetrics } from './audit/DetailedMetrics';
 
 interface SavedAudit {
   id: string;
@@ -479,6 +480,9 @@ export function AuditPage() {
               </div>
             </div>
           )}
+
+          {/* Detailed Metrics - All Category Metrics */}
+          <DetailedMetrics result={result} />
         </div>
       )}
 
