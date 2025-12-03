@@ -49,7 +49,7 @@ export default defineConfig(({ mode }) => {
         },
         terserOptions: {
           compress: {
-            drop_console: mode === 'production',
+            drop_console: false, // TEMPORARILY DISABLED for production debugging
             passes: 2, // Additional optimization pass
           },
           mangle: {
