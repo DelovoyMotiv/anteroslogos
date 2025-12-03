@@ -3,6 +3,11 @@
  * Enterprise-grade user registration
  */
 
+// CRITICAL: Log module load IMMEDIATELY
+console.log('[SignupPage] ========== MODULE LOADED ==========');
+console.log('[SignupPage] Timestamp:', new Date().toISOString());
+console.log('[SignupPage] Location:', window.location.href);
+
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../lib/dashboard/auth-guard';
@@ -14,6 +19,8 @@ import { logAuthEvent } from '../../../lib/auth/auditLogger';
 import { Spinner } from '../../components/auth/SkeletonLoader';
 
 export function SignupPage() {
+  console.log('[SignupPage] ========== COMPONENT RENDER ==========');
+  
   const { signUp, signInWithOAuth } = useAuth();
   const navigate = useNavigate();
   
