@@ -43,6 +43,10 @@ const UpdateTenantSchema = z.object({
  * Get authenticated user from request
  */
 async function getAuthenticatedUser(req: VercelRequest) {
+  if (!supabase) {
+    return null;
+  }
+
   const authHeader = req.headers.authorization;
   if (!authHeader) {
     return null;
@@ -70,6 +74,8 @@ function getIdFromQuery(req: VercelRequest): string | null {
  * Check if user has access to tenant
  */
 async function checkTenantAccess(userId: string, tenantId: string): Promise<boolean> {
+  if (!supabase) return false;
+
   const { data, error } = await supabase
     .from('tenant_members')
     .select('role')
@@ -85,6 +91,8 @@ async function checkTenantAccess(userId: string, tenantId: string): Promise<bool
  * Check if user is tenant owner
  */
 async function isTenantOwner(userId: string, tenantId: string): Promise<boolean> {
+  if (!supabase) return false;
+
   const { data, error } = await supabase
     .from('tenants')
     .select('owner_id')
@@ -102,7 +110,11 @@ async function isTenantOwner(userId: string, tenantId: string): Promise<boolean>
  * GET /api/tenants - List user's tenants
  * GET /api/tenants?id=xxx - Get specific tenant
  */
-async function handleGet(req: VercelRequest, res: VercelResponse) {
+async function handleGet(req: VercelRequest, res: VercelResponse): Promise<VercelResponse> {
+  if (!supabase) {
+    return res.status(503).json({ error: 'Service unavailable' });
+  }
+
   const user = await getAuthenticatedUser(req);
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -171,8 +183,8 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: 'Failed to fetch tenants' });
   }
 
-  const tenants = memberships?.map(m => ({
-    ...m.tenants,
+  const tenants = memberships?.map((m: any) => ({
+    ...(m.tenants || {}),
     user_role: m.role,
   })) || [];
 
@@ -193,8 +205,16 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
 async function handlePost(
   req: VercelRequest,
   res: VercelResponse,
-  validated: { body: z.infer<typeof CreateTenantSchema> }
-) {
+  validated?: { body: z.infer<typeof CreateTenantSchema> }
+): Promise<VercelResponse> {
+  if (!supabase) {
+    return res.status(503).json({ error: 'Service unavailable' });
+  }
+
+  if (!validated?.body) {
+    return res.status(400).json({ error: 'Invalid request body' });
+  }
+
   const user = await getAuthenticatedUser(req);
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -221,7 +241,7 @@ async function handlePost(
       description: validated.body.description || null,
       settings: validated.body.settings || {},
       status: 'active',
-    })
+    } as any)
     .select()
     .single();
 
@@ -237,7 +257,7 @@ async function handlePost(
       user_id: user.id,
       role: 'owner',
       status: 'active',
-    });
+    } as any);
 
   if (memberError) {
     // Rollback tenant creation
@@ -252,7 +272,7 @@ async function handlePost(
     resource_type: 'tenant',
     resource_id: tenant.id,
     metadata: { name: validated.body.name, slug: validated.body.slug },
-  });
+  } as any);
 
   return res.status(201).json(tenant);
 }
@@ -263,8 +283,16 @@ async function handlePost(
 async function handlePut(
   req: VercelRequest,
   res: VercelResponse,
-  validated: { body: z.infer<typeof UpdateTenantSchema> }
-) {
+  validated?: { body: z.infer<typeof UpdateTenantSchema> }
+): Promise<VercelResponse> {
+  if (!supabase) {
+    return res.status(503).json({ error: 'Service unavailable' });
+  }
+
+  if (!validated?.body) {
+    return res.status(400).json({ error: 'Invalid request body' });
+  }
+
   const user = await getAuthenticatedUser(req);
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -287,7 +315,7 @@ async function handlePut(
     .update({
       ...validated.body,
       updated_at: new Date().toISOString(),
-    })
+    } as any)
     .eq('id', id)
     .select()
     .single();
@@ -303,7 +331,7 @@ async function handlePut(
     resource_type: 'tenant',
     resource_id: id,
     metadata: validated.body,
-  });
+  } as any);
 
   return res.status(200).json(updated);
 }
@@ -311,7 +339,11 @@ async function handlePut(
 /**
  * DELETE /api/tenants?id=xxx - Delete tenant
  */
-async function handleDelete(req: VercelRequest, res: VercelResponse) {
+async function handleDelete(req: VercelRequest, res: VercelResponse): Promise<VercelResponse> {
+  if (!supabase) {
+    return res.status(503).json({ error: 'Service unavailable' });
+  }
+
   const user = await getAuthenticatedUser(req);
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -334,7 +366,7 @@ async function handleDelete(req: VercelRequest, res: VercelResponse) {
     .update({
       status: 'deleted',
       updated_at: new Date().toISOString(),
-    })
+    } as any)
     .eq('id', id)
     .select()
     .single();
@@ -349,7 +381,7 @@ async function handleDelete(req: VercelRequest, res: VercelResponse) {
     action: 'tenant.deleted',
     resource_type: 'tenant',
     resource_id: id,
-  });
+  } as any);
 
   return res.status(200).json(deleted);
 }
@@ -364,7 +396,7 @@ async function mainHandler(
   req: VercelRequest,
   res: VercelResponse,
   validated?: TenantValidated
-): Promise<void> {
+): Promise<VercelResponse> {
   switch (req.method) {
     case 'GET':
       return handleGet(req, res);
@@ -382,12 +414,12 @@ async function mainHandler(
 // Apply middleware: CORS -> Rate Limiting -> Validation
 export default compose(
   withCors,
-  (handler) => withRateLimit(handler, { maxRequests: 60, windowMs: 60000 }),
+  (handler) => withRateLimit(handler, { limit: 60, window: 60000 }),
   (handler) => withValidation(
     {
       bodySchema: z.union([CreateTenantSchema, UpdateTenantSchema]).optional(),
       allowedMethods: ['GET', 'POST', 'PUT', 'DELETE'],
     },
-    handler as OptionalValidatedApiHandler<TenantValidated>
+    handler as any
   )
-)(mainHandler);
+)(mainHandler as any);
