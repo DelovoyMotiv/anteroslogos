@@ -518,7 +518,7 @@ export function AuditPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span className={`text-base font-bold font-mono ${getScoreColor(audit.overall_score)}`}>
-                      {audit.overall_score.toFixed(0)}
+                      {audit.overall_score.toFixed(3)}
                     </span>
                     <span className="text-xs text-slate-500 truncate">
                       {audit.url}
@@ -562,7 +562,7 @@ function ScoreCard({ label, score }: { label: string; score: number }) {
         {label}
       </div>
       <div className={`text-2xl font-bold font-mono ${getColor(score)}`}>
-        {score.toFixed(0)}
+        {score.toFixed(1)}
       </div>
     </div>
   );
@@ -603,7 +603,7 @@ function CategoryDetail({
           {title}
         </h4>
         <span className={`text-lg font-bold font-mono ${getColor(score)}`}>
-          {score.toFixed(0)}
+          {score.toFixed(1)}
         </span>
       </div>
 

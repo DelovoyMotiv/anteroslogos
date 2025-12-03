@@ -67,7 +67,7 @@ export function CategoryScoresChart({ scores }: CategoryScoresChartProps) {
               borderRadius: '4px',
               color: CHART_THEME.tooltip.text,
             }}
-            formatter={(value: number) => [`${value.toFixed(0)}`, 'Score']}
+            formatter={(value: number) => [`${value.toFixed(1)}`, 'Score']}
           />
           <Bar dataKey="score" radius={[0, 4, 4, 0]}>
             {data.map((entry, index) => {
