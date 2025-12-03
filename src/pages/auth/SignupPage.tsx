@@ -51,7 +51,9 @@ export function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    console.log('[SignupPage] ========== FORM SUBMIT START ==========');
     console.log('[SignupPage] Form submitted', { email: formData.email });
+    console.log('[SignupPage] Current state:', { loading, success, oauthLoading, rateLimitError });
 
     // Validation
     if (!formData.fullName || !formData.email || !formData.password) {
@@ -351,6 +353,7 @@ export function SignupPage() {
             <button
               type="submit"
               disabled={loading}
+              onClick={() => console.log('[SignupPage] Button clicked - disabled:', loading)}
               className="w-full py-2.5 bg-brand-accent hover:bg-blue-500 text-white text-sm font-medium rounded disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 mt-6"
             >
               {loading ? (
