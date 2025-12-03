@@ -2,7 +2,10 @@ import path from 'path';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-export default defineConfig(() => {
+export default defineConfig(({ mode }) => {
+    // Note: mode parameter kept for TypeScript type inference, but not used
+    // because drop_console is temporarily disabled for debugging
+    console.log('Build mode:', mode); // This will be removed by terser in production anyway
     return {
       server: {
         port: 3000,
