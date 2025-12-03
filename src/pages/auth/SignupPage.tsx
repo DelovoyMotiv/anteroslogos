@@ -3,7 +3,7 @@
  * Enterprise-grade user registration
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../lib/dashboard/auth-guard';
 import { Mail, Lock, User, ArrowRight, Check, AlertTriangle } from 'lucide-react';
@@ -28,24 +28,45 @@ export function SignupPage() {
   const [oauthLoading, setOauthLoading] = useState(false);
   const [rateLimitError, setRateLimitError] = useState<string | null>(null);
 
+  // Check Supabase configuration on mount
+  useEffect(() => {
+    const checkConfig = async () => {
+      const { isSupabaseConfigured } = await import('../../../lib/supabase');
+      if (!isSupabaseConfigured()) {
+        console.error('[SignupPage] Supabase not configured!');
+        toast.error('Authentication service not configured. Please contact support.');
+      } else {
+        console.log('[SignupPage] Supabase configured successfully');
+      }
+    };
+    checkConfig();
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    console.log('[SignupPage] Form submitted', { email: formData.email });
+
     // Validation
     if (!formData.fullName || !formData.email || !formData.password) {
+      console.warn('[SignupPage] Validation failed: missing fields');
       toast.error('Please fill in all fields');
       return;
     }
 
     if (formData.password.length < 8) {
+      console.warn('[SignupPage] Validation failed: password too short');
       toast.error('Password must be at least 8 characters');
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
+      console.warn('[SignupPage] Validation failed: passwords do not match');
       toast.error('Passwords do not match');
       return;
     }
+
+    console.log('[SignupPage] Validation passed, checking rate limit');
 
     // Check rate limit
     const rateLimit = await checkRateLimit(formData.email, 'signup');
@@ -54,23 +75,32 @@ export function SignupPage() {
       setRateLimitError(message);
       toast.error(message);
       await logAuthEvent('rate_limit_exceeded', 'signup', { email: formData.email });
+      console.warn('[SignupPage] Rate limit exceeded');
       return;
     }
+
+    console.log('[SignupPage] Rate limit check passed, attempting signup');
 
     setRateLimitError(null);
     setLoading(true);
     try {
       await logAuthEvent('signup_attempt', 'email', { email: formData.email });
-      await signUp(formData.email, formData.password, {
+      console.log('[SignupPage] Calling signUp function');
+      
+      const result = await signUp(formData.email, formData.password, {
         full_name: formData.fullName,
       });
+      
+      console.log('[SignupPage] SignUp result:', result);
       
       await logAuthEvent('signup_success', 'email', { email: formData.email });
       setSuccess(true);
       toast.success('Account created! Check your email to verify.');
+      console.log('[SignupPage] Signup successful');
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to create account';
-      console.error('Signup error:', errorMessage);
+      console.error('[SignupPage] Signup error:', error);
+      console.error('[SignupPage] Error message:', errorMessage);
       
       await recordAttempt(formData.email, 'signup');
       await logAuthEvent('signup_failure', 'email', { 
@@ -85,6 +115,7 @@ export function SignupPage() {
       }
     } finally {
       setLoading(false);
+      console.log('[SignupPage] Signup process completed');
     }
   };
 
