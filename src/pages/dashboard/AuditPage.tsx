@@ -16,7 +16,6 @@ import {
   Loader2, 
   AlertCircle, 
   TrendingUp, 
-  Download, 
   History,
   ExternalLink,
   CheckCircle,
@@ -24,6 +23,11 @@ import {
   BarChart3
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { PreciseScoreDisplay } from './audit/PreciseScoreDisplay';
+import { ScoreBreakdownChart } from './audit/ScoreBreakdownChart';
+import { CategoryScoresChart } from './audit/CategoryScoresChart';
+import { InsightsPanel } from './audit/InsightsPanel';
+import { ExportButtons } from './audit/ExportButtons';
 
 interface SavedAudit {
   id: string;
@@ -215,17 +219,7 @@ export function AuditPage() {
     }
   };
 
-  const downloadReport = () => {
-    if (!result) return;
-    const dataStr = JSON.stringify(result, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
-    const exportFileDefaultName = `geo-audit-${new URL(result.url).hostname}-${Date.now()}.json`;
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-    toast.success('Report downloaded');
-  };
+
 
   const getScoreColor = (score: number): string => {
     if (score >= 80) return 'text-emerald-400';
@@ -234,12 +228,7 @@ export function AuditPage() {
     return 'text-red-400';
   };
 
-  const getScoreGradient = (score: number): string => {
-    if (score >= 80) return 'from-emerald-500/20 to-emerald-600/10';
-    if (score >= 60) return 'from-yellow-500/20 to-orange-500/10';
-    if (score >= 40) return 'from-orange-500/20 to-red-500/10';
-    return 'from-red-500/20 to-red-700/10';
-  };
+
 
   return (
     <div className="space-y-4">
@@ -307,31 +296,33 @@ export function AuditPage() {
       {/* Audit Results */}
       {result && (
         <div className="space-y-4">
-          {/* Overall Score */}
-          <div className={`bg-gradient-to-r ${getScoreGradient(result.overallScore)} border border-slate-800/50 p-6`}>
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <CheckCircle className="w-5 h-5 text-emerald-400" />
-                  <span className="text-xs font-mono text-slate-400 uppercase tracking-wider">
-                    Overall Score
-                  </span>
-                </div>
-                <div className={`text-4xl font-bold ${getScoreColor(result.overallScore)}`}>
-                  {result.overallScore.toFixed(1)}
-                </div>
-                <div className="text-xs font-mono text-slate-500 mt-1">
-                  Grade: {result.grade}
-                </div>
-              </div>
-              <button
-                onClick={downloadReport}
-                className="px-4 py-2 bg-black/40 hover:bg-black/60 border border-slate-700/50 text-slate-300 text-xs font-mono uppercase tracking-wider transition-colors flex items-center gap-2"
-              >
-                <Download className="w-3.5 h-3.5" />
-                Export
-              </button>
+          {/* Precise Score Display with Export Buttons */}
+          <div className="flex flex-col gap-4">
+            <PreciseScoreDisplay
+              overallScore={result.overallScore}
+              preciseScore={result.preciseScore}
+              grade={result.grade}
+              scoreBreakdown={result.scoreBreakdown}
+            />
+            <div className="flex items-center justify-between bg-black/20 border border-slate-800/50 p-3">
+              <span className="text-xs font-mono text-slate-400 uppercase tracking-wider">
+                Export Report
+              </span>
+              <ExportButtons result={result} />
             </div>
+          </div>
+
+          {/* AI Insights */}
+          {result.insights && result.insights.length > 0 && (
+            <InsightsPanel insights={result.insights} />
+          )}
+
+          {/* Charts Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {result.scoreBreakdown && (
+              <ScoreBreakdownChart breakdown={result.scoreBreakdown} />
+            )}
+            <CategoryScoresChart scores={result.scores} />
           </div>
 
           {/* Category Scores Grid - ALL 11 CATEGORIES */}
