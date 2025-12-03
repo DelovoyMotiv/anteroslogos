@@ -56,9 +56,21 @@ export function AuditPage() {
   }, [user]);
 
   const loadAuditHistory = async () => {
-    if (!user || !supabase) return;
+    if (!user || !supabase) {
+      setLoadingHistory(false);
+      return;
+    }
 
     try {
+      // Verify session before making request
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        console.warn('No active session for audit history');
+        setLoadingHistory(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('audits')
         .select(`
@@ -79,9 +91,12 @@ export function AuditPage() {
         .order('timestamp', { ascending: false })
         .limit(10);
 
-      if (error) throw error;
-
-      setSavedAudits(data || []);
+      if (error) {
+        console.error('Failed to load audit history:', error);
+        // Don't throw - just log and continue
+      } else {
+        setSavedAudits(data || []);
+      }
     } catch (err) {
       console.error('Failed to load audit history:', err);
     } finally {
@@ -141,6 +156,15 @@ export function AuditPage() {
     if (!user || !supabase) return;
 
     try {
+      // Verify session before making request
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !session) {
+        console.warn('No active session for saving audit');
+        toast.warning('Audit completed but not saved (no active session)');
+        return;
+      }
+
       const urlObj = new URL(auditResult.url);
       const normalizedUrl = urlObj.hostname + urlObj.pathname;
       const domain = urlObj.hostname;

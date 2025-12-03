@@ -165,11 +165,12 @@ export function useAuth() {
       return;
     }
 
-    supabase.auth.getUser().then(({ data: { user }, error }) => {
+    // Use getSession() instead of getUser() to avoid unnecessary API calls
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
       if (error) {
-        console.error('Failed to get user:', error.message);
+        console.error('Failed to get session:', error.message);
       }
-      setUser(user);
+      setUser(session?.user ?? null);
       setLoading(false);
     });
 
