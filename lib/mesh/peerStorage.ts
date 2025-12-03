@@ -43,6 +43,7 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { MeshNode } from './network';
 import type { PeerHealthMetrics } from './healthMonitor';
+import type { JSONValue } from '../../types/common.types';
 
 // =====================================================
 // TYPE DEFINITIONS
@@ -64,7 +65,7 @@ export interface PeerRecord {
   successful_requests: number;
   failed_requests: number;
   avg_rtt_ms: number;
-  metadata: any;
+  metadata: JSONValue;
   created_at: string;
   updated_at: string;
 }

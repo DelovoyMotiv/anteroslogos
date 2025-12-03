@@ -5,6 +5,7 @@
 
 import { z } from 'zod';
 import { ulid } from 'ulid';
+import type { JSONValue } from '../../types/common.types';
 
 // =====================================================
 // TOKEN & NETWORK
@@ -121,7 +122,7 @@ export interface InvoiceRow {
   user_id: string | null;
   agent_id: string | null;
   method: string;
-  params: any;
+  params: JSONValue;
   params_hash: string;
   amount: number | string;
   token: string;

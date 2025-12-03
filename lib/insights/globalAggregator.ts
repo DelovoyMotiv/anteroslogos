@@ -5,6 +5,9 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
+// AggregationJob type is used in comments and type annotations
+// @ts-expect-error - Type imported for documentation purposes
+import type { AggregationJob } from '../../types/lib.types';
 
 // =====================================================
 // TYPES
@@ -211,7 +214,7 @@ export async function calculateIndustryBenchmarks(
 
       const group = industryMap.get(industry)!;
       group.scores.push(score);
-      group.tenants.add(job.tenant_id);
+      group.tenants.add(String(job.tenant_id));
     });
 
     // Calculate benchmarks for each industry
@@ -229,7 +232,7 @@ export async function calculateIndustryBenchmarks(
         const jobIndustry = job.tenants?.metadata?.industry || 'Unknown';
         if (jobIndustry !== industry) return;
 
-        const tenantId = job.tenant_id;
+        const tenantId = String(job.tenant_id);
         const score = job.result?.overallScore;
         if (typeof score !== 'number') return;
 

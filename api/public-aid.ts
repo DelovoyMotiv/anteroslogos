@@ -5,8 +5,10 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { ed25519 } from '@noble/curves/ed25519';
+import { ed25519 } from '@noble/curves/ed25519.js';
 import { randomBytes, createHash } from 'crypto';
+import { withCors, withRateLimit, withValidation, compose } from '../lib/validation/middleware';
+import { PublicAidCreateSchema } from '../lib/validation/apiSchemas';
 
 const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
@@ -53,16 +55,13 @@ function generateAidUri(name: string, publicKey: string): string {
   return `aid://${normalizedName}/${suffix}`;
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  
-  if (req.method === 'OPTIONS') {
-    return res.status(204).end();
-  }
+import type { PublicAidValidated, ValidatedApiHandler } from '../types/api.types';
 
+async function mainHandler(
+  req: VercelRequest,
+  res: VercelResponse,
+  validated: PublicAidValidated
+): Promise<void> {
   // GET - Documentation
   if (req.method === 'GET') {
     return res.status(200).json({
@@ -84,14 +83,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // POST - Generate identity
   if (req.method === 'POST') {
-    const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || 'unknown';
-    const rateLimit = checkRateLimit(ip);
-    
-    if (!rateLimit.allowed) {
-      return res.status(429).json({ error: 'Rate limit exceeded', retryAfter: 60 });
-    }
-
-    const { name = 'agent', description = '' } = req.body || {};
+    const { name = 'agent', description = '' } = validated.body || {};
     const { publicKey, privateKey } = generateKeyPair();
     const aid = generateAidUri(name, publicKey);
 
@@ -115,3 +107,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   return res.status(405).json({ error: 'Method not allowed' });
 }
+
+// Apply middleware: CORS -> Rate Limiting -> Validation
+export default compose(
+  withCors,
+  (handler) => withRateLimit(handler, { maxRequests: 10, windowMs: 60000 }),
+  (handler) => withValidation(
+    {
+      bodySchema: PublicAidCreateSchema.optional(),
+      allowedMethods: ['GET', 'POST'],
+    },
+    handler as ValidatedApiHandler<PublicAidValidated>
+  )
+)(mainHandler);

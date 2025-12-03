@@ -11,6 +11,13 @@ import {
 } from './openrouter';
 import type { AuditResult, EnhancedRecommendation } from '../geoAuditEnhanced';
 
+// Base interface for audit detail sections
+interface AuditDetailSection {
+  issues?: string[];
+  strengths?: string[];
+  [key: string]: unknown;
+}
+
 // ==================== TYPES ====================
 
 export interface AgentConfig {
@@ -104,7 +111,7 @@ export class GeoMarketologAgent {
   ): AIRecommendationRequest {
     // Extract critical issues from all detail sections
     const criticalIssues: string[] = [];
-    Object.values(auditResult.details).forEach((detail: any) => {
+    Object.values(auditResult.details).forEach((detail: AuditDetailSection) => {
       if (detail.issues && Array.isArray(detail.issues)) {
         // Only include first 2 issues per category to keep prompt concise
         criticalIssues.push(...detail.issues.slice(0, 2));
@@ -113,7 +120,7 @@ export class GeoMarketologAgent {
 
     // Extract top strengths from all detail sections
     const topStrengths: string[] = [];
-    Object.values(auditResult.details).forEach((detail: any) => {
+    Object.values(auditResult.details).forEach((detail: AuditDetailSection) => {
       if (detail.strengths && Array.isArray(detail.strengths)) {
         // Only include first 2 strengths per category
         topStrengths.push(...detail.strengths.slice(0, 2));

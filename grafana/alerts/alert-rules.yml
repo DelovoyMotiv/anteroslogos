@@ -1,0 +1,354 @@
+# Prometheus Alert Rules for Anóteros Lógos
+# 
+# Place this file in your Prometheus rules directory and reference it
+# in prometheus.yml under rule_files:
+#   rule_files:
+#     - "alerts/alert-rules.yml"
+
+groups:
+  # ============================================================================
+  # CRITICAL ALERTS - Page immediately
+  # ============================================================================
+  - name: anoteros_critical_alerts
+    interval: 1m
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(anoteros_http_errors_total[5m])) 
+          / 
+          sum(rate(anoteros_http_requests_total[5m])) > 0.01
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 1%)"
+          runbook: "https://docs.anoteroslogos.com/runbooks/high-error-rate"
+
+      - alert: CriticalAPILatency
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(anoteros_http_request_duration_seconds_bucket[5m])) by (le, route)
+          ) > 1
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Critical API latency on {{ $labels.route }}"
+          description: "p95 latency is {{ $value }}s (threshold: 1s)"
+          runbook: "https://docs.anoteroslogos.com/runbooks/high-latency"
+
+      - alert: DatabaseConnectionPoolExhausted
+        expr: anoteros_db_connection_pool_size{state="waiting"} > 10
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Database connection pool exhausted"
+          description: "{{ $value }} connections waiting (threshold: 10)"
+          runbook: "https://docs.anoteroslogos.com/runbooks/db-pool-exhausted"
+
+      - alert: HighPaymentFailureRate
+        expr: |
+          sum(rate(anoteros_payment_transactions_total{status="failed"}[5m])) 
+          / 
+          sum(rate(anoteros_payment_transactions_total[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          team: payments
+        annotations:
+          summary: "High payment failure rate"
+          description: "Payment failure rate is {{ $value | humanizePercentage }} (threshold: 5%)"
+          runbook: "https://docs.anoteroslogos.com/runbooks/payment-failures"
+
+      - alert: ServiceDown
+        expr: up{job=~"anoteros-api.*"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Service {{ $labels.job }} is down"
+          description: "{{ $labels.instance }} has been down for more than 1 minute"
+          runbook: "https://docs.anoteroslogos.com/runbooks/service-down"
+
+      - alert: CircuitBreakerOpen
+        expr: anoteros_circuit_breaker_state > 0
+        for: 5m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "Circuit breaker open for {{ $labels.service }}"
+          description: "Circuit breaker has been open for 5 minutes"
+          runbook: "https://docs.anoteroslogos.com/runbooks/circuit-breaker"
+
+  # ============================================================================
+  # WARNING ALERTS - Notify via Slack
+  # ============================================================================
+  - name: anoteros_warning_alerts
+    interval: 1m
+    rules:
+      - alert: ElevatedErrorRate
+        expr: |
+          sum(rate(anoteros_http_errors_total[10m])) 
+          / 
+          sum(rate(anoteros_http_requests_total[10m])) > 0.005
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Elevated error rate"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 0.5%)"
+
+      - alert: SlowAPIEndpoint
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(anoteros_http_request_duration_seconds_bucket[5m])) by (le, route)
+          ) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Slow API endpoint {{ $labels.route }}"
+          description: "p95 latency is {{ $value }}s (threshold: 500ms)"
+
+      - alert: LowCacheHitRate
+        expr: |
+          sum(rate(anoteros_cache_hits_total[5m])) 
+          / 
+          (sum(rate(anoteros_cache_hits_total[5m])) + sum(rate(anoteros_cache_misses_total[5m]))) < 0.7
+        for: 15m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Low cache hit rate"
+          description: "Cache hit rate is {{ $value | humanizePercentage }} (threshold: 70%)"
+
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes > 1e9
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value | humanize }}B (threshold: 1GB)"
+
+      - alert: HighDatabaseQueryLatency
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(anoteros_db_query_duration_seconds_bucket[5m])) by (le, operation)
+          ) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High database query latency for {{ $labels.operation }}"
+          description: "p95 query latency is {{ $value }}s (threshold: 100ms)"
+
+      - alert: HighRateLimitViolations
+        expr: sum(increase(anoteros_http_requests_total{status_code="429"}[1h])) > 100
+        for: 5m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "High rate limit violations"
+          description: "{{ $value }} rate limit violations in the last hour (threshold: 100)"
+
+      - alert: HighAuthenticationFailures
+        expr: sum(increase(anoteros_http_requests_total{status_code="401"}[1h])) > 100
+        for: 5m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "High authentication failures"
+          description: "{{ $value }} failed auth attempts in the last hour (threshold: 100)"
+
+      - alert: SlowAuditProcessing
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(anoteros_audit_duration_seconds_bucket[5m])) by (le)
+          ) > 60
+        for: 10m
+        labels:
+          severity: warning
+          team: product
+        annotations:
+          summary: "Slow audit processing"
+          description: "p95 audit duration is {{ $value }}s (threshold: 60s)"
+
+  # ============================================================================
+  # BUSINESS METRICS ALERTS
+  # ============================================================================
+  - name: anoteros_business_alerts
+    interval: 5m
+    rules:
+      - alert: LowAuditCompletionRate
+        expr: sum(increase(anoteros_audits_completed_total{status="success"}[1h])) < 10
+        for: 1h
+        labels:
+          severity: warning
+          team: product
+        annotations:
+          summary: "Low audit completion rate"
+          description: "Only {{ $value }} audits completed in the last hour (threshold: 10)"
+
+      - alert: NoUserSignups
+        expr: sum(increase(anoteros_user_signups_total[6h])) == 0
+        for: 6h
+        labels:
+          severity: warning
+          team: growth
+        annotations:
+          summary: "No user signups in 6 hours"
+          description: "Zero new user signups detected"
+
+      - alert: PaymentProcessingStalled
+        expr: sum(increase(anoteros_payment_transactions_total[30m])) == 0
+        for: 30m
+        labels:
+          severity: warning
+          team: payments
+        annotations:
+          summary: "Payment processing stalled"
+          description: "No payment transactions in the last 30 minutes"
+
+  # ============================================================================
+  # INFRASTRUCTURE ALERTS
+  # ============================================================================
+  - name: anoteros_infrastructure_alerts
+    interval: 1m
+    rules:
+      - alert: HighCPUUsage
+        expr: 100 * (1 - avg(rate(process_cpu_seconds_total[5m]))) > 80
+        for: 10m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}% (threshold: 80%)"
+
+      - alert: DatabaseConnectionPoolNearCapacity
+        expr: |
+          anoteros_db_connection_pool_size{state="active"} 
+          / 
+          (anoteros_db_connection_pool_size{state="active"} + anoteros_db_connection_pool_size{state="idle"}) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "Database connection pool near capacity"
+          description: "Connection pool is {{ $value | humanizePercentage }} full (threshold: 80%)"
+
+      - alert: ExternalAPIHighErrorRate
+        expr: |
+          sum(rate(anoteros_external_api_errors_total[5m])) by (service) 
+          / 
+          sum(rate(anoteros_external_api_duration_seconds_count[5m])) by (service) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "High error rate for external API {{ $labels.service }}"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 10%)"
+
+  # ============================================================================
+  # SECURITY ALERTS
+  # ============================================================================
+  - name: anoteros_security_alerts
+    interval: 1m
+    rules:
+      - alert: SuspiciousSecurityErrors
+        expr: sum(increase(anoteros_http_errors_total{error_type="SecurityError"}[5m])) > 10
+        for: 5m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "Suspicious security errors detected"
+          description: "{{ $value }} security errors in the last 5 minutes (threshold: 10)"
+
+      - alert: BruteForceAttackSuspected
+        expr: sum(increase(anoteros_http_requests_total{status_code="401"}[5m])) by (instance) > 50
+        for: 5m
+        labels:
+          severity: critical
+          team: security
+        annotations:
+          summary: "Possible brute force attack on {{ $labels.instance }}"
+          description: "{{ $value }} failed auth attempts in 5 minutes (threshold: 50)"
+
+      - alert: ValidationErrorSpike
+        expr: |
+          sum(rate(anoteros_http_errors_total{error_type="ValidationError"}[5m])) 
+          > 
+          sum(rate(anoteros_http_errors_total{error_type="ValidationError"}[1h] offset 1h)) * 5
+        for: 5m
+        labels:
+          severity: warning
+          team: security
+        annotations:
+          summary: "Validation error spike detected"
+          description: "Validation errors are 5x higher than usual"
+
+# ============================================================================
+# RECORDING RULES - Pre-calculate expensive queries
+# ============================================================================
+  - name: anoteros_recording_rules
+    interval: 30s
+    rules:
+      # Error rate by route
+      - record: anoteros:http_error_rate:5m
+        expr: |
+          sum(rate(anoteros_http_errors_total[5m])) by (route)
+          /
+          sum(rate(anoteros_http_requests_total[5m])) by (route)
+
+      # Overall error rate
+      - record: anoteros:http_error_rate_total:5m
+        expr: |
+          sum(rate(anoteros_http_errors_total[5m]))
+          /
+          sum(rate(anoteros_http_requests_total[5m]))
+
+      # Cache hit rate
+      - record: anoteros:cache_hit_rate:5m
+        expr: |
+          sum(rate(anoteros_cache_hits_total[5m]))
+          /
+          (sum(rate(anoteros_cache_hits_total[5m])) + sum(rate(anoteros_cache_misses_total[5m])))
+
+      # P95 latency by route
+      - record: anoteros:http_request_duration:p95:5m
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(anoteros_http_request_duration_seconds_bucket[5m])) by (le, route)
+          )
+
+      # P99 latency by route
+      - record: anoteros:http_request_duration:p99:5m
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(anoteros_http_request_duration_seconds_bucket[5m])) by (le, route)
+          )
+
+      # Payment success rate
+      - record: anoteros:payment_success_rate:5m
+        expr: |
+          sum(rate(anoteros_payment_transactions_total{status="success"}[5m]))
+          /
+          sum(rate(anoteros_payment_transactions_total[5m]))

@@ -59,7 +59,7 @@ class CacheStorage {
   /**
    * Generate ETag
    */
-  private generateETag(value: any): string {
+  private generateETag(value: unknown): string {
     const json = JSON.stringify(value);
     let hash = 0;
     for (let i = 0; i < json.length; i++) {
@@ -73,7 +73,7 @@ class CacheStorage {
   /**
    * Calculate size in bytes
    */
-  private calculateSize(value: any): number {
+  private calculateSize(value: unknown): number {
     return new Blob([JSON.stringify(value)]).size;
   }
   
@@ -341,10 +341,12 @@ export function invalidateCachedAuditResult(url: string): boolean {
   return deleted;
 }
 
+import type { GlobalInsights, IndustryBenchmark, TrendAnalysis } from '../insights/globalAggregator';
+
 /**
  * Cache global insights
  */
-export function cacheGlobalInsights(insights: any, ttl?: number): string {
+export function cacheGlobalInsights(insights: GlobalInsights, ttl?: number): string {
   const entry = cacheStorage.set('insights', 'global', insights, ttl || 24 * 60 * 60 * 1000); // 24 hours default
   console.log(`💾 Cached global insights (ETag: ${entry.etag})`);
   return entry.etag;
@@ -353,8 +355,8 @@ export function cacheGlobalInsights(insights: any, ttl?: number): string {
 /**
  * Get cached global insights
  */
-export function getCachedGlobalInsights(): { insights: any; etag: string } | null {
-  const entry = cacheStorage.get<any>('insights', 'global');
+export function getCachedGlobalInsights(): { insights: GlobalInsights; etag: string } | null {
+  const entry = cacheStorage.get<GlobalInsights>('insights', 'global');
   
   if (!entry) {
     console.log(`❌ Cache miss for global insights`);
@@ -371,7 +373,7 @@ export function getCachedGlobalInsights(): { insights: any; etag: string } | nul
 /**
  * Cache industry insights
  */
-export function cacheIndustryInsights(industry: string, insights: any, ttl?: number): string {
+export function cacheIndustryInsights(industry: string, insights: IndustryBenchmark, ttl?: number): string {
   const entry = cacheStorage.set('insights', `industry:${industry}`, insights, ttl || 12 * 60 * 60 * 1000); // 12 hours default
   console.log(`💾 Cached insights for industry ${industry} (ETag: ${entry.etag})`);
   return entry.etag;
@@ -380,8 +382,8 @@ export function cacheIndustryInsights(industry: string, insights: any, ttl?: num
 /**
  * Get cached industry insights
  */
-export function getCachedIndustryInsights(industry: string): { insights: any; etag: string } | null {
-  const entry = cacheStorage.get<any>('insights', `industry:${industry}`);
+export function getCachedIndustryInsights(industry: string): { insights: IndustryBenchmark; etag: string } | null {
+  const entry = cacheStorage.get<IndustryBenchmark>('insights', `industry:${industry}`);
   
   if (!entry) {
     console.log(`❌ Cache miss for industry ${industry}`);
@@ -398,7 +400,7 @@ export function getCachedIndustryInsights(industry: string): { insights: any; et
 /**
  * Cache domain trends
  */
-export function cacheDomainTrends(domain: string, trends: any, ttl?: number): string {
+export function cacheDomainTrends(domain: string, trends: TrendAnalysis, ttl?: number): string {
   const entry = cacheStorage.set('trends', domain, trends, ttl || 6 * 60 * 60 * 1000); // 6 hours default
   console.log(`💾 Cached trends for domain ${domain} (ETag: ${entry.etag})`);
   return entry.etag;
@@ -407,8 +409,8 @@ export function cacheDomainTrends(domain: string, trends: any, ttl?: number): st
 /**
  * Get cached domain trends
  */
-export function getCachedDomainTrends(domain: string): { trends: any; etag: string } | null {
-  const entry = cacheStorage.get<any>('trends', domain);
+export function getCachedDomainTrends(domain: string): { trends: TrendAnalysis; etag: string } | null {
+  const entry = cacheStorage.get<TrendAnalysis>('trends', domain);
   
   if (!entry) {
     console.log(`❌ Cache miss for domain ${domain}`);
@@ -454,12 +456,14 @@ export async function warmCache(warmingFunction: () => Promise<void>): Promise<v
 /**
  * Cache middleware for Express/Vercel
  */
+import type { Request, Response, NextFunction } from 'express';
+
 export function cacheMiddleware(options: {
   namespace: string;
-  keyGenerator: (req: any) => string;
+  keyGenerator: (req: Request) => string;
   ttl?: number;
 }) {
-  return async (req: any, res: any, next: any) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
     const key = options.keyGenerator(req);
     const cached = cacheStorage.get(options.namespace, key);
     
@@ -479,12 +483,12 @@ export function cacheMiddleware(options: {
     
     // Intercept response to cache it
     const originalJson = res.json.bind(res);
-    res.json = (body: any) => {
+    res.json = (body: unknown) => {
       const entry = cacheStorage.set(options.namespace, key, body, options.ttl);
       res.setHeader('ETag', entry.etag);
       return originalJson(body);
     };
     
-    next();
+    return next();
   };
 }

@@ -6,12 +6,16 @@
  * Analyzes content and predicts which AI platforms will cite it
  */
 
-import type { KnowledgeGraph } from '../knowledgeGraph/builder';
+import type { KnowledgeGraph, Entity, Relationship } from '../knowledgeGraph/builder';
 import type { Citation } from '../citationProof/tracker';
 
 // =====================================================
 // TYPES
 // =====================================================
+
+// Type aliases for prediction context
+type PredictionEntity = Entity;
+type PredictionRelationship = Relationship;
 
 export interface CitationPrediction {
   overall_probability: number; // 0-100%
@@ -190,12 +194,12 @@ class FeatureExtractor {
     };
   }
   
-  private calculateEntityDiversity(entities: any[]): number {
+  private calculateEntityDiversity(entities: PredictionEntity[]): number {
     const types = new Set(entities.map(e => e.type));
     return types.size / 10; // Normalize by total possible types
   }
   
-  private calculateRelationshipDiversity(relationships: any[]): number {
+  private calculateRelationshipDiversity(relationships: PredictionRelationship[]): number {
     const types = new Set(relationships.map(r => r.type));
     return types.size / 10; // Normalize by total possible types
   }

@@ -4,6 +4,7 @@
  */
 
 import type { PlanTier, SubscriptionStatus } from '../subscriptions/types';
+import type { SubscriptionWithDetails } from '../../types/lib-extended.types';
 
 // USDC Plan Configuration (Base L2)
 export const PLAN_CONFIG = {
@@ -108,10 +109,9 @@ export async function getSubscription(
   try {
     const { supabase, isSupabaseConfigured } = await import('../supabase');
     
-    // Dev mode: return mock subscription (local only)
-    const isLocalDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-    if (isLocalDev && (!isSupabaseConfigured() || !supabase)) {
-      console.warn('[DEV MODE] getSubscription: Returning mock free tier subscription (LOCAL ONLY)');
+    // Check if Supabase is configured first
+    if (!supabase || !isSupabaseConfigured()) {
+      console.warn('[DEV MODE] getSubscription: Supabase not configured - returning mock free tier subscription');
       const now = new Date();
       const periodEnd = new Date(now);
       periodEnd.setMonth(periodEnd.getMonth() + 1);
@@ -128,10 +128,6 @@ export async function getSubscription(
         created_at: now.toISOString(),
         updated_at: now.toISOString(),
       } as USDCSubscription;
-    }
-    
-    if (!supabase) {
-      return { error: 'Supabase not configured' };
     }
     
     const { data, error } = await supabase
@@ -176,7 +172,7 @@ export async function getPendingInvoices(
       return { error: 'Failed to fetch subscriptions' };
     }
 
-    const subscriptionIds = subscriptions.map((s: any) => s.subscription_id);
+    const subscriptionIds = subscriptions.map((s: SubscriptionWithDetails) => s.subscription_id);
 
     if (subscriptionIds.length === 0) {
       return [];

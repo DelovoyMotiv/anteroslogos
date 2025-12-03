@@ -6,6 +6,7 @@
 import { getSupabaseClient } from './supabaseStorage';
 import type { StoredKey } from './ed25519Signatures';
 import { logger } from './logger';
+import type { JSONValue } from '../../types/common.types';
 
 // =====================================================
 // DATABASE SCHEMA
@@ -22,7 +23,7 @@ export interface DbEd25519Key {
   revoked_at: string | null;
   revoked_reason: string | null;
   agent_id: string | null;
-  metadata: any;
+  metadata: JSONValue;
 }
 
 export interface DbKeyAuditLog {
@@ -32,7 +33,7 @@ export interface DbKeyAuditLog {
   performed_by: string | null;
   ip_address: string | null;
   user_agent: string | null;
-  metadata: any;
+  metadata: JSONValue;
   created_at: string;
 }
 
@@ -199,8 +200,8 @@ export class SupabaseEd25519KeyStorage {
     userAgent?: string
   ): Promise<void> {
     await this.logKeyAction(keyId, 'used', null, {
-      ip_address: ipAddress,
-      user_agent: userAgent,
+      ip_address: ipAddress || null,
+      user_agent: userAgent || null,
     });
   }
   
@@ -211,7 +212,7 @@ export class SupabaseEd25519KeyStorage {
     keyId: string,
     action: string,
     performedBy: string | null,
-    metadata?: any
+    metadata?: JSONValue
   ): Promise<void> {
     const logEntry: Partial<DbKeyAuditLog> = {
       key_id: keyId,
@@ -304,14 +305,14 @@ export class SupabaseEd25519KeyStorage {
   /**
    * Map database key to StoredKey type
    */
-  private mapDbKeyToStoredKey(dbKey: any): StoredKey {
+  private mapDbKeyToStoredKey(dbKey: DbEd25519Key): StoredKey {
     return {
       keyId: dbKey.key_id,
       publicKey: dbKey.public_key,
-      algorithm: dbKey.algorithm,
+      algorithm: 'ed25519' as const,
       domain: dbKey.domain,
       created: dbKey.created,
-      expires: dbKey.expires,
+      expires: dbKey.expires || undefined,
       revoked: dbKey.revoked,
     };
   }

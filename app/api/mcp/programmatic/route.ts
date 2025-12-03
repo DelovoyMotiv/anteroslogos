@@ -187,7 +187,9 @@ export async function executeProgrammatic(
     // Extract result from isolated context
     let result: unknown;
     if (rawResult && typeof rawResult === 'object' && 'copy' in rawResult) {
-      result = await (rawResult as any).copy();
+      // VM context objects have a copy() method to extract values
+      const copyable = rawResult as { copy: () => Promise<unknown> };
+      result = await copyable.copy();
     } else {
       result = rawResult;
     }

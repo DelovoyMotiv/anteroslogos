@@ -18,9 +18,9 @@
  * @version 2.0.0
  */
 
-import { bls12_381 as bls } from '@noble/curves/bls12-381';
-import { sha256 } from '@noble/hashes/sha2';
-import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
+import { bls12_381 as bls } from '@noble/curves/bls12-381.js';
+import { sha256 } from '@noble/hashes/sha2.js';
+import { bytesToHex, hexToBytes } from '@noble/hashes/utils.js';
 import { ulid } from 'ulid';
 import type { MeshNetworkRouter, MeshNode } from '../mesh/network';
 import { createOCCOOracle, type OCCOOracle, type ValidatorWeight } from './occoOracle';

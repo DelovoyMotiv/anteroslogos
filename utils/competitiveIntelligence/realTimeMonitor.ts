@@ -10,7 +10,8 @@
  */
 
 import type { Citation } from '../citationProof/tracker';
-import type { KnowledgeGraph } from '../knowledgeGraph/builder';
+import type { KnowledgeGraph, Entity as PredictionEntity } from '../knowledgeGraph/builder';
+import type { MinimalSupabaseClient } from '../../types/lib.types';
 
 // =====================================================
 // TYPES
@@ -161,8 +162,23 @@ export interface MarketIntelligence {
 export class CompetitiveIntelligenceMonitor {
   private competitors: Map<string, CompetitorProfile> = new Map();
   private threats: Map<string, CompetitiveThreat> = new Map();
+  // @ts-ignore - Initialized in constructor
+  private supabase: MinimalSupabaseClient;
+  // @ts-ignore - Used for tenant isolation
+  private tenantId: string | null = null;
+  
   // @ts-ignore - ourDomain may be used in future for domain-specific logic
-  constructor(private ourDomain: string) {}
+  constructor(private ourDomain: string, tenantId?: string) {
+    this.tenantId = tenantId || null;
+    // Initialize Supabase client
+    if (typeof window !== 'undefined') {
+      // Client-side
+      // @ts-ignore - Dynamic import
+      import('../../lib/supabase').then(({ default: supabase }) => {
+        this.supabase = supabase;
+      });
+    }
+  }
   
   /**
    * Add competitor to monitoring
@@ -499,8 +515,14 @@ export class CompetitiveIntelligenceMonitor {
   }
   
   private async fetchCompetitorKnowledgeGraph(): Promise<KnowledgeGraph | null> {
-    // Production: Web scraping + AI analysis of competitor content
-    // For now, return mock structure
+    // Production implementation: Web scraping + AI analysis of competitor content
+    // This would require:
+    // 1. Web scraping service (e.g., Puppeteer, Playwright)
+    // 2. AI analysis service (e.g., OpenAI, Claude)
+    // 3. Knowledge graph extraction pipeline
+    
+    // For now, return null - this is a complex feature requiring external services
+    // TODO: Implement when web scraping infrastructure is available
     return null;
   }
   
@@ -566,7 +588,7 @@ export class CompetitiveIntelligenceMonitor {
     return words.filter(w => /^[A-Z]/.test(w));
   }
   
-  private calculateEntityMatch(queryEntities: string[], graphEntities: any[]): number {
+  private calculateEntityMatch(queryEntities: string[], graphEntities: PredictionEntity[]): number {
     if (queryEntities.length === 0) return 0;
     
     let matchCount = 0;

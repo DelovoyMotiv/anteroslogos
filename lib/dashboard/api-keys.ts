@@ -7,6 +7,8 @@
 import { supabase } from '../supabase';
 import { scrypt, randomBytes } from 'crypto';
 import { promisify } from 'util';
+import type { UserProfileWithSubscription } from '../../types/lib-extended.types';
+import type { JSONValue } from '../../types/common.types';
 
 const scryptAsync = promisify(scrypt);
 
@@ -127,7 +129,7 @@ export async function createAPIKey(
       .from('profiles')
       .select('current_plan, api_keys_count')
       .eq('id', user.id)
-      .single() as any;
+      .single() as { data: UserProfileWithSubscription | null; error: unknown };
 
     if (profileError || !profile) {
       return { error: 'Profile not found' };
@@ -169,7 +171,7 @@ export async function createAPIKey(
         rate_limit_per_minute: rateLimits.per_minute,
         rate_limit_per_hour: rateLimits.per_hour,
         expires_at: expiresAt,
-      } as any)
+      } as JSONValue)
       .select()
       .single();
 

@@ -10,6 +10,7 @@ import { detectCitations, calculateCitationROI } from '../../utils/citationProof
 import { discoverAIDAgent } from '../../utils/aidDiscovery';
 import { getAuditHistory } from '../../utils/auditHistory';
 import type { AIDAgentInfo } from '../../utils/aidDiscovery';
+import type { JSONValue, ToolCallParams, ToolCallResult } from '../../types/a2a.types';
 
 // =====================================================
 // TYPES
@@ -17,15 +18,10 @@ import type { AIDAgentInfo } from '../../utils/aidDiscovery';
 
 export interface A2AToolCall {
   method: string;
-  params: Record<string, any>;
+  params: ToolCallParams;
 }
 
-export interface A2AToolResult {
-  success: boolean;
-  result?: any;
-  error?: string;
-  executionTimeMs: number;
-}
+export type A2AToolResult = ToolCallResult;
 
 // =====================================================
 // TOOL ROUTER
@@ -35,7 +31,7 @@ export interface A2AToolResult {
  * Call A2A tool from code execution environment
  * Routes to actual implementation based on method name
  */
-export async function callA2ATool<T = any>(method: string, params: Record<string, any>): Promise<T> {
+export async function callA2ATool<T = JSONValue>(method: string, params: ToolCallParams): Promise<T> {
   const startTime = Date.now();
   
   try {
@@ -55,7 +51,7 @@ export async function callA2ATool<T = any>(method: string, params: Record<string
 /**
  * Route tool call to appropriate implementation
  */
-async function routeToolCall(method: string, params: Record<string, any>): Promise<any> {
+async function routeToolCall(method: string, params: ToolCallParams): Promise<JSONValue> {
   const [server, tool] = method.split('__');
   
   switch (server) {
@@ -80,14 +76,14 @@ async function routeToolCall(method: string, params: Record<string, any>): Promi
 // GEO AUDIT TOOLS
 // =====================================================
 
-async function handleGeoAuditTools(tool: string, params: Record<string, any>): Promise<any> {
+async function handleGeoAuditTools(tool: string, params: ToolCallParams): Promise<JSONValue> {
   switch (tool) {
     case 'auditWebsite': {
       const { url, useAI = false } = params;
       if (!url) throw new Error('Missing required parameter: url');
       
-      const result = await performGeoAudit(url, useAI);
-      return result;
+      const result = await performGeoAudit(url as string, { useAI: useAI as boolean });
+      return result as unknown as JSONValue;
     }
     
     case 'batchAudit': {
@@ -100,11 +96,13 @@ async function handleGeoAuditTools(tool: string, params: Record<string, any>): P
       }
       
       const results: Array<any> = [];
+      const maxConcurrentNum = typeof maxConcurrent === 'number' ? maxConcurrent : 5;
+      const urlStrings = urls.filter((u): u is string => typeof u === 'string');
       
-      for (let i = 0; i < urls.length; i += maxConcurrent) {
-        const batch = urls.slice(i, i + maxConcurrent);
+      for (let i = 0; i < urlStrings.length; i += maxConcurrentNum) {
+        const batch = urlStrings.slice(i, i + maxConcurrentNum);
         const batchResults = await Promise.all(
-          batch.map(async (url: string) => {
+          batch.map(async (url) => {
             try {
               const result = await performGeoAudit(url, { useAI: false });
               return { ...result, url };
@@ -120,25 +118,26 @@ async function handleGeoAuditTools(tool: string, params: Record<string, any>): P
       }
       
       return {
-        total: urls.length,
+        total: urlStrings.length,
         results,
-        completed: results.filter((r: any) => !r.error).length,
-        failed: results.filter((r: any) => r.error).length,
-      };
+        completed: results.filter((r) => !(r as Record<string, unknown>).error).length,
+        failed: results.filter((r) => (r as Record<string, unknown>).error).length,
+      } as unknown as JSONValue;
     }
     
     case 'getAuditHistory': {
       const { url, limit = 10 } = params;
       if (!url) throw new Error('Missing required parameter: url');
       
+      const limitNum = typeof limit === 'number' ? limit : 10;
       const history = getAuditHistory();
-      const filtered = history.filter(h => h.url === url).slice(0, limit);
+      const filtered = history.filter(h => h.url === url).slice(0, limitNum);
       
       return {
         url,
         count: filtered.length,
         audits: filtered,
-      };
+      } as unknown as JSONValue;
     }
     
     default:
@@ -150,19 +149,19 @@ async function handleGeoAuditTools(tool: string, params: Record<string, any>): P
 // KNOWLEDGE GRAPH TOOLS
 // =====================================================
 
-async function handleKnowledgeGraphTools(tool: string, params: Record<string, any>): Promise<any> {
+async function handleKnowledgeGraphTools(tool: string, params: ToolCallParams): Promise<JSONValue> {
   switch (tool) {
     case 'buildKnowledgeGraph': {
       const { html, sourceUrl } = params;
-      if (!html || !sourceUrl) {
-        throw new Error('Missing required parameters: html, sourceUrl');
+      if (!html || !sourceUrl || typeof html !== 'string' || typeof sourceUrl !== 'string') {
+        throw new Error('Missing required parameters: html, sourceUrl (must be strings)');
       }
       
       const domain = new URL(sourceUrl).hostname;
       const builder = new KnowledgeGraphBuilder(domain);
       const graph = await builder.buildFromHTML(html, sourceUrl);
       
-      return graph;
+      return graph as unknown as JSONValue;
     }
     
     case 'queryKnowledgeGraph': {
@@ -187,12 +186,13 @@ async function handleKnowledgeGraphTools(tool: string, params: Record<string, an
 // CITATION TRACKING TOOLS
 // =====================================================
 
-async function handleCitationTrackingTools(tool: string, params: Record<string, any>): Promise<any> {
+async function handleCitationTrackingTools(tool: string, params: ToolCallParams): Promise<JSONValue> {
   switch (tool) {
     case 'detectCitations': {
       const { platform, response, domain } = params;
-      if (!platform || !response || !domain) {
-        throw new Error('Missing required parameters: platform, response, domain');
+      if (!platform || !response || !domain || 
+          typeof platform !== 'string' || typeof response !== 'string' || typeof domain !== 'string') {
+        throw new Error('Missing required parameters: platform, response, domain (must be strings)');
       }
       
       const detectedCitations = detectCitations(response, domain, platform as any);
@@ -202,7 +202,7 @@ async function handleCitationTrackingTools(tool: string, params: Record<string, 
         domain,
         citations: detectedCitations,
         count: detectedCitations.length,
-      };
+      } as unknown as JSONValue;
     }
     
     case 'calculateCitationROI': {
@@ -211,9 +211,9 @@ async function handleCitationTrackingTools(tool: string, params: Record<string, 
         throw new Error('Missing or invalid parameter: citations (must be array)');
       }
       
-      const roi = calculateCitationROI(citations);
+      const roi = calculateCitationROI(citations as any);
       
-      return roi;
+      return roi as unknown as JSONValue;
     }
     
     default:
@@ -225,24 +225,26 @@ async function handleCitationTrackingTools(tool: string, params: Record<string, 
 // AID DISCOVERY TOOLS
 // =====================================================
 
-async function handleAIDTools(tool: string, params: Record<string, any>): Promise<any> {
+async function handleAIDTools(tool: string, params: ToolCallParams): Promise<JSONValue> {
   switch (tool) {
     case 'discoverAIDAgent': {
       const { url } = params;
-      if (!url) throw new Error('Missing required parameter: url');
+      if (!url || typeof url !== 'string') {
+        throw new Error('Missing required parameter: url (must be string)');
+      }
       
       const aidInfo = await discoverAIDAgent(url);
       
-      return aidInfo;
+      return aidInfo as unknown as JSONValue;
     }
     
     case 'validateAIDConfig': {
       const { aidInfo } = params;
       if (!aidInfo) throw new Error('Missing required parameter: aidInfo');
       
-      const validation = validateAIDConfiguration(aidInfo);
+      const validation = validateAIDConfiguration(aidInfo as unknown as AIDAgentInfo);
       
-      return validation;
+      return validation as unknown as JSONValue;
     }
     
     default:

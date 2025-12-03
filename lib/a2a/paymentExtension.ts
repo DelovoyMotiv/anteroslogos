@@ -8,7 +8,7 @@
  */
 
 import { createInvoice, Invoice } from '../payments/invoice';
-import { Task, TaskStatus, taskManager } from './taskManager';
+import { Task, TaskStatus, TaskPriority, taskManager } from './taskManager';
 import { agentCardManager } from './agentCard';
 
 // =====================================================
@@ -406,15 +406,17 @@ export const paymentExtension = PaymentExtensionManager.getInstance();
 // UTILITY FUNCTIONS
 // =====================================================
 
+import type { ToolCallParams } from '../../types/a2a.types';
+
 /**
  * Create task with payment requirement
  */
 export async function createPaidTask(
   capability: string,
-  params: Record<string, any>,
+  params: ToolCallParams,
   userId: string,
   options?: {
-    priority?: 'low' | 'normal' | 'high' | 'critical';
+    priority?: TaskPriority;
     userTier?: 'free' | 'basic' | 'pro';
     sessionId?: string;
   }
@@ -426,7 +428,7 @@ export async function createPaidTask(
     {
       capability,
       params,
-      priority: options?.priority as any,
+      priority: options?.priority,
       session_id: options?.sessionId,
     },
     agentId

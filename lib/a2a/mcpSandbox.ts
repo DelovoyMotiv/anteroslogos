@@ -12,9 +12,11 @@ import { logger } from './logger';
 // TYPES
 // =====================================================
 
+import type { JSONValue } from '../../types/common.types';
+
 export interface ExecutionResult {
   output: string[];
-  returnValue: any;
+  returnValue: JSONValue;
   executionTimeMs: number;
   memoryUsedMB: number;
   tokenSavings: {
@@ -66,7 +68,7 @@ export class ProductionCodeExecutionEnvironment {
   /**
    * Execute TypeScript/JavaScript code in isolated sandbox
    */
-  async execute(code: string, context: Record<string, any> = {}): Promise<ExecutionResult> {
+  async execute(code: string, context: Record<string, JSONValue> = {}): Promise<ExecutionResult> {
     const startTime = Date.now();
     const output: string[] = [];
     
@@ -241,8 +243,8 @@ export class ProductionCodeExecutionEnvironment {
   /**
    * Get tool definition for progressive disclosure
    */
-  getToolDefinition(method: string): { schema: any; example: string } | null {
-    const definitions: Record<string, { schema: any; example: string }> = {
+  getToolDefinition(method: string): { schema: JSONValue; example: string } | null {
+    const definitions: Record<string, { schema: JSONValue; example: string }> = {
       'geo-audit__auditWebsite': {
         schema: {
           type: 'function',

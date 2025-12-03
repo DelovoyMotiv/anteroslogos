@@ -83,7 +83,6 @@ const PricingPage: React.FC = () => {
 
   const handleCTAClick = (tierName: string) => {
     if (tierName === 'Enterprise') {
-      // TODO: Open contact modal or navigate to contact page
       navigate('/contact');
     } else {
       navigate('/auth/signup');

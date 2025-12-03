@@ -265,8 +265,8 @@ export const TracerViz: React.FC<TracerVizProps> = ({
   className = '',
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
-  const [zoom, setZoom] = useState(1);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState<number>(1);
+  const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [_selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
@@ -320,16 +320,18 @@ export const TracerViz: React.FC<TracerVizProps> = ({
 
   // Force simulation
   const simulationRef = useRef<ForceSimulation | null>(null);
-  const [, setTick] = useState(0);
+  const [, setTick] = useState<number>(0);
 
   useEffect(() => {
     simulationRef.current = new ForceSimulation(nodes, edges, width, height);
 
     let animationFrame: number;
+    let tickCount = 0;
     const animate = () => {
       if (simulationRef.current) {
         const shouldContinue = simulationRef.current.tick();
-        setTick(t => t + 1);
+        tickCount++;
+        setTick(tickCount);
         if (shouldContinue) {
           animationFrame = requestAnimationFrame(animate);
         }
@@ -359,8 +361,12 @@ export const TracerViz: React.FC<TracerVizProps> = ({
     setIsDragging(false);
   };
 
-  const handleZoomIn = () => setZoom(z => Math.min(z * 1.2, 4));
-  const handleZoomOut = () => setZoom(z => Math.max(z / 1.2, 0.25));
+  const handleZoomIn = () => {
+    setZoom(Math.min(zoom * 1.2, 4));
+  };
+  const handleZoomOut = () => {
+    setZoom(Math.max(zoom / 1.2, 0.25));
+  };
   const handleResetView = () => {
     setZoom(1);
     setPan({ x: 0, y: 0 });
@@ -424,41 +430,46 @@ export const TracerViz: React.FC<TracerVizProps> = ({
           </div>
 
           {/* Controls */}
-          <div className="flex gap-2">
+          <div className="flex gap-2" role="toolbar" aria-label="Graph controls">
             <button
               onClick={handleZoomIn}
-              className="p-2 bg-gray-800 hover:bg-gray-700 rounded text-white transition"
+              className="p-2 bg-gray-800 hover:bg-gray-700 rounded text-white transition focus:outline-none focus:ring-2 focus:ring-blue-400"
               title="Zoom In"
+              aria-label="Zoom in on graph"
             >
-              <ZoomIn size={18} />
+              <ZoomIn size={18} aria-hidden="true" />
             </button>
             <button
               onClick={handleZoomOut}
-              className="p-2 bg-gray-800 hover:bg-gray-700 rounded text-white transition"
+              className="p-2 bg-gray-800 hover:bg-gray-700 rounded text-white transition focus:outline-none focus:ring-2 focus:ring-blue-400"
               title="Zoom Out"
+              aria-label="Zoom out on graph"
             >
-              <ZoomOut size={18} />
+              <ZoomOut size={18} aria-hidden="true" />
             </button>
             <button
               onClick={handleResetView}
-              className="p-2 bg-gray-800 hover:bg-gray-700 rounded text-white transition"
+              className="p-2 bg-gray-800 hover:bg-gray-700 rounded text-white transition focus:outline-none focus:ring-2 focus:ring-blue-400"
               title="Reset View"
+              aria-label="Reset graph view to default"
             >
-              <Maximize2 size={18} />
+              <Maximize2 size={18} aria-hidden="true" />
             </button>
             <button
               onClick={handleExportPNG}
-              className="p-2 bg-gray-800 hover:bg-gray-700 rounded text-white transition"
+              className="p-2 bg-gray-800 hover:bg-gray-700 rounded text-white transition focus:outline-none focus:ring-2 focus:ring-blue-400"
               title="Export PNG"
+              aria-label="Export graph as PNG image"
             >
-              <Download size={18} />
+              <Download size={18} aria-hidden="true" />
             </button>
             <button
               onClick={handleExportSVG}
-              className="p-2 bg-gray-800 hover:bg-gray-700 rounded text-white transition"
+              className="p-2 bg-gray-800 hover:bg-gray-700 rounded text-white transition focus:outline-none focus:ring-2 focus:ring-blue-400"
               title="Export SVG"
+              aria-label="Export graph as SVG image"
             >
-              <Download size={18} />
+              <Download size={18} aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -478,6 +489,8 @@ export const TracerViz: React.FC<TracerVizProps> = ({
           height={height}
           className="bg-gray-950"
           style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+          role="img"
+          aria-label={`Causal citation trace graph for ${data.platform} with ${data.metadata.graphNodes} nodes and ${data.metadata.graphEdges} edges`}
         >
           <g transform={`translate(${pan.x},${pan.y}) scale(${zoom})`}>
             {/* Edges */}

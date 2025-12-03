@@ -1,0 +1,29 @@
+# Grafana Dashboard Provisioning
+# 
+# This file automatically loads dashboards from the specified folder
+# when Grafana starts. Place in /etc/grafana/provisioning/dashboards/
+
+apiVersion: 1
+
+providers:
+  - name: 'Anóteros Lógos Dashboards'
+    orgId: 1
+    folder: 'Anóteros Lógos'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/anoteros
+      foldersFromFilesStructure: false
+
+  # Alternative: Load from Git repository
+  # - name: 'Anóteros Lógos Dashboards (Git)'
+  #   orgId: 1
+  #   folder: 'Anóteros Lógos'
+  #   type: file
+  #   disableDeletion: false
+  #   updateIntervalSeconds: 300
+  #   allowUiUpdates: true
+  #   options:
+  #     path: /var/lib/grafana/dashboards/anoteros

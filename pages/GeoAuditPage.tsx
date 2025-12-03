@@ -92,12 +92,12 @@ const GeoAuditPage = () => {
       const auditResult = await auditWebsite(sanitizedUrl);
       
       // 3. Validate audit result
-      if (!validateAuditResult(auditResult)) {
+      if (!validateAuditResult(auditResult as any)) {
         throw new Error('Invalid audit result received. Please try again.');
       }
       
       // Save to history
-      saveAuditToHistory(auditResult);
+      saveAuditToHistory(auditResult as any);
       
       // Get comparison with previous audit
       const comp = compareWithPrevious(auditResult);

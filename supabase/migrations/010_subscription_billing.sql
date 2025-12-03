@@ -152,10 +152,14 @@ CREATE TABLE IF NOT EXISTS public.user_subscriptions (
   ),
   CONSTRAINT period_start_before_end CHECK (
     current_period_start IS NULL OR current_period_end IS NULL OR current_period_start < current_period_end
-  ),
-  -- Prevent multiple active subscriptions per user
-  CONSTRAINT one_active_subscription_per_user UNIQUE (user_id) WHERE status = 'active'
+  )
 );
+
+-- Partial unique index to prevent multiple active subscriptions per user
+-- (Cannot use inline CONSTRAINT with WHERE clause)
+CREATE UNIQUE INDEX idx_one_active_subscription_per_user 
+  ON public.user_subscriptions(user_id) 
+  WHERE status = 'active';
 
 -- Indexes
 CREATE INDEX idx_user_subscriptions_user_status ON public.user_subscriptions(user_id, status);

@@ -177,7 +177,9 @@ export const Disclosure = ({
     <div className="border border-white/10 rounded-xl overflow-hidden">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full px-6 py-4 flex items-center justify-between bg-white/5 hover:bg-white/10 transition-colors text-left"
+        className="w-full px-6 py-4 flex items-center justify-between bg-white/5 hover:bg-white/10 transition-colors text-left focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-2 focus:ring-offset-brand-bg"
+        aria-expanded={isOpen}
+        aria-controls={`disclosure-content-${title.replace(/\s+/g, '-').toLowerCase()}`}
       >
         <div className="flex items-center gap-3">
           <svg
@@ -197,7 +199,12 @@ export const Disclosure = ({
       </button>
       
       {isOpen && (
-        <div className="px-6 py-4 bg-white/5 animate-in slide-in-from-top-2 duration-200">
+        <div 
+          id={`disclosure-content-${title.replace(/\s+/g, '-').toLowerCase()}`}
+          className="px-6 py-4 bg-white/5 animate-in slide-in-from-top-2 duration-200"
+          role="region"
+          aria-label={`${title} content`}
+        >
           {children}
         </div>
       )}

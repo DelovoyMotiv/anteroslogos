@@ -1,0 +1,52 @@
+# Grafana Datasource Provisioning
+# 
+# This file automatically configures the Prometheus datasource
+# when Grafana starts. Place in /etc/grafana/provisioning/datasources/
+
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+    jsonData:
+      httpMethod: POST
+      timeInterval: 15s
+      queryTimeout: 60s
+      # Enable Prometheus exemplars (for trace correlation)
+      exemplarTraceIdDestinations:
+        - name: trace_id
+          datasourceUid: tempo
+    version: 1
+
+  # Optional: Add Tempo for distributed tracing
+  # - name: Tempo
+  #   type: tempo
+  #   access: proxy
+  #   url: http://tempo:3200
+  #   uid: tempo
+  #   editable: true
+  #   jsonData:
+  #     httpMethod: GET
+  #     tracesToLogs:
+  #       datasourceUid: loki
+  #       tags: ['trace_id']
+  #   version: 1
+
+  # Optional: Add Loki for log aggregation
+  # - name: Loki
+  #   type: loki
+  #   access: proxy
+  #   url: http://loki:3100
+  #   uid: loki
+  #   editable: true
+  #   jsonData:
+  #     derivedFields:
+  #       - datasourceUid: tempo
+  #         matcherRegex: "trace_id=(\\w+)"
+  #         name: TraceID
+  #         url: "$${__value.raw}"
+  #   version: 1

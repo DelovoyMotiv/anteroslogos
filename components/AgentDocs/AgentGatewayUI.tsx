@@ -223,10 +223,10 @@ export const ChallengeTester = ({ enableAutoKeygen = true }: ChallengeTesterProp
         status: 'success',
         message: 'Challenge signed! Click "Verify Signature" to test.',
       });
-    } catch (error: any) {
+    } catch (error) {
       setResult({ 
         status: 'error', 
-        message: `Signing failed: ${error.message || 'Unknown error'}` 
+        message: `Signing failed: ${error instanceof Error ? error.message : 'Unknown error'}` 
       });
     } finally {
       setIsAutoSigning(false);
@@ -324,8 +324,8 @@ export const ChallengeTester = ({ enableAutoKeygen = true }: ChallengeTesterProp
       } else {
         throw new Error(verifyData.error || 'Verification failed');
       }
-    } catch (error: any) {
-      setResult({ status: 'error', message: `Flow failed: ${error.message}` });
+    } catch (error) {
+      setResult({ status: 'error', message: `Flow failed: ${error instanceof Error ? error.message : 'Unknown error'}` });
     }
   }, []);
 
@@ -531,8 +531,16 @@ export const ChallengeTester = ({ enableAutoKeygen = true }: ChallengeTesterProp
   );
 };
 
+import type { JSONValue } from '../../types/common.types';
+
+interface ToolSchema {
+  name: string;
+  description: string;
+  parameters: JSONValue;
+}
+
 interface ToolSchemaAccordionsProps {
-  schemas: Array<{ name: string; description: string; parameters: any }>;
+  schemas: ToolSchema[];
 }
 
 export const ToolSchemaAccordions = ({ schemas }: ToolSchemaAccordionsProps) => {

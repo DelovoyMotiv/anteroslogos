@@ -14,6 +14,7 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { getCurrentTenantIdOrNull } from './context';
+import type { JSONObject } from '../../types/common.types';
 
 // =====================================================
 // TYPES
@@ -369,13 +370,13 @@ export class CrossTenantValidator {
         return null;
       }
 
-      const settings = data.settings as any;
+      const settings = data.settings as JSONObject;
       const policy: TenantAccessPolicy = {
         tenantId: data.id,
-        federationMode: settings?.federation_mode || 'private',
-        allowedPartners: settings?.allowed_partners || [],
-        blockedTenants: settings?.blocked_tenants || [],
-        resourcePolicies: settings?.resource_policies || {},
+        federationMode: (settings?.federation_mode as any) || 'private',
+        allowedPartners: (settings?.allowed_partners as any) || [],
+        blockedTenants: (settings?.blocked_tenants as any) || [],
+        resourcePolicies: (settings?.resource_policies as any) || {},
       };
 
       // Cache policy

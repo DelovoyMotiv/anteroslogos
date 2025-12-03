@@ -43,9 +43,11 @@ export interface TenantRequest {
   tenantContext?: TenantContext;
 }
 
+import type { JSONValue } from '../../types/common.types';
+
 export interface TenantResponse {
   status: (code: number) => TenantResponse;
-  json: (data: any) => void;
+  json: (data: JSONValue) => void;
 }
 
 export type TenantNextFunction = () => void;
@@ -233,18 +235,18 @@ function normalizeHeaders(
  */
 export function withTenantContext(
   options: MiddlewareOptions,
-  handler: (req: TenantRequest, res: any) => Promise<void>
+  handler: (req: TenantRequest, res: TenantResponse) => Promise<void>
 ) {
   const middleware = createTenantMiddleware(options);
 
-  return async (req: TenantRequest, res: any) => {
+  return async (req: TenantRequest, res: TenantResponse) => {
     return new Promise<void>((resolve, reject) => {
       const mockRes: TenantResponse = {
         status: (code: number) => {
           res.status(code);
           return mockRes;
         },
-        json: (data: any) => {
+        json: (data: JSONValue) => {
           res.json(data);
           resolve();
         },

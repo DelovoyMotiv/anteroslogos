@@ -6,10 +6,11 @@
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { RegisteredAgent } from './agentRegistry';
-import type { AuditJob, BatchJob } from './queue';
+import type { AuditJob, BatchJob, JobPriority, JobStatus } from './queue';
 import type { A2AAuditResult } from './protocol';
 import { logger } from './logger';
 import { config } from '../config';
+import type { JSONValue } from '../../types/common.types';
 
 // =====================================================
 // DATABASE SCHEMA TYPES
@@ -30,7 +31,7 @@ export interface DbAgent {
   failed_requests: number;
   avg_response_time_ms: number;
   trust_score: number;
-  metadata: any;
+  metadata: JSONValue;
   rate_limit_tier: string;
   webhook_url: string | null;
   notification_email: string | null;
@@ -55,9 +56,9 @@ export interface DbAuditJob {
   started_at: string | null;
   completed_at: string | null;
   progress: number;
-  result: any | null;
+  result: JSONValue | null;
   error: string | null;
-  metadata: any;
+  metadata: JSONValue;
 }
 
 export interface DbBatchJob {
@@ -72,14 +73,14 @@ export interface DbBatchJob {
   jobs: string[];
   completed_jobs: number;
   failed_jobs: number;
-  metadata: any;
+  metadata: JSONValue;
 }
 
 export interface DbAuditResult {
   id: string;
   audit_id: string;
   url: string;
-  result: any;
+  result: JSONValue;
   cached_until: string;
   created_at: string;
 }
@@ -218,7 +219,7 @@ export class SupabaseAgentStorage {
   async updateAgent(id: string, updates: Partial<RegisteredAgent>): Promise<boolean> {
     const { error } = await this.supabase
       .from('a2a_agents')
-      .update(updates as any)
+      .update(updates)
       .eq('id', id);
     
     return !error;
@@ -256,26 +257,26 @@ export class SupabaseAgentStorage {
   /**
    * Map database agent to RegisteredAgent type
    */
-  private mapDbAgentToRegisteredAgent(dbAgent: any): RegisteredAgent {
+  private mapDbAgentToRegisteredAgent(dbAgent: DbAgent): RegisteredAgent {
     return {
       id: dbAgent.id,
       name: dbAgent.name,
-      version: dbAgent.version,
-      type: dbAgent.type,
+      version: dbAgent.version || undefined,
+      type: dbAgent.type as 'search' | 'assistant' | 'crawler' | 'analytics' | 'other',
       capabilities: dbAgent.capabilities,
-      contact: dbAgent.contact,
+      contact: dbAgent.contact || undefined,
       api_key: dbAgent.api_key,
-      status: dbAgent.status,
+      status: dbAgent.status as 'active' | 'inactive' | 'banned' | 'pending_verification',
       registered_at: dbAgent.registered_at,
-      last_seen_at: dbAgent.last_seen_at,
+      last_seen_at: dbAgent.last_seen_at || undefined,
       total_requests: dbAgent.total_requests,
       failed_requests: dbAgent.failed_requests,
       avg_response_time_ms: dbAgent.avg_response_time_ms,
       trust_score: dbAgent.trust_score,
-      metadata: dbAgent.metadata,
-      rate_limit_tier: dbAgent.rate_limit_tier,
-      webhook_url: dbAgent.webhook_url,
-      notification_email: dbAgent.notification_email,
+      metadata: dbAgent.metadata as RegisteredAgent['metadata'],
+      rate_limit_tier: dbAgent.rate_limit_tier as 'free' | 'basic' | 'pro' | 'enterprise',
+      webhook_url: dbAgent.webhook_url || undefined,
+      notification_email: dbAgent.notification_email || undefined,
     };
   }
 }
@@ -349,7 +350,7 @@ export class SupabaseQueueStorage {
       started_at: job.started_at ? new Date(job.started_at).toISOString() : null,
       completed_at: job.completed_at ? new Date(job.completed_at).toISOString() : null,
       progress: job.progress,
-      result: job.result || null,
+      result: (job.result || null) as JSONValue,
       error: job.error || null,
       metadata: job.metadata,
     };
@@ -402,7 +403,7 @@ export class SupabaseQueueStorage {
   async updateJob(jobId: string, updates: Partial<AuditJob>): Promise<void> {
     const { error } = await this.supabase
       .from('a2a_audit_jobs')
-      .update(updates as any)
+      .update(updates)
       .eq('id', jobId);
     
     if (error) {
@@ -457,32 +458,32 @@ export class SupabaseQueueStorage {
   /**
    * Map database job to AuditJob type
    */
-  private mapDbJobToAuditJob(dbJob: any): AuditJob {
+  private mapDbJobToAuditJob(dbJob: DbAuditJob): AuditJob {
     return {
       id: dbJob.id,
       url: dbJob.url,
-      priority: dbJob.priority,
-      status: dbJob.status,
-      depth: dbJob.depth,
+      priority: dbJob.priority as JobPriority,
+      status: dbJob.status as JobStatus,
+      depth: dbJob.depth as 'quick' | 'standard' | 'deep',
       created_at: new Date(dbJob.created_at).getTime(),
       started_at: dbJob.started_at ? new Date(dbJob.started_at).getTime() : undefined,
       completed_at: dbJob.completed_at ? new Date(dbJob.completed_at).getTime() : undefined,
       progress: dbJob.progress,
-      result: dbJob.result,
-      error: dbJob.error,
-      metadata: dbJob.metadata,
+      result: dbJob.result as unknown as A2AAuditResult | undefined,
+      error: dbJob.error || undefined,
+      metadata: dbJob.metadata as { api_key?: string; tier: string; agent_name?: string; retry_count: number; max_retries: number },
     };
   }
   
   /**
    * Map database batch to BatchJob type
    */
-  private mapDbBatchToBatchJob(dbBatch: any): BatchJob {
+  private mapDbBatchToBatchJob(dbBatch: DbBatchJob): BatchJob {
     return {
       id: dbBatch.id,
       urls: dbBatch.urls,
-      priority: dbBatch.priority,
-      status: dbBatch.status,
+      priority: dbBatch.priority as JobPriority,
+      status: dbBatch.status as JobStatus,
       created_at: new Date(dbBatch.created_at).getTime(),
       started_at: dbBatch.started_at ? new Date(dbBatch.started_at).getTime() : undefined,
       completed_at: dbBatch.completed_at ? new Date(dbBatch.completed_at).getTime() : undefined,
@@ -490,7 +491,7 @@ export class SupabaseQueueStorage {
       jobs: dbBatch.jobs,
       completed_jobs: dbBatch.completed_jobs,
       failed_jobs: dbBatch.failed_jobs,
-      metadata: dbBatch.metadata,
+      metadata: dbBatch.metadata as { api_key?: string; tier: string; agent_name?: string },
     };
   }
 }
@@ -515,7 +516,7 @@ export class SupabaseAuditCache {
     const dbResult: Partial<DbAuditResult> = {
       audit_id: auditId,
       url,
-      result,
+      result: result as unknown as JSONValue,
       cached_until: cachedUntil,
       created_at: new Date().toISOString(),
     };

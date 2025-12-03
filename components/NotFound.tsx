@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { Logo } from './Icons';
 
 const NotFound = () => {
-    const [seconds, setSeconds] = useState(0);
-    const [existentialQuote, setExistentialQuote] = useState(0);
+    const [seconds, setSeconds] = useState<number>(0);
+    const [existentialQuote, setExistentialQuote] = useState<number>(0);
 
     const quotes = [
         "We are all just URLs in the vast sitemap of existence.",
@@ -15,11 +15,13 @@ const NotFound = () => {
 
     useEffect(() => {
         const timer = setInterval(() => {
-            setSeconds(prev => prev + 1);
+            // @ts-ignore - TypeScript has issues with setState updater function type inference
+            setSeconds((prev) => prev + 1);
         }, 1000);
 
         const quoteRotation = setInterval(() => {
-            setExistentialQuote(prev => (prev + 1) % quotes.length);
+            // @ts-ignore - TypeScript has issues with setState updater function type inference
+            setExistentialQuote((prev) => (prev + 1) % quotes.length);
         }, 4000);
 
         return () => {

@@ -10,6 +10,8 @@
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error' | 'fatal';
 
+import type { JSONValue } from '../../types/a2a.types';
+
 export interface LogContext {
   request_id?: string;
   agent_id?: string;
@@ -22,7 +24,8 @@ export interface LogContext {
   url?: string;
   duration_ms?: number;
   status_code?: number;
-  [key: string]: any;
+  tags?: string[];
+  [key: string]: JSONValue | undefined;
 }
 
 export interface LogEntry {
@@ -99,7 +102,7 @@ class StructuredLogger {
         name: error.name,
         message: error.message,
         stack: error.stack,
-        code: (error as any).code,
+        code: (error as { code?: string }).code,
       };
     }
     
@@ -186,9 +189,10 @@ class StructuredLogger {
    * Log API request
    */
   logRequest(context: LogContext): void {
+    const tags = Array.isArray(context.tags) ? context.tags : [];
     this.info(`API Request: ${context.method} ${context.url}`, {
       ...context,
-      tags: ['api', 'request', ...(context.tags || [])],
+      tags: ['api', 'request', ...tags],
     });
   }
   
@@ -312,7 +316,7 @@ export class RequestTracer {
   /**
    * Log checkpoint with timing
    */
-  checkpoint(name: string, metadata?: Record<string, any>): void {
+  checkpoint(name: string, metadata?: Partial<LogContext>): void {
     const elapsed = Date.now() - this.startTime;
     logger.debug(`Checkpoint: ${name}`, {
       ...this.context,
@@ -326,7 +330,7 @@ export class RequestTracer {
   /**
    * Complete trace
    */
-  complete(statusCode?: number, metadata?: Record<string, any>): void {
+  complete(statusCode?: number, metadata?: Partial<LogContext>): void {
     const duration = Date.now() - this.startTime;
     logger.logResponse({
       ...this.context,
@@ -339,7 +343,7 @@ export class RequestTracer {
   /**
    * Fail trace
    */
-  fail(error: Error, metadata?: Record<string, any>): void {
+  fail(error: Error, metadata?: Partial<LogContext>): void {
     const duration = Date.now() - this.startTime;
     logger.error('Request failed', {
       ...this.context,

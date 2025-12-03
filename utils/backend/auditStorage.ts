@@ -7,9 +7,36 @@
 import { supabase, getCurrentUser } from '../../lib/supabase';
 import type { AuditResult } from '../geoAuditEnhanced';
 import type { Database } from '../../types/database.types';
+import type { JSONValue } from '../../types/common.types';
 
 type AuditInsert = Database['public']['Tables']['audits']['Insert'];
 type AuditRow = Database['public']['Tables']['audits']['Row'];
+
+/**
+ * Result type for cloud save operations
+ */
+export interface CloudSaveResult {
+  success: boolean;
+  auditId?: string;
+  id?: string;
+  error?: any;
+}
+
+/**
+ * Result type for cloud delete operations
+ */
+export interface CloudDeleteResult {
+  success: boolean;
+  error?: any;
+}
+
+/**
+ * Result type for public status update operations
+ */
+export interface PublicStatusUpdateResult {
+  success: boolean;
+  error?: any;
+}
 
 /**
  * Normalize URL for deduplication
@@ -136,20 +163,20 @@ function convertToDbFormat(result: AuditResult, userId: string | null): AuditIns
     score_link_analysis: result.scores.linkAnalysis || 0,
     
     // Detailed findings
-    schema_findings: details.schemaMarkup as any,
-    meta_findings: details.metaTags as any,
-    crawler_findings: details.aiCrawlers as any,
-    eeat_findings: details.eeat as any,
-    structure_findings: details.structure as any,
-    performance_findings: details.performance as any,
-    content_findings: details.contentQuality as any,
-    citation_findings: details.citationPotential as any,
-    technical_findings: details.technicalSEO as any,
-    link_findings: details.linkAnalysis as any,
+    schema_findings: details.schemaMarkup as unknown as JSONValue,
+    meta_findings: details.metaTags as unknown as JSONValue,
+    crawler_findings: details.aiCrawlers as unknown as JSONValue,
+    eeat_findings: details.eeat as unknown as JSONValue,
+    structure_findings: details.structure as unknown as JSONValue,
+    performance_findings: details.performance as unknown as JSONValue,
+    content_findings: details.contentQuality as unknown as JSONValue,
+    citation_findings: details.citationPotential as unknown as JSONValue,
+    technical_findings: details.technicalSEO as unknown as JSONValue,
+    link_findings: details.linkAnalysis as unknown as JSONValue,
     
     // AI recommendations (serialize to JSON)
-    ai_recommendations: JSON.stringify(result.recommendations || []) as any,
-    priority_actions: JSON.stringify(result.recommendations?.slice(0, 5) || []) as any,
+    ai_recommendations: JSON.stringify(result.recommendations || []) as JSONValue,
+    priority_actions: JSON.stringify(result.recommendations?.slice(0, 5) || []) as JSONValue,
     
     // Feature flags
     ...schemaTypes,
@@ -168,7 +195,7 @@ function convertToDbFormat(result: AuditResult, userId: string | null): AuditIns
 /**
  * Save audit to Supabase with localStorage fallback
  */
-export async function saveAuditToCloud(result: AuditResult): Promise<{ success: boolean; id?: string; error?: any }> {
+export async function saveAuditToCloud(result: AuditResult): Promise<CloudSaveResult> {
   try {
     // Get current user
     const user = await getCurrentUser();
@@ -198,12 +225,13 @@ export async function saveAuditToCloud(result: AuditResult): Promise<{ success: 
       return { success: false, error };
     }
     
-    console.log('✅ Audit saved to Supabase:', (data as any)?.id);
+    const savedData = data as { id: string } | null;
+    console.log('✅ Audit saved to Supabase:', savedData?.id);
     
     // Also save to localStorage for offline access
     saveToLocalStorage(result);
     
-    return { success: true, id: (data as any)?.id };
+    return { success: true, id: savedData?.id };
     
   } catch (error) {
     console.error('Error saving audit:', error);
@@ -293,12 +321,18 @@ export async function getCloudUrlHistory(url: string): Promise<AuditRow[]> {
 /**
  * Delete audit from Supabase (soft delete)
  */
-export async function deleteCloudAudit(auditId: string): Promise<{ success: boolean; error?: any }> {
+export async function deleteCloudAudit(auditId: string): Promise<CloudDeleteResult> {
   try {
-    const { error } = await (supabase as any)
+    if (!supabase) {
+      return { success: false, error: 'Supabase not configured' };
+    }
+    
+    const result: any = await supabase
       .from('audits')
+      // @ts-ignore - Supabase type issue
       .update({ deleted_at: new Date().toISOString() })
       .eq('id', auditId);
+    const { error } = result;
     
     if (error) {
       console.error('Error deleting audit:', error);
@@ -316,12 +350,18 @@ export async function deleteCloudAudit(auditId: string): Promise<{ success: bool
 /**
  * Update audit public status (opt-in to global insights)
  */
-export async function updateAuditPublicStatus(auditId: string, isPublic: boolean): Promise<{ success: boolean; error?: any }> {
+export async function updateAuditPublicStatus(auditId: string, isPublic: boolean): Promise<PublicStatusUpdateResult> {
   try {
-    const { error } = await (supabase as any)
+    if (!supabase) {
+      return { success: false, error: 'Supabase not configured' };
+    }
+    
+    const result: any = await supabase
       .from('audits')
+      // @ts-ignore - Supabase type issue
       .update({ is_public: isPublic })
       .eq('id', auditId);
+    const { error } = result;
     
     if (error) {
       console.error('Error updating audit public status:', error);

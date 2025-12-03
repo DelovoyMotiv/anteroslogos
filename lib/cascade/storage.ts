@@ -45,13 +45,15 @@ export interface CascadeMetrics {
 // UPSTASH REDIS CLIENT
 // =====================================================
 
-let upstashClient: any = null;
+import type { UpstashRedisClient } from '../../types/lib-extended.types';
+
+let upstashClient: UpstashRedisClient | null = null;
 
 /**
  * Get or create Upstash Redis client
  * Uses UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN from env
  */
-async function getUpstashClient() {
+async function getUpstashClient(): Promise<UpstashRedisClient> {
   if (upstashClient) return upstashClient;
   
   // Check environment variables
@@ -70,7 +72,7 @@ async function getUpstashClient() {
   upstashClient = new Redis({
     url,
     token,
-  });
+  }) as unknown as UpstashRedisClient;
   
   console.log('[CascadeStorage] Upstash Redis client initialized');
   return upstashClient;
@@ -221,7 +223,7 @@ async function incrementMetric(metric: keyof CascadeMetrics): Promise<void> {
   await redis.hincrby(key, metric, 1);
   
   // Update lastUpdated timestamp
-  await redis.hset(key, 'lastUpdated', Date.now());
+  await redis.hset(key, 'lastUpdated', Date.now().toString());
 }
 
 /**
@@ -311,10 +313,10 @@ export async function getCascadeTokensBatch(
   const pipeline = redis.pipeline();
   keys.forEach(key => pipeline.get(key));
   
-  const results = await pipeline.exec();
+  const results = await pipeline.exec() as (string | null)[];
   
   const entries = new Map<string, CascadeEntry>();
-  results.forEach((result: any, index: number) => {
+  results.forEach((result, index) => {
     if (result && typeof result === 'string') {
       try {
         const entry = JSON.parse(result) as CascadeEntry;

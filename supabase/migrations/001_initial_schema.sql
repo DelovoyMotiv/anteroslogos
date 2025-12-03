@@ -301,9 +301,19 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Trigger: Create profile on auth.users insert
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+-- Create trigger (wrapped for permission handling)
+DO $$
+BEGIN
+  CREATE TRIGGER on_auth_user_created
+    AFTER INSERT ON auth.users
+    FOR EACH ROW
+    EXECUTE FUNCTION public.handle_new_user();
+EXCEPTION
+  WHEN insufficient_privilege THEN
+    RAISE NOTICE 'Skipping trigger creation - insufficient privileges';
+  WHEN duplicate_object THEN
+    RAISE NOTICE 'Trigger already exists';
+END $$;
 
 -- =====================================================
 -- VIEWS FOR COMMON QUERIES

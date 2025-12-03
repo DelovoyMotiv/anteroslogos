@@ -20,6 +20,20 @@ import {
 
 // ==================== INTERFACES ====================
 
+export interface AuditResultDetails {
+  schemaMarkup: EnhancedSchemaDetails;
+  metaTags: MetaTagsDetails;
+  aiCrawlers: AICrawlersDetails;
+  eeat: EnhancedEEATDetails;
+  structure: StructureDetails;
+  performance: PerformanceDetails;
+  contentQuality: ContentQualityDetails;
+  citationPotential: CitationPotentialDetails;
+  technicalSEO: TechnicalSEODetails;
+  linkAnalysis: LinkAnalysisDetails;
+  aidAgent: AIDAgentInfo; // AID protocol detection details
+}
+
 export interface AuditResult {
   url: string;
   timestamp: string;
@@ -45,19 +59,7 @@ export interface AuditResult {
     linkAnalysis: number;
     aidAgent: number; // AID protocol support score
   };
-  details: {
-    schemaMarkup: EnhancedSchemaDetails;
-    metaTags: MetaTagsDetails;
-    aiCrawlers: AICrawlersDetails;
-    eeat: EnhancedEEATDetails;
-    structure: StructureDetails;
-    performance: PerformanceDetails;
-    contentQuality: ContentQualityDetails;
-    citationPotential: CitationPotentialDetails;
-    technicalSEO: TechnicalSEODetails;
-    linkAnalysis: LinkAnalysisDetails;
-    aidAgent: AIDAgentInfo; // AID protocol detection details
-  };
+  details: AuditResultDetails;
   recommendations: EnhancedRecommendation[];
   insights: string[];
   knowledgeGraph?: KnowledgeGraph; // Knowledge Graph extraction (optional)
@@ -412,7 +414,7 @@ export async function auditWebsite(
       citationPotential,
       technicalSEO,
       linkAnalysis,
-    }, scores),
+    } as any, scores),
     ...aidRecommendations
   ];
 
@@ -424,7 +426,7 @@ export async function auditWebsite(
     eeat,
     technicalSEO,
     linkAnalysis,
-  });
+  } as any);
 
   // Create base result with HIGH-PRECISION scores
   const baseResult: AuditResult = {
@@ -710,14 +712,19 @@ function auditSchemaMarkup(doc: Document): EnhancedSchemaDetails {
   };
 }
 
-function checkSchemaType(schemas: any[], types: string | string[]): boolean {
+interface SchemaObject {
+  '@type'?: string | string[];
+  [key: string]: unknown;
+}
+
+function checkSchemaType(schemas: SchemaObject[], types: string | string[]): boolean {
   const typeArray = Array.isArray(types) ? types : [types];
   return schemas.some(s => {
     const schemaType = s['@type'];
     if (Array.isArray(schemaType)) {
       return schemaType.some(t => typeArray.includes(t));
     }
-    return typeArray.includes(schemaType);
+    return schemaType ? typeArray.includes(schemaType) : false;
   });
 }
 
@@ -1136,9 +1143,9 @@ function auditEnhancedEEAT(doc: Document, html: string): EnhancedEEATDetails {
   const scripts = Array.from(doc.querySelectorAll('script[type="application/ld+json"]'));
   const hasCredentials = scripts.some(script => {
     try {
-      const schema = JSON.parse(script.textContent || '{}');
-      const allSchemas = schema['@graph'] || [schema];
-      return allSchemas.some((s: any) => s.hasCredential || s.expertise || s.knowsAbout || s.award);
+      const schema = JSON.parse(script.textContent || '{}') as Record<string, unknown>;
+      const allSchemas = (schema['@graph'] as unknown[] || [schema]) as SchemaObject[];
+      return allSchemas.some((s) => s.hasCredential || s.expertise || s.knowsAbout || s.award);
     } catch {
       return false;
     }
@@ -1950,6 +1957,20 @@ function calculateLinkAnalysisScore(details: LinkAnalysisDetails): number {
   return Math.max(0, Math.min(100, score));
 }
 
+interface ScoreCalculationInput {
+  schemaMarkup: number;
+  metaTags: number;
+  aiCrawlers: number;
+  eeat: number;
+  structure: number;
+  performance: number;
+  contentQuality: number;
+  citationPotential: number;
+  technicalSEO: number;
+  linkAnalysis: number;
+  aidAgent: number;
+}
+
 interface ScoreCalculation {
   overall: number; // Rounded for display
   precise: number; // High-precision (3 decimals)
@@ -1961,7 +1982,7 @@ interface ScoreCalculation {
   };
 }
 
-function calculateOverallScore(scores: any): ScoreCalculation {
+function calculateOverallScore(scores: ScoreCalculationInput): ScoreCalculation {
   // Dynamic weighting based on content type
   // Total must equal 1.00 (100%)
   const weights = {
@@ -2046,8 +2067,8 @@ function getGrade(score: number): 'Authority' | 'Expert' | 'Advanced' | 'Interme
 // ==================== RECOMMENDATIONS ====================
 
 function generateEnhancedRecommendations(
-  details: any,
-  scores: any
+  details: AuditResultDetails,
+  scores: ScoreCalculationInput
 ): EnhancedRecommendation[] {
   const recommendations: EnhancedRecommendation[] = [];
 
@@ -2276,7 +2297,7 @@ Allow: /`,
   return recommendations.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
 }
 
-function generateInsights(scores: any, details: any): string[] {
+function generateInsights(scores: ScoreCalculationInput, details: AuditResultDetails): string[] {
   const insights: string[] = [];
 
   const overall = (scores.schemaMarkup + scores.contentQuality + scores.citationPotential + scores.eeat + scores.technicalSEO) / 5;

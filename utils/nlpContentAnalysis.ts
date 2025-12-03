@@ -333,9 +333,10 @@ function classifyContentType(text: string): {
   const maxScore = Math.max(...Object.values(scores));
   const dominantTypes = Object.entries(scores).filter(([, score]) => score === maxScore && score > 0);
   
-  const type: 'informational' | 'commercial' | 'navigational' | 'transactional' | 'mixed' = 
+  type IntentType = 'informational' | 'commercial' | 'navigational' | 'transactional' | 'mixed';
+  const type: IntentType = 
     dominantTypes.length > 1 ? 'mixed' : 
-    (dominantTypes[0]?.[0] as any) || 'informational';
+    (dominantTypes[0]?.[0] as IntentType) || 'informational';
   
   const intent: string[] = [];
   if (scores.informational > 0) intent.push('educate');

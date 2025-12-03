@@ -61,10 +61,9 @@ export async function getUsageStats(
   endDate: Date
 ): Promise<UsageStats | { error: string }> {
   try {
-    // Dev mode: return mock data if supabase not configured (local only)
-    const isLocalDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-    if (isLocalDev && !supabase) {
-      console.warn('[DEV MODE] getUsageStats: Returning mock data (LOCAL ONLY)');
+    // Check if Supabase is configured first
+    if (!supabase || !isSupabaseConfigured()) {
+      console.warn('[DEV MODE] getUsageStats: Supabase not configured - returning mock data');
       return {
         total_calls: 156,
         successful_calls: 142,
@@ -114,6 +113,21 @@ async function getUsageStatsManual(
   startDate: Date,
   endDate: Date
 ): Promise<UsageStats> {
+  // Check if Supabase is configured
+  if (!supabase || !isSupabaseConfigured()) {
+    return {
+      total_calls: 0,
+      successful_calls: 0,
+      failed_calls: 0,
+      rate_limited_calls: 0,
+      total_tokens: 0,
+      total_cost: 0,
+      unique_tools: 0,
+      ucpt_verified_calls: 0,
+      avg_duration_ms: 0,
+    };
+  }
+
   const { data: events } = await supabase
     .from('usage_events')
     .select('*')
@@ -160,6 +174,12 @@ export async function getDailyUsage(
   days: number = 30
 ): Promise<DailyUsage[] | { error: string }> {
   try {
+    // Check if Supabase is configured first
+    if (!supabase || !isSupabaseConfigured()) {
+      console.warn('[DEV MODE] getDailyUsage: Supabase not configured - returning empty array');
+      return [];
+    }
+
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
@@ -190,6 +210,11 @@ async function getDailyUsageManual(
   userId: string,
   days: number
 ): Promise<DailyUsage[]> {
+  // Check if Supabase is configured
+  if (!supabase || !isSupabaseConfigured()) {
+    return [];
+  }
+
   const startDate = new Date();
   startDate.setDate(startDate.getDate() - days);
 
@@ -245,6 +270,12 @@ export async function getTopTools(
   days: number = 7
 ): Promise<ToolUsage[] | { error: string }> {
   try {
+    // Check if Supabase is configured first
+    if (!supabase || !isSupabaseConfigured()) {
+      console.warn('[DEV MODE] getTopTools: Supabase not configured - returning empty array');
+      return [];
+    }
+
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
@@ -298,6 +329,12 @@ export async function getRecentUsage(
   limit: number = 50
 ): Promise<UsageEvent[] | { error: string }> {
   try {
+    // Check if Supabase is configured first
+    if (!supabase || !isSupabaseConfigured()) {
+      console.warn('[DEV MODE] getRecentUsage: Supabase not configured - returning empty array');
+      return [];
+    }
+
     const { data: events, error } = await supabase
       .from('usage_events')
       .select('*')
@@ -326,6 +363,22 @@ export async function getAPIKeyUsage(
   days: number = 30
 ): Promise<UsageStats | { error: string }> {
   try {
+    // Check if Supabase is configured first
+    if (!supabase || !isSupabaseConfigured()) {
+      console.warn('[DEV MODE] getAPIKeyUsage: Supabase not configured - returning empty stats');
+      return {
+        total_calls: 0,
+        successful_calls: 0,
+        failed_calls: 0,
+        rate_limited_calls: 0,
+        total_tokens: 0,
+        total_cost: 0,
+        unique_tools: 0,
+        ucpt_verified_calls: 0,
+        avg_duration_ms: 0,
+      };
+    }
+
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
@@ -386,6 +439,12 @@ export async function logUsageEvent(params: {
   metadata?: Record<string, unknown>;
 }): Promise<{ success: boolean; error?: string }> {
   try {
+    // Check if Supabase is configured first
+    if (!supabase || !isSupabaseConfigured()) {
+      console.warn('[DEV MODE] logUsageEvent: Supabase not configured - skipping log');
+      return { success: true }; // Return success in dev mode
+    }
+
     const { error } = await supabase.from('usage_events').insert({
       user_id: params.user_id,
       api_key_id: params.api_key_id || null,
@@ -420,16 +479,10 @@ export async function getUCPTRate(
   days: number = 7
 ): Promise<number | { error: string }> {
   try {
-    // Dev mode: return mock data (local only)
-    const isLocalDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-    if (isLocalDev && (!supabase || !isSupabaseConfigured())) {
-      console.warn('[DEV MODE] getUCPTRate: Returning mock rate (LOCAL ONLY)');
+    // Check if Supabase is configured first
+    if (!supabase || !isSupabaseConfigured()) {
+      console.warn('[DEV MODE] getUCPTRate: Supabase not configured - returning mock rate');
       return 63; // 63% verified
-    }
-
-    if (!supabase) {
-      console.error('getUCPTRate: Supabase client not available');
-      return { error: 'Database client not configured' };
     }
     
     const startDate = new Date();
@@ -460,10 +513,9 @@ export async function getCurrentCycleUsage(
   userId: string
 ): Promise<UsageStats | { error: string }> {
   try {
-    // Dev mode: return mock data (local only)
-    const isLocalDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-    if (isLocalDev && (!supabase || !isSupabaseConfigured())) {
-      console.warn('[DEV MODE] getCurrentCycleUsage: Returning mock data (LOCAL ONLY)');
+    // Check if Supabase is configured first
+    if (!supabase || !isSupabaseConfigured()) {
+      console.warn('[DEV MODE] getCurrentCycleUsage: Supabase not configured - returning mock data');
       return {
         total_calls: 78,
         successful_calls: 71,
@@ -475,11 +527,6 @@ export async function getCurrentCycleUsage(
         ucpt_verified_calls: 45,
         avg_duration_ms: 234,
       };
-    }
-
-    if (!supabase) {
-      console.error('getCurrentCycleUsage: Supabase client not available');
-      return { error: 'Database client not configured' };
     }
     
     // Get subscription to determine cycle dates

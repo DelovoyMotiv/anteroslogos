@@ -8,6 +8,8 @@
  * @version 1.0.0
  */
 
+import type { JSONObject } from './common.types';
+
 // ============================================================================
 // CORE GRAPH STRUCTURES
 // ============================================================================
@@ -578,7 +580,7 @@ export class CausalTracerError extends Error {
   constructor(
     message: string,
     public code: TracerErrorCode,
-    public details?: any
+    public details?: JSONObject
   ) {
     super(message);
     this.name = 'CausalTracerError';

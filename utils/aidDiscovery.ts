@@ -8,6 +8,26 @@
  * - Cross-tenant federation checks
  */
 
+import type { JSONObject } from '../types/common.types';
+
+// DNS TXT Record type
+interface DNSTxtRecord {
+  type: number;
+  data: string;
+}
+
+// Well-known endpoint response type
+interface WellKnownResponse {
+  version?: string;
+  protocols?: string[];
+  endpoint?: string;
+  serviceId?: string;
+  agentName?: string;
+  agentDescription?: string;
+  capabilities?: string[];
+  [key: string]: unknown;
+}
+
 export interface AIDAgentInfo {
   detected: boolean;
   discoveryMethod: 'dns' | 'https' | 'both' | 'none';
@@ -61,11 +81,7 @@ interface DNSResponse {
   error?: string;
 }
 
-interface WellKnownResponse {
-  found: boolean;
-  data?: any;
-  error?: string;
-}
+// WellKnownResponse type moved to types/utils-extended.types.ts
 
 /**
  * Parse AID TXT record value
@@ -166,7 +182,7 @@ async function checkDNSTxtRecord(domain: string): Promise<DNSResponse> {
     // Check if TXT record exists
     if (data.Status === 0 && data.Answer && data.Answer.length > 0) {
       // Find TXT record
-      const txtRecord = data.Answer.find((record: any) => record.type === 16); // Type 16 = TXT
+      const txtRecord = data.Answer.find((record: DNSTxtRecord) => record.type === 16); // Type 16 = TXT
       
       if (txtRecord && txtRecord.data) {
         // Remove quotes from DNS response
@@ -259,46 +275,50 @@ async function checkWellKnownEndpoint(domain: string): Promise<WellKnownResponse
 /**
  * Validate and extract agent metadata from well-known JSON
  */
-function extractAgentMetadata(data: any): Partial<AIDAgentInfo> {
+function extractAgentMetadata(data: JSONObject): Partial<AIDAgentInfo> {
   const result: Partial<AIDAgentInfo> = {
     errors: [],
     warnings: []
   };
 
   try {
-    // Extract basic info
-    result.version = data.v || data.version;
-    result.protocols = Array.isArray(data.p) ? data.p : (data.p ? data.p.split(',') : data.protocols);
-    result.endpoint = data.u || data.endpoint;
-    result.serviceId = data.s || data.serviceId;
-    result.domain = data.d || data.domain;
+    // Extract basic info with type guards
+    result.version = typeof (data.v || data.version) === 'string' ? (data.v || data.version) as string : undefined;
+    result.protocols = Array.isArray(data.p) ? (data.p as string[]) : (typeof data.p === 'string' ? (data.p as string).split(',') : Array.isArray(data.protocols) ? data.protocols as string[] : undefined);
+    result.endpoint = typeof (data.u || data.endpoint) === 'string' ? (data.u || data.endpoint) as string : undefined;
+    result.serviceId = typeof (data.s || data.serviceId) === 'string' ? (data.s || data.serviceId) as string : undefined;
+    result.domain = typeof (data.d || data.domain) === 'string' ? (data.d || data.domain) as string : undefined;
 
     // Extract agent details (nested in 'a' field)
     if (data.a || data.agent) {
-      const agent = data.a || data.agent;
-      result.agentName = agent.name;
-      result.agentDescription = agent.description;
-      result.agentVersion = agent.version;
-      result.capabilities = agent.capabilities;
-      result.vendor = agent.vendor;
-      result.homepage = agent.homepage;
-      result.documentation = agent.documentation;
-      result.contact = agent.contact;
+      const agent = (data.a || data.agent) as JSONObject;
+      result.agentName = typeof agent.name === 'string' ? agent.name : undefined;
+      result.agentDescription = typeof agent.description === 'string' ? agent.description : undefined;
+      result.agentVersion = typeof agent.version === 'string' ? agent.version : undefined;
+      result.capabilities = Array.isArray(agent.capabilities) ? agent.capabilities as string[] : undefined;
+      result.vendor = typeof agent.vendor === 'string' ? agent.vendor : undefined;
+      result.homepage = typeof agent.homepage === 'string' ? agent.homepage : undefined;
+      result.documentation = typeof agent.documentation === 'string' ? agent.documentation : undefined;
+      result.contact = typeof agent.contact === 'string' ? agent.contact : undefined;
     }
 
     // Extract metadata
-    if (data.metadata) {
+    if (data.metadata && typeof data.metadata === 'object') {
+      const metadata = data.metadata as JSONObject;
       result.metadata = {
-        organization: data.metadata.organization,
-        industry: data.metadata.industry,
-        established: data.metadata.established,
-        specialization: data.metadata.specialization
+        organization: typeof metadata.organization === 'string' ? metadata.organization : undefined,
+        industry: typeof metadata.industry === 'string' ? metadata.industry : undefined,
+        established: typeof metadata.established === 'string' ? metadata.established : undefined,
+        specialization: Array.isArray(metadata.specialization) ? metadata.specialization as string[] : undefined
       };
     }
 
     // Extract pricing
-    if (data.metadata?.pricing) {
-      result.pricing = data.metadata.pricing;
+    if (data.metadata && typeof data.metadata === 'object') {
+      const metadata = data.metadata as JSONObject;
+      if (metadata.pricing) {
+        result.pricing = metadata.pricing as Record<string, unknown>;
+      }
     }
 
     return result;
@@ -408,7 +428,7 @@ export async function discoverAIDAgent(url: string): Promise<AIDAgentInfo> {
     // Process HTTPS result
     if (httpsResult.status === 'fulfilled' && httpsResult.value.found) {
       httpsFound = true;
-      const metadata = extractAgentMetadata(httpsResult.value.data);
+      const metadata = extractAgentMetadata(httpsResult.value.data as JSONObject);
       
       // Merge metadata (HTTPS data is more detailed)
       Object.assign(result, metadata);

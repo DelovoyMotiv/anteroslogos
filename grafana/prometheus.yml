@@ -1,0 +1,101 @@
+# Prometheus Configuration for Anóteros Lógos
+# 
+# This configuration scrapes metrics from the Anóteros Lógos API
+# and stores them for visualization in Grafana.
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: 'anoteros-production'
+    environment: 'production'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - 'alertmanager:9093'
+
+# Load rules once and periodically evaluate them
+rule_files:
+  # - "alerts/*.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Anóteros Lógos API - Production
+  - job_name: 'anoteros-api-production'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: '/api/metrics'
+    scheme: 'https'
+    static_configs:
+      - targets: ['anoteroslogos.com']
+        labels:
+          environment: 'production'
+          service: 'api'
+
+  # Anóteros Lógos API - Staging
+  - job_name: 'anoteros-api-staging'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: '/api/metrics'
+    scheme: 'https'
+    static_configs:
+      - targets: ['staging.anoteroslogos.com']
+        labels:
+          environment: 'staging'
+          service: 'api'
+
+  # Anóteros Lógos API - Local Development
+  - job_name: 'anoteros-api-local'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+    metrics_path: '/api/metrics'
+    scheme: 'http'
+    static_configs:
+      - targets: ['localhost:3000']
+        labels:
+          environment: 'development'
+          service: 'api'
+
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Node Exporter (if running)
+  - job_name: 'node'
+    static_configs:
+      - targets: ['localhost:9100']
+
+# Recording rules for expensive queries
+# Uncomment and customize as needed
+# rule_files:
+#   - 'recording_rules.yml'
+
+# Example recording rules (create recording_rules.yml):
+# groups:
+#   - name: anoteros_aggregations
+#     interval: 30s
+#     rules:
+#       # Pre-calculate error rate
+#       - record: anoteros:http_error_rate:5m
+#         expr: |
+#           sum(rate(anoteros_http_errors_total[5m]))
+#           /
+#           sum(rate(anoteros_http_requests_total[5m]))
+#       
+#       # Pre-calculate cache hit rate
+#       - record: anoteros:cache_hit_rate:5m
+#         expr: |
+#           sum(rate(anoteros_cache_hits_total[5m]))
+#           /
+#           (sum(rate(anoteros_cache_hits_total[5m])) + sum(rate(anoteros_cache_misses_total[5m])))
+#       
+#       # Pre-calculate p95 latency by route
+#       - record: anoteros:http_request_duration:p95:5m
+#         expr: |
+#           histogram_quantile(0.95,
+#             sum(rate(anoteros_http_request_duration_seconds_bucket[5m])) by (le, route)
+#           )

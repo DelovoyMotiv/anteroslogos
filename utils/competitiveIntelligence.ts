@@ -8,6 +8,20 @@ import type { AuditResult } from './geoAuditEnhanced';
 const COMPETITORS_STORAGE_KEY = 'geo_audit_competitors';
 const MAX_COMPETITORS = 20;
 
+export interface CompetitorScores {
+  schemaMarkup: number;
+  metaTags: number;
+  aiCrawlers: number;
+  eeat: number;
+  structure: number;
+  performance: number;
+  contentQuality: number;
+  citationPotential: number;
+  technicalSEO: number;
+  linkAnalysis: number;
+  aidAgent?: number;
+}
+
 export interface CompetitorData {
   id: string;
   url: string;
@@ -16,18 +30,20 @@ export interface CompetitorData {
   lastAuditedAt?: string;
   overallScore?: number;
   grade?: string;
-  scores?: {
-    schemaMarkup: number;
-    metaTags: number;
-    aiCrawlers: number;
-    eeat: number;
-    structure: number;
-    performance: number;
-    contentQuality: number;
-    citationPotential: number;
-    technicalSEO: number;
-    linkAnalysis: number;
-  };
+  scores?: CompetitorScores;
+}
+
+/**
+ * Type guard for CompetitorScores
+ */
+function isCompetitorScores(obj: unknown): obj is CompetitorScores {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'schemaMarkup' in obj &&
+    'metaTags' in obj &&
+    typeof (obj as CompetitorScores).schemaMarkup === 'number'
+  );
 }
 
 export interface CompetitiveComparison {
@@ -320,8 +336,11 @@ export function generateCompetitiveComparison(
   const categoryBreakdown: Record<string, any> = {};
   
   categoryKeys.forEach(category => {
-    const scores = allSites.map(s => (s.scores as any)[category] || 0);
-    const yourScore = (yourResult.scores as any)[category] || 0;
+    const scores = allSites.map(s => {
+      const competitorScores = s.scores;
+      return isCompetitorScores(competitorScores) ? competitorScores[category as keyof CompetitorScores] || 0 : 0;
+    });
+    const yourScore = isCompetitorScores(yourResult.scores) ? yourResult.scores[category as keyof CompetitorScores] || 0 : 0;
     
     const sorted = [...scores].sort((a, b) => b - a);
     const yourRank = sorted.findIndex(s => s === yourScore) + 1;
@@ -438,8 +457,8 @@ export function compareWithIndustryBenchmark(
   const categoryDifferences: Record<string, number> = {};
   
   categoryKeys.forEach(category => {
-    const yourScore = (result.scores as any)[category] || 0;
-    const benchmarkScore = (benchmark.categoryAverages as any)[category] || 0;
+    const yourScore = isCompetitorScores(result.scores) ? result.scores[category as keyof CompetitorScores] || 0 : 0;
+    const benchmarkScore = (benchmark.categoryAverages as Partial<CompetitorScores>)[category as keyof CompetitorScores] || 0;
     categoryDifferences[category] = yourScore - benchmarkScore;
   });
   
@@ -536,7 +555,7 @@ export function getCompetitiveIntelligenceSummary(
   categoryKeys.forEach(category => {
     const competitorScores = competitors
       .filter(c => c.scores)
-      .map(c => (c.scores as any)![category] || 0);
+      .map(c => isCompetitorScores(c.scores) ? c.scores[category as keyof CompetitorScores] || 0 : 0);
     
     if (competitorScores.length > 0) {
       const avgCompetitor = competitorScores.reduce((a, b) => a + b, 0) / competitorScores.length;

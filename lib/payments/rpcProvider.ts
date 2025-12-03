@@ -3,10 +3,16 @@
  * @description RPC provider manager with automatic failover
  * @purpose Resilience against single RPC endpoint failures
  * @fallback Base mainnet.base.org → Alchemy → Infura → QuickNode
+ * 
+ * **Feature: production-audit-improvements, Property 27: External API Resilience**
+ * **Validates: Requirements 6.4**
  */
 
 import { createPublicClient, http, type PublicClient } from "viem";
 import { base } from "viem/chains";
+import { withRetry, NETWORK_RETRY_CONFIG } from "../reliability/retry";
+import { globalCircuitBreakerRegistry } from "../reliability/circuitBreaker";
+import { ExternalServiceError } from "../reliability/errors";
 
 // =====================================================
 // Configuration
@@ -156,6 +162,61 @@ class RpcProviderManager {
     }
 
     return client;
+  }
+
+  /**
+   * Execute RPC call with retry and circuit breaker
+   * Wraps viem client calls with resilience features
+   * @param operation - RPC operation to execute
+   * @returns Promise resolving to operation result
+   */
+  public async executeWithResilience<T>(
+    operation: (client: PublicClient) => Promise<T>
+  ): Promise<T> {
+    const healthyEndpoint = this.endpoints.find((e) => e.isHealthy);
+    
+    if (!healthyEndpoint) {
+      throw new ExternalServiceError(
+        "All RPC endpoints are unhealthy",
+        undefined,
+        "rpc-provider",
+        false
+      );
+    }
+
+    // Get or create circuit breaker for this endpoint
+    const circuitBreaker = globalCircuitBreakerRegistry.getOrCreate(
+      `rpc-${healthyEndpoint.name}`,
+      {
+        failureThreshold: 5,
+        timeout: 60000,
+      }
+    );
+
+    try {
+      return await circuitBreaker.execute(async () => {
+        return await withRetry(
+          async () => {
+            const client = this.getClient();
+            try {
+              return await operation(client);
+            } catch (error) {
+              // Mark endpoint as failed
+              this.markEndpointFailed(healthyEndpoint.url);
+              throw error;
+            }
+          },
+          NETWORK_RETRY_CONFIG
+        );
+      });
+    } catch (error) {
+      throw new ExternalServiceError(
+        `RPC call failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        undefined,
+        "rpc-provider",
+        true
+      );
+    }
   }
 
   /**

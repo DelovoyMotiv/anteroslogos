@@ -4,8 +4,11 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { ed25519 } from '@noble/curves/ed25519';
+import { ed25519 } from '@noble/curves/ed25519.js';
 import { randomBytes, createHash } from 'crypto';
+import { withCors, withValidation, withCsrfProtection, compose } from '../lib/validation/middleware';
+import { withRateLimit } from '../lib/middleware/rateLimiter';
+import { HandshakeRequestSchema } from '../lib/validation/apiSchemas';
 
 const challengeStore = new Map<string, { challenge: string; expiresAt: number }>();
 const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
@@ -63,13 +66,13 @@ function generateToken(aid: string, publicKey: string): { token: string; expires
   return { token: `${header}.${body}.${sig}`, expiresAt: expiresAt.toISOString() };
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  
-  if (req.method === 'OPTIONS') return res.status(204).end();
-  
+import type { HandshakeValidated, ValidatedApiHandler } from '../types/api.types';
+
+async function mainHandler(
+  req: VercelRequest,
+  res: VercelResponse,
+  validated: HandshakeValidated
+): Promise<void> {
   // GET - Documentation
   if (req.method === 'GET') {
     return res.status(200).json({
@@ -81,13 +84,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     });
   }
-  
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-  
-  const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || 'unknown';
-  if (!checkRateLimit(ip)) return res.status(429).json({ error: 'Rate limit exceeded' });
 
-  const { aid, publicKey, challenge, signature, name } = req.body || {};
+  const { aid, publicKey, challenge, signature, name } = validated.body || {};
   const now = Date.now();
 
   // Case 1: Verify signature
@@ -128,3 +126,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     warning: 'Store private key securely. It is only returned once.'
   });
 }
+
+// Apply middleware: CORS -> Rate Limiting -> CSRF Protection -> Validation
+export default compose(
+  withCors,
+  // New token bucket rate limiter: 60 req/min for authenticated, 10 req/min for anonymous
+  withRateLimit,
+  (handler) => withCsrfProtection(handler, { 
+    excludeMethods: ['GET', 'OPTIONS'],
+    excludePaths: [] 
+  }),
+  (handler) => withValidation(
+    {
+      bodySchema: HandshakeRequestSchema.optional(),
+      allowedMethods: ['GET', 'POST'],
+    },
+    handler as ValidatedApiHandler<HandshakeValidated>
+  )
+)(mainHandler);

@@ -18,15 +18,17 @@ export interface TrendAnalysis {
   };
 }
 
+export interface AnomalyItem {
+  timestamp: string;
+  score: number;
+  deviation: number; // Standard deviations from mean
+  severity: 'minor' | 'moderate' | 'severe';
+  category?: string;
+}
+
 export interface AnomalyDetection {
   hasAnomalies: boolean;
-  anomalies: Array<{
-    timestamp: string;
-    score: number;
-    deviation: number; // Standard deviations from mean
-    severity: 'minor' | 'moderate' | 'severe';
-    category?: string;
-  }>;
+  anomalies: AnomalyItem[];
   threshold: number; // Z-score threshold used
 }
 
@@ -172,7 +174,7 @@ export function detectAnomalies(
         // Higher threshold for categories
         const existing = anomalies.find(a => a.timestamp === item.timestamp);
         if (existing) {
-          (existing as any).category = category;
+          (existing as AnomalyItem & { category: string }).category = category;
         }
       }
     });

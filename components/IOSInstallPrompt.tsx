@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Share, Plus, Square } from 'lucide-react';
+import type { WindowWithMSStream, NavigatorStandalone } from '../types/components.types';
 
 interface IOSInstallPromptProps {
   onClose?: () => void;
@@ -10,8 +11,8 @@ export const IOSInstallPrompt: React.FC<IOSInstallPromptProps> = ({ onClose }) =
 
   useEffect(() => {
     // Check if it's iOS Safari
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
-    const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator as any).standalone;
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as WindowWithMSStream).MSStream;
+    const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator as NavigatorStandalone).standalone;
     
     // Check if already dismissed
     const isDismissed = localStorage.getItem('ios-pwa-prompt-dismissed') === 'true';

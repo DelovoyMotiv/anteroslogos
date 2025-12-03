@@ -68,19 +68,20 @@ export function SignupPage() {
       await logAuthEvent('signup_success', 'email', { email: formData.email });
       setSuccess(true);
       toast.success('Account created! Check your email to verify.');
-    } catch (error: any) {
-      console.error('Signup error:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create account';
+      console.error('Signup error:', errorMessage);
       
       await recordAttempt(formData.email, 'signup');
       await logAuthEvent('signup_failure', 'email', { 
         email: formData.email, 
-        error: error.message 
+        error: errorMessage 
       });
       
-      if (error.message?.includes('already registered')) {
+      if (errorMessage.includes('already registered')) {
         toast.error('Email already registered. Try logging in.');
       } else {
-        toast.error(error.message || 'Failed to create account');
+        toast.error(errorMessage);
       }
     } finally {
       setLoading(false);
@@ -102,11 +103,14 @@ export function SignupPage() {
       await logAuthEvent('oauth_attempt', 'google', {});
       await signInWithOAuth('google');
       // Redirect happens automatically via Supabase
-    } catch (error: any) {
-      console.error('Google signup error:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to sign up with Google';
+      console.error('Google signup error:', errorMessage);
       await recordAttempt('oauth', 'oauth');
-      await logAuthEvent('oauth_failure', 'google', { error: error.message });
-      toast.error(error.message || 'Failed to sign up with Google');
+      await logAuthEvent('oauth_failure', 'google', { 
+        error: errorMessage 
+      });
+      toast.error(errorMessage);
       setOauthLoading(false);
     }
   };

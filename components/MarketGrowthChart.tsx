@@ -1,12 +1,20 @@
 import React from 'react';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import type { ChartTooltipProps, ChartDataPoint } from '../types/components.types';
+
+interface MarketDataPoint extends ChartDataPoint {
+  year: string;
+  aiSeo: number;
+  geo: number;
+  transformation: number;
+}
 
 interface MarketGrowthChartProps {
   variant?: 'line' | 'area';
 }
 
 const MarketGrowthChart: React.FC<MarketGrowthChartProps> = ({ variant = 'area' }) => {
-  const marketData = [
+  const marketData: MarketDataPoint[] = [
     { year: '2024', aiSeo: 1.7, geo: 0.5, transformation: 1070 },
     { year: '2025', aiSeo: 2.2, geo: 1.2, transformation: 1350 },
     { year: '2026', aiSeo: 2.8, geo: 2.0, transformation: 1680 },
@@ -16,12 +24,12 @@ const MarketGrowthChart: React.FC<MarketGrowthChartProps> = ({ variant = 'area' 
     { year: '2030', aiSeo: 6.5, geo: 6.1, transformation: 4600 },
   ];
 
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip: React.FC<ChartTooltipProps<MarketDataPoint>> = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
         <div className="bg-brand-bg border border-white/20 rounded-lg p-4 shadow-xl">
           <p className="text-white font-semibold mb-2">{label}</p>
-          {payload.map((entry: any, index: number) => (
+          {payload.map((entry, index) => (
             <p key={index} className="text-sm" style={{ color: entry.color }}>
               {entry.name}: ${entry.value}B
             </p>

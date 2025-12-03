@@ -75,16 +75,20 @@ export interface ConfidenceDistribution {
  * @param timeWindow - Optional time window in hours (default: all time)
  * @returns Detection statistics
  */
-export async function getDetectionStats(_timeWindow?: number): Promise<DetectionStats> {
-  // Note: timeWindow parameter reserved for future time-based filtering
-  // TODO: Implement time-based filtering when needed
-  // const timeFilter = timeWindow ? `created_at >= NOW() - INTERVAL '${timeWindow} hours'` : "true";
-
-  // Overall stats
-  const { data: overallData, error: overallError } = await supabase
+export async function getDetectionStats(timeWindow?: number): Promise<DetectionStats> {
+  // Build query with optional time filter
+  let overallQuery = supabase
     .from("a2a_payment_detections")
     .select("detection_status, confidence_score")
     .order("created_at", { ascending: false });
+
+  if (timeWindow) {
+    const cutoffTime = new Date(Date.now() - timeWindow * 60 * 60 * 1000).toISOString();
+    overallQuery = overallQuery.gte("created_at", cutoffTime);
+  }
+
+  // Overall stats
+  const { data: overallData, error: overallError } = await overallQuery;
 
   if (overallError) {
     throw new Error(`Failed to fetch detection stats: ${overallError.message}`);

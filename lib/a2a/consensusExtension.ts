@@ -32,6 +32,7 @@ export interface TaskConsensusResult {
   consensus_time_ms: number;
   validator_nodes: string[];
   consensus_hash?: string;
+  timestamp: number; // Unix timestamp in milliseconds
 }
 
 // =====================================================
@@ -146,7 +147,7 @@ export class ConsensusExtensionManager {
   async routeTaskThroughConsensus(
     task: Task,
     operation: string,
-    payload: any
+    payload: unknown
   ): Promise<TaskConsensusResult> {
     if (!this.bftRouter) {
       throw new Error('BFT Router not initialized. Call initializeBFTRouter() first.');
@@ -174,16 +175,17 @@ export class ConsensusExtensionManager {
       }
     );
     
-    // Build consensus result
+    // Build consensus result using actual ConsensusResult fields
     const consensusResult: TaskConsensusResult = {
       task_id: task.id,
       consensus_achieved: bftResult.success && bftResult.consensusUsed,
       quorum_size: requirement.quorum_size,
-      votes_for: (bftResult.consensusResult as any)?.votesFor || 0,
-      votes_against: (bftResult.consensusResult as any)?.votesAgainst || 0,
+      votes_for: bftResult.consensusResult?.commitsReceived || 0,
+      votes_against: 0, // Not tracked in ConsensusResult
       consensus_time_ms: Date.now() - startTime,
-      validator_nodes: (bftResult.consensusResult as any)?.validators || [],
-      consensus_hash: (bftResult.consensusResult as any)?.consensusHash,
+      validator_nodes: bftResult.consensusResult?.quorumNodes || [],
+      consensus_hash: bftResult.consensusResult?.consensusId,
+      timestamp: Date.now(),
     };
     
     // Store consensus result
@@ -234,11 +236,12 @@ export class ConsensusExtensionManager {
       task_id: taskId,
       consensus_achieved: bftResult.success && bftResult.consensusUsed,
       quorum_size: this.getConsensusConfig()?.quorum_size || 7,
-      votes_for: (bftResult.consensusResult as any)?.votesFor || 0,
-      votes_against: (bftResult.consensusResult as any)?.votesAgainst || 0,
+      votes_for: bftResult.consensusResult?.commitsReceived || 0,
+      votes_against: 0, // Not tracked in ConsensusResult
       consensus_time_ms: bftResult.executionTimeMs,
-      validator_nodes: (bftResult.consensusResult as any)?.validators || [],
-      consensus_hash: (bftResult.consensusResult as any)?.consensusHash,
+      validator_nodes: bftResult.consensusResult?.quorumNodes || [],
+      consensus_hash: bftResult.consensusResult?.consensusId,
+      timestamp: Date.now(),
     };
     
     this.taskConsensus.set(taskId, consensusResult);
@@ -270,11 +273,12 @@ export class ConsensusExtensionManager {
       task_id: taskId,
       consensus_achieved: bftResult.success && bftResult.consensusUsed,
       quorum_size: this.getConsensusConfig()?.quorum_size || 7,
-      votes_for: (bftResult.consensusResult as any)?.votesFor || 0,
-      votes_against: (bftResult.consensusResult as any)?.votesAgainst || 0,
+      votes_for: bftResult.consensusResult?.commitsReceived || 0,
+      votes_against: 0, // Not tracked in ConsensusResult
       consensus_time_ms: bftResult.executionTimeMs,
-      validator_nodes: (bftResult.consensusResult as any)?.validators || [],
-      consensus_hash: (bftResult.consensusResult as any)?.consensusHash,
+      validator_nodes: bftResult.consensusResult?.quorumNodes || [],
+      consensus_hash: bftResult.consensusResult?.consensusId,
+      timestamp: Date.now(),
     };
     
     this.taskConsensus.set(taskId, consensusResult);
@@ -331,11 +335,18 @@ export class ConsensusExtensionManager {
   /**
    * Cleanup old consensus results
    */
-  cleanupOldResults(_retentionMs: number = 24 * 60 * 60 * 1000): number {
-    // For now, just clear all since we don't track timestamps
-    // TODO: Add timestamp tracking to TaskConsensusResult
-    const count = this.taskConsensus.size;
-    this.taskConsensus.clear();
+  cleanupOldResults(retentionMs: number = 24 * 60 * 60 * 1000): number {
+    const now = Date.now();
+    const cutoffTime = now - retentionMs;
+    let count = 0;
+    
+    for (const [taskId, result] of this.taskConsensus.entries()) {
+      if (result.timestamp < cutoffTime) {
+        this.taskConsensus.delete(taskId);
+        count++;
+      }
+    }
+    
     return count;
   }
 }
@@ -358,7 +369,7 @@ export async function executeTaskWithConsensus(
   executionFn: () => Promise<any>
 ): Promise<{
   success: boolean;
-  result?: any;
+  result?: unknown;
   consensus?: TaskConsensusResult;
   error?: string;
 }> {

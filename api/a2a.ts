@@ -11,8 +11,12 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import type { UCPTCascadeMessage } from '../lib/mesh/network';
+import type { InitializableRouter, ValidatedApiHandler } from '../types/api.types';
 import { MeshNetworkRouter } from '../lib/mesh/network';
 import { storeCascadeToken, recordRebroadcast } from '../lib/cascade/storage';
+import { withCors, withRateLimit, withJsonRpcValidation, withCsrfProtection, compose } from '../lib/validation/middleware';
+import { UCPTCascadeMessageSchema } from '../lib/validation/apiSchemas';
+import { isInitializableRouter } from '../types/api.types';
 
 // =====================================================
 // JSON-RPC 2.0 TYPES
@@ -100,7 +104,7 @@ async function handleCascadeMessage(params: UCPTCascadeMessage): Promise<void> {
   const router = getMeshRouter();
   
   // Check if router is initialized
-  if (!(router as any).initialized) {
+  if (isInitializableRouter(router) && !router.initialized) {
     try {
       await router.initialize();
     } catch (error) {
@@ -142,50 +146,15 @@ async function handleCascadeMessage(params: UCPTCascadeMessage): Promise<void> {
 // MAIN HANDLER
 // =====================================================
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  
-  if (req.method === 'OPTIONS') {
-    return res.status(204).end();
-  }
-  
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-  
-  const request = req.body as JsonRpcRequest;
-  
-  // Validate JSON-RPC structure
-  if (!request || request.jsonrpc !== '2.0' || !request.method) {
-    return res.status(400).json({
-      jsonrpc: '2.0',
-      id: null,
-      error: {
-        code: -32600,
-        message: 'Invalid Request',
-      },
-    } satisfies JsonRpcResponse);
-  }
-  
+async function mainHandler(
+  req: VercelRequest,
+  res: VercelResponse,
+  validated: { method: string; params: unknown; id: string | number }
+) {
   // Handle a2a.mesh.cascade method
-  if (request.method === 'a2a.mesh.cascade') {
+  if (validated.method === 'a2a.mesh.cascade') {
     try {
-      const params = request.params as unknown as UCPTCascadeMessage;
-      
-      // Validate params
-      if (!params || params.type !== 'ucpt-cascade' || !params.ucpt || !params.sourceAid) {
-        return res.status(400).json({
-          jsonrpc: '2.0',
-          id: request.id,
-          error: {
-            code: -32602,
-            message: 'Invalid params: missing required fields',
-          },
-        } satisfies JsonRpcResponse);
-      }
+      const params = validated.params as UCPTCascadeMessage;
       
       // Process cascade message (async, don't wait)
       // Fire-and-forget for maximum throughput
@@ -196,7 +165,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       // Return immediate acknowledgment (silent success)
       return res.status(200).json({
         jsonrpc: '2.0',
-        id: request.id,
+        id: validated.id,
         result: {
           accepted: true,
           timestamp: Date.now(),
@@ -206,7 +175,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       console.error('[A2ACascade] Handler error:', error);
       return res.status(500).json({
         jsonrpc: '2.0',
-        id: request.id,
+        id: validated.id,
         error: {
           code: -32603,
           message: 'Internal error',
@@ -219,11 +188,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Method not found
   return res.status(404).json({
     jsonrpc: '2.0',
-    id: request.id,
+    id: validated.id,
     error: {
       code: -32601,
       message: 'Method not found',
-      data: `Unknown method: ${request.method}`,
+      data: `Unknown method: ${validated.method}`,
     },
   } satisfies JsonRpcResponse);
 }
+
+// Apply middleware: CORS -> Rate Limiting -> CSRF Protection -> JSON-RPC Validation
+export default compose(
+  withCors,
+  (handler) => withRateLimit(handler, { maxRequests: 100, windowMs: 60000 }),
+  (handler) => withCsrfProtection(handler, { 
+    excludeMethods: ['GET', 'OPTIONS'],
+    excludePaths: [] 
+  }),
+  (handler) => withJsonRpcValidation(
+    {
+      'a2a.mesh.cascade': UCPTCascadeMessageSchema,
+    },
+    handler as ValidatedApiHandler
+  )
+)(mainHandler);

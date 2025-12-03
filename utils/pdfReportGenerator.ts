@@ -42,7 +42,8 @@ export async function generatePDFReport(
   const addPage = () => {
     pdf.addPage();
     yPos = margin;
-    const pageCount = (pdf as any).internal.getNumberOfPages();
+    // jsPDF internal API for page count
+    const pageCount = (pdf as unknown as { internal: { getNumberOfPages: () => number } }).internal.getNumberOfPages();
     addFooter(pageCount);
   };
 
@@ -445,7 +446,7 @@ export async function generatePDFReport(
   pdf.text('Our GEO specialists can implement these recommendations', pageWidth / 2, yPos + 20, { align: 'center' });
   pdf.text('and maximize your AI visibility.', pageWidth / 2, yPos + 26, { align: 'center' });
 
-  const finalPageCount = (pdf as any).internal.getNumberOfPages();
+  const finalPageCount = (pdf as unknown as { internal: { getNumberOfPages: () => number } }).internal.getNumberOfPages();
   addFooter(finalPageCount);
 
   // ==================== SAVE PDF ====================

@@ -9,6 +9,7 @@
 
 import { ulid } from 'ulid';
 import { z } from 'zod';
+import type { JSONValue } from '../../types/common.types';
 
 // =====================================================
 // TASK STATUS & TYPES
@@ -178,8 +179,8 @@ export class TaskManager {
     taskId: string,
     status: TaskStatus,
     options?: {
-      result?: any;
-      error?: { code: string; message: string; details?: any };
+      result?: JSONValue;
+      error?: { code: string; message: string; details?: JSONValue };
       artifacts?: TaskArtifact[];
       cost?: TaskCostBreakdown;
     }
@@ -475,8 +476,8 @@ export function isValidULID(id: string): boolean {
  */
 export function createArtifact(
   type: 'text' | 'json' | 'binary' | 'url' | 'report',
-  data: any,
-  metadata?: Record<string, any>
+  data: JSONValue,
+  metadata?: Record<string, JSONValue>
 ): TaskArtifact {
   const artifact: TaskArtifact = {
     id: ulid(),

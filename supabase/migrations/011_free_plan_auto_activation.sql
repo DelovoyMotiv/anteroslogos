@@ -67,14 +67,39 @@ COMMENT ON FUNCTION public.auto_activate_free_plan IS 'Automatically activates F
 -- Execution order: 1) handle_new_user (profile) 2) auto_activate_free_plan (subscription)
 -- =====================================================
 
-DROP TRIGGER IF EXISTS on_auth_user_created_activate_plan ON auth.users;
+-- Drop trigger (wrapped for permission handling)
+DO $$
+BEGIN
+  DROP TRIGGER IF EXISTS on_auth_user_created_activate_plan ON auth.users;
+EXCEPTION
+  WHEN insufficient_privilege THEN
+    RAISE NOTICE 'Skipping trigger drop - insufficient privileges';
+END $$;
 
-CREATE TRIGGER on_auth_user_created_activate_plan
-  AFTER INSERT ON auth.users
-  FOR EACH ROW
-  EXECUTE FUNCTION public.auto_activate_free_plan();
+-- Create trigger (wrapped for permission handling)
+DO $$
+BEGIN
+  CREATE TRIGGER on_auth_user_created_activate_plan
+    AFTER INSERT ON auth.users
+    FOR EACH ROW
+    EXECUTE FUNCTION public.auto_activate_free_plan();
+EXCEPTION
+  WHEN insufficient_privilege THEN
+    RAISE NOTICE 'Skipping trigger creation - insufficient privileges';
+  WHEN duplicate_object THEN
+    RAISE NOTICE 'Trigger already exists';
+END $$;
 
-COMMENT ON TRIGGER on_auth_user_created_activate_plan ON auth.users IS 'Activates FREE plan subscription for new users (runs after profile creation)';
+-- Comment on trigger (wrapped for permission handling)
+DO $$
+BEGIN
+  EXECUTE format('COMMENT ON TRIGGER on_auth_user_created_activate_plan ON auth.users IS %L', 'Activates FREE plan subscription for new users (runs after profile creation)');
+EXCEPTION
+  WHEN insufficient_privilege THEN
+    RAISE NOTICE 'Skipping trigger comment - insufficient privileges';
+  WHEN undefined_object THEN
+    RAISE NOTICE 'Trigger does not exist';
+END $$;
 
 -- =====================================================
 -- UPDATE: Platform wallet address for all operations

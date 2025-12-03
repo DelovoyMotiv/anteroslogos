@@ -26,6 +26,7 @@ import type {
   TracerConfig,
   LLMPlatform,
 } from '../../types/causalTracer.types';
+import type { CausalGraphInput, CausalGraphNode, CausalGraphEdge } from '../../types/lib-extended.types';
 
 import { findAllPaths } from './pathFinder';
 import PathFinder from './pathFinder';
@@ -792,11 +793,11 @@ export class CausalTracerEngine {
   /**
    * Add a graph to the engine's registry
    */
-  addGraph(graph: any): void {
+  addGraph(graph: CausalGraphInput): void {
     const causalGraph: CausalGraph = {
       domain: graph.metadata?.url || 'unknown',
-      nodes: new Map(graph.nodes.map((n: any) => [n.id, n])),
-      edges: new Map(graph.edges.map((e: any) => [e.id, e])),
+      nodes: new Map(graph.nodes.map((n: CausalGraphNode) => [n.id, n])) as unknown as Map<string, CausalNode>,
+      edges: new Map(graph.edges.map((e: CausalGraphEdge) => [e.id, e])) as unknown as Map<string, CausalEdge>,
       nodeCount: graph.nodes.length,
       edgeCount: graph.edges.length,
       density: 0,
@@ -805,7 +806,7 @@ export class CausalTracerEngine {
       lastUpdated: new Date(),
       version: 1,
     };
-    this.graphs.set(graph.id, causalGraph);
+    this.graphs.set((graph as unknown as { id: string }).id, causalGraph);
   }
 
   /**

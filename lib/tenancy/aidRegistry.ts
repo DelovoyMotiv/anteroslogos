@@ -16,6 +16,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { ed25519 } from '@noble/curves/ed25519.js';
 import { hexToBytes } from '@noble/hashes/utils.js';
 import { getCurrentTenantId, getCurrentTenantIdOrNull } from './context';
+import type { JSONObject } from '../../types/common.types';
 
 // =====================================================
 // TYPES
@@ -377,23 +378,23 @@ export class AIDRegistry {
       }
 
       // Apply client-side filters (since VIEW doesn't have all columns)
-      let results = data as any[];
+      let results = data as JSONObject[];
 
       if (filters?.protocols) {
         results = results.filter((agent) =>
-          filters.protocols!.some((p) => agent.protocols?.includes(p))
+          filters.protocols!.some((p) => (agent.protocols as any)?.includes(p))
         );
       }
 
       if (filters?.capabilities) {
         results = results.filter((agent) =>
-          filters.capabilities!.some((c) => agent.capabilities?.includes(c))
+          filters.capabilities!.some((c) => (agent.capabilities as any)?.includes(c))
         );
       }
 
       return results.map((row) => ({
         // aid_discovery view has limited columns
-        id: row.id || '',
+        id: (row.id as any) || '',
         tenantId: '', // Not exposed in view
         aidUri: row.aid_uri,
         publicKeyEd25519: '', // Not exposed
@@ -411,7 +412,7 @@ export class AIDRegistry {
         usageCount: 0,
         registeredAt: row.registered_at,
         updatedAt: '',
-      }));
+      })) as AIDRegistration[];
     } catch {
       return [];
     }
@@ -451,37 +452,41 @@ export class AIDRegistry {
       return false;
     }
 
-    const settings = data.settings as any;
+    const settings = data.settings as JSONObject;
     const federationMode = settings?.federation_mode || 'private';
 
     return federationMode === 'federated' || federationMode === 'public';
   }
 
-  private mapRowToRegistration(row: any): AIDRegistration {
+  private mapRowToRegistration(row: JSONObject): AIDRegistration {
     return {
-      id: row.id,
-      tenantId: row.tenant_id,
-      aidUri: row.aid_uri,
-      publicKeyEd25519: row.public_key_ed25519,
-      keyAlgorithm: row.key_algorithm,
-      agentName: row.agent_name,
-      agentDescription: row.agent_description,
-      endpoint: row.endpoint,
-      protocols: row.protocols || [],
-      metadata: row.metadata || {},
-      verified: row.verified,
-      verificationMethod: row.verification_method,
-      verificationData: row.verification_data,
-      status: row.status,
-      revokedAt: row.revoked_at,
-      revokedReason: row.revoked_reason,
-      expiresAt: row.expires_at,
-      permissions: row.permissions || [],
-      capabilities: row.capabilities || [],
-      lastUsedAt: row.last_used_at,
-      usageCount: row.usage_count,
-      registeredAt: row.registered_at,
-      updatedAt: row.updated_at,
+      id: String(row.id || ''),
+      tenantId: String(row.tenant_id || ''),
+      aidUri: String(row.aid_uri || ''),
+      publicKeyEd25519: String(row.public_key_ed25519 || ''),
+      keyAlgorithm: (row.key_algorithm as 'Ed25519' | 'ECDSA-secp256k1') || 'Ed25519',
+      agentName: String(row.agent_name || ''),
+      agentDescription: row.agent_description ? String(row.agent_description) : undefined,
+      endpoint: row.endpoint ? String(row.endpoint) : undefined,
+      protocols: Array.isArray(row.protocols) ? row.protocols.map(String) : [],
+      metadata: (typeof row.metadata === 'object' && row.metadata !== null && !Array.isArray(row.metadata)) 
+        ? row.metadata as Record<string, unknown> 
+        : {},
+      verified: Boolean(row.verified),
+      verificationMethod: row.verification_method as 'dns-txt' | 'https-wellknown' | 'manual' | undefined,
+      verificationData: (typeof row.verification_data === 'object' && row.verification_data !== null && !Array.isArray(row.verification_data))
+        ? row.verification_data as Record<string, unknown>
+        : undefined,
+      status: (row.status as 'active' | 'suspended' | 'revoked') || 'active',
+      revokedAt: row.revoked_at ? String(row.revoked_at) : undefined,
+      revokedReason: row.revoked_reason ? String(row.revoked_reason) : undefined,
+      expiresAt: row.expires_at ? String(row.expires_at) : undefined,
+      permissions: Array.isArray(row.permissions) ? row.permissions.map(String) : [],
+      capabilities: Array.isArray(row.capabilities) ? row.capabilities.map(String) : [],
+      lastUsedAt: row.last_used_at ? String(row.last_used_at) : undefined,
+      usageCount: typeof row.usage_count === 'number' ? row.usage_count : 0,
+      registeredAt: String(row.registered_at || ''),
+      updatedAt: String(row.updated_at || ''),
     };
   }
 }

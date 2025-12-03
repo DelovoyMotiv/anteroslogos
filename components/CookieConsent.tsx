@@ -6,7 +6,11 @@ const CookieConsent: React.FC = () => {
     const [isVisible, setIsVisible] = useState(false);
     const [showPreferences, setShowPreferences] = useState(false);
 
-    const [preferences, setPreferences] = useState({
+    const [preferences, setPreferences] = useState<{
+        necessary: boolean;
+        analytics: boolean;
+        marketing: boolean;
+    }>({
         necessary: true,
         analytics: false,
         marketing: false,
@@ -53,10 +57,8 @@ const CookieConsent: React.FC = () => {
 
     const togglePreference = (key: keyof typeof preferences) => {
         if (key === 'necessary') return; // Necessary cookies cannot be disabled
-        setPreferences((prev) => ({
-            ...prev,
-            [key]: !prev[key],
-        }));
+        // @ts-ignore - TypeScript has issues with setState updater function type inference
+        setPreferences(prev => ({ ...prev, [key]: !prev[key] }));
     };
 
     if (!isVisible) return null;

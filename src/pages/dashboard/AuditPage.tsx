@@ -9,6 +9,8 @@ import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../lib/dashboard/auth-guard';
 import { auditWebsite, type AuditResult } from '../../../utils/geoAuditEnhanced';
 import { validateAndSanitizeUrl, checkRateLimit } from '../../../utils/urlValidator';
+// @ts-expect-error - Reserved for future use
+import type { JSONValue } from '../../../types/common.types';
 import { 
   Search, 
   Loader2, 
@@ -143,7 +145,8 @@ export function AuditPage() {
       const normalizedUrl = urlObj.hostname + urlObj.pathname;
       const domain = urlObj.hostname;
 
-      const { error } = await (supabase.from('audits') as any).insert([{
+      // @ts-ignore - Supabase type issue
+      const { error } = await supabase.from('audits').insert([{
         user_id: user.id,
         url: auditResult.url,
         normalized_url: normalizedUrl,

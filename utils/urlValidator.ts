@@ -3,6 +3,10 @@
  * Production-grade security checks for user input
  */
 
+import type { JSONObject } from '../types/common.types';
+
+type ValidationFunction<T> = (value: T) => boolean;
+
 export interface ValidationResult {
   isValid: boolean;
   sanitizedUrl?: string;
@@ -304,7 +308,7 @@ export function sanitizeForDisplay(text: string): string {
 /**
  * Validate that result data hasn't been tampered with
  */
-export function validateAuditResult(result: any): boolean {
+export const validateAuditResult: ValidationFunction<JSONObject> = (result: JSONObject): boolean => {
   if (!result || typeof result !== 'object') return false;
   
   // Check required fields
@@ -323,7 +327,7 @@ export function validateAuditResult(result: any): boolean {
   // Validate scores object
   if (typeof result.scores !== 'object') return false;
   
-  for (const score of Object.values(result.scores)) {
+  for (const score of Object.values(result.scores as any)) {
     if (typeof score !== 'number' || score < 0 || score > 100) {
       return false;
     }

@@ -34,6 +34,7 @@ coverage
 .parcel-cache
 .eslintcache
 *.tsbuildinfo
+cache/
 
 # Editor directories and files
 .vscode/*
@@ -59,63 +60,91 @@ Thumbs.db
 # Vercel
 .vercel
 
-# Documentation (keep only essential)
-*.md
-!README.md
-!CHANGELOG.md
-!LICENSE
+# Hardhat artifacts (generated, not for git)
+artifacts/
+cache/hardhat/
 
-# Internal documentation (not for production)
-GOLD_STANDARD_INNOVATIONS.md
-PRODUCTION_AUDIT_REPORT.md
-PRODUCTION_IMPROVEMENTS_COMPLETE.md
-CITATION_LEARNING_ENGINE.md
-KNOWLEDGE_GRAPH_ENGINE.md
-UCPT_INFRASTRUCTURE.md
-LICENSE_EXPLANATION.md
-OPEN_GRAPH_SETUP.md
-DNS_SETUP.md
-VERCEL_DEPLOYMENT.md
-CONTRIBUTING.md
-docs/
-metadata.json
+# Kiro AI specs and documentation (development only)
+.kiro/
 
-# Auth system development docs (not for production)
-docs/AUTH_SYSTEM_COMPLETE.md
-docs/AUTH_SYSTEM_AUDIT_COMPLETE.md
-docs/AUTH_DEPLOYMENT_QUICKSTART.md
-docs/RATE_LIMITING.md
-docs/DEPLOYMENT_OAUTH.md
+# Python scripts (temporary migration/fix scripts)
+*.py
+!scripts/**/*.py
 
-# PDF reports and exports
-*.pdf
-
-# Scripts (only keep essential for runtime)
-scripts/
-!scripts/generateOGImage.ts
-!scripts/validateOGTags.ts
-scripts/detect-watermark.ts
-*.ps1
-*.sh
-validate-*.ps1
-
-# Text notes
+# Text files (build errors, lint errors)
+build-errors.txt
+lint-errors.txt
 *.txt
 !humans.txt
 !robots.txt
 !public/humans.txt
 !public/robots.txt
 
-# Development files
-.vercel
-*.local
+# Migration reports and session logs
+MIGRATION_*.md
+SUPABASE_*.md
+FINAL_USER_ID_SOLUTION.md
+IMMUTABLE_FUNCTION_FIX_GUIDE.md
+APPLY_MIGRATIONS_NOW.md
+test-migrations-individually.md
 
-# Hardhat artifacts (generated, not for git)
-artifacts/
-cache/hardhat/
-hardhat.config.ts
+# Dashboard and startup fixes
+DASHBOARD_*.md
+STARTUP_*.md
 
-# Test files (not for production)
-test/
-tests/
-**/__tests__/
+# Audit reports
+*_AUDIT.md
+*_AUDIT_REPORT.md
+CODE_DUPLICATION_REPORT.md
+PRODUCTION_AUDIT_REPORT.md
+TODO_FIXME_AUDIT.md
+TODO_FIXME_PROCESS.md
+
+# Implementation summaries
+*_SUMMARY.md
+*_COMPLETE.md
+*_APPLIED.md
+*_FIXES_*.md
+OG_*.md
+POST_DEPLOY_*.md
+
+# Deployment guides (keep essential ones in docs/)
+VERCEL_DEPLOYMENT.md
+VERCEL_ENV_SETUP.md
+DNS_SETUP.md
+OPEN_GRAPH_SETUP.md
+MCP-V2-DEPLOYMENT.md
+
+# License documentation
+LICENSE_CHANGE_SUMMARY.md
+LICENSE_EXPLANATION.md
+
+# Feature documentation (move to docs/ or keep essential)
+GOLD_STANDARD_INNOVATIONS.md
+CITATION_LEARNING_ENGINE.md
+KNOWLEDGE_GRAPH_ENGINE.md
+UCPT_INFRASTRUCTURE.md
+SUBSCRIPTION_SYSTEM_README.md
+PRODUCTION_IMPROVEMENTS_COMPLETE.md
+
+# Integration guides
+*INTEGRATION_GUIDE.md
+*QUICK_START.md
+*TROUBLESHOOTING.md
+
+# Supabase temporary files
+supabase/combined-migrations.sql
+supabase/diagnose-and-fix-user-id.sql
+
+# JSCPD report
+jscpd-report.json/
+
+# Keep essential documentation
+!README.md
+!CHANGELOG.md
+!CONTRIBUTING.md
+!LICENSE
+!docs/CRUD_API_REFERENCE.md
+!supabase/migrations/MIGRATION_GUIDE.md
+!supabase/migrations/rollback/README.md
+!grafana/README.md

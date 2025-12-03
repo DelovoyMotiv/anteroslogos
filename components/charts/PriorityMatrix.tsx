@@ -1,6 +1,18 @@
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ZAxis } from 'recharts';
 import type { EnhancedRecommendation } from '../../utils/geoAuditEnhanced';
 import { CHART_THEME } from '../../utils/chartTheme';
+import type { ChartTooltipProps } from '../../types/components.types';
+
+interface PriorityDataPoint {
+  x: number;
+  y: number;
+  z: number;
+  title: string;
+  category: string;
+  priority: string;
+  effort: string;
+  index: number;
+}
 
 interface PriorityMatrixProps {
   recommendations: EnhancedRecommendation[];
@@ -44,9 +56,9 @@ const PriorityMatrix = ({ recommendations }: PriorityMatrixProps) => {
     }
   };
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip: React.FC<ChartTooltipProps<PriorityDataPoint>> = ({ active, payload }) => {
     if (active && payload && payload.length) {
-      const data = payload[0].payload;
+      const data = payload[0].payload as PriorityDataPoint;
       const priorityColor = getColor(data.priority);
       return (
         <div 

@@ -8,6 +8,7 @@
 
 import type { KnowledgeGraph } from './builder';
 import type { KnowledgeGraphUpdate } from './selfImproving';
+import type { JSONObject } from '../../types/common.types';
 
 // =====================================================
 // TYPES
@@ -21,8 +22,8 @@ export interface SyncOperation {
   domain: string;
   
   // Change details
-  before?: any;
-  after?: any;
+  before?: JSONObject;
+  after?: JSONObject;
   
   // Sync status
   platforms: {
@@ -108,8 +109,8 @@ export class RealtimeKnowledgeGraphSync {
     changeType: 'create' | 'update' | 'delete',
     targetType: 'entity' | 'relationship' | 'claim' | 'full_graph',
     targetId: string,
-    before?: any,
-    after?: any
+    before?: JSONObject,
+    after?: JSONObject
   ): Promise<string> {
     const operation: SyncOperation = {
       operation_id: `sync_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -506,8 +507,8 @@ export class RealtimeKnowledgeGraphSync {
     for (const update of updates) {
       let targetType: 'entity' | 'relationship' | 'claim';
       let targetId: string;
-      let before: any;
-      let after: any;
+      let before: JSONObject | undefined;
+      let after: JSONObject | undefined;
       
       if (update.entity_update) {
         targetType = 'entity';
@@ -517,7 +518,7 @@ export class RealtimeKnowledgeGraphSync {
       } else if (update.relationship_update) {
         targetType = 'relationship';
         targetId = `${update.relationship_update.source_entity_id}:${update.relationship_update.target_entity_id}`;
-        before = null;
+        before = undefined;
         after = update.relationship_update;
       } else if (update.claim_update) {
         targetType = 'claim';

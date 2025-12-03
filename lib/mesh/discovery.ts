@@ -195,11 +195,13 @@ export class MeshDiscoveryService {
       try {
         const txt = record.join('');
         const parts = txt.split(';');
-        const data: any = {};
+        const data: Record<string, string> = {};
 
         for (const part of parts) {
           const [key, value] = part.split('=');
-          data[key.trim()] = value.trim();
+          if (key && value) {
+            data[key.trim()] = value.trim();
+          }
         }
 
         if (!data.aid || !data.endpoint) {

@@ -131,6 +131,24 @@ export async function announceUAPCapabilities(
       return false;
     }
 
+    // Get Ed25519 public key for this agent
+    let publicKey: string | undefined;
+    try {
+      const { SupabaseEd25519KeyStorage } = await import('../../../lib/a2a/ed25519KeyStorage');
+      const keyStorage = new SupabaseEd25519KeyStorage();
+      const nodeId = extractNodeIdFromDID(did);
+      const keys = await keyStorage.listKeysForDomain(nodeId, false);
+      if (keys && keys.length > 0) {
+        // Use the most recent non-revoked key
+        const activeKey = keys.find((k: any) => !k.revoked);
+        if (activeKey) {
+          publicKey = activeKey.publicKey;
+        }
+      }
+    } catch (error) {
+      console.warn('[UAP Discovery] Could not retrieve Ed25519 public key:', error);
+    }
+
     const announcement: PeerAnnouncement = {
       nodeId: extractNodeIdFromDID(did),
       aidUri: did,
@@ -142,7 +160,7 @@ export async function announceUAPCapabilities(
       ],
       trustScore,
       version: capabilities.version,
-      publicKey: undefined, // TODO: Add Ed25519 public key
+      publicKey,
       timestamp: Date.now(),
     };
 
@@ -184,17 +202,20 @@ export async function connectToUAPAgent(
 /**
  * Get mesh router instance (cached)
  */
-let meshRouterCache: any = null;
+import type { MeshRouter, MeshPeer } from '../../../types/lib-extended.types';
 
-function getMeshRouter(): any {
+let meshRouterCache: MeshRouter | null = null;
+
+function getMeshRouter(): MeshRouter | null {
   if (meshRouterCache) {
     return meshRouterCache;
   }
 
   try {
     // Check if there's a global instance
-    if ((global as any).__meshRouter) {
-      meshRouterCache = (global as any).__meshRouter;
+    const globalWithRouter = global as typeof global & { __meshRouter?: MeshRouter };
+    if (globalWithRouter.__meshRouter) {
+      meshRouterCache = globalWithRouter.__meshRouter;
       return meshRouterCache;
     }
     
@@ -209,17 +230,18 @@ function getMeshRouter(): any {
 /**
  * Query mesh network for all nodes
  */
-async function queryMeshNodes(meshRouter: any): Promise<MeshNode[]> {
+async function queryMeshNodes(meshRouter: MeshRouter): Promise<MeshNode[]> {
   try {
-    // Use mesh router's discovery method
-    if (typeof meshRouter.getAllNodes === 'function') {
-      return await meshRouter.getAllNodes();
+    // Use mesh router's query method
+    if (meshRouter.queryPeers) {
+      const peers = await meshRouter.queryPeers({});
+      return peers.map((peer: MeshPeer) => convertPeerToMeshNode(peer));
     }
     
     // Fallback: try DHT query
     if (meshRouter.dht && typeof meshRouter.dht.getClosestPeers === 'function') {
       const peers = await meshRouter.dht.getClosestPeers();
-      return peers.map((peer: any) => convertPeerToMeshNode(peer));
+      return peers.map((peer: MeshPeer) => convertPeerToMeshNode(peer));
     }
     
     console.warn('[UAP Discovery] Mesh router does not support node query');
@@ -233,15 +255,10 @@ async function queryMeshNodes(meshRouter: any): Promise<MeshNode[]> {
 /**
  * Broadcast announcement to mesh network
  */
-async function broadcastAnnouncement(meshRouter: any, announcement: PeerAnnouncement): Promise<void> {
+async function broadcastAnnouncement(meshRouter: MeshRouter, announcement: PeerAnnouncement): Promise<void> {
   try {
-    if (typeof meshRouter.announcePeer === 'function') {
-      await meshRouter.announcePeer(announcement);
-    } else if (typeof meshRouter.broadcast === 'function') {
-      await meshRouter.broadcast({
-        type: 'peer_announcement',
-        data: announcement,
-      });
+    if (meshRouter.announcePeer) {
+      await meshRouter.announcePeer(announcement as any);
     } else {
       console.warn('[UAP Discovery] Mesh router does not support announcements');
     }
@@ -281,16 +298,16 @@ function extractNodeIdFromDID(did: DIDString): string {
 /**
  * Convert DHT peer to MeshNode
  */
-function convertPeerToMeshNode(peer: any): MeshNode {
+function convertPeerToMeshNode(peer: MeshPeer): MeshNode {
   return {
     nodeId: peer.id || peer.nodeId,
-    aidUri: peer.aidUri || `did:aid:${peer.id}`,
-    endpoint: peer.endpoint || peer.address,
-    capabilities: peer.capabilities || [],
-    trustScore: peer.trustScore || 50,
-    lastSeen: peer.lastSeen || Date.now(),
-    failureCount: peer.failureCount || 0,
-    isolationMode: peer.isolationMode || 'private' as const,
+    aidUri: `did:aid:${peer.id}`,
+    endpoint: peer.addresses?.[0] || '',
+    capabilities: (peer.protocols as any) || [],
+    trustScore: 50,
+    lastSeen: Date.now(),
+    failureCount: 0,
+    isolationMode: 'private' as const,
     metadata: peer.metadata,
   };
 }

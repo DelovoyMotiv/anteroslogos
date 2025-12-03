@@ -13,6 +13,17 @@
 import ivm from 'isolated-vm';
 import crypto from 'crypto';
 import { logger } from '../a2a/logger';
+import type {
+  SerializableValue,
+  SerializableObject,
+  ExecutionMetadata,
+  StreamEventType,
+  StreamEventData,
+  ProgressEventData,
+  DataEventData,
+  ErrorEventData,
+  CompleteEventData,
+} from '../../types/mcp.types';
 
 // =====================================================
 // TYPES
@@ -33,12 +44,12 @@ export interface ExecutionContext {
   agentId?: string;
   publicKey?: string;              // Ed25519 public key for verification
   signature?: string;              // Request signature
-  metadata?: Record<string, any>;
+  metadata?: ExecutionMetadata;
 }
 
 export interface ExecutionResult {
   success: boolean;
-  output: any;
+  output: SerializableValue;
   logs: string[];
   errors: string[];
   metrics: {
@@ -55,9 +66,9 @@ export interface ExecutionResult {
 }
 
 export interface StreamEvent {
-  type: 'progress' | 'data' | 'complete' | 'error';
+  type: StreamEventType;
   timestamp: number;
-  data: any;
+  data: StreamEventData;
 }
 
 // =====================================================
@@ -278,7 +289,7 @@ export class EnterpriseSandboxV2 {
   async execute(
     code: string,
     context: ExecutionContext,
-    variables: Record<string, any> = {}
+    variables: SerializableObject = {}
   ): Promise<ExecutionResult> {
     const startTime = Date.now();
     const logs: string[] = [];
@@ -430,15 +441,16 @@ export class EnterpriseSandboxV2 {
   async *executeStream(
     code: string,
     _context: ExecutionContext,
-    variables: Record<string, any> = {}
+    variables: SerializableObject = {}
   ): AsyncGenerator<StreamEvent, void, unknown> {
     const startTime = Date.now();
     
-    yield {
+    const progressEvent: StreamEvent = {
       type: 'progress',
       timestamp: Date.now(),
-      data: { stage: 'initializing', progress: 0 },
+      data: { stage: 'initializing', progress: 0 } as ProgressEventData,
     };
+    yield progressEvent;
     
     try {
       const ivmContext = await this.isolate.createContext();
@@ -453,22 +465,24 @@ export class EnterpriseSandboxV2 {
       
       await jail.set('_streamLog', streamLog);
       
-      yield {
+      const compilingEvent: StreamEvent = {
         type: 'progress',
         timestamp: Date.now(),
-        data: { stage: 'compiling', progress: 25 },
+        data: { stage: 'compiling', progress: 25 } as ProgressEventData,
       };
+      yield compilingEvent;
       
       // Inject variables
       for (const [key, value] of Object.entries(variables)) {
         await jail.set(key, new ivm.ExternalCopy(value).copyInto());
       }
       
-      yield {
+      const executingEvent: StreamEvent = {
         type: 'progress',
         timestamp: Date.now(),
-        data: { stage: 'executing', progress: 50 },
+        data: { stage: 'executing', progress: 50 } as ProgressEventData,
       };
+      yield executingEvent;
       
       // Execute
       const script = await this.isolate.compileScript(code);
@@ -476,43 +490,47 @@ export class EnterpriseSandboxV2 {
         timeout: this.config.cpuTimeoutMs 
       });
       
-      yield {
+      const finalizingEvent: StreamEvent = {
         type: 'progress',
         timestamp: Date.now(),
-        data: { stage: 'finalizing', progress: 90 },
+        data: { stage: 'finalizing', progress: 90 } as ProgressEventData,
       };
+      yield finalizingEvent;
       
       const executionTime = Date.now() - startTime;
       const memoryUsed = this.isolate.getHeapStatisticsSync().used_heap_size / (1024 * 1024);
       const billing = this.calculateBilling(executionTime, memoryUsed);
       
-      yield {
+      const dataEvent: StreamEvent = {
         type: 'data',
         timestamp: Date.now(),
         data: {
-          output: result,
+          output: result as SerializableValue,
           metrics: {
             executionTimeMs: executionTime,
             memoryUsedMB: Math.round(memoryUsed * 100) / 100,
           },
           billing,
-        },
+        } as DataEventData,
       };
+      yield dataEvent;
       
-      yield {
+      const completeEvent: StreamEvent = {
         type: 'complete',
         timestamp: Date.now(),
-        data: { success: true },
+        data: { success: true } as CompleteEventData,
       };
+      yield completeEvent;
       
     } catch (error) {
-      yield {
+      const errorEvent: StreamEvent = {
         type: 'error',
         timestamp: Date.now(),
         data: {
           error: error instanceof Error ? error.message : String(error),
-        },
+        } as ErrorEventData,
       };
+      yield errorEvent;
     }
   }
   
@@ -522,7 +540,7 @@ export class EnterpriseSandboxV2 {
   async executeWithFallback(
     code: string,
     context: ExecutionContext,
-    variables: Record<string, any> = {}
+    variables: SerializableObject = {}
   ): Promise<ExecutionResult> {
     try {
       // Try full enterprise execution first

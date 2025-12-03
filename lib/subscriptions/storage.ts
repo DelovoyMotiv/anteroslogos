@@ -531,7 +531,7 @@ export async function recordUsage(input: {
     resource_type: "geo_audit",
     cost_units: 1,
     quota_remaining: input.quotaRemaining,
-    metadata: input.metadata || {},
+    metadata: (input.metadata || {}) as any,
   };
 
   const { data, error } = await supabase

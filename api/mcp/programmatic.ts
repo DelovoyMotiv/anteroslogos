@@ -7,28 +7,22 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { executeProgrammatic } from '../../app/api/mcp/programmatic/route';
+import { withValidation, compose } from '../../lib/validation/middleware';
+import { ProgrammaticExecutionSchema } from '../../lib/validation/apiSchemas';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Method validation
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+import type { McpProgrammaticValidated, ValidatedApiHandler } from '../../types/api.types';
 
+async function mainHandler(
+  req: VercelRequest,
+  res: VercelResponse,
+  validated: McpProgrammaticValidated
+): Promise<void> {
   // Beta header validation (opt-in security)
   const advancedToolUse = req.headers['anthropic-beta'] || req.headers['x-anthropic-beta'];
   if (!advancedToolUse || !String(advancedToolUse).includes('advanced-tool-use-2025-11-20')) {
     return res.status(403).json({
       error: 'Programmatic tool calling requires advanced-tool-use-2025-11-20 beta header',
       required_header: 'anthropic-beta: advanced-tool-use-2025-11-20'
-    });
-  }
-
-  // Input validation
-  if (!req.body || !req.body.code) {
-    return res.status(400).json({
-      error: 'Invalid request body',
-      required_fields: ['code'],
-      optional_fields: ['language', 'timeout']
     });
   }
 
@@ -48,7 +42,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     );
 
     // Execute in production sandbox
-    const result = await executeProgrammatic(req.body, supabase, tenantId);
+    const result = await executeProgrammatic(validated.body, supabase, tenantId);
     
     // Return full result with UCPT proof, logs, and execution metrics
     return res.status(200).json({
@@ -69,3 +63,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 }
+
+// Apply middleware: Validation
+export default compose(
+  (handler) => withValidation(
+    {
+      bodySchema: ProgrammaticExecutionSchema,
+      allowedMethods: ['POST'],
+    },
+    handler as ValidatedApiHandler<McpProgrammaticValidated>
+  )
+)(mainHandler);

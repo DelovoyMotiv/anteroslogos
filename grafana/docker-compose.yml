@@ -1,0 +1,128 @@
+version: '3.8'
+
+# Grafana + Prometheus Stack for Anóteros Lógos
+# 
+# Quick start:
+#   docker-compose up -d
+# 
+# Access:
+#   Grafana: http://localhost:3001 (admin/admin)
+#   Prometheus: http://localhost:9090
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.45.0
+    container_name: anoteros-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:9090/-/healthy"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  grafana:
+    image: grafana/grafana:10.0.3
+    container_name: anoteros-grafana
+    restart: unless-stopped
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./dashboards:/etc/grafana/provisioning/dashboards/anoteros:ro
+    environment:
+      # Security
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_SECURITY_SECRET_KEY=${GRAFANA_SECRET_KEY:-change-this-secret-key}
+      
+      # Server
+      - GF_SERVER_ROOT_URL=http://localhost:3001
+      - GF_SERVER_DOMAIN=localhost
+      
+      # Analytics
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+      - GF_ANALYTICS_CHECK_FOR_UPDATES=false
+      
+      # Users
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_USERS_ALLOW_ORG_CREATE=false
+      
+      # Auth
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      
+      # Plugins
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel,grafana-clock-panel
+      
+      # Dashboards
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/etc/grafana/provisioning/dashboards/anoteros/operations-dashboard.json
+    ports:
+      - "3001:3000"
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Optional: Alertmanager for alert routing
+  # alertmanager:
+  #   image: prom/alertmanager:v0.26.0
+  #   container_name: anoteros-alertmanager
+  #   restart: unless-stopped
+  #   volumes:
+  #     - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+  #     - alertmanager-data:/alertmanager
+  #   command:
+  #     - '--config.file=/etc/alertmanager/alertmanager.yml'
+  #     - '--storage.path=/alertmanager'
+  #   ports:
+  #     - "9093:9093"
+  #   networks:
+  #     - monitoring
+
+  # Optional: Node Exporter for host metrics
+  # node-exporter:
+  #   image: prom/node-exporter:v1.6.1
+  #   container_name: anoteros-node-exporter
+  #   restart: unless-stopped
+  #   command:
+  #     - '--path.procfs=/host/proc'
+  #     - '--path.sysfs=/host/sys'
+  #     - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+  #   volumes:
+  #     - /proc:/host/proc:ro
+  #     - /sys:/host/sys:ro
+  #     - /:/rootfs:ro
+  #   ports:
+  #     - "9100:9100"
+  #   networks:
+  #     - monitoring
+
+networks:
+  monitoring:
+    driver: bridge
+
+volumes:
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  # alertmanager-data:
+  #   driver: local

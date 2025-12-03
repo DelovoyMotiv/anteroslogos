@@ -22,8 +22,9 @@ export class IdempotencyManager {
     }, 60000);
     
     // Unref in Node.js to prevent hanging process
-    if (typeof (this.cleanupInterval as any).unref === 'function') {
-      (this.cleanupInterval as any).unref();
+    const intervalWithUnref = this.cleanupInterval as NodeJS.Timeout & { unref?: () => void };
+    if (typeof intervalWithUnref.unref === 'function') {
+      intervalWithUnref.unref();
     }
   }
 

@@ -74,7 +74,7 @@ export async function generateEd25519KeyPair(
     {
       name: 'Ed25519',
       namedCurve: 'Ed25519',
-    } as any,
+    } as EcKeyGenParams,
     true,
     ['sign', 'verify']
   );
@@ -118,7 +118,7 @@ async function importPublicKey(base64Key: string): Promise<CryptoKey> {
     {
       name: 'Ed25519',
       namedCurve: 'Ed25519',
-    } as any,
+    } as EcKeyImportParams,
     true,
     ['verify']
   );
@@ -136,7 +136,7 @@ async function importPrivateKey(base64Key: string): Promise<CryptoKey> {
     {
       name: 'Ed25519',
       namedCurve: 'Ed25519',
-    } as any,
+    } as EcKeyImportParams,
     true,
     ['sign']
   );
@@ -603,15 +603,18 @@ export const keyStore = new KeyStore();
 // MIDDLEWARE
 // =====================================================
 
+import type { Request, Response, NextFunction } from 'express';
+
 /**
  * Express/Vercel middleware for signature verification
  */
 export async function signatureVerificationMiddleware(
-  req: any,
-  res: any,
-  next: any
+  req: Request,
+  res: Response,
+  next: NextFunction
 ): Promise<void> {
-  const signatureHeader = req.headers['signature'];
+  const signatureHeaderRaw = req.headers['signature'];
+  const signatureHeader = Array.isArray(signatureHeaderRaw) ? signatureHeaderRaw[0] : signatureHeaderRaw;
   
   if (!signatureHeader) {
     res.status(401).json({
@@ -677,8 +680,8 @@ export async function signatureVerificationMiddleware(
   }
   
   // Attach verification result to request
-  (req as any).signatureVerification = result;
-  (req as any).verifiedDomain = storedKey.domain;
+  (req as unknown as Record<string, unknown>).signatureVerification = result;
+  (req as unknown as Record<string, unknown>).verifiedDomain = storedKey.domain;
   
   next();
 }

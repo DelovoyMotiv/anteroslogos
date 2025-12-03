@@ -242,11 +242,13 @@ export class Libp2pDHTAdapter implements IDHTAdapter {
 // LEGACY DHT ADAPTER
 // =====================================================
 
+import type { DistributedHashTable } from './dht';
+
 /**
  * Adapter for legacy custom DHT
  */
 export class LegacyDHTAdapter implements IDHTAdapter {
-  constructor(private dht: any) {} // Type: DistributedHashTable from ./dht
+  constructor(private dht: DistributedHashTable) {}
 
   async addNode(node: UnifiedDHTNode): Promise<boolean> {
     const legacyNode: LegacyDHTNode = {
@@ -279,11 +281,11 @@ export class LegacyDHTAdapter implements IDHTAdapter {
   }
 
   getNodeCount(): number {
-    return this.dht.getNodeCount();
+    return (this.dht as any).getNodeCount?.() || 0;
   }
 
   getNodeId(): string {
-    return this.dht.localNodeId;
+    return (this.dht as any).localNodeId || 'unknown';
   }
 
   async stop(): Promise<void> {

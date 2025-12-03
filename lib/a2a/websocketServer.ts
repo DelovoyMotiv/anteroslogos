@@ -6,14 +6,22 @@
 import type { A2AStreamEvent, A2AProgressEvent } from './protocol';
 import { logger } from './logger';
 import { validateApiKey } from './agentRegistry';
+import type { JSONObject, JSONValue, ProgressMetadata, ErrorMetadata } from '../../types/a2a.types';
 
-// =====================================================
-// TYPES
-// =====================================================
+/**
+ * Generic WebSocket interface (compatible with ws library and native WebSocket)
+ */
+export interface WebSocketLike {
+  send(data: string | Buffer): void;
+  close(code?: number, reason?: string): void;
+  readyState: number;
+  on?(event: string, listener: (...args: unknown[]) => void): void;
+  addEventListener?(type: string, listener: EventListener): void;
+}
 
 export interface WebSocketConnection {
   id: string;
-  socket: any; // WebSocket type
+  socket: WebSocketLike;
   apiKey?: string;
   tier: string;
   subscriptions: Set<string>; // audit_ids
@@ -80,7 +88,7 @@ class WebSocketConnectionManager {
    */
   addConnection(
     connectionId: string,
-    socket: any,
+    socket: WebSocketLike,
     metadata: Partial<WebSocketConnection['metadata']>
   ): WebSocketConnection {
     const connection: WebSocketConnection = {
@@ -356,12 +364,13 @@ const connectionManager = new WebSocketConnectionManager();
  * Handle new WebSocket connection
  */
 export function handleWebSocketConnection(
-  socket: any,
-  request: any
+  socket: WebSocketLike,
+  request: JSONObject
 ): string {
   const connectionId = `ws_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
-  const ipAddress = request.headers['x-forwarded-for'] || request.socket.remoteAddress;
-  const userAgent = request.headers['user-agent'] || '';
+  const headers = request.headers as Record<string, string> | null;
+  const ipAddress = headers?.['x-forwarded-for'] || (request.socket as { remoteAddress?: string })?.remoteAddress;
+  const userAgent = headers?.['user-agent'] || '';
   
   connectionManager.addConnection(connectionId, socket, {
     ip_address: ipAddress,
@@ -422,10 +431,10 @@ export async function handleWebSocketMessage(
 /**
  * Handle authentication message
  */
-function handleAuthMessage(connectionId: string, data: any): void {
+function handleAuthMessage(connectionId: string, data: JSONObject): void {
   const { api_key } = data;
   
-  if (!api_key) {
+  if (!api_key || typeof api_key !== 'string') {
     sendError(connectionId, 'API key required');
     return;
   }
@@ -445,10 +454,10 @@ function handleAuthMessage(connectionId: string, data: any): void {
 /**
  * Handle subscribe message
  */
-function handleSubscribeMessage(connectionId: string, data: any): void {
+function handleSubscribeMessage(connectionId: string, data: JSONObject): void {
   const { audit_id } = data;
   
-  if (!audit_id) {
+  if (!audit_id || typeof audit_id !== 'string') {
     sendError(connectionId, 'Audit ID required');
     return;
   }
@@ -468,10 +477,10 @@ function handleSubscribeMessage(connectionId: string, data: any): void {
 /**
  * Handle unsubscribe message
  */
-function handleUnsubscribeMessage(connectionId: string, data: any): void {
+function handleUnsubscribeMessage(connectionId: string, data: JSONObject): void {
   const { audit_id } = data;
   
-  if (!audit_id) {
+  if (!audit_id || typeof audit_id !== 'string') {
     sendError(connectionId, 'Audit ID required');
     return;
   }
@@ -506,7 +515,7 @@ function handlePingMessage(connectionId: string): void {
 /**
  * Send error to connection
  */
-function sendError(connectionId: string, message: string, data?: any): void {
+function sendError(connectionId: string, message: string, data?: JSONValue): void {
   const connection = connectionManager.getConnection(connectionId);
   
   if (connection) {
@@ -527,7 +536,7 @@ export function broadcastProgress(
   stage: string,
   progress: number,
   message: string,
-  metadata?: Record<string, any>
+  metadata?: ProgressMetadata
 ): void {
   const event: A2AProgressEvent = {
     type: 'progress',
@@ -551,7 +560,7 @@ export function broadcastProgress(
  */
 export function broadcastComplete(
   auditId: string,
-  result: any
+  result: JSONValue
 ): void {
   const event: A2AStreamEvent = {
     type: 'complete',
@@ -569,7 +578,7 @@ export function broadcastComplete(
 export function broadcastError(
   auditId: string,
   error: string,
-  metadata?: Record<string, any>
+  metadata?: ErrorMetadata
 ): void {
   const event: A2AStreamEvent = {
     type: 'error',

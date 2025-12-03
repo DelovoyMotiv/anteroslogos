@@ -5,6 +5,7 @@
  */
 
 import { z } from "zod";
+import type { SubscriptionPlanFeatures, UsageRecordMetadata } from '../../types/lib.types';
 
 // =====================================================
 // ENUMS & CONSTANTS
@@ -127,7 +128,7 @@ export interface SubscriptionPlanRow {
   billing_cycle_days: number;
   audit_quota: number;
   description: string | null;
-  features: any;
+  features: SubscriptionPlanFeatures;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -178,7 +179,7 @@ export interface SubscriptionUsageLogRow {
   resource_type: string;
   cost_units: number;
   quota_remaining: number;
-  metadata: any;
+  metadata: UsageRecordMetadata;
   timestamp: string;
 }
 

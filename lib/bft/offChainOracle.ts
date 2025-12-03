@@ -231,7 +231,7 @@ export class OffChainCausalOracle {
       };
       
       // Broadcast to mesh peers with 'bft.gossip' capability
-      await this.meshRouter.broadcastUpdate(gossipMessage);
+      await this.meshRouter.broadcastUpdate(gossipMessage as any);
       this.gossipBroadcasts++;
     } catch (error) {
       console.error('[OCCO] Failed to broadcast weight delta:', error);

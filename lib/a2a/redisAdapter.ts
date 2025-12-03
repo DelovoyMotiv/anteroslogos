@@ -6,6 +6,7 @@
 
 import type { RegisteredAgent } from './agentRegistry';
 import type { A2ARateLimitConfig } from './protocol';
+import type { JSONValue } from '../../types/common.types';
 
 // =====================================================
 // TYPES
@@ -308,7 +309,7 @@ export class RedisCache {
     return `cache:${namespace}:${identifier}`;
   }
   
-  async set<T>(namespace: string, identifier: string, value: T, ttlSeconds?: number): Promise<void> {
+  async set<T extends JSONValue>(namespace: string, identifier: string, value: T, ttlSeconds?: number): Promise<void> {
     const key = this.cacheKey(namespace, identifier);
     const data = JSON.stringify({
       value,
@@ -352,7 +353,7 @@ export class RedisCache {
     return result > 0;
   }
   
-  private generateETag(value: any): string {
+  private generateETag(value: JSONValue): string {
     const json = JSON.stringify(value);
     let hash = 0;
     for (let i = 0; i < json.length; i++) {
@@ -445,13 +446,13 @@ export class RedisQueue {
     return `queue:${priority}`;
   }
   
-  async enqueue(jobId: string, priority: 'high' | 'normal' | 'low', jobData: any): Promise<void> {
+  async enqueue(jobId: string, priority: 'high' | 'normal' | 'low', jobData: JSONValue): Promise<void> {
     await this.redis.set(this.jobKey(jobId), JSON.stringify(jobData));
     // Use list for FIFO queue
     await this.redis.hset(this.queueKey(priority), jobId, Date.now().toString());
   }
   
-  async dequeue(): Promise<{ jobId: string; data: any } | null> {
+  async dequeue(): Promise<{ jobId: string; data: JSONValue } | null> {
     // Check queues in priority order
     for (const priority of ['high', 'normal', 'low'] as const) {
       const queueKey = this.queueKey(priority);
@@ -484,11 +485,11 @@ export class RedisQueue {
     return data ? JSON.parse(data) : null;
   }
   
-  async updateJob(jobId: string, updates: any): Promise<void> {
+  async updateJob(jobId: string, updates: JSONValue): Promise<void> {
     const job = await this.getJob(jobId);
-    if (!job) return;
+    if (!job || typeof job !== 'object' || Array.isArray(job)) return;
     
-    const updated = { ...job, ...updates };
+    const updated = { ...job, ...(typeof updates === 'object' && !Array.isArray(updates) ? updates : {}) };
     await this.redis.set(this.jobKey(jobId), JSON.stringify(updated));
   }
   

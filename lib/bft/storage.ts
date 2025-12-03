@@ -231,15 +231,15 @@ export class BFTStorage {
       throw new Error(`Failed to get consensus statistics: ${error.message}`);
     }
 
-    return (data || []).map((row: any) => ({
-      operation: row.operation,
-      totalRequests: row.total_requests,
-      committedCount: row.committed_count,
-      failedCount: row.failed_count,
-      timeoutCount: row.timeout_count,
-      avgExecutionMs: row.avg_execution_ms,
-      maxExecutionMs: row.max_execution_ms,
-      minExecutionMs: row.min_execution_ms,
+    return (data || []).map((row: Record<string, unknown>) => ({
+      operation: row.operation as string,
+      totalRequests: row.total_requests as number,
+      committedCount: row.committed_count as number,
+      failedCount: row.failed_count as number,
+      timeoutCount: row.timeout_count as number,
+      avgExecutionMs: row.avg_execution_ms as number,
+      maxExecutionMs: row.max_execution_ms as number,
+      minExecutionMs: row.min_execution_ms as number,
     }));
   }
 
@@ -285,7 +285,7 @@ export class BFTStorage {
     status: 'VERIFIED' | 'SLASHED' | 'REJECTED';
     slashTxHash?: string;
   }): Promise<void> {
-    const updateData: any = {
+    const updateData: Record<string, string> = {
       status: params.status,
     };
 
@@ -354,14 +354,14 @@ export class BFTStorage {
       throw new Error(`Failed to get Byzantine statistics: ${error.message}`);
     }
 
-    return (data || []).map((row: any) => ({
-      accusedNode: row.accused_node,
-      totalReports: row.total_reports,
-      verifiedCount: row.verified_count,
-      slashedCount: row.slashed_count,
-      lastReported: row.last_reported,
-      reportedReasons: row.reported_reasons || [],
-    }));
+    return ((data || []) as any[]).map((row: Record<string, unknown>) => ({
+      accusedNode: row.accused_node as string,
+      totalReports: row.total_reports as number,
+      verifiedCount: row.verified_count as number,
+      slashedCount: row.slashed_count as number,
+      lastReported: row.last_reported as string,
+      reportedReasons: (row.reported_reasons as unknown as string[]) || [],
+    })) as ByzantineStatistics[];
   }
 
   // =====================================================

@@ -1,5 +1,12 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import { CHART_THEME, getScoreGradient } from '../../utils/chartTheme';
+import type { ChartTooltipProps, ChartDataPoint } from '../../types/components.types';
+
+interface CategoryDataPoint extends ChartDataPoint {
+  name: string;
+  score: number;
+  weight: string;
+}
 
 interface CategoryBarChartProps {
   scores: {
@@ -32,9 +39,9 @@ const CategoryBarChart = ({ scores }: CategoryBarChartProps) => {
     return `categoryBarGradient${index}`;
   };
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip: React.FC<ChartTooltipProps<CategoryDataPoint>> = ({ active, payload }) => {
     if (active && payload && payload.length) {
-      const data = payload[0].payload;
+      const data = payload[0].payload as CategoryDataPoint;
       const gradient = getScoreGradient(data.score);
       return (
         <div 

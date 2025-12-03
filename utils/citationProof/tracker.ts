@@ -290,21 +290,46 @@ export class CitationTracker {
    * Get competitive share of voice
    * Compares citation count with competitors
    */
-  getCompetitiveShareOfVoice(
+  async getCompetitiveShareOfVoice(
     competitors: string[],
     startDate: Date,
     endDate: Date
-  ): { domain: string; citations: number; share: number }[] {
-    // In production, this would query citations for all competitors
-    // For now, we'll use the current domain's data
+  ): Promise<{ domain: string; citations: number; share: number }[]> {
+    // Get our citations
     const myCitations = this.getCitations(startDate, endDate).length;
 
-    // Mock competitor data
-    const competitorCitations = competitors.map(domain => ({
-      domain,
-      citations: Math.floor(Math.random() * myCitations * 2),
-      share: 0,
-    }));
+    // Query competitor citations from database
+    const competitorCitations: { domain: string; citations: number; share: number }[] = [];
+    
+    if (typeof window !== 'undefined') {
+      try {
+        // @ts-ignore - Dynamic import
+        const { default: supabase } = await import('../../lib/supabase');
+        
+        // Query competitor citations for each competitor
+        for (const domain of competitors) {
+          const { data, error } = await supabase
+            .from('competitor_citations')
+            .select('id', { count: 'exact', head: true })
+            .eq('competitor_id', domain)
+            .gte('timestamp', startDate.toISOString())
+            .lte('timestamp', endDate.toISOString())
+            .is('deleted_at', null);
+          
+          if (!error && data !== null) {
+            competitorCitations.push({
+              domain,
+              citations: data || 0,
+              share: 0,
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Failed to query competitor citations:', error);
+        // Fallback: return only our data
+        return [{ domain: this.domain, citations: myCitations, share: 100 }];
+      }
+    }
 
     const allDomains = [
       { domain: this.domain, citations: myCitations, share: 0 },

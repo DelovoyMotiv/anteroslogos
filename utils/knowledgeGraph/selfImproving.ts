@@ -8,6 +8,7 @@
 
 import type { KnowledgeGraph, Entity } from './builder';
 import type { Citation } from '../citationProof/tracker';
+import type { JSONValue, JSONObject } from '../../types/common.types';
 
 // =====================================================
 // TYPES
@@ -23,8 +24,8 @@ export interface KnowledgeGraphUpdate {
   entity_update?: {
     entity_id: string;
     field: string;
-    old_value: any;
-    new_value: any;
+    old_value: JSONValue;
+    new_value: JSONValue;
     reason: string;
   };
   
@@ -39,8 +40,8 @@ export interface KnowledgeGraphUpdate {
   claim_update?: {
     claim_id: string;
     field: string;
-    old_value: any;
-    new_value: any;
+    old_value: JSONValue;
+    new_value: JSONValue;
     reason: string;
   };
   
@@ -57,7 +58,7 @@ export interface KnowledgeGraphUpdate {
 export interface LearningAnalysis {
   graph_domain: string;
   total_citations_analyzed: number;
-  learning_insights: any[];
+  learning_insights: JSONValue[];
   
   // What we learned
   high_value_entities: Array<{
@@ -106,7 +107,7 @@ export class SelfImprovingKnowledgeGraph {
   async analyzeCitationsAndGenerateUpdates(
     graph: KnowledgeGraph,
     citations: Citation[],
-    learningMetrics?: any
+    learningMetrics?: JSONObject
   ): Promise<LearningAnalysis> {
     // Filter citations for this domain
     const domainCitations = citations.filter(c => c.url?.includes(graph.domain) || false);
@@ -140,7 +141,7 @@ export class SelfImprovingKnowledgeGraph {
     return {
       graph_domain: graph.domain,
       total_citations_analyzed: domainCitations.length,
-      learning_insights: learningMetrics?.learning_insights || [],
+      learning_insights: Array.isArray(learningMetrics?.learning_insights) ? learningMetrics.learning_insights : [],
       high_value_entities: highValueEntities,
       high_value_relationships: highValueRelationships,
       validated_claims: validatedClaims,
@@ -422,9 +423,28 @@ export class SelfImprovingKnowledgeGraph {
   
   private generateUpdateSuggestions(
     graph: KnowledgeGraph,
-    highValueEntities: any[],
-    highValueRelationships: any[],
-    validatedClaims: any[],
+    highValueEntities: Array<{
+      entity_id: string;
+      entity_name: string;
+      citation_count: number;
+      citation_rate: number;
+      platforms: string[];
+      confidence_boost: number;
+    }>,
+    highValueRelationships: Array<{
+      source_entity: string;
+      target_entity: string;
+      relationship_type: string;
+      citation_count: number;
+      platforms: string[];
+    }>,
+    validatedClaims: Array<{
+      claim_id: string;
+      statement: string;
+      validation_count: number;
+      platforms: string[];
+      new_confidence: number;
+    }>,
     citations: Citation[]
   ): KnowledgeGraphUpdate[] {
     const updates: KnowledgeGraphUpdate[] = [];
@@ -537,14 +557,16 @@ export class SelfImprovingKnowledgeGraph {
   // UPDATE APPLICATION
   // =====================================================
   
-  private applyEntityUpdate(graph: KnowledgeGraph, update: any): void {
+  private applyEntityUpdate(graph: KnowledgeGraph, update: KnowledgeGraphUpdate['entity_update']): void {
+    if (!update) return;
     const entity = graph.entities.find(e => e.id === update.entity_id);
     if (!entity) return;
     
-    (entity as any)[update.field] = update.new_value;
+    (entity as Record<string, JSONValue>)[update.field] = update.new_value;
   }
   
-  private applyRelationshipUpdate(graph: KnowledgeGraph, update: any): void {
+  private applyRelationshipUpdate(graph: KnowledgeGraph, update: KnowledgeGraphUpdate['relationship_update']): void {
+    if (!update) return;
     // Check if relationship already exists
     const existingRel = graph.relationships.find(r =>
       r.source === update.source_entity_id &&
@@ -560,18 +582,19 @@ export class SelfImprovingKnowledgeGraph {
         id: `rel_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         source: update.source_entity_id,
         target: update.target_entity_id,
-        type: update.relationship_type,
+        type: update.relationship_type as 'worksFor' | 'owns' | 'creates' | 'specializes' | 'relatedTo' | 'proves' | 'contradicts' | 'cites' | 'supports' | 'measures',
         confidence: update.confidence,
         extractedAt: new Date().toISOString(),
       });
     }
   }
   
-  private applyClaimUpdate(graph: KnowledgeGraph, update: any): void {
+  private applyClaimUpdate(graph: KnowledgeGraph, update: KnowledgeGraphUpdate['claim_update']): void {
+    if (!update) return;
     const claim = graph.claims.find(c => c.id === update.claim_id);
     if (!claim) return;
     
-    (claim as any)[update.field] = update.new_value;
+    (claim as Record<string, JSONValue>)[update.field] = update.new_value;
   }
   
   private applyConfidenceAdjustments(graph: KnowledgeGraph, update: KnowledgeGraphUpdate): void {
@@ -591,12 +614,13 @@ export class SelfImprovingKnowledgeGraph {
     }
   }
   
-  private addNewEntity(graph: KnowledgeGraph, update: any): void {
+  private addNewEntity(graph: KnowledgeGraph, update: KnowledgeGraphUpdate['entity_update']): void {
+    if (!update) return;
     // In production, this would create a full entity object
     graph.entities.push({
       id: `entity_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       type: 'Concept', // Default type
-      name: update.new_value,
+      name: typeof update.new_value === 'string' ? update.new_value : String(update.new_value),
       confidence: 0.70, // Start with lower confidence
       sourceUrl: graph.metadata.sourceUrls[0] || '',
       extractedAt: new Date().toISOString(),

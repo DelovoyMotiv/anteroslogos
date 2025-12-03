@@ -23,6 +23,7 @@ import type {
   AttestationResult,
   VerificationOptions,
   VerificationResult,
+  TrustHistory,
 } from './types';
 import { RejectionReason } from './types';
 import { TRUST_CONFIG } from '../../protocols/uap/constants';
@@ -237,7 +238,7 @@ export class TrustMiddleware {
    * Compute trust score from history
    * Weighted formula: 0.35*consensus + 0.25*watermark + 0.15*uptime + 0.10*endorsements + 0.15*causalContribution
    */
-  private async computeTrustScore(history: any, agentDid: DIDString): Promise<TrustScoreComponents> {
+  private async computeTrustScore(history: TrustHistory, agentDid: DIDString): Promise<TrustScoreComponents> {
     // Consensus participation score (0-100)
     const consensusParticipation = Math.min(100, (history.totalRounds / 1000) * 100);
 
@@ -281,7 +282,7 @@ export class TrustMiddleware {
    */
   private async generateAttestation(
     agentDid: DIDString,
-    _history: any,
+    _history: TrustHistory,
     scoreComponents: TrustScoreComponents
   ): Promise<AttestationResult> {
     const now = new Date();

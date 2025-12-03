@@ -61,18 +61,22 @@ export function LoginPage() {
       
       toast.success('Welcome back!');
       navigate(redirectTo);
-    } catch (error: any) {
-      console.error('Login error:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Invalid credentials';
+      console.error('Login error:', errorMessage);
       
       // Record failed attempt
       await recordAttempt(email, 'login');
-      await logAuthEvent('login_failure', 'email', { email, error: error.message });
+      await logAuthEvent('login_failure', 'email', { 
+        email, 
+        error: errorMessage 
+      });
       
       // Update remaining attempts
       const updatedLimit = await checkRateLimit(email, 'login');
       setAttemptsRemaining(updatedLimit.remaining);
       
-      toast.error(error.message || 'Invalid credentials');
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -103,11 +107,15 @@ export function LoginPage() {
       
       setMagicLinkSent(true);
       toast.success('Magic link sent! Check your email.');
-    } catch (error: any) {
-      console.error('Magic link error:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to send magic link';
+      console.error('Magic link error:', errorMessage);
       await recordAttempt(email, 'login');
-      await logAuthEvent('login_failure', 'magic_link', { email, error: error.message });
-      toast.error(error.message || 'Failed to send magic link');
+      await logAuthEvent('login_failure', 'magic_link', { 
+        email, 
+        error: errorMessage 
+      });
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -128,11 +136,14 @@ export function LoginPage() {
       await logAuthEvent('oauth_attempt', 'google', {});
       await signInWithOAuth('google');
       // Redirect happens automatically via Supabase
-    } catch (error: any) {
-      console.error('Google login error:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to sign in with Google';
+      console.error('Google login error:', errorMessage);
       await recordAttempt('oauth', 'oauth');
-      await logAuthEvent('oauth_failure', 'google', { error: error.message });
-      toast.error(error.message || 'Failed to sign in with Google');
+      await logAuthEvent('oauth_failure', 'google', { 
+        error: errorMessage 
+      });
+      toast.error(errorMessage);
       setOauthLoading(false);
     }
   };

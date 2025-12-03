@@ -13,6 +13,7 @@ import type {
   LedgerQueryParams,
   LedgerQueryResult,
 } from './types';
+import type { MinimalMeshRouterStorage, ConsensusNodeState, ConsensusBlock, ConsensusVote, MinimalConsensusNode } from '../../../types/trust.types';
 import { PBFTConsensus } from '../../../lib/bft/pbftConsensus';
 
 // =====================================================
@@ -51,12 +52,12 @@ export class WatermarkLedgerClient {
     const mockRouter = {
       localAidUri: `aid:mesh:${this.nodeId}`,
       localNodeId: this.nodeId,
-    } as any; // Minimal interface for read-only ledger access
+    } as MinimalMeshRouterStorage; // Minimal interface for read-only ledger access
 
     // PBFTConsensus signature: (nodeId, meshRouter, storage?, causalGraph?)
     this.consensusNode = new PBFTConsensus(
       this.nodeId,
-      mockRouter
+      mockRouter as any
     );
 
     // Initialize without starting (read-only mode)
@@ -178,11 +179,12 @@ export class WatermarkLedgerClient {
 
     try {
       // Get committed blocks from consensus
-      const state = (node as any).getState?.() || {};
+      const consensusNode = node as MinimalConsensusNode;
+      const state = consensusNode.getState?.() || ({} as ConsensusNodeState);
       const committedBlocks = state.committedBlocks || [];
 
       // Filter blocks by round range
-      const relevantBlocks = committedBlocks.filter((block: any) => {
+      const relevantBlocks = committedBlocks.filter((block: ConsensusBlock) => {
         if (params.fromRound && block.viewNumber < params.fromRound) return false;
         if (params.toRound && block.viewNumber > params.toRound) return false;
         return true;
@@ -192,7 +194,7 @@ export class WatermarkLedgerClient {
       for (const block of relevantBlocks.slice(0, params.limit || 100)) {
         // Check if agent participated in this round
         const votes = block.votes || [];
-        const agentVote = votes.find((v: any) => v.nodeId === params.agentDid);
+        const agentVote = votes.find((v: ConsensusVote) => v.nodeId === params.agentDid);
 
         if (agentVote) {
           watermarks.push({
@@ -201,9 +203,9 @@ export class WatermarkLedgerClient {
             blockHash: block.hash || '',
             signature: agentVote.signature || '',
             timestamp: new Date(block.timestamp || Date.now()).toISOString(),
-            voteType: this.mapVoteType(agentVote.phase),
-            valid: agentVote.valid !== false,
-            ledgerHash: block.stateHash || '',
+            voteType: this.mapVoteType((agentVote as any).phase),
+            valid: (agentVote as any).valid !== false,
+            ledgerHash: (block as any).stateHash || '',
           });
         }
       }

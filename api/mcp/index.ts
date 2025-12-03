@@ -24,6 +24,13 @@ import type { SerializedUCPT } from '../../lib/ucpt/types';
 import { performGeoAudit } from '../../utils/geoAuditEnhanced';
 import { KnowledgeGraphBuilder } from '../../utils/knowledgeGraph/builder';
 import { CitationPredictionEngine } from '../../utils/citationPrediction/engine';
+import { withCors, withRateLimit, withJsonRpcValidation, compose } from '../../lib/validation/middleware';
+import {
+  McpInitializeParamsSchema,
+  McpToolsCallParamsSchema,
+  McpResourcesReadParamsSchema,
+  McpPromptsGetParamsSchema,
+} from '../../lib/validation/apiSchemas';
 
 // =====================================================
 // MCP PROTOCOL TYPES (2024-11-05 Spec)
@@ -202,8 +209,10 @@ async function broadcastUCPTCascade(
 ): Promise<void> {
   const router = getMeshRouter();
   
+import type { InitializableRouter, isInitializableRouter, ValidatedApiHandler } from '../../types/api.types';
+
   // Ensure router is initialized
-  if (!(router as any).initialized) {
+  if (isInitializableRouter(router) && !router.initialized) {
     try {
       await router.initialize();
     } catch (error) {
@@ -380,7 +389,9 @@ async function executeToolCall(
         // Enforce allowed_callers policy: these heavy tools must be called from code_execution
         const allowedFromCode = ['synthesizeNode', 'causal_citation_trace', 'predictive_synthesis', 'federated_authority_boost'];
         if (allowedFromCode.includes(name)) {
-          const caller = (args.caller as any)?.type;
+import type { JSONObject } from '../../types/common.types';
+
+          const caller = (args.caller as JSONObject | undefined)?.type as string | undefined;
           if (caller !== 'code_execution_20250825' && caller !== 'code_execution') {
             throw new Error(`Tool ${name} must be invoked via Programmatic Tool Calling (caller=code_execution_20250825).`);
           }
@@ -589,16 +600,11 @@ async function handlePromptsGet(params: Record<string, unknown>): Promise<unknow
 // MAIN HANDLER
 // =====================================================
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS + MCP 2025-06-18 headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, MCP-Protocol-Version, Mcp-Session-Id, anthropic-beta, x-anthropic-beta');
-  
-  if (req.method === 'OPTIONS') {
-    return res.status(204).end();
-  }
-  
+async function mainHandler(
+  req: VercelRequest,
+  res: VercelResponse,
+  validated?: { method: string; params: unknown; id: string | number }
+) {
   // GET - Return server info and tools in various formats
   if (req.method === 'GET') {
     const format = req.query.format as string;
@@ -630,36 +636,28 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
     }
   }
-  
-  // POST - JSON-RPC 2.0
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-  
-  const request = req.body as JsonRpcRequest;
-  
-  // Validate JSON-RPC structure
-  if (!request || request.jsonrpc !== '2.0' || !request.method) {
+
+  // POST - JSON-RPC 2.0 (validated by middleware)
+  if (!validated) {
     return res.status(400).json({
       jsonrpc: '2.0',
       id: null,
       error: {
         code: -32600,
         message: 'Invalid Request',
-        data: 'Request must be valid JSON-RPC 2.0',
       },
-    } satisfies JsonRpcResponse);
+    });
   }
-  
+
   const response: JsonRpcResponse = {
     jsonrpc: '2.0',
-    id: request.id,
+    id: validated.id,
   };
   
   try {
-    const params = (request.params || {}) as Record<string, unknown>;
+    const params = (validated.params || {}) as Record<string, unknown>;
     
-    switch (request.method) {
+    switch (validated.method) {
       case 'initialize':
         response.result = await handleInitialize(params);
         break;
@@ -696,7 +694,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         response.error = {
           code: -32601,
           message: 'Method not found',
-          data: `Unknown method: ${request.method}`,
+          data: `Unknown method: ${validated.method}`,
         };
     }
   } catch (error) {
@@ -712,4 +710,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
   
   return res.status(response.error ? 400 : 200).json(response);
+}
+
+// Apply middleware: CORS -> Rate Limiting -> JSON-RPC Validation (for POST only)
+const postHandler = compose(
+  withCors,
+  (handler) => withRateLimit(handler, { maxRequests: 100, windowMs: 60000 }),
+  (handler) => withJsonRpcValidation(
+    {
+      'initialize': McpInitializeParamsSchema,
+      'tools/call': McpToolsCallParamsSchema,
+      'resources/read': McpResourcesReadParamsSchema,
+      'prompts/get': McpPromptsGetParamsSchema,
+    },
+    handler as ValidatedApiHandler
+  )
+)(mainHandler);
+
+// Export handler that routes GET vs POST
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method === 'GET') {
+    return mainHandler(req, res);
+  }
+  return postHandler(req, res);
 }

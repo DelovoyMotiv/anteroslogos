@@ -212,7 +212,7 @@ export async function withRateLimit<T>(
       {
         remaining: limitResult.remaining,
         resetAt: limitResult.resetAt,
-        retryAfter: limitResult.retryAfter,
+        retryAfter: limitResult.retryAfter || null,
       }
     );
   }

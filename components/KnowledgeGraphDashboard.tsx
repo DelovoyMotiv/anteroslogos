@@ -27,7 +27,8 @@ const KnowledgeGraphDashboard: React.FC<KnowledgeGraphDashboardProps> = ({
   citationStats,
   onEntityClick,
 }) => {
-  const [selectedTab, setSelectedTab] = useState<'graph' | 'entities' | 'claims' | 'citations'>('graph');
+  type DashboardTab = 'graph' | 'entities' | 'claims' | 'citations';
+  const [selectedTab, setSelectedTab] = useState<DashboardTab>('graph');
 
   // Calculate graph quality score
   const graphQuality = React.useMemo(() => {
@@ -204,7 +205,7 @@ const KnowledgeGraphDashboard: React.FC<KnowledgeGraphDashboardProps> = ({
         ].map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setSelectedTab(tab.id as any)}
+            onClick={() => setSelectedTab(tab.id as DashboardTab)}
             className={`flex items-center gap-2 px-4 py-3 text-sm font-medium transition-colors ${
               selectedTab === tab.id
                 ? 'text-brand-accent border-b-2 border-brand-accent'

@@ -5,8 +5,10 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { ed25519 } from '@noble/curves/ed25519';
+import { ed25519 } from '@noble/curves/ed25519.js';
 import { randomBytes, createHash } from 'crypto';
+import { withCors, withRateLimit, withValidation, compose } from '../lib/validation/middleware';
+import { ChallengeGetSchema, ChallengeVerifySchema } from '../lib/validation/apiSchemas';
 
 // In-memory stores (production: use Redis/KV)
 const challengeStore = new Map<string, { challenge: string; expiresAt: number; publicKey?: string }>();
@@ -69,32 +71,16 @@ function generateToken(aid: string, publicKey: string): { token: string; expires
   return { token: `${header}.${body}.${sig}`, expiresAt: expiresAt.toISOString() };
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  
-  if (req.method === 'OPTIONS') {
-    return res.status(204).end();
-  }
+import type { ChallengeValidated, ValidatedApiHandler } from '../types/api.types';
 
-  const ip = (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || 
-             req.headers['x-real-ip'] as string || 
-             'unknown';
-  
-  const rateLimit = checkRateLimit(ip);
-  if (!rateLimit.allowed) {
-    return res.status(429).json({ error: 'Rate limit exceeded', retryAfter: 60 });
-  }
-
+async function mainHandler(
+  req: VercelRequest,
+  res: VercelResponse,
+  validated: ChallengeValidated
+): Promise<void> {
   // GET - Generate challenge
   if (req.method === 'GET') {
-    const aid = String(req.query.aid || '').trim();
-    
-    if (!aid || !aid.startsWith('aid://')) {
-      return res.status(400).json({ error: 'Invalid AID format', example: 'aid://agent/abc123' });
-    }
+    const { aid } = validated.query;
     
     const challenge = generateChallenge();
     const expiresAt = Date.now() + CHALLENGE_TTL_MS;
@@ -112,14 +98,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // POST - Verify signature
   if (req.method === 'POST') {
-    const { aid, challenge, publicKey, signature } = req.body || {};
-    
-    if (!aid || !challenge || !publicKey || !signature) {
-      return res.status(400).json({ 
-        error: 'Missing fields', 
-        required: ['aid', 'challenge', 'publicKey', 'signature'] 
-      });
-    }
+    const { aid, challenge, publicKey, signature } = validated.body;
     
     const stored = challengeStore.get(aid);
     if (!stored || stored.expiresAt < Date.now()) {
@@ -147,3 +126,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   return res.status(405).json({ error: 'Method not allowed' });
 }
+
+// Apply middleware: CORS -> Rate Limiting -> Validation
+export default compose(
+  withCors,
+  (handler) => withRateLimit(handler, { maxRequests: 20, windowMs: 60000 }),
+  (handler) => withValidation(
+    {
+      querySchema: ChallengeGetSchema.optional(),
+      bodySchema: ChallengeVerifySchema.optional(),
+      allowedMethods: ['GET', 'POST'],
+    },
+    handler as ValidatedApiHandler<ChallengeValidated>
+  )
+)(mainHandler);

@@ -142,13 +142,28 @@ function registerApplicationHandlers(router: ReturnType<typeof getMessageRouter>
       console.log(`[UAP Handler] GEO audit request for ${payload.url}`);
 
       try {
-        // Placeholder for GEO audit logic (to be implemented)
+        // Import GEO audit engine dynamically to avoid circular dependencies
+        const { auditWebsite } = await import('../../../utils/geoAudit');
+        
+        // Perform actual GEO audit
+        const auditResult = await auditWebsite(payload.url);
+        
+        // Calculate grade from score
+        const grade = 
+          auditResult.overallScore >= 90 ? 'A+' :
+          auditResult.overallScore >= 80 ? 'A' :
+          auditResult.overallScore >= 70 ? 'B' :
+          auditResult.overallScore >= 60 ? 'C' :
+          auditResult.overallScore >= 50 ? 'D' : 'F';
+
         const result = {
-          url: payload.url,
-          score: 85,
-          grade: 'A',
-          timestamp: new Date().toISOString(),
-          message: 'GEO audit functionality to be integrated with lib/geo/analyzer',
+          url: auditResult.url,
+          score: auditResult.overallScore,
+          grade,
+          timestamp: auditResult.timestamp,
+          scores: auditResult.scores,
+          details: auditResult.details,
+          recommendations: auditResult.recommendations,
         };
 
         return {
@@ -180,19 +195,52 @@ function registerApplicationHandlers(router: ReturnType<typeof getMessageRouter>
   router.registerRoute({
     type: 'knowledge.graph.query',
     handler: async (message: UAPMessage) => {
-      const payload = message.payload as RequestPayload & { query: string };
+      const payload = message.payload as RequestPayload & { 
+        query: string;
+        url?: string; // Optional URL to build graph from
+      };
 
       console.log(`[UAP Handler] Knowledge graph query: ${payload.query}`);
 
       try {
-        // Placeholder for knowledge graph logic (to be implemented)
-        const result = {
-          query: payload.query,
-          entities: [],
-          relationships: [],
-          timestamp: new Date().toISOString(),
-          message: 'Knowledge graph functionality to be integrated with lib/knowledge/graph',
-        };
+        // Import knowledge graph builder dynamically
+        const { KnowledgeGraphBuilder } = await import('../../../utils/knowledgeGraph/builder');
+        
+        let result;
+        
+        if (payload.url) {
+          // Build knowledge graph from URL
+          const domain = new URL(payload.url).hostname;
+          const builder = new KnowledgeGraphBuilder(domain);
+          
+          // Fetch HTML content
+          const response = await fetch(payload.url);
+          if (!response.ok) {
+            throw new Error(`Failed to fetch URL: ${response.statusText}`);
+          }
+          const html = await response.text();
+          
+          // Build knowledge graph
+          const knowledgeGraph = await builder.buildFromHTML(html, payload.url);
+          
+          result = {
+            query: payload.query,
+            url: payload.url,
+            graph: knowledgeGraph,
+            timestamp: new Date().toISOString(),
+          };
+        } else {
+          // Query existing knowledge graph (would need database integration)
+          // For now, return empty result with message
+          result = {
+            query: payload.query,
+            entities: [],
+            relationships: [],
+            claims: [],
+            timestamp: new Date().toISOString(),
+            message: 'Knowledge graph query requires URL parameter or database integration',
+          };
+        }
 
         return {
           header: {

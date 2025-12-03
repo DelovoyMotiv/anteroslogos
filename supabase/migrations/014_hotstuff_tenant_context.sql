@@ -11,7 +11,8 @@
 -- =====================================================
 
 -- Add tenant_id to consensus_proposals (if table exists)
-DO $$ BEGIN
+DO $consensus_proposals_tenant_col$
+BEGIN
   IF EXISTS (
     SELECT FROM information_schema.tables 
     WHERE table_schema = 'public' AND table_name = 'consensus_proposals'
@@ -27,10 +28,11 @@ DO $$ BEGIN
       COMMENT ON COLUMN consensus_proposals.tenant_id IS 'Tenant isolation - which tenant owns this proposal';
     END IF;
   END IF;
-END $$;
+END $consensus_proposals_tenant_col$;
 
 -- Add tenant_id to byzantine_evidence (if table exists)
-DO $$ BEGIN
+DO $byzantine_evidence_tenant_col$
+BEGIN
   IF EXISTS (
     SELECT FROM information_schema.tables 
     WHERE table_schema = 'public' AND table_name = 'byzantine_evidence'
@@ -45,14 +47,15 @@ DO $$ BEGIN
       COMMENT ON COLUMN byzantine_evidence.tenant_id IS 'Tenant isolation - which tenant reported this evidence';
     END IF;
   END IF;
-END $$;
+END $byzantine_evidence_tenant_col$;
 
 -- =====================================================
 -- 2. CREATE INDEXES
 -- =====================================================
 
 -- Index for consensus_proposals tenant filtering
-DO $$ BEGIN
+DO $consensus_proposals_indexes$
+BEGIN
   IF EXISTS (
     SELECT FROM information_schema.tables 
     WHERE table_schema = 'public' AND table_name = 'consensus_proposals'
@@ -63,10 +66,11 @@ DO $$ BEGIN
     CREATE INDEX IF NOT EXISTS idx_consensus_proposals_tenant_height 
       ON consensus_proposals(tenant_id, height);
   END IF;
-END $$;
+END $consensus_proposals_indexes$;
 
 -- Index for byzantine_evidence tenant filtering
-DO $$ BEGIN
+DO $byzantine_evidence_indexes$
+BEGIN
   IF EXISTS (
     SELECT FROM information_schema.tables 
     WHERE table_schema = 'public' AND table_name = 'byzantine_evidence'
@@ -77,44 +81,55 @@ DO $$ BEGIN
     CREATE INDEX IF NOT EXISTS idx_byzantine_evidence_tenant_accused 
       ON byzantine_evidence(tenant_id, accused_address);
   END IF;
-END $$;
+END $byzantine_evidence_indexes$;
 
 -- =====================================================
 -- 3. ENABLE ROW-LEVEL SECURITY
 -- =====================================================
 
 -- Enable RLS for consensus_proposals
-DO $$ BEGIN
+DO $consensus_proposals_rls$
+BEGIN
   IF EXISTS (
     SELECT FROM information_schema.tables 
     WHERE table_schema = 'public' AND table_name = 'consensus_proposals'
   ) THEN
     ALTER TABLE consensus_proposals ENABLE ROW LEVEL SECURITY;
   END IF;
-END $$;
+END $consensus_proposals_rls$;
 
 -- Enable RLS for byzantine_evidence
-DO $$ BEGIN
+DO $byzantine_evidence_rls$
+BEGIN
   IF EXISTS (
     SELECT FROM information_schema.tables 
     WHERE table_schema = 'public' AND table_name = 'byzantine_evidence'
   ) THEN
     ALTER TABLE byzantine_evidence ENABLE ROW LEVEL SECURITY;
   END IF;
-END $$;
+END $byzantine_evidence_rls$;
 
 -- =====================================================
 -- 4. RLS POLICIES - CONSENSUS_PROPOSALS
 -- =====================================================
 
--- Drop existing policies if present
-DROP POLICY IF EXISTS "Consensus proposals tenant isolation SELECT" ON consensus_proposals;
-DROP POLICY IF EXISTS "Consensus proposals tenant isolation INSERT" ON consensus_proposals;
-DROP POLICY IF EXISTS "Consensus proposals tenant isolation UPDATE" ON consensus_proposals;
-DROP POLICY IF EXISTS "Consensus proposals tenant isolation DELETE" ON consensus_proposals;
+-- Drop existing policies if present (only if table exists)
+DO $consensus_proposals_drop_policies$
+BEGIN
+  IF EXISTS (
+    SELECT FROM information_schema.tables 
+    WHERE table_schema = 'public' AND table_name = 'consensus_proposals'
+  ) THEN
+    DROP POLICY IF EXISTS "Consensus proposals tenant isolation SELECT" ON consensus_proposals;
+    DROP POLICY IF EXISTS "Consensus proposals tenant isolation INSERT" ON consensus_proposals;
+    DROP POLICY IF EXISTS "Consensus proposals tenant isolation UPDATE" ON consensus_proposals;
+    DROP POLICY IF EXISTS "Consensus proposals tenant isolation DELETE" ON consensus_proposals;
+  END IF;
+END $consensus_proposals_drop_policies$;
 
 -- SELECT: Users can view proposals from their tenant
-DO $$ BEGIN
+DO $consensus_proposals_select_policy$
+BEGIN
   IF EXISTS (
     SELECT FROM information_schema.tables 
     WHERE table_schema = 'public' AND table_name = 'consensus_proposals'
@@ -127,10 +142,11 @@ DO $$ BEGIN
         OR auth.role() = 'service_role'
       );
   END IF;
-END $$;
+END $consensus_proposals_select_policy$;
 
 -- INSERT: Users can only create proposals for their tenant
-DO $$ BEGIN
+DO $consensus_proposals_insert_policy$
+BEGIN
   IF EXISTS (
     SELECT FROM information_schema.tables 
     WHERE table_schema = 'public' AND table_name = 'consensus_proposals'
@@ -143,10 +159,11 @@ DO $$ BEGIN
         OR auth.role() = 'service_role'
       );
   END IF;
-END $$;
+END $consensus_proposals_insert_policy$;
 
 -- UPDATE: Only service role can update (consensus is immutable)
-DO $$ BEGIN
+DO $consensus_proposals_update_policy$
+BEGIN
   IF EXISTS (
     SELECT FROM information_schema.tables 
     WHERE table_schema = 'public' AND table_name = 'consensus_proposals'
@@ -156,10 +173,11 @@ DO $$ BEGIN
       FOR UPDATE
       USING (auth.role() = 'service_role');
   END IF;
-END $$;
+END $consensus_proposals_update_policy$;
 
 -- DELETE: Only service role can delete (for cleanup)
-DO $$ BEGIN
+DO $consensus_proposals_delete_policy$
+BEGIN
   IF EXISTS (
     SELECT FROM information_schema.tables 
     WHERE table_schema = 'public' AND table_name = 'consensus_proposals'
@@ -169,20 +187,29 @@ DO $$ BEGIN
       FOR DELETE
       USING (auth.role() = 'service_role');
   END IF;
-END $$;
+END $consensus_proposals_delete_policy$;
 
 -- =====================================================
 -- 5. RLS POLICIES - BYZANTINE_EVIDENCE
 -- =====================================================
 
--- Drop existing policies if present
-DROP POLICY IF EXISTS "Byzantine evidence tenant isolation SELECT" ON byzantine_evidence;
-DROP POLICY IF EXISTS "Byzantine evidence tenant isolation INSERT" ON byzantine_evidence;
-DROP POLICY IF EXISTS "Byzantine evidence tenant isolation UPDATE" ON byzantine_evidence;
-DROP POLICY IF EXISTS "Byzantine evidence tenant isolation DELETE" ON byzantine_evidence;
+-- Drop existing policies if present (only if table exists)
+DO $byzantine_evidence_drop_policies$
+BEGIN
+  IF EXISTS (
+    SELECT FROM information_schema.tables 
+    WHERE table_schema = 'public' AND table_name = 'byzantine_evidence'
+  ) THEN
+    DROP POLICY IF EXISTS "Byzantine evidence tenant isolation SELECT" ON byzantine_evidence;
+    DROP POLICY IF EXISTS "Byzantine evidence tenant isolation INSERT" ON byzantine_evidence;
+    DROP POLICY IF EXISTS "Byzantine evidence tenant isolation UPDATE" ON byzantine_evidence;
+    DROP POLICY IF EXISTS "Byzantine evidence tenant isolation DELETE" ON byzantine_evidence;
+  END IF;
+END $byzantine_evidence_drop_policies$;
 
 -- SELECT: Users can view evidence from their tenant
-DO $$ BEGIN
+DO $byzantine_evidence_select_policy$
+BEGIN
   IF EXISTS (
     SELECT FROM information_schema.tables 
     WHERE table_schema = 'public' AND table_name = 'byzantine_evidence'
@@ -195,10 +222,11 @@ DO $$ BEGIN
         OR auth.role() = 'service_role'
       );
   END IF;
-END $$;
+END $byzantine_evidence_select_policy$;
 
 -- INSERT: Users can report evidence for their tenant
-DO $$ BEGIN
+DO $byzantine_evidence_insert_policy$
+BEGIN
   IF EXISTS (
     SELECT FROM information_schema.tables 
     WHERE table_schema = 'public' AND table_name = 'byzantine_evidence'
@@ -211,10 +239,11 @@ DO $$ BEGIN
         OR auth.role() = 'service_role'
       );
   END IF;
-END $$;
+END $byzantine_evidence_insert_policy$;
 
 -- UPDATE: Only service role can update (evidence is immutable)
-DO $$ BEGIN
+DO $byzantine_evidence_update_policy$
+BEGIN
   IF EXISTS (
     SELECT FROM information_schema.tables 
     WHERE table_schema = 'public' AND table_name = 'byzantine_evidence'
@@ -224,10 +253,11 @@ DO $$ BEGIN
       FOR UPDATE
       USING (auth.role() = 'service_role');
   END IF;
-END $$;
+END $byzantine_evidence_update_policy$;
 
 -- DELETE: Only service role can delete
-DO $$ BEGIN
+DO $byzantine_evidence_delete_policy$
+BEGIN
   IF EXISTS (
     SELECT FROM information_schema.tables 
     WHERE table_schema = 'public' AND table_name = 'byzantine_evidence'
@@ -237,14 +267,14 @@ DO $$ BEGIN
       FOR DELETE
       USING (auth.role() = 'service_role');
   END IF;
-END $$;
+END $byzantine_evidence_delete_policy$;
 
 -- =====================================================
 -- 6. VERIFICATION
 -- =====================================================
 
 -- Verify tenant_id columns exist
-DO $$ 
+DO $verification_block$
 DECLARE
   proposals_has_tenant BOOLEAN;
   evidence_has_tenant BOOLEAN;
@@ -268,4 +298,4 @@ BEGIN
   RAISE NOTICE 'Migration 014 verification:';
   RAISE NOTICE '  consensus_proposals.tenant_id: %', proposals_has_tenant;
   RAISE NOTICE '  byzantine_evidence.tenant_id: %', evidence_has_tenant;
-END $$;
+END $verification_block$;

@@ -6,6 +6,13 @@
 
 import { useState, useCallback } from 'react';
 import { Play, Loader2, CheckCircle2, AlertCircle, ChevronDown, Copy, Check, Zap, Globe, Key, Database, Link2 } from 'lucide-react';
+import type { JSONValue } from '../../types/common.types';
+
+interface APIResponse {
+  data: JSONValue;
+  status: number;
+  time: number;
+}
 
 type ApiMethod = {
   id: string;
@@ -128,7 +135,7 @@ export function InteractiveExplorer() {
   const [apiKey, setApiKey] = useState('');
   const [customBody, setCustomBody] = useState('');
   const [loading, setLoading] = useState(false);
-  const [response, setResponse] = useState<{ data: any; status: number; time: number } | null>(null);
+  const [response, setResponse] = useState<APIResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [showMethodDropdown, setShowMethodDropdown] = useState(false);
@@ -179,8 +186,8 @@ export function InteractiveExplorer() {
           time: Math.round(endTime - startTime),
         });
       }
-    } catch (err: any) {
-      setError(err.message || 'Network error');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Network error');
     } finally {
       setLoading(false);
     }

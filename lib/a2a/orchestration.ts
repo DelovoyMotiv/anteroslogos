@@ -23,11 +23,13 @@ export enum OrchestrationStatus {
   CANCELLED = 'cancelled',
 }
 
+import type { JSONValue, JSONObject, Params } from '../../types/common.types';
+
 export interface OrchestrationStep {
   step_id: string;
   agent_id: string;
   capability: string;
-  params: Record<string, any> | ((prevResult: any) => Record<string, any>);
+  params: Params | ((prevResult: JSONValue) => Params);
   depends_on?: string[]; // Step IDs this step depends on
   optional: boolean; // If true, continue on failure
 }
@@ -37,8 +39,8 @@ export interface OrchestrationStepResult {
   agent_id: string;
   task_id: string;
   status: TaskStatus;
-  result?: any;
-  error?: any;
+  result?: JSONValue;
+  error?: JSONValue;
   started_at: string;
   completed_at?: string;
   duration_ms?: number;
@@ -97,7 +99,7 @@ export class OrchestrationManager {
     steps: OrchestrationStep[],
     options?: {
       description?: string;
-      metadata?: Record<string, any>;
+      metadata?: JSONObject;
     }
   ): Orchestration {
     const orchestrationId = ulid();
@@ -164,8 +166,12 @@ export class OrchestrationManager {
           orchestration.completed_at = new Date().toISOString();
           this.orchestrations.set(orchestrationId, orchestration);
           
+          const errorMessage = stepResult.error && typeof stepResult.error === 'object' && 'message' in stepResult.error
+            ? String(stepResult.error.message)
+            : 'Unknown error';
+          
           throw new Error(
-            `Orchestration failed at step ${i + 1} (${step.step_id}): ${stepResult.error?.message || 'Unknown error'}`
+            `Orchestration failed at step ${i + 1} (${step.step_id}): ${errorMessage}`
           );
         }
       }
@@ -221,7 +227,7 @@ export class OrchestrationManager {
       }
       
       // Resolve params (may be function depending on previous results)
-      let params: Record<string, any>;
+      let params: Params;
       
       if (typeof step.params === 'function') {
         // Get previous step result
@@ -410,7 +416,7 @@ export function createSequentialOrchestration(
   steps: Array<{
     agent_id: string;
     capability: string;
-    params: Record<string, any> | ((prevResult: any) => Record<string, any>);
+    params: Params | ((prevResult: JSONValue) => Params);
     optional?: boolean;
   }>
 ): Orchestration {
@@ -434,7 +440,7 @@ export function createParallelOrchestration(
   steps: Array<{
     agent_id: string;
     capability: string;
-    params: Record<string, any>;
+    params: Params;
     optional?: boolean;
   }>
 ): Orchestration {
@@ -458,7 +464,7 @@ export function createDAGOrchestration(
     step_id: string;
     agent_id: string;
     capability: string;
-    params: Record<string, any> | ((prevResult: any) => Record<string, any>);
+    params: Params | ((prevResult: JSONValue) => Params);
     depends_on?: string[];
     optional?: boolean;
   }>

@@ -14,6 +14,7 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import { createHmac } from 'crypto';
 import type { AuditJob } from './queue';
+import type { JSONValue } from '../../types/common.types';
 
 // =====================================================
 // TYPES
@@ -33,7 +34,7 @@ export interface WebhookPayload {
     id: string;
     url: string;
     status: string;
-    result?: any;
+    result?: JSONValue;
     error?: string;
     progress: number;
     created_at: number;
@@ -60,7 +61,7 @@ export async function sendWebhook(
       id: job.id,
       url: job.url,
       status: job.status,
-      result: job.result,
+      result: job.result as JSONValue | undefined,
       error: job.error,
       progress: job.progress,
       created_at: job.created_at,

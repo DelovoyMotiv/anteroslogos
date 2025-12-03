@@ -68,16 +68,9 @@ export function Sidebar() {
 
 
   const handleSignOut = async () => {
-    // Dev mode: just redirect (local only)
-    const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    if (isLocalDev && !supabase) {
-      console.warn('[DEV MODE] Sidebar: Bypassing signOut (LOCAL ONLY)');
-      window.location.href = '/';
-      return;
-    }
-
+    // Check if Supabase is configured
     if (!supabase) {
-      console.error('Sidebar: Supabase client not available');
+      console.warn('[DEV MODE] Sidebar: Supabase not configured - redirecting to home');
       window.location.href = '/';
       return;
     }

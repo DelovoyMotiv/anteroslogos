@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS public.a2a_tasks (
   -- Core Identity (ULID)
   id TEXT PRIMARY KEY CHECK (id ~ '^[0-9A-HJKMNP-TV-Z]{26}$'),
   agent_id TEXT NOT NULL,
-  session_id TEXT REFERENCES public.a2a_sessions(id) ON DELETE SET NULL,
+  session_id TEXT, -- FK added later after a2a_sessions is created
   
   -- Task Definition
   capability TEXT NOT NULL,
@@ -108,6 +108,21 @@ CREATE INDEX IF NOT EXISTS idx_a2a_sessions_status ON public.a2a_sessions(status
 CREATE INDEX IF NOT EXISTS idx_a2a_sessions_created_at ON public.a2a_sessions(created_at DESC);
 
 COMMENT ON TABLE public.a2a_sessions IS 'A2A Protocol v1.0 multi-task session grouping';
+
+-- Add foreign key constraint now that a2a_sessions exists
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint 
+    WHERE conname = 'a2a_tasks_session_id_fkey'
+  ) THEN
+    ALTER TABLE public.a2a_tasks
+      ADD CONSTRAINT a2a_tasks_session_id_fkey
+      FOREIGN KEY (session_id)
+      REFERENCES public.a2a_sessions(id)
+      ON DELETE SET NULL;
+  END IF;
+END $$;
 
 -- =====================================================
 -- TABLE: a2a_agent_reputation

@@ -28,9 +28,11 @@ export enum SSEEventType {
 // SSE EVENT STRUCTURE
 // =====================================================
 
+import type { JSONValue } from '../../types/common.types';
+
 export interface SSEEvent {
   event: SSEEventType;
-  data: any;
+  data: JSONValue;
   id?: string;
   retry?: number;
 }
@@ -53,9 +55,9 @@ export interface TaskProgressEvent {
 
 export interface TaskCompletedEvent {
   task_id: string;
-  result: any;
-  artifacts?: any[];
-  cost?: any;
+  result: JSONValue;
+  artifacts?: JSONValue[];
+  cost?: JSONValue;
   completed_at: string;
 }
 
@@ -64,7 +66,7 @@ export interface TaskFailedEvent {
   error: {
     code: string;
     message: string;
-    details?: any;
+    details?: JSONValue;
   };
   failed_at: string;
 }
@@ -230,7 +232,7 @@ export class SSEStream {
   sendTaskCreated(event: TaskCreatedEvent): void {
     this.send({
       event: SSEEventType.TASK_CREATED,
-      data: event,
+      data: event as unknown as JSONValue,
     });
   }
   
@@ -240,7 +242,7 @@ export class SSEStream {
   sendTaskStarted(event: TaskStartedEvent): void {
     this.send({
       event: SSEEventType.TASK_STARTED,
-      data: event,
+      data: event as unknown as JSONValue,
     });
   }
   
@@ -250,7 +252,7 @@ export class SSEStream {
   sendTaskProgress(event: TaskProgressEvent): void {
     this.send({
       event: SSEEventType.TASK_PROGRESS,
-      data: event,
+      data: event as unknown as JSONValue,
     });
   }
   
@@ -260,7 +262,7 @@ export class SSEStream {
   sendTaskCompleted(event: TaskCompletedEvent): void {
     this.send({
       event: SSEEventType.TASK_COMPLETED,
-      data: event,
+      data: event as unknown as JSONValue,
     });
   }
   
@@ -270,7 +272,7 @@ export class SSEStream {
   sendTaskFailed(event: TaskFailedEvent): void {
     this.send({
       event: SSEEventType.TASK_FAILED,
-      data: event,
+      data: event as unknown as JSONValue,
     });
   }
   
@@ -280,21 +282,21 @@ export class SSEStream {
   sendTaskCancelled(event: TaskCancelledEvent): void {
     this.send({
       event: SSEEventType.TASK_CANCELLED,
-      data: event,
+      data: event as unknown as JSONValue,
     });
   }
   
   /**
    * Send error event
    */
-  sendError(code: string, message: string, details?: any): void {
+  sendError(code: string, message: string, details?: JSONValue): void {
     this.send({
       event: SSEEventType.ERROR,
       data: {
         code,
         message,
-        details,
-      },
+        details: details || null,
+      } as unknown as JSONValue,
     });
   }
   

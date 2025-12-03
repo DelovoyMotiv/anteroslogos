@@ -15,6 +15,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { getCurrentTenantIdOrNull } from '../tenancy/context';
 import type { AuditJob, BatchJob, JobPriority, JobStatus } from './queue';
 import type { A2AAuditResult } from './protocol';
+import type { JSONValue } from '../../types/common.types';
 
 // =====================================================
 // TYPES
@@ -126,12 +127,12 @@ export class PersistentQueueStorage {
    * Update job fields
    */
   async updateJob(jobId: string, updates: Partial<AuditJob>): Promise<void> {
-    const dbUpdates: any = {};
+    const dbUpdates: Record<string, JSONValue> = {};
 
     // Map AuditJob fields to database columns
     if (updates.status !== undefined) dbUpdates.status = updates.status;
     if (updates.progress !== undefined) dbUpdates.progress = updates.progress;
-    if (updates.result !== undefined) dbUpdates.result = updates.result;
+    if (updates.result !== undefined) dbUpdates.result = updates.result as unknown as JSONValue;
     if (updates.error !== undefined) dbUpdates.error = updates.error;
     if (updates.started_at !== undefined) dbUpdates.started_at = new Date(updates.started_at).toISOString();
     if (updates.completed_at !== undefined) dbUpdates.completed_at = new Date(updates.completed_at).toISOString();
@@ -204,7 +205,7 @@ export class PersistentQueueStorage {
    * Update batch
    */
   async updateBatch(batchId: string, updates: Partial<BatchJob>): Promise<void> {
-    const dbUpdates: any = {};
+    const dbUpdates: Record<string, JSONValue> = {};
 
     if (updates.status !== undefined) dbUpdates.status = updates.status;
     if (updates.progress !== undefined) dbUpdates.progress = updates.progress;
@@ -283,41 +284,45 @@ export class PersistentQueueStorage {
   // MAPPERS
   // =====================================================
 
-  private mapRowToJob(row: any): AuditJob {
+  private mapRowToJob(row: Record<string, unknown>): AuditJob {
     return {
-      id: row.id,
-      url: row.url,
+      id: row.id as string,
+      url: row.url as string,
       priority: row.priority as JobPriority,
       status: row.status as JobStatus,
       depth: row.depth as 'quick' | 'standard' | 'deep',
-      created_at: new Date(row.created_at).getTime(),
-      started_at: row.started_at ? new Date(row.started_at).getTime() : undefined,
-      completed_at: row.completed_at ? new Date(row.completed_at).getTime() : undefined,
-      progress: row.progress || 0,
-      result: row.result || undefined,
-      error: row.error || undefined,
+      created_at: new Date(row.created_at as string).getTime(),
+      started_at: row.started_at ? new Date(row.started_at as string).getTime() : undefined,
+      completed_at: row.completed_at ? new Date(row.completed_at as string).getTime() : undefined,
+      progress: (row.progress as number) || 0,
+      result: (row.result as A2AAuditResult) || undefined,
+      error: (row.error as string) || undefined,
       metadata: {
-        ...row.metadata,
-        retry_count: row.retry_count || 0,
-        max_retries: row.max_retries || 3,
+        ...(row.metadata as Record<string, unknown>),
+        tier: (row.tier as string) || 'free',
+        retry_count: (row.retry_count as number) || 0,
+        max_retries: (row.max_retries as number) || 3,
       },
     };
   }
 
-  private mapRowToBatch(row: any): BatchJob {
+  private mapRowToBatch(row: Record<string, unknown>): BatchJob {
     return {
-      id: row.id,
-      urls: row.urls,
+      id: row.id as string,
+      urls: (row.urls as string[]) || [],
       priority: row.priority as JobPriority,
       status: row.status as JobStatus,
-      created_at: new Date(row.created_at).getTime(),
-      started_at: row.started_at ? new Date(row.started_at).getTime() : undefined,
-      completed_at: row.completed_at ? new Date(row.completed_at).getTime() : undefined,
-      progress: row.progress || 0,
-      jobs: row.job_ids || [],
-      completed_jobs: row.completed_jobs || 0,
-      failed_jobs: row.failed_jobs || 0,
-      metadata: row.metadata || {},
+      created_at: new Date(row.created_at as string).getTime(),
+      started_at: row.started_at ? new Date(row.started_at as string).getTime() : undefined,
+      completed_at: row.completed_at ? new Date(row.completed_at as string).getTime() : undefined,
+      progress: (row.progress as number) || 0,
+      jobs: (row.job_ids as string[]) || [],
+      completed_jobs: (row.completed_jobs as number) || 0,
+      failed_jobs: (row.failed_jobs as number) || 0,
+      metadata: {
+        tier: (row.tier as string) || 'free',
+        ...(row.metadata as Record<string, unknown>),
+      },
     };
   }
 }

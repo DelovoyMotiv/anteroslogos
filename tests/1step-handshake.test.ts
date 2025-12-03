@@ -3,15 +3,10 @@
  * Test pre-signed challenge in AID generation response
  */
 
-import { ed25519 } from '@noble/curves/ed25519';
+import { ed25519 } from '@noble/ed25519';
+import type { TestResult, ComparableValue, AssertEquals, AssertExists } from '../types/test.types';
 
 const BASE_URL = process.env.TEST_URL || 'http://localhost:3000';
-
-interface TestResult {
-  name: string;
-  passed: boolean;
-  error?: string;
-}
 
 const results: TestResult[] = [];
 
@@ -29,17 +24,17 @@ function test(name: string, fn: () => Promise<void>) {
   };
 }
 
-function assertEquals(actual: any, expected: any, message?: string) {
+const assertEquals: AssertEquals = <T extends ComparableValue>(actual: T, expected: T, message?: string) => {
   if (JSON.stringify(actual) !== JSON.stringify(expected)) {
     throw new Error(message || `Expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
   }
-}
+};
 
-function assertExists(value: any, message?: string) {
+const assertExists: AssertExists = <T>(value: T | null | undefined, message?: string): asserts value is T => {
   if (value === undefined || value === null) {
     throw new Error(message || `Expected value to exist`);
   }
-}
+};
 
 function assertTrue(value: boolean, message?: string) {
   if (value !== true) {

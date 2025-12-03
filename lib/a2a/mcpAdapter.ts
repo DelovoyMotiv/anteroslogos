@@ -19,18 +19,13 @@ export interface MCPServerDefinition {
   tools: MCPToolDefinition[];
 }
 
+import type { MCPToolInputSchema, MCPToolOutputSchema } from '../../types/a2a.types';
+
 export interface MCPToolDefinition {
   name: string;
   description: string;
-  inputSchema: {
-    type: 'object';
-    properties: Record<string, any>;
-    required?: string[];
-  };
-  outputSchema?: {
-    type: 'object';
-    properties: Record<string, any>;
-  };
+  inputSchema: MCPToolInputSchema;
+  outputSchema?: MCPToolOutputSchema;
 }
 
 export interface SkillDefinition {
@@ -41,17 +36,7 @@ export interface SkillDefinition {
   code: string;
 }
 
-export interface CodeExecutionResult {
-  success: boolean;
-  output: any;
-  logs: string[];
-  errors: string[];
-  tokensUsed: {
-    input: number;
-    output: number;
-    saved: number;
-  };
-}
+import type { CodeExecutionResult, CodeExecutionContext } from '../../types/a2a.types';
 
 // =====================================================
 // MCP SERVERS REGISTRY
@@ -281,10 +266,10 @@ function mapJsonTypeToTS(jsonType: string): string {
     string: 'string',
     number: 'number',
     boolean: 'boolean',
-    array: 'any[]',
-    object: 'Record<string, any>',
+    array: 'JSONValue[]',
+    object: 'Record<string, JSONValue>',
   };
-  return mapping[jsonType] || 'any';
+  return mapping[jsonType] || 'JSONValue';
 }
 
 /**
@@ -358,7 +343,7 @@ export const BUILTIN_SKILLS: Record<string, SkillDefinition> = {
 
 export async function batchAuditWithFiltering(
   urls: string[],
-  filterFn: (result: any) => boolean
+  filterFn: (result: JSONValue) => boolean
 ) {
   const results = [];
   
@@ -550,7 +535,7 @@ export function calculateTokenSavings(
  */
 
 export interface CodeExecutionEnvironment {
-  execute(code: string, context?: Record<string, any>): Promise<CodeExecutionResult>;
+  execute(code: string, context?: CodeExecutionContext): Promise<CodeExecutionResult>;
   loadSkill(skillName: string): Promise<void>;
   listAvailableTools(serverName?: string): Promise<string[]>;
   getToolDefinition(serverName: string, toolName: string): Promise<string>;

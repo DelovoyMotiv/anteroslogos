@@ -12,6 +12,10 @@ import '@fontsource/space-grotesk/700.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import { runStartupValidation } from './lib/config/startup';
+
+// Validate environment configuration at startup
+runStartupValidation();
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -40,9 +44,11 @@ if ('serviceWorker' in navigator) {
 }
 
 // Core Web Vitals monitoring
+import type { CLSMetric, FCPMetric, INPMetric, LCPMetric, TTFBMetric } from 'web-vitals';
+
 if (typeof window !== 'undefined') {
   import('web-vitals').then(({ onCLS, onFCP, onINP, onLCP, onTTFB }) => {
-    const sendToAnalytics = (metric: any) => {
+    const sendToAnalytics = (metric: CLSMetric | FCPMetric | INPMetric | LCPMetric | TTFBMetric) => {
       // Log to console in development
       if (process.env.NODE_ENV === 'development') {
         console.log(`[Web Vitals] ${metric.name}:`, metric.value, metric);

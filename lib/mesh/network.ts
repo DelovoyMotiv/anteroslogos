@@ -126,10 +126,12 @@ export interface PeerAnnouncement {
 /**
  * Mesh sync message (knowledge graph delta, citation learning, etc.)
  */
+import type { JSONValue } from '../../types/common.types';
+
 export interface MeshSyncMessage {
   type: 'knowledge_graph' | 'citation_learning' | 'model_update' | 'peer_update';
   sender: string; // node ID
-  payload: any; // CBOR-encoded data
+  payload: JSONValue; // CBOR-encoded data
   timestamp: number;
   signature?: string;
 }
@@ -339,7 +341,7 @@ export class MeshNetworkRouter {
       a.name === dhtNode.aidUri
     );
 
-    const metadata = dhtNode.metadata as any;
+    const metadata = dhtNode.metadata as Record<string, unknown> | undefined;
     const meshNode: MeshNode = {
       ...dhtNode,
       trustScore: agent ? agent.trust_score : dhtNode.trustScore,
@@ -423,7 +425,7 @@ export class MeshNetworkRouter {
    */
   async routeRequest(
     method: string,
-    params: any,
+    params: JSONValue,
     options: RoutingOptions = {}
   ): Promise<RoutingResult> {
     const {
@@ -727,7 +729,7 @@ export class MeshNetworkRouter {
   /**
    * Sync with specific peer
    */
-  async syncWithPeer(peerId: string, data: any): Promise<boolean> {
+  async syncWithPeer(peerId: string, data: JSONValue): Promise<boolean> {
     if (!this.initialized || !this.dht) {
       throw new Error('MeshRouter not initialized. Call initialize() first.');
     }
@@ -845,7 +847,7 @@ export class MeshNetworkRouter {
   /**
    * Broadcast update to mesh network (gossip protocol)
    */
-  async broadcastUpdate(message: any): Promise<void> {
+  async broadcastUpdate(message: JSONValue): Promise<void> {
     const peers = await this.discoverPeers('bft.gossip', 20);
     
     if (peers.length === 0) {

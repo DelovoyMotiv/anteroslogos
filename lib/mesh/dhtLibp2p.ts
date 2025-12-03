@@ -322,7 +322,7 @@ export class Libp2pDHT {
         dht: kadDHT({
           kBucketSize: K_BUCKET_SIZE,
           clientMode: false,
-        }) as any, // Type assertion to bypass libp2p type incompatibility
+        }) as any, // Type assertion for libp2p service type compatibility
       },
     });
 

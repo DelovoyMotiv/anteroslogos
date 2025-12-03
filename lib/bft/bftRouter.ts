@@ -98,9 +98,9 @@ export class BFTRouter {
   /**
    * Route operation with automatic consensus detection
    */
-  async route<T = any>(
+  async route<T = unknown>(
     operation: string,
-    payload: any,
+    payload: unknown,
     options: BFTRoutingOptions = {}
   ): Promise<BFTRoutingResult<T>> {
     const startTime = Date.now();
@@ -108,7 +108,7 @@ export class BFTRouter {
     
     try {
       // Analyze operation
-      const metadata = this.analyzeOperation(operation, payload);
+      const metadata = this.analyzeOperation(operation, payload as Record<string, unknown>);
       
       // Decide if consensus is needed
       const needsConsensus = 
@@ -177,8 +177,8 @@ export class BFTRouter {
    */
   async requestDeepAudit(
     url: string,
-    options: any
-  ): Promise<BFTRoutingResult<any>> {
+    options: Record<string, unknown>
+  ): Promise<BFTRoutingResult<unknown>> {
     return this.route(
       'AUDIT_DEEP',
       { url, options },
@@ -235,7 +235,7 @@ export class BFTRouter {
    */
   private async routeThroughConsensus<T>(
     operation: string,
-    payload: any,
+    payload: unknown,
     _metadata: OperationMetadata,
     options: BFTRoutingOptions,
     startTime: number
@@ -247,9 +247,9 @@ export class BFTRouter {
       const request: ConsensusRequest = {
         requestId: ulid(),
         operation: operation as ConsensusOperation,
-        payload,
+        payload: payload as Record<string, unknown>,
         clientId: this.nodeId,
-        clientSignature: await this.signPayload(payload),
+        clientSignature: await this.signPayload(payload as Record<string, unknown>),
         timestamp: Date.now(),
       };
       
@@ -258,7 +258,7 @@ export class BFTRouter {
       
       if (consensusResult.success) {
         // Execute operation after consensus
-        const data = await this.executeOperation<T>(operation, payload);
+        const data = await this.executeOperation<T>(operation, payload as Record<string, unknown>);
         
         return {
           success: true,
@@ -274,7 +274,7 @@ export class BFTRouter {
           console.warn('[BFTRouter] Consensus failed, using fallback');
           this.stats.fallbackRequests++;
           
-          const data = await this.executeOperation<T>(operation, payload);
+          const data = await this.executeOperation<T>(operation, payload as Record<string, unknown>);
           
           return {
             success: true,
@@ -302,7 +302,7 @@ export class BFTRouter {
       // Fallback if enabled
       if (options.fallbackOnFailure !== false) {
         this.stats.fallbackRequests++;
-        const data = await this.executeOperation<T>(operation, payload);
+        const data = await this.executeOperation<T>(operation, payload as Record<string, unknown>);
         
         return {
           success: true,
@@ -322,13 +322,13 @@ export class BFTRouter {
    */
   private async routeDirect<T>(
     operation: string,
-    payload: any,
+    payload: unknown,
     startTime: number
   ): Promise<BFTRoutingResult<T>> {
     this.stats.directRequests++;
     
     try {
-      const data = await this.executeOperation<T>(operation, payload);
+      const data = await this.executeOperation<T>(operation, payload as Record<string, unknown>);
       
       return {
         success: true,

@@ -5,6 +5,7 @@
  */
 
 import { z } from 'zod';
+import type { JSONValue, JSONObject } from '../../types/common.types';
 
 // =====================================================
 // PROTOCOL VERSION & CONSTANTS
@@ -155,8 +156,8 @@ export interface A2ADiscoveryResponse {
 export interface A2ACapability {
   method: string;
   description: string;
-  params_schema: Record<string, any>;
-  result_schema: Record<string, any>;
+  params_schema: JSONObject;
+  result_schema: JSONObject;
   streaming: boolean;
   batch_support: boolean;
   rate_limit?: {
@@ -255,14 +256,14 @@ export interface A2AEntity {
   type: string;
   name: string;
   confidence: number;
-  properties?: Record<string, any>;
+  properties?: JSONObject;
 }
 
 export interface A2AInsight {
   type: 'best_practice' | 'opportunity' | 'benchmark' | 'prediction';
   title: string;
   description: string;
-  data?: Record<string, any>;
+  data?: JSONObject;
   confidence: number;
 }
 
@@ -298,7 +299,7 @@ export class A2AError extends Error {
   constructor(
     public code: A2AErrorCode,
     message: string,
-    public data?: any
+    public data?: JSONValue
   ) {
     super(message);
     this.name = 'A2AError';
@@ -419,7 +420,7 @@ export interface A2AStreamEvent {
   type: 'progress' | 'result' | 'error' | 'complete';
   audit_id: string;
   timestamp: string;
-  data: any;
+  data: JSONValue;
 }
 
 export interface A2AProgressEvent extends A2AStreamEvent {
@@ -444,7 +445,7 @@ export interface A2AContext {
   user_id?: string;
   api_key?: string;
   tier: string;
-  metadata?: Record<string, any>;
+  metadata?: JSONObject;
   timestamp: string;
   ip_address?: string;
 }
@@ -458,7 +459,7 @@ export interface A2AContext {
  */
 export function createA2AResponse(
   id: string | number | null,
-  result: any
+  result: JSONValue
 ): A2AResponse {
   return {
     jsonrpc: '2.0',
@@ -474,7 +475,7 @@ export function createA2AErrorResponse(
   id: string | number | null,
   code: number,
   message: string,
-  data?: any
+  data?: JSONValue
 ): A2AResponse {
   return {
     jsonrpc: '2.0',
@@ -490,7 +491,7 @@ export function createA2AErrorResponse(
 /**
  * Validate incoming request
  */
-export function validateA2ARequest(data: unknown): { valid: boolean; request?: A2ARequest; errors?: any } {
+export function validateA2ARequest(data: unknown): { valid: boolean; request?: A2ARequest; errors?: unknown } {
   try {
     const request = A2ARequestSchema.parse(data);
     return { valid: true, request };

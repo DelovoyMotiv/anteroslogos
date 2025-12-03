@@ -10,6 +10,7 @@ import { ulid } from "ulid";
 import { keccak256, toUtf8Bytes } from "ethers";
 import { createHash } from "node:crypto";
 import { z } from "zod";
+import type { JSONObject } from '../../types/common.types';
 import {
   InvoiceCreateInputSchema,
   InvoiceStatusSchema,
@@ -396,7 +397,7 @@ export async function createInvoice(
     user_id: validated.userId || null,
     agent_id: validated.agentId || null,
     method: validated.method,
-    params: validated.params as any, // JSONB
+    params: validated.params as JSONObject, // JSONB
     params_hash: paramsHash,
     amount: price,
     token: validated.token,

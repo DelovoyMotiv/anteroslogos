@@ -7,6 +7,7 @@
 import { z } from 'zod';
 import type { KnowledgeGraph } from '../../utils/knowledgeGraph/builder';
 import { config } from '../config';
+import type { OpenAIAssistantResponse, OpenAIAssistant } from '../../types/lib-extended.types';
 
 // ==================== SCHEMAS ====================
 
@@ -220,7 +221,8 @@ export class AISyndicationManager {
 
     if (listResponse.ok) {
       const data = await listResponse.json();
-      const existing = data.data.find((a: any) => a.name === assistantName);
+      const assistantData = data as OpenAIAssistantResponse;
+      const existing = assistantData.data.find((a: OpenAIAssistant) => a.name === assistantName);
       if (existing) return existing.id;
     }
 

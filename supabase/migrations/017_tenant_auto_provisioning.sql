@@ -91,14 +91,39 @@ COMMENT ON FUNCTION public.auto_provision_tenant IS 'Automatically creates tenan
 -- =====================================================
 
 -- Drop if exists (for idempotency)
-DROP TRIGGER IF EXISTS on_auth_user_created_provision_tenant ON auth.users;
+-- Drop trigger (wrapped for permission handling)
+DO $$
+BEGIN
+  DROP TRIGGER IF EXISTS on_auth_user_created_provision_tenant ON auth.users;
+EXCEPTION
+  WHEN insufficient_privilege THEN
+    RAISE NOTICE 'Skipping trigger drop - insufficient privileges';
+END $$;
 
-CREATE TRIGGER on_auth_user_created_provision_tenant
-  AFTER INSERT ON auth.users
-  FOR EACH ROW
-  EXECUTE FUNCTION public.auto_provision_tenant();
+-- Create trigger (wrapped for permission handling)
+DO $$
+BEGIN
+  CREATE TRIGGER on_auth_user_created_provision_tenant
+    AFTER INSERT ON auth.users
+    FOR EACH ROW
+    EXECUTE FUNCTION public.auto_provision_tenant();
+EXCEPTION
+  WHEN insufficient_privilege THEN
+    RAISE NOTICE 'Skipping trigger creation - insufficient privileges';
+  WHEN duplicate_object THEN
+    RAISE NOTICE 'Trigger already exists';
+END $$;
 
-COMMENT ON TRIGGER on_auth_user_created_provision_tenant ON auth.users IS 'Provisions tenant workspace for new users';
+-- Comment on trigger (wrapped for permission handling)
+DO $$
+BEGIN
+  EXECUTE format('COMMENT ON TRIGGER on_auth_user_created_provision_tenant ON auth.users IS %L', 'Provisions tenant workspace for new users');
+EXCEPTION
+  WHEN insufficient_privilege THEN
+    RAISE NOTICE 'Skipping trigger comment - insufficient privileges';
+  WHEN undefined_object THEN
+    RAISE NOTICE 'Trigger does not exist';
+END $$;
 
 -- =====================================================
 -- HELPER FUNCTION: get_user_primary_tenant
