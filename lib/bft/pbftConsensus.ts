@@ -34,12 +34,12 @@ import {
 import { BFTStorage, getBFTStorage } from './storage';
 import { MeshNetworkRouter } from '../mesh/network';
 import type { MeshNode } from '../mesh/network';
-import { calculateCausalWeight } from './causalWeightOracle';
 import { offChainOracle } from './offChainOracle';
 import type { CausalGraph as CausalTracerGraph } from '../../types/causalTracer.types';
 import { TemporalEpochManager } from './temporalEpochManager';
 import { CircularDependencyDetector } from './circularDependencyDetector';
 import type { EpochCommit, CausalGraph as ByzantineGraph } from '../../types/byzantine.types';
+import { getUnifiedCache } from '../graph/unifiedMetricsCache';
 
 // =====================================================
 // PBFT CONSENSUS ENGINE
@@ -549,28 +549,38 @@ export class PBFTConsensus {
         const normalizedStake = stake ? Math.min(stake.stakedAmount / 1000, 1) : 0;
         const rttScore = node.rtt ? Math.max(0, 1 - (node.rtt / 1000)) : 0;
         
-        // Off-Chain Causal Oracle: cache-first with fallback
+        // Unified Cache: Single source of truth for causal weights
+        // Eliminates duplicate computation between BFT and CCC
         let causalWeight = 0;
         if (this.causalGraph) {
           try {
+            const unifiedCache = getUnifiedCache();
             const referenceEntity = this.causalGraph.domain || 'consensus_reference';
-            causalWeight = await offChainOracle.getCausalWeight(
-              node.nodeId,
-              referenceEntity,
-              this.causalGraph
-            );
-          } catch (error) {
-            console.warn(`[PBFT] Off-chain oracle failed for ${node.nodeId}, using fallback`);
-            const referenceEntityFallback = this.causalGraph.domain || 'consensus_reference';
+            
+            // Try off-chain oracle first (distributed cache)
             try {
-              causalWeight = await calculateCausalWeight(
+              causalWeight = await offChainOracle.getCausalWeight(
                 node.nodeId,
-                referenceEntityFallback,
+                referenceEntity,
                 this.causalGraph
               );
-            } catch (fallbackError) {
-              console.warn(`[PBFT] Fallback causal weight calculation failed for ${node.nodeId}`);
+            } catch (error) {
+              console.warn(`[PBFT] Off-chain oracle failed for ${node.nodeId}, using unified cache`);
+              
+              // Fallback to unified cache with PageRank-based approximation
+              const pageRankResult = await unifiedCache.getPageRank(
+                node.nodeId,
+                this.causalGraph,
+                this.currentEpoch,
+                this.currentEpoch
+              );
+              
+              // Approximate causal weight from PageRank
+              // Higher PageRank = higher causal weight
+              causalWeight = Math.min(1.0, pageRankResult.rank * 10);
             }
+          } catch (fallbackError) {
+            console.warn(`[PBFT] Unified cache fallback failed for ${node.nodeId}`);
           }
         }
         

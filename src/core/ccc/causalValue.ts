@@ -15,6 +15,7 @@ import {
   CCCRewardConfig
 } from './types';
 import { QualityAnalyzer } from '../../../lib/bft/qualityAnalyzer';
+import { getUnifiedCache } from '../../../lib/graph/unifiedMetricsCache';
 
 /**
  * Global knowledge graph state for novelty detection
@@ -89,8 +90,9 @@ export async function computeCausalValue(
   const startTime = Date.now();
 
   // Component scores (0-100 each)
-  const noveltyScore = computeNoveltyScore(delta);
-  const connectivityScore = computeConnectivityScore(delta);
+  // All use unified cache to eliminate duplicate computation
+  const noveltyScore = await computeNoveltyScore(delta);
+  const connectivityScore = await computeConnectivityScore(delta);
   const predictionImprovementScore = await computePredictionImprovementScore(delta);
   const temporalRelevanceScore = computeTemporalRelevanceScore(delta);
   const confidenceScore = computeConfidenceScore(delta);
@@ -102,10 +104,12 @@ export async function computeCausalValue(
   const kolmogorovScore = computeKolmogorovScore(delta);
   
   // Calculate betweenness centrality for connectivity quality (Requirement 6.2)
-  const betweennessScore = computeBetweennessScore(delta);
+  // Uses unified cache to avoid duplicate computation with BFT
+  const betweennessScore = await computeBetweennessScore(delta);
   
   // Calculate PageRank differential for connectivity quality (Requirement 6.3)
-  const pageRankDifferentialScore = computePageRankDifferentialScore(delta);
+  // Uses unified cache to avoid duplicate computation with BFT
+  const pageRankDifferentialScore = await computePageRankDifferentialScore(delta);
 
   // Weights for final score (adjusted to include all quality metrics)
   const weights = {
@@ -240,58 +244,41 @@ export function computeCCCReward(
  * Novelty Score: Measures how much new information is contributed
  * 
  * Algorithm:
- * 1. Check each entity against global entity index
- * 2. Check each relationship against global relationship index
+ * 1. Check each entity against unified cache novelty index
+ * 2. Check each relationship against unified cache novelty index
  * 3. Score = (novel entities + novel relationships) / total × 100
+ * 
+ * Uses unified cache to eliminate duplicate novelty detection
  */
-function computeNoveltyScore(delta: KnowledgeGraphDelta): number {
+async function computeNoveltyScore(delta: KnowledgeGraphDelta): Promise<number> {
+  const unifiedCache = getUnifiedCache();
   let novelEntities = 0;
   let novelRelationships = 0;
 
-  // Check entity novelty
+  // Check entity novelty via unified cache
   for (const entity of delta.entities) {
-    const normalizedName = entity.name.toLowerCase().trim();
-    const existingIds = globalGraph.entityNameIndex.get(normalizedName);
+    const noveltyResult = await unifiedCache.isEntityNovel(
+      entity.name,
+      entity.type,
+      entity.id
+    );
     
-    if (!existingIds || existingIds.size === 0) {
+    if (noveltyResult.isNovel) {
       novelEntities++;
-    } else {
-      // Check if this specific entity (by properties) is truly novel
-      let isNovel = true;
-      for (const existingId of existingIds) {
-        const existing = globalGraph.entities.get(existingId);
-        if (existing && existing.type === entity.type) {
-          // Same name and type = not novel (even if properties differ)
-          isNovel = false;
-          break;
-        }
-      }
-      if (isNovel) {
-        novelEntities++;
-      }
     }
   }
 
-  // Check relationship novelty
+  // Check relationship novelty via unified cache
   for (const rel of delta.relationships) {
-    const relKey = `${rel.sourceEntityId}:${rel.targetEntityId}`;
-    const existingRels = globalGraph.relationshipIndex.get(relKey);
+    const noveltyResult = await unifiedCache.isRelationshipNovel(
+      rel.sourceEntityId,
+      rel.targetEntityId,
+      rel.type,
+      rel.id
+    );
     
-    if (!existingRels || existingRels.size === 0) {
+    if (noveltyResult.isNovel) {
       novelRelationships++;
-    } else {
-      // Check if this specific relationship type is novel
-      let isNovel = true;
-      for (const existingRelId of existingRels) {
-        const existing = globalGraph.relationships.get(existingRelId);
-        if (existing && existing.type === rel.type) {
-          isNovel = false;
-          break;
-        }
-      }
-      if (isNovel) {
-        novelRelationships++;
-      }
     }
   }
 
@@ -306,45 +293,34 @@ function computeNoveltyScore(delta: KnowledgeGraphDelta): number {
  * Connectivity Score: Measures how well new data connects to existing graph
  * 
  * Algorithm:
- * 1. Compute PageRank before and after adding delta
- * 2. Measure average centrality improvement
+ * 1. Use unified cache to get connectivity metrics
+ * 2. Measure average centrality improvement via cached PageRank
  * 3. Bonus for connecting previously isolated clusters
+ * 
+ * Uses unified cache to eliminate duplicate PageRank computation
  */
-function computeConnectivityScore(delta: KnowledgeGraphDelta): number {
+async function computeConnectivityScore(delta: KnowledgeGraphDelta): Promise<number> {
   if (delta.relationships.length === 0) {
     return 0; // No connectivity without relationships
   }
 
-  let totalConnectivityBoost = 0;
-  let connectionsToExisting = 0;
-
-  // Check how many relationships connect to existing entities
-  for (const rel of delta.relationships) {
-    const sourceExists = globalGraph.entities.has(rel.sourceEntityId);
-    const targetExists = globalGraph.entities.has(rel.targetEntityId);
-
-    if (sourceExists || targetExists) {
-      connectionsToExisting++;
-      
-      // Boost score if connecting high-PageRank entities
-      const sourceRank = sourceExists ? globalGraph.entities.get(rel.sourceEntityId)!.pageRank : 0;
-      const targetRank = targetExists ? globalGraph.entities.get(rel.targetEntityId)!.pageRank : 0;
-      const avgRank = (sourceRank + targetRank) / 2;
-      
-      totalConnectivityBoost += avgRank * rel.weight;
-    }
-  }
-
-  if (delta.relationships.length === 0) return 0;
-
-  // Base score: percentage of relationships connecting to existing graph
-  const connectionRatio = connectionsToExisting / delta.relationships.length;
+  const unifiedCache = getUnifiedCache();
   
-  // Weighted by quality (PageRank)
-  const qualityBoost = totalConnectivityBoost / delta.relationships.length;
-  
+  // Get connectivity metrics from unified cache
+  // This uses cached PageRank values instead of recomputing
+  const connectivityResult = await unifiedCache.getConnectivityMetrics(
+    delta.relationships,
+    {
+      nodes: globalGraph.entities as any,
+      edges: globalGraph.relationships as any,
+      nodeCount: globalGraph.entities.size,
+      edgeCount: globalGraph.relationships.size,
+      domain: 'global',
+    } as any
+  );
+
   // Combine (60% connection ratio, 40% quality)
-  const score = (connectionRatio * 0.6 + qualityBoost * 0.4) * 100;
+  const score = (connectivityResult.connectionRatio * 0.6 + connectivityResult.qualityBoost * 0.4) * 100;
   
   return Math.min(100, score);
 }
@@ -520,66 +496,36 @@ function computeKolmogorovScore(delta: KnowledgeGraphDelta): number {
  * indicates nodes that connect previously isolated clusters.
  * 
  * Algorithm:
- * 1. For each contributed entity, calculate betweenness centrality
- * 2. Betweenness = number of shortest paths passing through node
- * 3. Average betweenness across all contributed nodes
- * 4. Normalize to 0-100 scale
+ * 1. Use unified cache to get betweenness centrality
+ * 2. Average betweenness across all contributed nodes
+ * 3. Normalize to 0-100 scale
  * 
- * Simplified implementation using degree-based approximation:
- * - Nodes connecting to high-degree nodes have higher betweenness
- * - Nodes with balanced in/out degree have higher betweenness
+ * Uses unified cache to eliminate duplicate betweenness computation
  * 
  * Requirements: 6.2
  */
-function computeBetweennessScore(delta: KnowledgeGraphDelta): number {
+async function computeBetweennessScore(delta: KnowledgeGraphDelta): Promise<number> {
   if (delta.entities.length === 0) {
     return 0;
   }
   
+  const unifiedCache = getUnifiedCache();
   let totalBetweenness = 0;
   
-  // For each contributed entity, estimate betweenness
+  // For each contributed entity, get betweenness from unified cache
   for (const entity of delta.entities) {
-    // Check if entity exists in global graph
-    const existingEntity = globalGraph.entities.get(entity.id);
+    const betweennessResult = await unifiedCache.getBetweenness(
+      entity.id,
+      {
+        nodes: globalGraph.entities as any,
+        edges: globalGraph.relationships as any,
+        nodeCount: globalGraph.entities.size,
+        edgeCount: globalGraph.relationships.size,
+        domain: 'global',
+      } as any
+    );
     
-    if (existingEntity) {
-      // Use actual degree information
-      const inDegree = existingEntity.inDegree;
-      const outDegree = existingEntity.outDegree;
-      const totalDegree = inDegree + outDegree;
-      
-      // Betweenness approximation: nodes with balanced in/out degree
-      // and high total degree have higher betweenness
-      const degreeBalance = totalDegree > 0
-        ? 1 - Math.abs(inDegree - outDegree) / totalDegree
-        : 0;
-      
-      // Normalize degree (assume max degree of 100)
-      const normalizedDegree = Math.min(1, totalDegree / 100);
-      
-      // Betweenness estimate: combination of degree and balance
-      const betweenness = (normalizedDegree * 0.6 + degreeBalance * 0.4);
-      totalBetweenness += betweenness;
-    } else {
-      // New entity: estimate based on relationships in delta
-      let inDegree = 0;
-      let outDegree = 0;
-      
-      for (const rel of delta.relationships) {
-        if (rel.targetEntityId === entity.id) inDegree++;
-        if (rel.sourceEntityId === entity.id) outDegree++;
-      }
-      
-      const totalDegree = inDegree + outDegree;
-      const degreeBalance = totalDegree > 0
-        ? 1 - Math.abs(inDegree - outDegree) / totalDegree
-        : 0;
-      
-      const normalizedDegree = Math.min(1, totalDegree / 20); // Lower max for new entities
-      const betweenness = (normalizedDegree * 0.6 + degreeBalance * 0.4);
-      totalBetweenness += betweenness;
-    }
+    totalBetweenness += betweennessResult.centrality;
   }
   
   // Average betweenness across all entities
@@ -597,45 +543,63 @@ function computeBetweennessScore(delta: KnowledgeGraphDelta): number {
  * contributions that significantly boost graph connectivity.
  * 
  * Algorithm:
- * 1. Capture current PageRank values for affected nodes
- * 2. Simulate adding delta to graph (without persisting)
- * 3. Calculate new PageRank values
- * 4. Compute differential (after - before)
- * 5. Normalize to 0-100 scale
+ * 1. Use unified cache to get current PageRank values
+ * 2. Estimate improvement based on relationship weights and cached PageRank
+ * 3. Compute differential (after - before)
+ * 4. Normalize to 0-100 scale
  * 
- * Simplified implementation:
- * - Use existing PageRank values from global graph
- * - Estimate improvement based on relationship weights and target PageRank
- * - Avoid full PageRank recomputation for performance
+ * Uses unified cache to eliminate duplicate PageRank computation
  * 
  * Requirements: 6.3
  */
-function computePageRankDifferentialScore(delta: KnowledgeGraphDelta): number {
+async function computePageRankDifferentialScore(delta: KnowledgeGraphDelta): Promise<number> {
   if (delta.relationships.length === 0) {
     return 0;
   }
   
+  const unifiedCache = getUnifiedCache();
   let totalPageRankImprovement = 0;
   const affectedNodes = new Set<string>();
   
-  // For each relationship, estimate PageRank improvement
+  // For each relationship, estimate PageRank improvement using unified cache
   for (const rel of delta.relationships) {
-    const sourceEntity = globalGraph.entities.get(rel.sourceEntityId);
-    const targetEntity = globalGraph.entities.get(rel.targetEntityId);
-    
     // Track affected nodes
     affectedNodes.add(rel.sourceEntityId);
     affectedNodes.add(rel.targetEntityId);
     
-    if (targetEntity) {
+    // Get PageRank from unified cache
+    const targetPageRank = await unifiedCache.getPageRank(
+      rel.targetEntityId,
+      {
+        nodes: globalGraph.entities as any,
+        edges: globalGraph.relationships as any,
+        nodeCount: globalGraph.entities.size,
+        edgeCount: globalGraph.relationships.size,
+        domain: 'global',
+      } as any
+    );
+    
+    if (targetPageRank.rank > 0) {
       // Existing target: estimate PageRank boost from new incoming link
-      const currentPageRank = targetEntity.pageRank;
+      const currentPageRank = targetPageRank.rank;
+      
+      // Get source PageRank from unified cache
+      const sourcePageRank = await unifiedCache.getPageRank(
+        rel.sourceEntityId,
+        {
+          nodes: globalGraph.entities as any,
+          edges: globalGraph.relationships as any,
+          nodeCount: globalGraph.entities.size,
+          edgeCount: globalGraph.relationships.size,
+          domain: 'global',
+        } as any
+      );
       
       // PageRank contribution from source
       let sourceContribution = 0;
-      if (sourceEntity && sourceEntity.outDegree > 0) {
-        // Existing source: use actual PageRank
-        sourceContribution = (sourceEntity.pageRank / (sourceEntity.outDegree + 1)) * rel.weight;
+      if (sourcePageRank.rank > 0 && sourcePageRank.outDegree > 0) {
+        // Existing source: use cached PageRank
+        sourceContribution = (sourcePageRank.rank / (sourcePageRank.outDegree + 1)) * rel.weight;
       } else {
         // New source: assume initial PageRank
         const initialPageRank = 1.0 / (globalGraph.entities.size + delta.entities.length);
