@@ -1,7 +1,7 @@
 # Anóteros Lógos - Enterprise AI Knowledge Infrastructure
 
 ![License](https://img.shields.io/badge/License-Proprietary-red)
-![Version](https://img.shields.io/badge/version-4.0.0-blue)
+![Version](https://img.shields.io/badge/version-4.1.1-blue)
 ![Node](https://img.shields.io/badge/node-20.x-green)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)
 ![React](https://img.shields.io/badge/React-19.2-cyan)
@@ -11,7 +11,7 @@ AI knowledge infrastructure platform providing cryptographically verifiable prov
 
 Production URL: https://anoteroslogos.com
 
-Codebase: 819 files | 157,573 lines
+Codebase: 878 files | 276,203 lines
 
 ---
 
@@ -545,12 +545,16 @@ Production persistence, automation, and backend services.
 
 ### 14. Byzantine Fault Tolerance
 
-Production PBFT consensus with Causal Consensus Oracle for provenance-based quorum weighting.
+Production PBFT consensus with Causal Consensus Oracle for provenance-based quorum weighting and comprehensive Byzantine resistance mechanisms.
 
 **Capabilities:**
 - Practical Byzantine Fault Tolerance implementing Castro & Liskov algorithm
 - Quorum consensus tolerating f=2 Byzantine nodes in 7-node network
 - Causal Consensus Oracle dynamically weighting nodes by knowledge provenance depth
+- Temporal epoch ordering preventing circular dependency attacks via blockchain-like commit chain
+- Merkle proof system for cryptographic verification of graph state integrity
+- Sybil attack detection using information-theoretic quality metrics and entropy analysis
+- Collusion detection via correlation analysis and graph similarity scoring
 - Automatic routing of critical operations through consensus
 - Payment verification for transactions exceeding 10 USDC threshold
 - Trust score updates via Byzantine-resistant reputation system
@@ -585,7 +589,13 @@ Production PBFT consensus with Causal Consensus Oracle for provenance-based quor
 - Cache-first strategy with transparent fallback to full provenance calculation
 - Zero API changes maintaining complete backward compatibility with existing consensus flow
 
-**Byzantine Detection:**
+**Byzantine Resistance:**
+- Temporal ordering with immutable epoch commits preventing retroactive graph manipulation
+- Circular dependency detection via Tarjan's strongly connected component algorithm
+- Merkle tree construction for O(log N) proof verification of graph state
+- Information-theoretic quality analysis using Shannon entropy and Kolmogorov complexity approximation
+- Sybil pattern detection through novelty-volume ratio tracking and entropy thresholds
+- Collusion cluster identification using Pearson correlation and Jaccard similarity
 - Equivocation identification via conflicting message analysis
 - Ed25519 signature verification on all protocol messages
 - Evidence reporting with cryptographic proof generation
@@ -615,10 +625,18 @@ Production PBFT consensus with Causal Consensus Oracle for provenance-based quor
 - `lib/bft/causalWeightOracle.ts` - Provenance-based weight calculation
 - `lib/bft/offChainOracle.ts` - Distributed cache with gossip protocol
 - `lib/bft/bftRouter.ts` - Consensus-aware routing
+- `lib/bft/temporalEpochManager.ts` - Epoch commit chain management
+- `lib/bft/circularDependencyDetector.ts` - Tarjan's SCC algorithm
+- `lib/bft/merkleProofSystem.ts` - Cryptographic state verification
+- `lib/bft/qualityAnalyzer.ts` - Information-theoretic metrics
+- `lib/bft/collusionDetector.ts` - Correlation and similarity analysis
+- `lib/bft/featureFlagManager.ts` - Gradual rollout with shadow mode
 - `lib/bft/__tests__/ccoIntegration.test.ts` - Real graph integration tests
 - `lib/bft/__tests__/tenantIsolation.test.ts` - RLS isolation verification
 - `supabase/migrations/009_bft_schema.sql` - Database schema
 - `supabase/migrations/20251124_tenant_isolation.sql` - Tenant RLS migration
+- `supabase/migrations/bft_epoch_tracking.sql` - Temporal ordering schema
+- `supabase/migrations/bft_validation_results.sql` - Validation results schema
 
 ### 15. Agent Mesh Network
 
@@ -1110,8 +1128,8 @@ tests/
 ## Statistics
 
 **Codebase:**
-- Total files: 819
-- Total lines: 157,573
+- Total files: 878
+- Total lines: 276,203
 - TypeScript: 94.2%
 - PLpgSQL: 5.0%
 - CSS: 0.8%
@@ -1153,4 +1171,4 @@ Proprietary - All rights reserved
 ---
 
 Last Updated: December 4, 2025
-Version: 4.0.0
+Version: 4.1.1
