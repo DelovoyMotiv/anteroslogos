@@ -23,13 +23,10 @@
  */
 
 import Redis, { type RedisOptions, type Cluster } from 'ioredis';
-import { createHash } from 'crypto';
 import { gzip, gunzip } from 'zlib';
 import { promisify } from 'util';
 import {
   UnifiedGraphMetricsCache,
-  getUnifiedCache,
-  initializeUnifiedCache,
 } from './unifiedMetricsCache';
 import type { CausalGraph } from '../../types/causalTracer.types';
 import { logger } from '../a2a/logger';
@@ -143,9 +140,26 @@ export class DistributedUnifiedCache extends UnifiedGraphMetricsCache {
     super();
     
     this.instanceId = instanceId || this.generateInstanceId();
-    this.keyPrefix = 'config' in config && config.keyPrefix ? config.keyPrefix : 'ugmc:';
-    this.enableCompression = 'enableCompression' in config ? config.enableCompression ?? true : true;
-    this.compressionThreshold = 'compressionThreshold' in config ? config.compressionThreshold ?? 1024 : 1024;
+    
+    // Extract keyPrefix from config if it's RedisConfig
+    if ('keyPrefix' in config) {
+      this.keyPrefix = config.keyPrefix || 'ugmc:';
+    } else {
+      this.keyPrefix = 'ugmc:';
+    }
+    
+    // Extract compression settings from config if it's RedisConfig
+    if ('enableCompression' in config) {
+      this.enableCompression = config.enableCompression ?? true;
+    } else {
+      this.enableCompression = true;
+    }
+    
+    if ('compressionThreshold' in config) {
+      this.compressionThreshold = config.compressionThreshold ?? 1024;
+    } else {
+      this.compressionThreshold = 1024;
+    }
     
     // Initialize Redis clients
     if ('nodes' in config) {
@@ -500,8 +514,14 @@ export class DistributedUnifiedCache extends UnifiedGraphMetricsCache {
   ): Promise<{ rank: number; inDegree: number; outDegree: number }> {
     const cacheKey = `pagerank:${nodeId}:${graph.domain}:${epochNumber || 'latest'}`;
     
-    // Tier 1: Local memory cache
-    const localResult = await super.getPageRank(nodeId, graph, epochNumber, currentEpoch);
+    // Tier 1: Local memory cache (call parent method)
+    const localResult = await UnifiedGraphMetricsCache.prototype.getPageRank.call(
+      this,
+      nodeId,
+      graph,
+      epochNumber,
+      currentEpoch
+    );
     if (localResult.rank > 0) {
       this.metrics.localHits++;
       return localResult;
@@ -511,14 +531,18 @@ export class DistributedUnifiedCache extends UnifiedGraphMetricsCache {
     const redisResult = await this.getFromRedis<{ rank: number; inDegree: number; outDegree: number }>(cacheKey);
     if (redisResult) {
       this.metrics.redisHits++;
-      // Warm local cache
-      // Note: We can't directly set in parent cache, so we'll compute and it will cache
       return redisResult;
     }
     
-    // Tier 3: Compute
+    // Tier 3: Compute (call parent method)
     this.metrics.computations++;
-    const computed = await super.getPageRank(nodeId, graph, epochNumber, currentEpoch);
+    const computed = await UnifiedGraphMetricsCache.prototype.getPageRank.call(
+      this,
+      nodeId,
+      graph,
+      epochNumber,
+      currentEpoch
+    );
     
     // Store in Redis (TTL: 90 seconds to match local cache)
     await this.setInRedis(cacheKey, computed, 90);
@@ -537,8 +561,14 @@ export class DistributedUnifiedCache extends UnifiedGraphMetricsCache {
   ): Promise<{ centrality: number; pathsThrough: number }> {
     const cacheKey = `betweenness:${nodeId}:${graph.domain}:${epochNumber || 'latest'}`;
     
-    // Tier 1: Local memory cache
-    const localResult = await super.getBetweenness(nodeId, graph, epochNumber, currentEpoch);
+    // Tier 1: Local memory cache (call parent method)
+    const localResult = await UnifiedGraphMetricsCache.prototype.getBetweenness.call(
+      this,
+      nodeId,
+      graph,
+      epochNumber,
+      currentEpoch
+    );
     if (localResult.centrality > 0) {
       this.metrics.localHits++;
       return localResult;
@@ -551,9 +581,15 @@ export class DistributedUnifiedCache extends UnifiedGraphMetricsCache {
       return redisResult;
     }
     
-    // Tier 3: Compute
+    // Tier 3: Compute (call parent method)
     this.metrics.computations++;
-    const computed = await super.getBetweenness(nodeId, graph, epochNumber, currentEpoch);
+    const computed = await UnifiedGraphMetricsCache.prototype.getBetweenness.call(
+      this,
+      nodeId,
+      graph,
+      epochNumber,
+      currentEpoch
+    );
     
     // Store in Redis
     await this.setInRedis(cacheKey, computed, 90);
@@ -565,9 +601,9 @@ export class DistributedUnifiedCache extends UnifiedGraphMetricsCache {
    * Invalidate cache and broadcast to other instances
    */
   async invalidateNode(nodeId: string, graphDomain?: string): Promise<void> {
-    // Invalidate local cache
-    // Note: Parent class doesn't have per-node invalidation, so we clear all
-    super.clearAll();
+    // Invalidate local cache by clearing all
+    // (Parent class doesn't expose per-node invalidation)
+    this.clearAll();
     
     // Broadcast invalidation to other instances
     await this.publishInvalidation('all', nodeId, graphDomain);
@@ -577,8 +613,9 @@ export class DistributedUnifiedCache extends UnifiedGraphMetricsCache {
    * Recompute PageRank and invalidate caches
    */
   async recomputePageRank(graph: CausalGraph): Promise<void> {
-    // Recompute in parent
-    await super.recomputePageRank(graph);
+    // Call parent's recomputePageRank using the inherited method
+    // We need to access the parent class method directly
+    await UnifiedGraphMetricsCache.prototype.recomputePageRank.call(this, graph);
     
     // Invalidate Redis cache for this graph
     if (!this.isCircuitOpen()) {
@@ -612,12 +649,12 @@ export class DistributedUnifiedCache extends UnifiedGraphMetricsCache {
   // =====================================================
   
   getDistributedMetrics(): DistributedCacheMetrics & {
-    localCacheMetrics: ReturnType<typeof super.getMetrics>;
+    localCacheMetrics: ReturnType<UnifiedGraphMetricsCache['getMetrics']>;
     hitRate: number;
     redisHitRate: number;
     circuitBreakerState: CircuitBreakerState;
   } {
-    const localMetrics = super.getMetrics();
+    const localMetrics = this.getMetrics();
     const totalRequests = this.metrics.localHits + this.metrics.redisHits + this.metrics.computations;
     const hitRate = totalRequests > 0
       ? (this.metrics.localHits + this.metrics.redisHits) / totalRequests
