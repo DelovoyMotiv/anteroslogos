@@ -19,8 +19,13 @@ const COSE_ALG_EDDSA = -8;  // EdDSA with Ed25519
 
 /**
  * Generate UCPT token with COSE_Sign1 structure
+ * 
+ * Optionally triggers cascade distribution through mesh network
  */
-export async function generateUCPT(options: UCPTGenerationOptions): Promise<SerializedUCPT> {
+export async function generateUCPT(
+  options: UCPTGenerationOptions,
+  cascadeOptions?: { enableCascade?: boolean; initialTTL?: number }
+): Promise<SerializedUCPT> {
   // Validate all inputs
   validateGenerationOptions(options);
   
@@ -122,9 +127,32 @@ export async function generateUCPT(options: UCPTGenerationOptions): Promise<Seri
   // Encode to base64url
   const token = base64urlEncode(token_bytes);
   
-  return {
+  const serialized: SerializedUCPT = {
     token,
     mime_type: 'application/cose; cose-type="cose-sign1"',
   };
+  
+  // Optionally trigger cascade distribution
+  if (cascadeOptions?.enableCascade) {
+    try {
+      const { getCascadeProtocol } = await import('./cascadeProtocol');
+      const protocol = getCascadeProtocol();
+      
+      // Initiate cascade in background (don't block token generation)
+      protocol.cascadeToken(
+        serialized,
+        issuer_aid,
+        tool_name,
+        { initialTTL: cascadeOptions.initialTTL }
+      ).catch(error => {
+        console.error('[UCPT] Cascade failed:', error);
+      });
+    } catch (error) {
+      // Cascade protocol not initialized - skip cascade
+      console.debug('[UCPT] Cascade protocol not available, skipping cascade');
+    }
+  }
+  
+  return serialized;
 }
 
