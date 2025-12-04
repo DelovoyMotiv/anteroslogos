@@ -14,6 +14,7 @@ import {
   CausalValueScore,
   CCCRewardConfig
 } from './types';
+import { QualityAnalyzer } from '../../../lib/bft/qualityAnalyzer';
 
 /**
  * Global knowledge graph state for novelty detection
@@ -60,6 +61,11 @@ const globalGraph: GlobalGraphState = {
 };
 
 /**
+ * Singleton quality analyzer for entropy and Kolmogorov complexity
+ */
+const qualityAnalyzer = new QualityAnalyzer();
+
+/**
  * Default CCC reward configuration
  */
 const DEFAULT_REWARD_CONFIG: CCCRewardConfig = {
@@ -88,14 +94,30 @@ export async function computeCausalValue(
   const predictionImprovementScore = await computePredictionImprovementScore(delta);
   const temporalRelevanceScore = computeTemporalRelevanceScore(delta);
   const confidenceScore = computeConfidenceScore(delta);
+  
+  // Calculate Shannon entropy for quality assessment (Requirements 5.2, 6.4)
+  const entropyScore = computeEntropyScore(delta);
+  
+  // Calculate Kolmogorov complexity for quality assessment (Requirements 6.1, 6.4)
+  const kolmogorovScore = computeKolmogorovScore(delta);
+  
+  // Calculate betweenness centrality for connectivity quality (Requirement 6.2)
+  const betweennessScore = computeBetweennessScore(delta);
+  
+  // Calculate PageRank differential for connectivity quality (Requirement 6.3)
+  const pageRankDifferentialScore = computePageRankDifferentialScore(delta);
 
-  // Weights for final score
+  // Weights for final score (adjusted to include all quality metrics)
   const weights = {
-    novelty: 0.30,
-    connectivity: 0.25,
-    predictionImprovement: 0.25,
+    novelty: 0.18,
+    connectivity: 0.13,
+    predictionImprovement: 0.13,
     temporalRelevance: 0.10,
-    confidence: 0.10
+    confidence: 0.10,
+    entropy: 0.12, // Information-theoretic quality
+    kolmogorov: 0.10, // Compression-based complexity
+    betweenness: 0.07, // Connectivity quality via betweenness centrality
+    pageRankDifferential: 0.07 // Connectivity quality via PageRank improvement
   };
 
   // Weighted total score
@@ -104,9 +126,39 @@ export async function computeCausalValue(
     connectivityScore * weights.connectivity +
     predictionImprovementScore * weights.predictionImprovement +
     temporalRelevanceScore * weights.temporalRelevance +
-    confidenceScore * weights.confidence;
+    confidenceScore * weights.confidence +
+    entropyScore * weights.entropy +
+    kolmogorovScore * weights.kolmogorov +
+    betweennessScore * weights.betweenness +
+    pageRankDifferentialScore * weights.pageRankDifferential;
 
   const computationTimeMs = Date.now() - startTime;
+  
+  // Calculate quality multiplier and path creation bonus for metadata
+  const qualityMultiplier = computeQualityMultiplier({
+    totalScore,
+    components: {
+      noveltyScore,
+      connectivityScore,
+      predictionImprovementScore,
+      temporalRelevanceScore,
+      confidenceScore,
+      entropyScore,
+      kolmogorovScore,
+      betweennessScore,
+      pageRankDifferentialScore
+    },
+    weights,
+    metadata: {
+      novelEntitiesCount: delta.entities.length,
+      novelRelationshipsCount: delta.relationships.length,
+      averageConnectivityBoost: connectivityScore / 100,
+      predictionsImproved: 0,
+      computationTimeMs
+    }
+  }, delta);
+  
+  const pathCreationBonus = computePathCreationBonus(delta);
 
   return {
     totalScore,
@@ -115,7 +167,11 @@ export async function computeCausalValue(
       connectivityScore,
       predictionImprovementScore,
       temporalRelevanceScore,
-      confidenceScore
+      confidenceScore,
+      entropyScore,
+      kolmogorovScore,
+      betweennessScore,
+      pageRankDifferentialScore
     },
     weights,
     metadata: {
@@ -123,7 +179,9 @@ export async function computeCausalValue(
       novelRelationshipsCount: delta.relationships.length,
       averageConnectivityBoost: connectivityScore / 100,
       predictionsImproved: 0, // Computed in prediction improvement
-      computationTimeMs
+      computationTimeMs,
+      qualityMultiplier,
+      pathCreationBonus
     }
   };
 }
@@ -156,6 +214,13 @@ export function computeCCCReward(
 
   // Confidence multiplier
   const confidenceMultiplier = causalValue.components.confidenceScore / 100;
+  
+  // Quality multiplier based on entropy-volume ratio (Requirements 6.4)
+  // Higher entropy relative to volume indicates higher quality
+  const qualityMultiplier = computeQualityMultiplier(causalValue, delta);
+  
+  // Path creation bonus for unique causal paths (Requirements 6.5)
+  const pathCreationBonus = computePathCreationBonus(delta);
 
   const reward =
     baseReward *
@@ -163,7 +228,9 @@ export function computeCCCReward(
     connectivityMultiplier *
     predictionMultiplier *
     temporalMultiplier *
-    confidenceMultiplier;
+    confidenceMultiplier *
+    qualityMultiplier +
+    pathCreationBonus;
 
   // Cap at maximum reward
   return Math.min(reward, config.maxRewardPerSync);
@@ -360,6 +427,351 @@ function computeConfidenceScore(delta: KnowledgeGraphDelta): number {
   
   const avgConfidence = allConfidences.reduce((sum, c) => sum + c, 0) / allConfidences.length;
   return avgConfidence * 100;
+}
+
+/**
+ * Entropy Score: Information-theoretic quality metric using Shannon entropy
+ * 
+ * Measures the diversity and information content of contributed data.
+ * Higher entropy indicates more diverse, higher-quality contributions.
+ * 
+ * Algorithm:
+ * 1. Calculate Shannon entropy using QualityAnalyzer
+ * 2. Normalize to 0-100 scale
+ * 3. Higher entropy = higher score
+ * 
+ * Requirements: 5.2, 6.4
+ */
+function computeEntropyScore(delta: KnowledgeGraphDelta): number {
+  // Convert delta entities/relationships to format expected by QualityAnalyzer
+  const entities = delta.entities.map(e => ({
+    id: e.id,
+    name: e.name,
+    type: e.type,
+    data: e.properties as Record<string, string | number | boolean | null>
+  }));
+  
+  const relationships = delta.relationships.map(r => ({
+    id: r.id,
+    source: r.sourceEntityId,
+    target: r.targetEntityId,
+    type: r.type,
+    confidence: r.confidence
+  }));
+  
+  // Calculate Shannon entropy
+  const entropy = qualityAnalyzer.calculateEntropy(entities, relationships);
+  
+  // Normalize entropy to 0-100 scale
+  // Typical entropy ranges from 0 to ~5 bits for diverse data
+  // We use a logarithmic scale to map entropy to score
+  const maxExpectedEntropy = 5.0;
+  const normalizedScore = Math.min(100, (entropy / maxExpectedEntropy) * 100);
+  
+  return normalizedScore;
+}
+
+/**
+ * Kolmogorov Complexity Score: Compression-based quality metric
+ * 
+ * Approximates Kolmogorov complexity using compression ratio as a proxy.
+ * Lower compression ratio indicates higher complexity and quality.
+ * 
+ * Algorithm:
+ * 1. Serialize delta to JSON string
+ * 2. Calculate compression ratio using QualityAnalyzer
+ * 3. Invert ratio (lower compression = higher score)
+ * 4. Normalize to 0-100 scale
+ * 
+ * Requirements: 6.1, 6.4
+ */
+function computeKolmogorovScore(delta: KnowledgeGraphDelta): number {
+  // Serialize delta to string for compression analysis
+  const dataString = JSON.stringify({
+    entities: delta.entities.map(e => ({
+      type: e.type,
+      name: e.name,
+      properties: e.properties
+    })),
+    relationships: delta.relationships.map(r => ({
+      type: r.type,
+      sourceEntityId: r.sourceEntityId,
+      targetEntityId: r.targetEntityId,
+      weight: r.weight
+    }))
+  });
+  
+  // Calculate compression ratio
+  const compressionRatio = qualityAnalyzer.approximateKolmogorovComplexity(dataString);
+  
+  // Invert ratio: lower compression ratio = higher complexity = higher quality
+  // compressionRatio ranges from 0 to 1
+  // We want: low ratio (0.3) -> high score (70), high ratio (0.9) -> low score (10)
+  const invertedScore = (1 - compressionRatio) * 100;
+  
+  return Math.max(0, Math.min(100, invertedScore));
+}
+
+/**
+ * Betweenness Centrality Score: Connectivity quality metric
+ * 
+ * Measures how well contributed nodes serve as bridges between
+ * different parts of the knowledge graph. Higher betweenness
+ * indicates nodes that connect previously isolated clusters.
+ * 
+ * Algorithm:
+ * 1. For each contributed entity, calculate betweenness centrality
+ * 2. Betweenness = number of shortest paths passing through node
+ * 3. Average betweenness across all contributed nodes
+ * 4. Normalize to 0-100 scale
+ * 
+ * Simplified implementation using degree-based approximation:
+ * - Nodes connecting to high-degree nodes have higher betweenness
+ * - Nodes with balanced in/out degree have higher betweenness
+ * 
+ * Requirements: 6.2
+ */
+function computeBetweennessScore(delta: KnowledgeGraphDelta): number {
+  if (delta.entities.length === 0) {
+    return 0;
+  }
+  
+  let totalBetweenness = 0;
+  
+  // For each contributed entity, estimate betweenness
+  for (const entity of delta.entities) {
+    // Check if entity exists in global graph
+    const existingEntity = globalGraph.entities.get(entity.id);
+    
+    if (existingEntity) {
+      // Use actual degree information
+      const inDegree = existingEntity.inDegree;
+      const outDegree = existingEntity.outDegree;
+      const totalDegree = inDegree + outDegree;
+      
+      // Betweenness approximation: nodes with balanced in/out degree
+      // and high total degree have higher betweenness
+      const degreeBalance = totalDegree > 0
+        ? 1 - Math.abs(inDegree - outDegree) / totalDegree
+        : 0;
+      
+      // Normalize degree (assume max degree of 100)
+      const normalizedDegree = Math.min(1, totalDegree / 100);
+      
+      // Betweenness estimate: combination of degree and balance
+      const betweenness = (normalizedDegree * 0.6 + degreeBalance * 0.4);
+      totalBetweenness += betweenness;
+    } else {
+      // New entity: estimate based on relationships in delta
+      let inDegree = 0;
+      let outDegree = 0;
+      
+      for (const rel of delta.relationships) {
+        if (rel.targetEntityId === entity.id) inDegree++;
+        if (rel.sourceEntityId === entity.id) outDegree++;
+      }
+      
+      const totalDegree = inDegree + outDegree;
+      const degreeBalance = totalDegree > 0
+        ? 1 - Math.abs(inDegree - outDegree) / totalDegree
+        : 0;
+      
+      const normalizedDegree = Math.min(1, totalDegree / 20); // Lower max for new entities
+      const betweenness = (normalizedDegree * 0.6 + degreeBalance * 0.4);
+      totalBetweenness += betweenness;
+    }
+  }
+  
+  // Average betweenness across all entities
+  const avgBetweenness = totalBetweenness / delta.entities.length;
+  
+  // Convert to 0-100 scale
+  return avgBetweenness * 100;
+}
+
+/**
+ * PageRank Differential Score: Connectivity improvement metric
+ * 
+ * Measures how much the contribution improves the PageRank of
+ * connected nodes in the graph. Higher differential indicates
+ * contributions that significantly boost graph connectivity.
+ * 
+ * Algorithm:
+ * 1. Capture current PageRank values for affected nodes
+ * 2. Simulate adding delta to graph (without persisting)
+ * 3. Calculate new PageRank values
+ * 4. Compute differential (after - before)
+ * 5. Normalize to 0-100 scale
+ * 
+ * Simplified implementation:
+ * - Use existing PageRank values from global graph
+ * - Estimate improvement based on relationship weights and target PageRank
+ * - Avoid full PageRank recomputation for performance
+ * 
+ * Requirements: 6.3
+ */
+function computePageRankDifferentialScore(delta: KnowledgeGraphDelta): number {
+  if (delta.relationships.length === 0) {
+    return 0;
+  }
+  
+  let totalPageRankImprovement = 0;
+  const affectedNodes = new Set<string>();
+  
+  // For each relationship, estimate PageRank improvement
+  for (const rel of delta.relationships) {
+    const sourceEntity = globalGraph.entities.get(rel.sourceEntityId);
+    const targetEntity = globalGraph.entities.get(rel.targetEntityId);
+    
+    // Track affected nodes
+    affectedNodes.add(rel.sourceEntityId);
+    affectedNodes.add(rel.targetEntityId);
+    
+    if (targetEntity) {
+      // Existing target: estimate PageRank boost from new incoming link
+      const currentPageRank = targetEntity.pageRank;
+      
+      // PageRank contribution from source
+      let sourceContribution = 0;
+      if (sourceEntity && sourceEntity.outDegree > 0) {
+        // Existing source: use actual PageRank
+        sourceContribution = (sourceEntity.pageRank / (sourceEntity.outDegree + 1)) * rel.weight;
+      } else {
+        // New source: assume initial PageRank
+        const initialPageRank = 1.0 / (globalGraph.entities.size + delta.entities.length);
+        sourceContribution = initialPageRank * rel.weight;
+      }
+      
+      // Damping factor (standard PageRank parameter)
+      const dampingFactor = 0.85;
+      const pageRankBoost = dampingFactor * sourceContribution;
+      
+      // Relative improvement
+      const relativeImprovement = currentPageRank > 0
+        ? pageRankBoost / currentPageRank
+        : pageRankBoost;
+      
+      totalPageRankImprovement += relativeImprovement;
+    } else {
+      // New target: initial PageRank boost
+      const initialPageRank = 1.0 / (globalGraph.entities.size + delta.entities.length);
+      totalPageRankImprovement += initialPageRank;
+    }
+  }
+  
+  // Average improvement across all relationships
+  const avgImprovement = totalPageRankImprovement / delta.relationships.length;
+  
+  // Normalize to 0-100 scale
+  // Typical improvements range from 0 to 0.5 (50% boost)
+  const normalizedScore = Math.min(100, avgImprovement * 200);
+  
+  return normalizedScore;
+}
+
+/**
+ * Compute quality multiplier based on entropy-volume ratio
+ * 
+ * Applies a multiplier to rewards based on the information-theoretic
+ * quality of contributions. Higher entropy relative to volume indicates
+ * higher quality and earns a higher multiplier.
+ * 
+ * Algorithm:
+ * 1. Calculate entropy score from causal value
+ * 2. Calculate volume (entity + relationship count)
+ * 3. Compute entropy-volume ratio
+ * 4. Map ratio to multiplier (1.0 to 2.0)
+ * 
+ * Requirements: 6.4
+ */
+function computeQualityMultiplier(
+  causalValue: CausalValueScore,
+  delta: KnowledgeGraphDelta
+): number {
+  const entropyScore = causalValue.components.entropyScore || 0;
+  const kolmogorovScore = causalValue.components.kolmogorovScore || 0;
+  
+  // Volume: total entities and relationships
+  const volume = delta.entities.length + delta.relationships.length;
+  
+  if (volume === 0) {
+    return 1.0; // No multiplier for empty delta
+  }
+  
+  // Normalize scores to 0-1 range
+  const normalizedEntropy = entropyScore / 100;
+  const normalizedKolmogorov = kolmogorovScore / 100;
+  
+  // Combined quality score (0-1)
+  // Both metrics must be reasonably high for high multiplier
+  // Use geometric mean to ensure both contribute
+  const qualityScore = Math.sqrt(normalizedEntropy * normalizedKolmogorov);
+  
+  // Map quality score to multiplier range [1.0, 2.0]
+  // Low quality (0) -> 1.0x, High quality (1) -> 2.0x
+  const multiplier = 1.0 + qualityScore;
+  
+  return Math.max(1.0, Math.min(2.0, multiplier));
+}
+
+/**
+ * Compute path creation bonus for unique causal paths
+ * 
+ * Rewards contributions that create new causal paths in the graph,
+ * especially paths that connect previously unconnected clusters.
+ * 
+ * Algorithm:
+ * 1. Identify causal relationships (cites, influences, mentions, references)
+ * 2. For each causal relationship, check if it creates a new path
+ * 3. Calculate path uniqueness score based on graph structure
+ * 4. Sum bonuses across all new paths
+ * 
+ * Requirements: 6.5
+ */
+function computePathCreationBonus(delta: KnowledgeGraphDelta): number {
+  let totalBonus = 0;
+  
+  // Causal relationship types that create valuable paths
+  const causalTypes = new Set(['cites', 'influences', 'mentions', 'references', 'derives_from', 'builds_on']);
+  
+  for (const rel of delta.relationships) {
+    if (!causalTypes.has(rel.type)) {
+      continue; // Only reward causal relationships
+    }
+    
+    const sourceEntity = globalGraph.entities.get(rel.sourceEntityId);
+    const targetEntity = globalGraph.entities.get(rel.targetEntityId);
+    
+    // Check if this creates a new path
+    const isNewPath = !globalGraph.relationshipIndex.has(`${rel.sourceEntityId}:${rel.targetEntityId}`);
+    
+    if (isNewPath) {
+      // Base bonus for creating a new path
+      let pathBonus = 5.0;
+      
+      // Bonus multiplier based on target importance (PageRank)
+      if (targetEntity) {
+        const targetImportance = targetEntity.pageRank;
+        // Connecting to important nodes is more valuable
+        pathBonus *= (1 + targetImportance * 2);
+      }
+      
+      // Bonus for connecting previously isolated nodes
+      if (sourceEntity && sourceEntity.outDegree === 0) {
+        pathBonus *= 1.5; // First outgoing connection
+      }
+      if (targetEntity && targetEntity.inDegree === 0) {
+        pathBonus *= 1.5; // First incoming connection
+      }
+      
+      // Weight by relationship confidence
+      pathBonus *= rel.weight;
+      
+      totalBonus += pathBonus;
+    }
+  }
+  
+  return totalBonus;
 }
 
 /**

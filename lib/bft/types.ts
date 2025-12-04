@@ -43,7 +43,8 @@ export type ByzantineReason =
   | 'DIGEST_MISMATCH'     // SHA-256 digest doesn't match payload
   | 'EQUIVOCATION'        // Node sent conflicting messages
   | 'TIMEOUT'             // Node didn't respond within timeout
-  | 'INVALID_PROOF';      // ZKP proof validation failed
+  | 'INVALID_PROOF'       // ZKP proof validation failed
+  | 'GRAPH_INVARIANT_VIOLATION'; // Graph structure violates invariants
 
 // =====================================================
 // ZOD SCHEMAS

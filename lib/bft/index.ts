@@ -26,3 +26,10 @@ export type {
   BFTRoutingOptions, 
   BFTRoutingResult 
 } from './bftRouter';
+
+// Byzantine resistance components
+export { TemporalEpochManager } from './temporalEpochManager';
+export { CircularDependencyDetector } from './circularDependencyDetector';
+export { MerkleProofSystem } from './merkleProofSystem';
+export { FeatureFlagManager } from './featureFlags';
+export { QualityAnalyzer } from './qualityAnalyzer';

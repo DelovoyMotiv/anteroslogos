@@ -36,7 +36,10 @@ import { MeshNetworkRouter } from '../mesh/network';
 import type { MeshNode } from '../mesh/network';
 import { calculateCausalWeight } from './causalWeightOracle';
 import { offChainOracle } from './offChainOracle';
-import type { CausalGraph } from '../../types/causalTracer.types';
+import type { CausalGraph as CausalTracerGraph } from '../../types/causalTracer.types';
+import { TemporalEpochManager } from './temporalEpochManager';
+import { CircularDependencyDetector } from './circularDependencyDetector';
+import type { EpochCommit, CausalGraph as ByzantineGraph } from '../../types/byzantine.types';
 
 // =====================================================
 // PBFT CONSENSUS ENGINE
@@ -46,7 +49,7 @@ export class PBFTConsensus {
   private nodeId: string;
   private meshRouter: MeshNetworkRouter;
   private storage: BFTStorage;
-  private causalGraph?: CausalGraph;
+  private causalGraph?: CausalTracerGraph;
   
   // View state
   private viewState: ViewState;
@@ -63,11 +66,16 @@ export class PBFTConsensus {
   // Timeouts for consensus rounds
   private roundTimeouts: Map<string, NodeJS.Timeout> = new Map();
   
+  // Byzantine resistance components
+  private epochManager: TemporalEpochManager;
+  private circularDependencyDetector: CircularDependencyDetector;
+  private currentEpoch: number = 0;
+  
   constructor(
     nodeId: string,
     meshRouter: MeshNetworkRouter,
     storage?: BFTStorage,
-    causalGraph?: CausalGraph
+    causalGraph?: CausalTracerGraph
   ) {
     this.nodeId = nodeId;
     this.meshRouter = meshRouter;
@@ -76,6 +84,10 @@ export class PBFTConsensus {
     
     // Initialize off-chain oracle with mesh router
     offChainOracle.setMeshRouter(meshRouter);
+    
+    // Initialize Byzantine resistance components
+    this.epochManager = new TemporalEpochManager(nodeId);
+    this.circularDependencyDetector = new CircularDependencyDetector(nodeId);
     
     // Initialize view state
     this.viewState = {
@@ -109,7 +121,58 @@ export class PBFTConsensus {
     const startTime = Date.now();
     
     try {
-      // 1. Select quorum
+      // 1. Validate graph structure before consensus (Subtask 8.2)
+      if (this.causalGraph) {
+        try {
+          const byzantineGraph = this.convertToByzantineGraph(this.causalGraph);
+          const validationResult = this.circularDependencyDetector.validateGraphStructure(byzantineGraph);
+          
+          if (!validationResult.isValid) {
+            console.error('[PBFT] Graph validation failed:', validationResult.violations);
+            
+            // Log validation results
+            await this.logGraphValidation(request.requestId, validationResult);
+            
+            // Report Byzantine behavior if critical violations detected
+            const criticalViolations = validationResult.violations.filter(v => v.severity === 'CRITICAL');
+            if (criticalViolations.length > 0) {
+              console.error('[PBFT] Critical graph violations detected, rejecting update');
+            }
+            
+            return this.createFailureResult(
+              request.requestId,
+              `Graph validation failed: ${validationResult.violations.map(v => v.type).join(', ')}`
+            );
+          }
+          
+          console.log('[PBFT] Graph validation passed');
+        } catch (error) {
+          console.error('[PBFT] Graph validation error:', error);
+          return this.createFailureResult(
+            request.requestId,
+            `Graph validation error: ${error instanceof Error ? error.message : 'Unknown error'}`
+          );
+        }
+      }
+      
+      // 2. Create epoch at consensus round start (Subtask 8.1)
+      let epochCommit: EpochCommit | null = null;
+      if (this.causalGraph) {
+        try {
+          const byzantineGraph = this.convertToByzantineGraph(this.causalGraph);
+          epochCommit = await this.epochManager.createEpoch(byzantineGraph);
+          this.currentEpoch = epochCommit.epochNumber;
+          console.log(`[PBFT] Created epoch ${this.currentEpoch} for consensus round`);
+        } catch (error) {
+          console.error('[PBFT] Failed to create epoch:', error);
+          return this.createFailureResult(
+            request.requestId,
+            `Epoch creation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+          );
+        }
+      }
+      
+      // 3. Select quorum
       const quorum = await this.selectQuorum();
       if (quorum.length < PBFT_PARAMS.QUORUM_SIZE) {
         return this.createFailureResult(
@@ -118,7 +181,7 @@ export class PBFTConsensus {
         );
       }
       
-      // 2. Create consensus round
+      // 4. Create consensus round
       const digest = this.computeDigest(request);
       const sequenceNumber = ++this.viewState.sequenceNumber;
       
@@ -138,7 +201,7 @@ export class PBFTConsensus {
       
       this.activeRounds.set(request.requestId, round);
       
-      // 3. Broadcast PRE-PREPARE
+      // 5. Broadcast PRE-PREPARE
       const prePrepare = await this.createPBFTMessage(
         'PRE_PREPARE',
         this.viewState.viewNumber,
@@ -149,13 +212,13 @@ export class PBFTConsensus {
       round.prePrepare = prePrepare;
       await this.broadcastToQuorum(prePrepare, request, quorum);
       
-      // 4. Set timeout
+      // 6. Set timeout
       this.setConsensusTimeout(request.requestId);
       
-      // 5. Wait for consensus (2f+1 commits)
+      // 7. Wait for consensus (2f+1 commits)
       const result = await this.waitForConsensus(request.requestId);
       
-      // 6. Record result in database
+      // 8. Record result in database
       const executionTime = Date.now() - startTime;
       await this.storage.recordConsensusResult({
         requestId: request.requestId,
@@ -169,7 +232,7 @@ export class PBFTConsensus {
         executionTimeMs: executionTime,
       });
       
-      // 7. Cleanup
+      // 9. Cleanup
       this.activeRounds.delete(request.requestId);
       this.clearConsensusTimeout(request.requestId);
       
@@ -209,6 +272,28 @@ export class PBFTConsensus {
       await this.reportByzantineNode(message.nodeId, 'INVALID_SIGNATURE', message);
       this.openCircuitBreaker(message.nodeId);
       return;
+    }
+    
+    // Subtask 8.3: Validate graph structure if request contains graph update
+    if (request && this.causalGraph) {
+      try {
+        const byzantineGraph = this.convertToByzantineGraph(this.causalGraph);
+        const validationResult = this.circularDependencyDetector.validateGraphStructure(byzantineGraph);
+        
+        if (!validationResult.isValid) {
+          console.error(`[PBFT] Graph validation failed from ${message.nodeId}:`, validationResult.violations);
+          
+          // Report as Byzantine behavior for critical violations
+          const criticalViolations = validationResult.violations.filter(v => v.severity === 'CRITICAL');
+          if (criticalViolations.length > 0) {
+            await this.reportByzantineNode(message.nodeId, 'GRAPH_INVARIANT_VIOLATION', message);
+            this.openCircuitBreaker(message.nodeId);
+            return;
+          }
+        }
+      } catch (error) {
+        console.error(`[PBFT] Graph validation error for ${message.nodeId}:`, error);
+      }
     }
     
     // Log message for equivocation detection
@@ -872,7 +957,7 @@ export class PBFTConsensus {
    */
   private async reportByzantineNode(
     accusedNode: string,
-    reason: 'INVALID_SIGNATURE' | 'DIGEST_MISMATCH' | 'EQUIVOCATION',
+    reason: 'INVALID_SIGNATURE' | 'DIGEST_MISMATCH' | 'EQUIVOCATION' | 'GRAPH_INVARIANT_VIOLATION',
     message1: PBFTMessage,
     message2?: PBFTMessage
   ): Promise<void> {
@@ -949,5 +1034,95 @@ export class PBFTConsensus {
     }
     
     this.circuitBreakers.set(nodeId, breaker);
+  }
+  
+  /**
+   * Log graph validation results to database (Subtask 8.2)
+   */
+  private async logGraphValidation(
+    requestId: string,
+    validationResult: any
+  ): Promise<void> {
+    try {
+      // This would store validation results in graph_validation_results table
+      // For now, just log to console
+      console.log('[PBFT] Graph validation result:', {
+        requestId,
+        isValid: validationResult.isValid,
+        violations: validationResult.violations,
+        sccAnalysis: validationResult.sccAnalysis,
+      });
+    } catch (error) {
+      console.error('[PBFT] Failed to log graph validation:', error);
+    }
+  }
+  
+  /**
+   * Get current epoch number
+   */
+  getCurrentEpoch(): number {
+    return this.currentEpoch;
+  }
+  
+  /**
+   * Get epoch manager (for testing)
+   */
+  getEpochManager(): TemporalEpochManager {
+    return this.epochManager;
+  }
+  
+  /**
+   * Get circular dependency detector (for testing)
+   */
+  getCircularDependencyDetector(): CircularDependencyDetector {
+    return this.circularDependencyDetector;
+  }
+  
+  /**
+   * Convert CausalTracerGraph to ByzantineGraph
+   */
+  private convertToByzantineGraph(graph: CausalTracerGraph): ByzantineGraph {
+    // Convert nodes map
+    const nodes = new Map();
+    for (const [id, node] of graph.nodes) {
+      nodes.set(id, {
+        id: node.id,
+        type: node.type || 'unknown',
+        data: {
+          label: node.label,
+          confidence: node.confidence,
+          eeatScore: node.eeatScore,
+          authorityScore: node.authorityScore,
+        },
+      });
+    }
+    
+    // Convert edges map
+    const edges = new Map();
+    for (const [source, edge] of graph.edges) {
+      const edgeList = edges.get(source) || [];
+      edgeList.push({
+        source: edge.source,
+        target: edge.target,
+        type: edge.type || 'unknown',
+      });
+      edges.set(source, edgeList);
+    }
+    
+    // Calculate metadata
+    const nodeCount = nodes.size;
+    const edgeCount = Array.from(edges.values()).reduce((sum, list) => sum + list.length, 0);
+    const maxPossibleEdges = nodeCount * (nodeCount - 1);
+    const density = maxPossibleEdges > 0 ? edgeCount / maxPossibleEdges : 0;
+    
+    return {
+      nodes,
+      edges,
+      metadata: {
+        nodeCount,
+        edgeCount,
+        density,
+      },
+    };
   }
 }

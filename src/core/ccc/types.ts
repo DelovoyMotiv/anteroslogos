@@ -140,6 +140,10 @@ export interface CausalValueScore {
     predictionImprovementScore: number; // 0-100, citation accuracy delta
     temporalRelevanceScore: number; // 0-100, recent vs stale data
     confidenceScore: number; // 0-100, weighted by entity/relationship confidence
+    entropyScore?: number; // 0-100, Shannon entropy-based quality metric
+    kolmogorovScore?: number; // 0-100, compression-based complexity metric
+    betweennessScore?: number; // 0-100, betweenness centrality metric
+    pageRankDifferentialScore?: number; // 0-100, PageRank improvement metric
   };
   weights: {
     novelty: number;
@@ -147,6 +151,10 @@ export interface CausalValueScore {
     predictionImprovement: number;
     temporalRelevance: number;
     confidence: number;
+    entropy?: number;
+    kolmogorov?: number;
+    betweenness?: number;
+    pageRankDifferential?: number;
   };
   metadata: {
     novelEntitiesCount: number;
@@ -154,6 +162,8 @@ export interface CausalValueScore {
     averageConnectivityBoost: number;
     predictionsImproved: number;
     computationTimeMs: number;
+    qualityMultiplier?: number; // Quality-based reward multiplier
+    pathCreationBonus?: number; // Bonus for creating unique causal paths
   };
 }
 
