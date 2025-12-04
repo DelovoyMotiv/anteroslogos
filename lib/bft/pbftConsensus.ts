@@ -40,6 +40,7 @@ import { TemporalEpochManager } from './temporalEpochManager';
 import { CircularDependencyDetector } from './circularDependencyDetector';
 import type { EpochCommit, CausalGraph as ByzantineGraph } from '../../types/byzantine.types';
 import { getUnifiedCache } from '../graph/unifiedMetricsCache';
+import { getDistributedCache } from '../graph/distributedMetricsCache';
 
 // =====================================================
 // PBFT CONSENSUS ENGINE
@@ -549,12 +550,21 @@ export class PBFTConsensus {
         const normalizedStake = stake ? Math.min(stake.stakedAmount / 1000, 1) : 0;
         const rttScore = node.rtt ? Math.max(0, 1 - (node.rtt / 1000)) : 0;
         
-        // Unified Cache: Single source of truth for causal weights
+        // Distributed Unified Cache: Single source of truth for causal weights
+        // Three-tier cache hierarchy: Local → Redis → Compute
         // Eliminates duplicate computation between BFT and CCC
         let causalWeight = 0;
         if (this.causalGraph) {
           try {
-            const unifiedCache = getUnifiedCache();
+            // Try distributed cache first (includes Redis layer)
+            let cache;
+            try {
+              cache = getDistributedCache();
+            } catch {
+              // Fallback to local unified cache if Redis not configured
+              cache = getUnifiedCache();
+            }
+            
             const referenceEntity = this.causalGraph.domain || 'consensus_reference';
             
             // Try off-chain oracle first (distributed cache)
@@ -565,10 +575,10 @@ export class PBFTConsensus {
                 this.causalGraph
               );
             } catch (error) {
-              console.warn(`[PBFT] Off-chain oracle failed for ${node.nodeId}, using unified cache`);
+              console.warn(`[PBFT] Off-chain oracle failed for ${node.nodeId}, using distributed cache`);
               
-              // Fallback to unified cache with PageRank-based approximation
-              const pageRankResult = await unifiedCache.getPageRank(
+              // Fallback to distributed cache with PageRank-based approximation
+              const pageRankResult = await cache.getPageRank(
                 node.nodeId,
                 this.causalGraph,
                 this.currentEpoch,
@@ -580,7 +590,7 @@ export class PBFTConsensus {
               causalWeight = Math.min(1.0, pageRankResult.rank * 10);
             }
           } catch (fallbackError) {
-            console.warn(`[PBFT] Unified cache fallback failed for ${node.nodeId}`);
+            console.warn(`[PBFT] Distributed cache fallback failed for ${node.nodeId}`);
           }
         }
         

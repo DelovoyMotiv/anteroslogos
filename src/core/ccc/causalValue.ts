@@ -16,6 +16,7 @@ import {
 } from './types';
 import { QualityAnalyzer } from '../../../lib/bft/qualityAnalyzer';
 import { getUnifiedCache } from '../../../lib/graph/unifiedMetricsCache';
+import { getDistributedCache } from '../../../lib/graph/distributedMetricsCache';
 
 /**
  * Global knowledge graph state for novelty detection
@@ -251,13 +252,20 @@ export function computeCCCReward(
  * Uses unified cache to eliminate duplicate novelty detection
  */
 async function computeNoveltyScore(delta: KnowledgeGraphDelta): Promise<number> {
-  const unifiedCache = getUnifiedCache();
+  // Use distributed cache if available, fallback to local unified cache
+  let cache;
+  try {
+    cache = getDistributedCache();
+  } catch {
+    cache = getUnifiedCache();
+  }
+  
   let novelEntities = 0;
   let novelRelationships = 0;
 
-  // Check entity novelty via unified cache
+  // Check entity novelty via distributed cache
   for (const entity of delta.entities) {
-    const noveltyResult = await unifiedCache.isEntityNovel(
+    const noveltyResult = await cache.isEntityNovel(
       entity.name,
       entity.type,
       entity.id
@@ -268,9 +276,9 @@ async function computeNoveltyScore(delta: KnowledgeGraphDelta): Promise<number> 
     }
   }
 
-  // Check relationship novelty via unified cache
+  // Check relationship novelty via distributed cache
   for (const rel of delta.relationships) {
-    const noveltyResult = await unifiedCache.isRelationshipNovel(
+    const noveltyResult = await cache.isRelationshipNovel(
       rel.sourceEntityId,
       rel.targetEntityId,
       rel.type,
@@ -304,11 +312,17 @@ async function computeConnectivityScore(delta: KnowledgeGraphDelta): Promise<num
     return 0; // No connectivity without relationships
   }
 
-  const unifiedCache = getUnifiedCache();
+  // Use distributed cache if available, fallback to local unified cache
+  let cache;
+  try {
+    cache = getDistributedCache();
+  } catch {
+    cache = getUnifiedCache();
+  }
   
-  // Get connectivity metrics from unified cache
-  // This uses cached PageRank values instead of recomputing
-  const connectivityResult = await unifiedCache.getConnectivityMetrics(
+  // Get connectivity metrics from distributed cache
+  // Three-tier hierarchy: Local → Redis → Compute
+  const connectivityResult = await cache.getConnectivityMetrics(
     delta.relationships,
     {
       nodes: globalGraph.entities as any,
@@ -509,12 +523,19 @@ async function computeBetweennessScore(delta: KnowledgeGraphDelta): Promise<numb
     return 0;
   }
   
-  const unifiedCache = getUnifiedCache();
+  // Use distributed cache if available, fallback to local unified cache
+  let cache;
+  try {
+    cache = getDistributedCache();
+  } catch {
+    cache = getUnifiedCache();
+  }
+  
   let totalBetweenness = 0;
   
-  // For each contributed entity, get betweenness from unified cache
+  // For each contributed entity, get betweenness from distributed cache
   for (const entity of delta.entities) {
-    const betweennessResult = await unifiedCache.getBetweenness(
+    const betweennessResult = await cache.getBetweenness(
       entity.id,
       {
         nodes: globalGraph.entities as any,
@@ -557,18 +578,25 @@ async function computePageRankDifferentialScore(delta: KnowledgeGraphDelta): Pro
     return 0;
   }
   
-  const unifiedCache = getUnifiedCache();
+  // Use distributed cache if available, fallback to local unified cache
+  let cache;
+  try {
+    cache = getDistributedCache();
+  } catch {
+    cache = getUnifiedCache();
+  }
+  
   let totalPageRankImprovement = 0;
   const affectedNodes = new Set<string>();
   
-  // For each relationship, estimate PageRank improvement using unified cache
+  // For each relationship, estimate PageRank improvement using distributed cache
   for (const rel of delta.relationships) {
     // Track affected nodes
     affectedNodes.add(rel.sourceEntityId);
     affectedNodes.add(rel.targetEntityId);
     
-    // Get PageRank from unified cache
-    const targetPageRank = await unifiedCache.getPageRank(
+    // Get PageRank from distributed cache
+    const targetPageRank = await cache.getPageRank(
       rel.targetEntityId,
       {
         nodes: globalGraph.entities as any,
@@ -583,8 +611,8 @@ async function computePageRankDifferentialScore(delta: KnowledgeGraphDelta): Pro
       // Existing target: estimate PageRank boost from new incoming link
       const currentPageRank = targetPageRank.rank;
       
-      // Get source PageRank from unified cache
-      const sourcePageRank = await unifiedCache.getPageRank(
+      // Get source PageRank from distributed cache
+      const sourcePageRank = await cache.getPageRank(
         rel.sourceEntityId,
         {
           nodes: globalGraph.entities as any,
