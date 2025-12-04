@@ -59,3 +59,4 @@ export { OverviewTab } from './OverviewTab';
 export { AnalysisTab } from './AnalysisTab';
 export { InsightsTab } from './InsightsTab';
 export { TechnicalTab } from './TechnicalTab';
+export { HistoricalComparison } from './HistoricalComparison';

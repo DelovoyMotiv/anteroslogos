@@ -32,6 +32,7 @@ import { ScoreBreakdownChart } from '../ScoreBreakdownChart';
 import { CategoryScoresChart } from '../CategoryScoresChart';
 import { ExportButtons } from '../ExportButtons';
 import { QuickSummary } from './QuickSummary';
+import { HistoricalComparison } from './HistoricalComparison';
 import type { AuditResult } from '../../../../../utils/geoAuditEnhanced';
 
 interface OverviewTabProps {
@@ -85,6 +86,9 @@ export function OverviewTab({ result }: OverviewTabProps) {
           <ScoreCard label="AID Agent" score={result.scores.aidAgent} />
         </div>
       </div>
+
+      {/* HISTORICAL COMPARISON SECTION */}
+      <HistoricalComparison result={result} />
 
       {/* BOTTOM SECTION: Charts - Stacked on Mobile, Side-by-Side on Desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
