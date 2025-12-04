@@ -24,21 +24,21 @@ export function ScoreBreakdownChart({ breakdown }: ScoreBreakdownChartProps) {
   ];
 
   return (
-    <div className="bg-black/20 border border-slate-800/50 p-4">
-      <h3 className="text-xs font-mono text-slate-300 uppercase tracking-wider mb-4">
+    <div className="bg-black/20 border border-slate-800/50 p-3 md:p-4">
+      <h3 className="text-[10px] md:text-xs font-mono text-slate-300 uppercase tracking-wider mb-2 md:mb-3">
         Score Breakdown
       </h3>
-      <ResponsiveContainer width="100%" height={300}>
+      <ResponsiveContainer width="100%" height={280}>
         <RadarChart data={data}>
           <PolarGrid stroke={CHART_THEME.grid.stroke} strokeOpacity={CHART_THEME.grid.opacity} />
           <PolarAngleAxis 
             dataKey="category" 
-            tick={{ fill: CHART_THEME.axis.tick, fontSize: 11 }}
+            tick={{ fill: CHART_THEME.axis.tick, fontSize: 9 }}
           />
           <PolarRadiusAxis 
             angle={90} 
             domain={[0, 100]}
-            tick={{ fill: CHART_THEME.axis.tick, fontSize: 10 }}
+            tick={{ fill: CHART_THEME.axis.tick, fontSize: 8 }}
           />
           <Radar
             name="Score"
@@ -53,6 +53,7 @@ export function ScoreBreakdownChart({ breakdown }: ScoreBreakdownChartProps) {
               border: `1px solid ${CHART_THEME.tooltip.border}`,
               borderRadius: '4px',
               color: CHART_THEME.tooltip.text,
+              fontSize: '11px',
             }}
             formatter={(value: number) => [`${value.toFixed(1)}`, 'Score']}
           />

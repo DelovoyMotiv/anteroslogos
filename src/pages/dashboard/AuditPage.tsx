@@ -15,20 +15,20 @@ import {
   Search, 
   Loader2, 
   AlertCircle, 
-  TrendingUp, 
   History,
   ExternalLink,
-  CheckCircle,
   Clock,
-  BarChart3
+  BarChart3,
+  Lightbulb,
+  Settings
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { PreciseScoreDisplay } from './audit/PreciseScoreDisplay';
-import { ScoreBreakdownChart } from './audit/ScoreBreakdownChart';
-import { CategoryScoresChart } from './audit/CategoryScoresChart';
-import { InsightsPanel } from './audit/InsightsPanel';
-import { ExportButtons } from './audit/ExportButtons';
 import { DetailedMetrics } from './audit/DetailedMetrics';
+import { TabContainer, TabButton, TabContent, MobileTabDropdown, OverviewTab, AnalysisTab, InsightsTab } from './audit/tabs';
+import type { MobileTab } from './audit/tabs';
+import { useAuditNavigation } from './audit/hooks/useAuditNavigation';
+import { useSwipeGesture, getAdjacentTab } from './audit/hooks/useSwipeGesture';
+import type { TabId } from './audit/hooks/useAuditNavigation';
 
 interface SavedAudit {
   id: string;
@@ -46,12 +46,62 @@ interface SavedAudit {
 
 export function AuditPage() {
   const { user } = useAuth();
+  const { state, setActiveTab } = useAuditNavigation();
   const [url, setUrl] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AuditResult | null>(null);
   const [error, setError] = useState('');
   const [savedAudits, setSavedAudits] = useState<SavedAudit[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
+
+  // Define tab order for swipe navigation
+  const tabOrder: TabId[] = ['overview', 'analysis', 'insights', 'technical'];
+
+  // Mobile tab data for dropdown
+  const mobileTabs: MobileTab[] = [
+    {
+      id: 'overview',
+      label: 'Overview',
+      icon: <BarChart3 className="w-4 h-4" />,
+      ariaLabel: 'Overview tab - View summary and key metrics',
+    },
+    {
+      id: 'analysis',
+      label: 'Analysis',
+      icon: <Search className="w-4 h-4" />,
+      badge: 11,
+      ariaLabel: 'Analysis tab - Detailed category breakdown (11 categories)',
+    },
+    {
+      id: 'insights',
+      label: 'Insights',
+      icon: <Lightbulb className="w-4 h-4" />,
+      ariaLabel: 'Insights tab - AI recommendations and action items',
+    },
+    {
+      id: 'technical',
+      label: 'Technical',
+      icon: <Settings className="w-4 h-4" />,
+      ariaLabel: 'Technical tab - Raw data and technical details',
+    },
+  ];
+
+  // Swipe gesture handlers for mobile
+  const swipeHandlers = useSwipeGesture({
+    onSwipeLeft: () => {
+      // Swipe left = next tab
+      const nextTab = getAdjacentTab(tabOrder, state.activeTab, 'next');
+      setActiveTab(nextTab);
+    },
+    onSwipeRight: () => {
+      // Swipe right = previous tab
+      const prevTab = getAdjacentTab(tabOrder, state.activeTab, 'previous');
+      setActiveTab(prevTab);
+    },
+    threshold: 50,
+    maxVerticalMovement: 100,
+    minVelocity: 0.3,
+  });
 
   // Load audit history on mount
   useEffect(() => {
@@ -233,62 +283,86 @@ export function AuditPage() {
 
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="border-b border-slate-800/50 pb-3">
-        <div className="flex items-center gap-2">
-          <Search className="w-5 h-5 text-blue-400" />
+      {/* Header with enhanced styling */}
+      <div className="border-b border-slate-800/50 pb-4 mb-1">
+        <div className="flex items-center gap-3">
+          <Search className="w-5 h-5 text-blue-400 animate-pulse" />
           <h1 className="text-base font-semibold text-slate-100 tracking-tight uppercase">
             GEO Audit
           </h1>
         </div>
-        <p className="text-xs text-slate-500 mt-1 font-mono">
+        <p className="text-xs text-slate-500 mt-2 font-mono leading-relaxed">
           Analyze website visibility for Generative AI engines
         </p>
       </div>
 
-      {/* Audit Form */}
+      {/* Audit Form with enhanced styling */}
       <form onSubmit={handleAnalyze} className="space-y-3">
-        <div className="bg-black/20 border border-slate-800/50 p-4">
-          <label htmlFor="url" className="block text-xs font-mono text-slate-400 uppercase tracking-wider mb-2">
+        <div className="bg-black/20 border border-slate-800/50 p-4 md:p-5 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+          <label htmlFor="url" className="block text-xs font-mono text-slate-400 uppercase tracking-wider mb-3">
             Website URL
           </label>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 md:gap-3">
             <input
               type="url"
               id="url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://example.com"
-              className="flex-1 px-3 py-2 bg-black/40 border border-slate-700/50 text-slate-200 text-sm font-mono placeholder:text-slate-600 focus:outline-none focus:border-blue-500/50 transition-colors"
+              className="
+                flex-1 px-4 py-2.5 
+                bg-black/40 border border-slate-700/50 rounded-lg
+                text-slate-200 text-sm font-mono 
+                placeholder:text-slate-600 
+                focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20
+                transition-all duration-300
+                hover:border-slate-600/50
+              "
               required
               disabled={isAnalyzing}
             />
             <button
               type="submit"
               disabled={isAnalyzing || !url}
-              className="px-6 py-2 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 disabled:text-slate-600 text-white text-sm font-medium uppercase tracking-wider transition-colors flex items-center gap-2"
+              className="
+                px-6 py-2.5 
+                bg-blue-600 hover:bg-blue-500 
+                disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed
+                text-white text-sm font-medium uppercase tracking-wider 
+                rounded-lg shadow-lg hover:shadow-xl
+                transition-all duration-300 ease-out
+                flex items-center justify-center gap-2
+                hover:scale-[1.02] active:scale-[0.98]
+                transform
+              "
             >
               {isAnalyzing ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  Analyzing...
+                  <span>Analyzing...</span>
                 </>
               ) : (
                 <>
                   <Search className="w-4 h-4" />
-                  Analyze
+                  <span>Analyze</span>
                 </>
               )}
             </button>
           </div>
         </div>
 
-        {/* Error Display */}
+        {/* Error Display with enhanced styling */}
         {error && (
-          <div className="bg-red-950/20 border border-red-500/30 p-3 flex items-start gap-2">
-            <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+          <div className="
+            bg-red-950/20 border border-red-500/30 
+            p-3 md:p-4 rounded-lg
+            flex items-start gap-3
+            shadow-lg shadow-red-500/10
+            animate-in fade-in slide-in-from-top-2 duration-300
+          ">
+            <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5 animate-pulse" />
             <div>
-              <p className="text-xs font-mono text-red-400">{error}</p>
+              <p className="text-xs md:text-sm font-mono text-red-400 leading-relaxed">{error}</p>
             </div>
           </div>
         )}
@@ -297,198 +371,95 @@ export function AuditPage() {
       {/* Audit Results */}
       {result && (
         <div className="space-y-4">
-          {/* Precise Score Display with Export Buttons */}
-          <div className="flex flex-col gap-4">
-            <PreciseScoreDisplay
-              overallScore={result.overallScore}
-              preciseScore={result.preciseScore}
-              grade={result.grade}
-              scoreBreakdown={result.scoreBreakdown}
-            />
-            <div className="flex items-center justify-between bg-black/20 border border-slate-800/50 p-3">
-              <span className="text-xs font-mono text-slate-400 uppercase tracking-wider">
-                Export Report
-              </span>
-              <ExportButtons result={result} />
-            </div>
-          </div>
-
-          {/* AI Insights */}
-          {result.insights && result.insights.length > 0 && (
-            <InsightsPanel insights={result.insights} />
-          )}
-
-          {/* Charts Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {result.scoreBreakdown && (
-              <ScoreBreakdownChart breakdown={result.scoreBreakdown} />
-            )}
-            <CategoryScoresChart scores={result.scores} />
-          </div>
-
-          {/* Category Scores Grid - ALL 11 CATEGORIES */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2">
-            <ScoreCard label="Schema" score={result.scores.schemaMarkup} />
-            <ScoreCard label="Meta Tags" score={result.scores.metaTags} />
-            <ScoreCard label="AI Crawlers" score={result.scores.aiCrawlers} />
-            <ScoreCard label="E-E-A-T" score={result.scores.eeat} />
-            <ScoreCard label="Structure" score={result.scores.structure} />
-            <ScoreCard label="Performance" score={result.scores.performance} />
-            <ScoreCard label="Content" score={result.scores.contentQuality} />
-            <ScoreCard label="Citation" score={result.scores.citationPotential} />
-            <ScoreCard label="Technical SEO" score={result.scores.technicalSEO} />
-            <ScoreCard label="Link Analysis" score={result.scores.linkAnalysis} />
-            <ScoreCard label="AID Agent" score={result.scores.aidAgent} />
-          </div>
-
-          {/* Detailed Category Analysis */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Schema Markup Details */}
-            <CategoryDetail
-              title="Schema Markup"
-              score={result.scores.schemaMarkup}
-              issues={result.details.schemaMarkup.issues}
-              strengths={result.details.schemaMarkup.strengths}
-            />
-
-            {/* Meta Tags Details */}
-            <CategoryDetail
-              title="Meta Tags"
-              score={result.scores.metaTags}
-              issues={result.details.metaTags.issues}
-              strengths={result.details.metaTags.strengths}
-            />
-
-            {/* AI Crawlers Details */}
-            <CategoryDetail
-              title="AI Crawlers"
-              score={result.scores.aiCrawlers}
-              issues={result.details.aiCrawlers.issues}
-              strengths={result.details.aiCrawlers.strengths}
-            />
-
-            {/* E-E-A-T Details */}
-            <CategoryDetail
-              title="E-E-A-T Signals"
-              score={result.scores.eeat}
-              issues={result.details.eeat.issues}
-              strengths={result.details.eeat.strengths}
-            />
-
-            {/* Structure Details */}
-            <CategoryDetail
-              title="HTML Structure"
-              score={result.scores.structure}
-              issues={result.details.structure.issues}
-              strengths={result.details.structure.strengths}
-            />
-
-            {/* Performance Details */}
-            <CategoryDetail
-              title="Performance"
-              score={result.scores.performance}
-              issues={result.details.performance.issues}
-              strengths={result.details.performance.strengths}
-            />
-
-            {/* Content Quality Details */}
-            <CategoryDetail
-              title="Content Quality"
-              score={result.scores.contentQuality}
-              issues={result.details.contentQuality.issues}
-              strengths={result.details.contentQuality.strengths}
-            />
-
-            {/* Citation Potential Details */}
-            <CategoryDetail
-              title="Citation Potential"
-              score={result.scores.citationPotential}
-              issues={result.details.citationPotential.issues}
-              strengths={result.details.citationPotential.strengths}
-            />
-
-            {/* Technical SEO Details */}
-            <CategoryDetail
-              title="Technical SEO"
-              score={result.scores.technicalSEO}
-              issues={result.details.technicalSEO.issues}
-              strengths={result.details.technicalSEO.strengths}
-            />
-
-            {/* Link Analysis Details */}
-            <CategoryDetail
-              title="Link Analysis"
-              score={result.scores.linkAnalysis}
-              issues={result.details.linkAnalysis.issues}
-              strengths={result.details.linkAnalysis.strengths}
-            />
-
-            {/* AID Agent Details */}
-            <CategoryDetail
-              title="AID Agent Support"
-              score={result.scores.aidAgent}
-              issues={result.details.aidAgent.errors || []}
-              strengths={result.details.aidAgent.detected ? ['AID protocol detected'] : []}
+          {/* Mobile Tab Dropdown - Visible only on mobile */}
+          <div className="md:hidden mb-4">
+            <MobileTabDropdown
+              tabs={mobileTabs}
+              activeTab={state.activeTab}
+              onTabChange={setActiveTab}
             />
           </div>
 
-          {/* Recommendations */}
-          {result.recommendations && result.recommendations.length > 0 && (
-            <div className="bg-black/20 border border-slate-800/50 p-4">
-              <div className="flex items-center gap-2 mb-3">
-                <TrendingUp className="w-4 h-4 text-blue-400" />
-                <h3 className="text-xs font-mono text-slate-300 uppercase tracking-wider">
-                  Top Recommendations
-                </h3>
-              </div>
-              <div className="space-y-2">
-                {result.recommendations.slice(0, 10).map((rec, idx) => (
-                  <div
-                    key={idx}
-                    className="bg-black/30 border border-slate-800/30 p-3"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className={`text-[9px] font-mono uppercase px-1.5 py-0.5 ${
-                            rec.priority === 'critical' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
-                            rec.priority === 'high' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' :
-                            rec.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
-                            'bg-slate-500/20 text-slate-400 border border-slate-500/30'
-                          }`}>
-                            {rec.priority}
-                          </span>
-                          <span className="text-xs font-mono text-slate-400">
-                            {rec.category}
-                          </span>
-                        </div>
-                        <p className="text-xs text-slate-300 font-medium">
-                          {rec.title}
-                        </p>
-                        <p className="text-xs text-slate-500 mt-1">
-                          {rec.description}
-                        </p>
-                        {rec.impact && (
-                          <p className="text-xs text-blue-400 mt-1">
-                            Impact: {rec.impact}
-                          </p>
-                        )}
-                      </div>
-                    </div>
+          {/* Desktop Tab Navigation - Hidden on mobile */}
+          <TabContainer>
+            <TabButton
+              id="overview"
+              label="Overview"
+              icon={<BarChart3 className="w-4 h-4" />}
+              isActive={state.activeTab === 'overview'}
+              onClick={() => setActiveTab('overview')}
+              ariaLabel="Overview tab - View summary and key metrics"
+            />
+            <TabButton
+              id="analysis"
+              label="Analysis"
+              icon={<Search className="w-4 h-4" />}
+              isActive={state.activeTab === 'analysis'}
+              onClick={() => setActiveTab('analysis')}
+              badge={11}
+              ariaLabel="Analysis tab - Detailed category breakdown (11 categories)"
+            />
+            <TabButton
+              id="insights"
+              label="Insights"
+              icon={<Lightbulb className="w-4 h-4" />}
+              isActive={state.activeTab === 'insights'}
+              onClick={() => setActiveTab('insights')}
+              ariaLabel="Insights tab - AI recommendations and action items"
+            />
+            <TabButton
+              id="technical"
+              label="Technical"
+              icon={<Settings className="w-4 h-4" />}
+              isActive={state.activeTab === 'technical'}
+              onClick={() => setActiveTab('technical')}
+              ariaLabel="Technical tab - Raw data and technical details"
+            />
+          </TabContainer>
+
+          {/* Tab Content with Swipe Gesture Support */}
+          <div {...swipeHandlers}>
+            {/* Overview Tab */}
+            <TabContent isActive={state.activeTab === 'overview'}>
+              <OverviewTab result={result} />
+            </TabContent>
+
+            {/* Analysis Tab */}
+            <TabContent isActive={state.activeTab === 'analysis'}>
+              <AnalysisTab result={result} />
+            </TabContent>
+
+            {/* Insights Tab */}
+            <TabContent isActive={state.activeTab === 'insights'}>
+              <InsightsTab result={result} />
+            </TabContent>
+
+            {/* Technical Tab */}
+            <TabContent isActive={state.activeTab === 'technical'}>
+              <div className="space-y-4">
+                <div className="bg-black/20 border border-slate-800/50 p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Settings className="w-4 h-4 text-blue-400" />
+                    <h3 className="text-xs font-mono text-slate-300 uppercase tracking-wider">
+                      Technical Details & Metrics
+                    </h3>
                   </div>
-                ))}
-              </div>
-            </div>
-          )}
+                  <p className="text-xs text-slate-500">
+                    Comprehensive technical analysis including all category metrics, AID protocol details, and raw data.
+                  </p>
+                </div>
 
-          {/* Detailed Metrics - All Category Metrics */}
-          <DetailedMetrics result={result} />
+                {/* Detailed Metrics - All Category Metrics */}
+                <DetailedMetrics result={result} />
+              </div>
+            </TabContent>
+          </div>
         </div>
       )}
 
-      {/* Audit History */}
-      <div className="bg-black/20 border border-slate-800/50 p-4">
-        <div className="flex items-center gap-2 mb-3">
+      {/* Audit History with enhanced styling */}
+      <div className="bg-black/20 border border-slate-800/50 p-4 md:p-5 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300">
+        <div className="flex items-center gap-2.5 mb-4">
           <History className="w-4 h-4 text-slate-500" />
           <h3 className="text-xs font-mono text-slate-300 uppercase tracking-wider">
             Recent Audits
@@ -496,35 +467,50 @@ export function AuditPage() {
         </div>
 
         {loadingHistory ? (
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="w-5 h-5 text-slate-600 animate-spin" />
+          <div className="flex items-center justify-center py-10">
+            <Loader2 className="w-6 h-6 text-slate-600 animate-spin" />
           </div>
         ) : savedAudits.length === 0 ? (
-          <div className="text-center py-8">
-            <BarChart3 className="w-8 h-8 text-slate-700 mx-auto mb-2" />
+          <div className="text-center py-10">
+            <BarChart3 className="w-10 h-10 text-slate-700 mx-auto mb-3 opacity-50" />
             <p className="text-xs text-slate-600 font-mono">No audit history yet</p>
           </div>
         ) : (
-          <div className="space-y-2">
-            {savedAudits.map((audit) => (
+          <div className="space-y-2.5">
+            {savedAudits.map((audit, idx) => (
               <div
                 key={audit.id}
-                className="bg-black/30 border border-slate-800/30 p-3 flex items-center justify-between hover:border-slate-700/50 transition-colors cursor-pointer"
+                className="
+                  bg-black/30 border border-slate-800/30 
+                  p-3 md:p-4 rounded-lg
+                  flex items-center justify-between 
+                  hover:border-slate-700/50 hover:bg-black/40
+                  transition-all duration-300 ease-out
+                  cursor-pointer
+                  hover:scale-[1.01] hover:shadow-lg
+                  transform
+                  animate-in fade-in slide-in-from-left-2
+                  group
+                "
+                style={{ animationDelay: `${idx * 50}ms` }}
                 onClick={() => {
                   setUrl(audit.url);
                   toast.info('URL loaded. Click Analyze to re-audit.');
                 }}
               >
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className={`text-base font-bold font-mono ${getScoreColor(audit.overall_score)}`}>
+                  <div className="flex items-center gap-2.5 mb-1.5">
+                    <span className={`
+                      text-base md:text-lg font-bold font-mono ${getScoreColor(audit.overall_score)}
+                      transition-transform duration-300 group-hover:scale-110
+                    `}>
                       {audit.overall_score.toFixed(3)}
                     </span>
-                    <span className="text-xs text-slate-500 truncate">
+                    <span className="text-xs text-slate-500 truncate group-hover:text-slate-400 transition-colors">
                       {audit.url}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-[10px] text-slate-600 font-mono">
+                  <div className="flex items-center gap-2 text-[10px] text-slate-600 font-mono group-hover:text-slate-500 transition-colors">
                     <Clock className="w-3 h-3" />
                     {new Date(audit.timestamp).toLocaleDateString('en-US', {
                       month: 'short',
@@ -535,7 +521,7 @@ export function AuditPage() {
                     })}
                   </div>
                 </div>
-                <ExternalLink className="w-3.5 h-3.5 text-slate-600" />
+                <ExternalLink className="w-4 h-4 text-slate-600 group-hover:text-slate-400 transition-all duration-300 group-hover:scale-110" />
               </div>
             ))}
           </div>
@@ -545,108 +531,8 @@ export function AuditPage() {
   );
 }
 
-/**
- * Score Card Component
- */
-function ScoreCard({ label, score }: { label: string; score: number }) {
-  const getColor = (s: number) => {
-    if (s >= 80) return 'text-emerald-400';
-    if (s >= 60) return 'text-yellow-400';
-    if (s >= 40) return 'text-orange-400';
-    return 'text-red-400';
-  };
 
-  return (
-    <div className="bg-black/20 border border-slate-800/50 p-3">
-      <div className="text-[10px] font-mono text-slate-500 uppercase tracking-wider mb-1">
-        {label}
-      </div>
-      <div className={`text-2xl font-bold font-mono ${getColor(score)}`}>
-        {score.toFixed(1)}
-      </div>
-    </div>
-  );
-}
 
-/**
- * Category Detail Component - Shows issues and strengths for each category
- */
-function CategoryDetail({ 
-  title, 
-  score, 
-  issues, 
-  strengths 
-}: { 
-  title: string; 
-  score: number; 
-  issues: string[]; 
-  strengths: string[]; 
-}) {
-  const getColor = (s: number) => {
-    if (s >= 80) return 'text-emerald-400';
-    if (s >= 60) return 'text-yellow-400';
-    if (s >= 40) return 'text-orange-400';
-    return 'text-red-400';
-  };
 
-  const getBorderColor = (s: number) => {
-    if (s >= 80) return 'border-emerald-500/30';
-    if (s >= 60) return 'border-yellow-500/30';
-    if (s >= 40) return 'border-orange-500/30';
-    return 'border-red-500/30';
-  };
-
-  return (
-    <div className={`bg-black/20 border ${getBorderColor(score)} p-4`}>
-      <div className="flex items-center justify-between mb-3">
-        <h4 className="text-xs font-mono text-slate-300 uppercase tracking-wider">
-          {title}
-        </h4>
-        <span className={`text-lg font-bold font-mono ${getColor(score)}`}>
-          {score.toFixed(1)}
-        </span>
-      </div>
-
-      {/* Strengths */}
-      {strengths.length > 0 && (
-        <div className="mb-3">
-          <div className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider mb-1.5">
-            ✓ Strengths
-          </div>
-          <ul className="space-y-1">
-            {strengths.map((strength, idx) => (
-              <li key={idx} className="text-xs text-slate-400 flex items-start gap-2">
-                <CheckCircle className="w-3 h-3 text-emerald-500 flex-shrink-0 mt-0.5" />
-                <span>{strength}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Issues */}
-      {issues.length > 0 && (
-        <div>
-          <div className="text-[10px] font-mono text-red-400 uppercase tracking-wider mb-1.5">
-            ⚠ Issues
-          </div>
-          <ul className="space-y-1">
-            {issues.map((issue, idx) => (
-              <li key={idx} className="text-xs text-slate-500 flex items-start gap-2">
-                <AlertCircle className="w-3 h-3 text-red-500 flex-shrink-0 mt-0.5" />
-                <span>{issue}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* No issues or strengths */}
-      {issues.length === 0 && strengths.length === 0 && (
-        <p className="text-xs text-slate-600 italic">No detailed information available</p>
-      )}
-    </div>
-  );
-}
 
 export default AuditPage;

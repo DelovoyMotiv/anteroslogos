@@ -38,12 +38,12 @@ export function CategoryScoresChart({ scores }: CategoryScoresChartProps) {
   ];
 
   return (
-    <div className="bg-black/20 border border-slate-800/50 p-4">
-      <h3 className="text-xs font-mono text-slate-300 uppercase tracking-wider mb-4">
-        Category Scores Distribution
+    <div className="bg-black/20 border border-slate-800/50 p-3 md:p-4">
+      <h3 className="text-[10px] md:text-xs font-mono text-slate-300 uppercase tracking-wider mb-2 md:mb-3">
+        Category Distribution
       </h3>
-      <ResponsiveContainer width="100%" height={400}>
-        <BarChart data={data} layout="vertical" margin={{ left: 80, right: 20 }}>
+      <ResponsiveContainer width="100%" height={280}>
+        <BarChart data={data} layout="vertical" margin={{ left: 60, right: 10, top: 5, bottom: 5 }}>
           <CartesianGrid 
             strokeDasharray="3 3" 
             stroke={CHART_THEME.grid.stroke} 
@@ -52,13 +52,13 @@ export function CategoryScoresChart({ scores }: CategoryScoresChartProps) {
           <XAxis 
             type="number" 
             domain={[0, 100]}
-            tick={{ fill: CHART_THEME.axis.tick, fontSize: 10 }}
+            tick={{ fill: CHART_THEME.axis.tick, fontSize: 8 }}
           />
           <YAxis 
             type="category" 
             dataKey="name"
-            tick={{ fill: CHART_THEME.axis.tick, fontSize: 11 }}
-            width={70}
+            tick={{ fill: CHART_THEME.axis.tick, fontSize: 9 }}
+            width={55}
           />
           <Tooltip
             contentStyle={{
@@ -66,6 +66,7 @@ export function CategoryScoresChart({ scores }: CategoryScoresChartProps) {
               border: `1px solid ${CHART_THEME.tooltip.border}`,
               borderRadius: '4px',
               color: CHART_THEME.tooltip.text,
+              fontSize: '11px',
             }}
             formatter={(value: number) => [`${value.toFixed(1)}`, 'Score']}
           />
