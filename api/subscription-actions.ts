@@ -2,10 +2,10 @@
  * Subscription Management Endpoints
  * Consolidated endpoint to reduce serverless function count
  * 
- * POST /api/subscriptions/manage?action=subscribe - Create subscription
- * POST /api/subscriptions/manage?action=cancel - Cancel subscription
- * POST /api/subscriptions/manage?action=verify - Verify payment
- * GET /api/subscriptions/manage?action=status - Get status
+ * POST /api/subscription-actions?action=subscribe - Create subscription
+ * POST /api/subscription-actions?action=cancel - Cancel subscription
+ * POST /api/subscription-actions?action=verify - Verify payment
+ * GET /api/subscription-actions?action=status - Get status
  * 
  * **Validates: Requirements 1.1, 2.1, 2.2, 2.3, 3.1, 3.2, 3.3**
  */

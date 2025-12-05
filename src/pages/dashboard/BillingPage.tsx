@@ -84,7 +84,7 @@ export function BillingPage() {
     setSubscribing(planTier);
 
     try {
-      const response = await fetch('/api/subscriptions/manage?action=subscribe', {
+      const response = await fetch('/api/subscription-actions?action=subscribe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -124,7 +124,7 @@ export function BillingPage() {
     }
 
     try {
-      const response = await fetch('/api/subscriptions/manage?action=cancel', {
+      const response = await fetch('/api/subscription-actions?action=cancel', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
