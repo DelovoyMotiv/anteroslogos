@@ -345,6 +345,7 @@ export const CacheKeys = {
   apiKey: (keyId: string) => `apikey:${keyId}`,
   globalEntity: (normalizedName: string) => `global:entity:${normalizedName}`,
   usageStats: (userId: string, date: string) => `usage:${userId}:${date}`,
+  subscription: (userId: string) => `subscription:${userId}`,
 };
 
 /**

@@ -14,5 +14,16 @@
  * @module lib/error-tracking
  */
 
-export { initSentry, captureError, captureException, setUserContext, addBreadcrumb } from './sentry';
+export { 
+  initSentry, 
+  captureError, 
+  captureException, 
+  setUserContext, 
+  addBreadcrumb,
+  setSubscriptionContext,
+  clearSubscriptionContext,
+  addPaymentBreadcrumb,
+  captureSubscriptionError,
+  capturePaymentDetectionError,
+} from './sentry';
 export type { SentryConfig, UserContext, Breadcrumb } from './types';

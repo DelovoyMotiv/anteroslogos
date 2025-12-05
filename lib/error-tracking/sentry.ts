@@ -76,10 +76,44 @@ export function initSentry(config: SentryConfig): void {
         
         // Remove sensitive data from extra
         if (event.extra) {
-          const sensitiveKeys = ['password', 'token', 'secret', 'apiKey', 'privateKey'];
+          const sensitiveKeys = [
+            'password', 
+            'token', 
+            'secret', 
+            'apiKey', 
+            'privateKey',
+            'privatekey',
+            'private_key',
+            'billing_wallet_address', // Don't log user wallet addresses
+            'billingWalletAddress',
+            'email', // Don't log user emails
+            'tx_hash', // Don't log full transaction hashes in extra
+            'txHash',
+          ];
           for (const key of sensitiveKeys) {
             if (key in event.extra) {
               event.extra[key] = '[REDACTED]';
+            }
+          }
+          
+          // Redact nested sensitive data
+          for (const value of Object.values(event.extra)) {
+            if (typeof value === 'object' && value !== null) {
+              for (const sensitiveKey of sensitiveKeys) {
+                if (sensitiveKey in value) {
+                  (value as any)[sensitiveKey] = '[REDACTED]';
+                }
+              }
+            }
+          }
+        }
+        
+        // Remove sensitive data from tags
+        if (event.tags) {
+          const sensitiveTagKeys = ['email', 'wallet_address', 'private_key'];
+          for (const key of sensitiveTagKeys) {
+            if (key in event.tags) {
+              delete event.tags[key];
             }
           }
         }
@@ -416,4 +450,265 @@ export function sentryTracingMiddleware() {
   return (_req: any, _res: any, next: any) => {
     next();
   };
+}
+
+// =====================================================
+// Subscription-Specific Error Tracking
+// =====================================================
+
+/**
+ * Set subscription context for error tracking
+ * 
+ * @param userId - User ID
+ * @param subscriptionId - Subscription ID (optional)
+ * @param invoiceId - Invoice ID (optional)
+ * 
+ * @example
+ * ```typescript
+ * setSubscriptionContext(user.id, subscription.id, invoice.invoiceId);
+ * ```
+ * 
+ * **Feature: billing-system-enhancement, Task 2.4**
+ * **Validates: Requirements 8.5**
+ */
+export function setSubscriptionContext(
+  userId: string,
+  subscriptionId?: string,
+  invoiceId?: string
+): void {
+  if (!isInitialized) {
+    return;
+  }
+
+  // Set tags for filtering and grouping
+  const tags: Record<string, string> = {
+    user_id: userId,
+  };
+
+  if (subscriptionId) {
+    tags.subscription_id = subscriptionId;
+  }
+
+  if (invoiceId) {
+    tags.invoice_id = invoiceId;
+  }
+
+  Sentry.setTags(tags);
+
+  // Set context for additional details
+  Sentry.setContext('subscription', {
+    userId,
+    subscriptionId: subscriptionId || null,
+    invoiceId: invoiceId || null,
+  });
+}
+
+/**
+ * Clear subscription context
+ * 
+ * Call this after completing a subscription operation to avoid
+ * context leaking into unrelated errors
+ */
+export function clearSubscriptionContext(): void {
+  if (!isInitialized) {
+    return;
+  }
+
+  // Clear subscription-specific tags
+  Sentry.setTag('user_id', '');
+  Sentry.setTag('subscription_id', '');
+  Sentry.setTag('invoice_id', '');
+
+  // Clear subscription context
+  Sentry.setContext('subscription', null);
+}
+
+/**
+ * Add payment verification breadcrumb
+ * 
+ * @param step - Verification step
+ * @param data - Additional data
+ * 
+ * @example
+ * ```typescript
+ * addPaymentBreadcrumb('verification_started', { invoiceId, txHash });
+ * addPaymentBreadcrumb('blockchain_check', { confirmations: 3 });
+ * addPaymentBreadcrumb('verification_complete', { success: true });
+ * ```
+ * 
+ * **Feature: billing-system-enhancement, Task 2.4**
+ * **Validates: Requirements 8.5**
+ */
+export function addPaymentBreadcrumb(
+  step: 
+    | 'verification_started'
+    | 'invoice_retrieved'
+    | 'blockchain_check'
+    | 'transaction_verified'
+    | 'subscription_activated'
+    | 'verification_complete'
+    | 'verification_failed',
+  data?: Record<string, JSONValue>
+): void {
+  if (!isInitialized) {
+    return;
+  }
+
+  // Filter sensitive data from breadcrumb
+  const filteredData = data ? { ...data } : {};
+  const sensitiveKeys = ['email', 'wallet_address', 'private_key', 'billing_wallet_address'];
+  
+  for (const key of sensitiveKeys) {
+    if (key in filteredData) {
+      delete filteredData[key];
+    }
+  }
+
+  Sentry.addBreadcrumb({
+    type: 'default',
+    category: 'payment_verification',
+    message: `Payment verification: ${step}`,
+    level: step === 'verification_failed' ? 'error' : 'info',
+    data: filteredData,
+  });
+}
+
+/**
+ * Capture subscription error with context
+ * 
+ * @param error - Error to capture
+ * @param userId - User ID
+ * @param subscriptionId - Subscription ID (optional)
+ * @param invoiceId - Invoice ID (optional)
+ * @param extra - Additional context
+ * 
+ * @example
+ * ```typescript
+ * try {
+ *   await activateSubscription(invoiceId, txHash);
+ * } catch (error) {
+ *   captureSubscriptionError(
+ *     error,
+ *     userId,
+ *     subscriptionId,
+ *     invoiceId,
+ *     { operation: 'activate_subscription', txHash }
+ *   );
+ * }
+ * ```
+ * 
+ * **Feature: billing-system-enhancement, Task 2.4**
+ * **Validates: Requirements 8.5**
+ */
+export function captureSubscriptionError(
+  error: Error | unknown,
+  userId: string,
+  subscriptionId?: string,
+  invoiceId?: string,
+  extra?: Record<string, JSONValue>
+): string {
+  if (!isInitialized) {
+    log.warn('Sentry not initialized, error not captured');
+    return '';
+  }
+
+  // Filter sensitive data from extra
+  const filteredExtra = extra ? { ...extra } : {};
+  const sensitiveKeys = [
+    'email',
+    'wallet_address',
+    'private_key',
+    'billing_wallet_address',
+    'billingWalletAddress',
+    'password',
+    'token',
+    'secret',
+  ];
+
+  for (const key of sensitiveKeys) {
+    if (key in filteredExtra) {
+      filteredExtra[key] = '[REDACTED]';
+    }
+  }
+
+  return Sentry.captureException(error, {
+    level: 'error',
+    tags: {
+      user_id: userId,
+      subscription_id: subscriptionId || '',
+      invoice_id: invoiceId || '',
+      operation: (filteredExtra.operation as string) || 'unknown',
+    },
+    extra: filteredExtra,
+    contexts: {
+      subscription: {
+        userId,
+        subscriptionId: subscriptionId || null,
+        invoiceId: invoiceId || null,
+      },
+    },
+  });
+}
+
+/**
+ * Capture payment detection error with context
+ * 
+ * @param error - Error to capture
+ * @param invoiceId - Invoice ID
+ * @param operation - Operation name
+ * @param extra - Additional context
+ * 
+ * @example
+ * ```typescript
+ * try {
+ *   await scanSubscriptionPayments();
+ * } catch (error) {
+ *   capturePaymentDetectionError(
+ *     error,
+ *     invoice.invoiceId,
+ *     'scan_payments',
+ *     { blockNumber: currentBlock }
+ *   );
+ * }
+ * ```
+ * 
+ * **Feature: billing-system-enhancement, Task 2.4**
+ * **Validates: Requirements 8.5**
+ */
+export function capturePaymentDetectionError(
+  error: Error | unknown,
+  invoiceId: string,
+  operation: string,
+  extra?: Record<string, JSONValue>
+): string {
+  if (!isInitialized) {
+    log.warn('Sentry not initialized, error not captured');
+    return '';
+  }
+
+  // Filter sensitive data
+  const filteredExtra = extra ? { ...extra } : {};
+  const sensitiveKeys = ['email', 'wallet_address', 'private_key'];
+
+  for (const key of sensitiveKeys) {
+    if (key in filteredExtra) {
+      filteredExtra[key] = '[REDACTED]';
+    }
+  }
+
+  return Sentry.captureException(error, {
+    level: 'error',
+    tags: {
+      invoice_id: invoiceId,
+      operation,
+      component: 'payment_detector',
+    },
+    extra: filteredExtra,
+    contexts: {
+      payment_detection: {
+        invoiceId,
+        operation,
+      },
+    },
+  });
 }
