@@ -198,10 +198,11 @@ export interface Entity {
   id: string;
   name: string;
   type: EntityType;
-  properties: Record<string, any>;
-  mentions: number;
-  firstSeen: Date;
-  lastSeen: Date;
+  properties?: Record<string, any>;
+  mentions?: number;
+  firstSeen?: Date;
+  lastSeen?: Date;
+  url?: string;
 }
 
 /**
@@ -212,9 +213,9 @@ export interface Relationship {
   sourceId: string;
   targetId: string;
   type: string;
-  properties: Record<string, any>;
-  strength: number; // 0-1
-  confidence: number; // 0-1
+  properties?: Record<string, any>;
+  strength?: number; // 0-1
+  confidence?: number; // 0-1
 }
 
 /**
@@ -223,9 +224,9 @@ export interface Relationship {
 export interface Claim {
   id: string;
   statement: string;
-  subjectId: string;
-  predicateId: string;
-  objectId: string;
+  subjectId?: string;
+  predicateId?: string;
+  objectId?: string;
   evidence: {
     type: 'citation' | 'data' | 'expert_opinion';
     source: string;
@@ -381,6 +382,7 @@ export interface StrategyRecommendation {
   title: string;
   description: string;
   category: 'content' | 'schema' | 'entity' | 'technical';
+  type?: string; // Optional intervention type for causal impact lookup
   priority: 'high' | 'medium' | 'low';
   expectedImpact: {
     citationLift: number;
@@ -394,6 +396,14 @@ export interface StrategyRecommendation {
     steps: string[];
     resources: string[];
     dependencies: string[];
+  };
+  metadata?: {
+    causalImpact?: {
+      effect: number;
+      pValue: number;
+      significance: boolean;
+    };
+    [key: string]: any;
   };
 }
 

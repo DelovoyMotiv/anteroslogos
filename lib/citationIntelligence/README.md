@@ -312,14 +312,94 @@ const models = await modelRegistry.listModels();
 console.log('Available models:', models.length);
 ```
 
+### 6. Content Optimizer (`lib/citationIntelligence/contentOptimizer.ts`)
+
+AI-powered content variation generator that creates citation-optimized content:
+
+#### Features
+
+- **Variation Generation**: Creates exactly 3 distinct optimized variations per request
+- **LLM Integration**: Uses OpenRouter with Claude Sonnet 4.5 for content generation
+- **Score Prediction**: Calculates predicted citation probability for each variation
+- **Improvement Tracking**: Measures semantic density, entity count, and claim strength improvements
+- **Implementation Guidance**: Provides HTML markup, JSON-LD schema, and structural recommendations
+
+#### Usage
+
+```typescript
+import { contentOptimizer } from './lib/citationIntelligence';
+
+// Initialize
+await contentOptimizer.initialize();
+
+// Generate variations
+const variations = await contentOptimizer.generateVariations(
+  originalContent,
+  knowledgeGraph,
+  80, // target score (optional)
+  {
+    preserveFactualAccuracy: true,
+    maintainEEAT: true,
+    maxLengthIncrease: 30,
+    targetAudience: 'technical',
+  }
+);
+
+// Each variation includes:
+console.log(variations[0].id);              // 'variation-1'
+console.log(variations[0].content);         // Optimized content
+console.log(variations[0].predictedScore);  // 85.5
+console.log(variations[0].improvements);    // { semanticDensity: 25%, entityCount: 40%, ... }
+console.log(variations[0].changes);         // Array of changes made
+console.log(variations[0].implementation);  // { html, schema, structural }
+```
+
+#### Individual Enhancement Methods
+
+```typescript
+// Enhance semantic density
+const enhanced = await contentOptimizer.enhanceSemanticDensity(content);
+
+// Add entity relationships
+const withEntities = await contentOptimizer.addEntityRelationships(
+  content,
+  knowledgeGraph
+);
+
+// Strengthen claims
+const withStrongerClaims = await contentOptimizer.strengthenClaims(content);
+```
+
+#### Optimization Principles
+
+The content optimizer follows these key principles:
+
+1. **Semantic Density**: Increases information richness with technical terms and precise definitions
+2. **Entity Presence**: Adds relevant entities (people, organizations, products) with context
+3. **Claim Strength**: Makes factual claims backed by evidence and data
+4. **Citation-Worthy Statements**: Creates quotable, authoritative statements
+5. **E-E-A-T Signals**: Maintains Experience, Expertise, Authoritativeness, and Trustworthiness
+
+#### Example
+
+See `lib/citationIntelligence/examples/contentOptimization.example.ts` for a complete example:
+
+```bash
+npx tsx lib/citationIntelligence/examples/contentOptimization.example.ts
+```
+
 ## Next Steps
 
 After setting up the core infrastructure:
 
-1. **Task 2**: Implement Citation Predictor core functionality
-2. **Task 3**: Implement Content Optimization Engine
-3. **Task 4**: Enhance Knowledge Graph Engine
-4. **Task 5**: Implement Temporal Analyzer
+1. ✅ **Task 1**: Set up core infrastructure and data models
+2. ✅ **Task 2**: Implement Citation Predictor core functionality
+3. ✅ **Task 3.1**: Set up LLM integration via OpenRouter
+4. ✅ **Task 3.2**: Build content variation generator
+5. **Task 3.3**: Write property test for content variation count
+6. **Task 3.4**: Implement factual accuracy validation
+7. **Task 4**: Enhance Knowledge Graph Engine
+8. **Task 5**: Implement Temporal Analyzer
 
 ## Troubleshooting
 
