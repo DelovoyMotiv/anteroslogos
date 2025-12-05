@@ -211,7 +211,7 @@ export function BillingPage() {
 
       {/* Pending Invoices */}
       {invoices.length > 0 && (
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4 md:p-6 shadow-md">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 md:p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-base md:text-lg font-semibold text-yellow-900 dark:text-yellow-100">
               Pending Payments

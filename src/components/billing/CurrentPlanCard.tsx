@@ -57,7 +57,7 @@ export function CurrentPlanCard({ subscription, usageStats, onCancelSubscription
   const StatusIcon = status.icon;
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm hover:shadow-md transition-shadow">
+    <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6">
       <div className="flex items-start justify-between mb-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
           Current Plan

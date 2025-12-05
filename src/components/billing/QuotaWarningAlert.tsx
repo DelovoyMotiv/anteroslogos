@@ -4,7 +4,7 @@
  * Displays warning when user has consumed > 80% of their monthly quota
  */
 
-import { AlertTriangle, TrendingUp, Clock } from 'lucide-react';
+import { AlertTriangle, Clock } from 'lucide-react';
 import { PLAN_CONFIG, type USDCSubscription, type UsageStats } from '../../../lib/dashboard/billing-client';
 
 interface QuotaWarningAlertProps {
@@ -46,24 +46,24 @@ export function QuotaWarningAlert({ subscription, usageStats, onUpgrade }: Quota
 
   const severityStyles = {
     critical: {
-      bg: 'bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20',
-      border: 'border-red-300 dark:border-red-800',
+      bg: 'bg-red-50 dark:bg-red-900/20',
+      border: 'border-red-200 dark:border-red-800',
       text: 'text-red-900 dark:text-red-100',
       icon: 'text-red-600 dark:text-red-400',
       badge: 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300',
       button: 'bg-red-600 hover:bg-red-700 text-white',
     },
     warning: {
-      bg: 'bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20',
-      border: 'border-yellow-300 dark:border-yellow-800',
+      bg: 'bg-yellow-50 dark:bg-yellow-900/20',
+      border: 'border-yellow-200 dark:border-yellow-800',
       text: 'text-yellow-900 dark:text-yellow-100',
       icon: 'text-yellow-600 dark:text-yellow-400',
       badge: 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-300',
       button: 'bg-yellow-600 hover:bg-yellow-700 text-white',
     },
     info: {
-      bg: 'bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-900/20 dark:to-yellow-900/20',
-      border: 'border-orange-300 dark:border-orange-800',
+      bg: 'bg-orange-50 dark:bg-orange-900/20',
+      border: 'border-orange-200 dark:border-orange-800',
       text: 'text-orange-900 dark:text-orange-100',
       icon: 'text-orange-600 dark:text-orange-400',
       badge: 'bg-orange-100 dark:bg-orange-900/40 text-orange-700 dark:text-orange-300',
@@ -76,7 +76,7 @@ export function QuotaWarningAlert({ subscription, usageStats, onUpgrade }: Quota
                  severityStyles.info;
 
   return (
-    <div className={`${styles.bg} border ${styles.border} rounded-xl p-6 shadow-md`}>
+    <div className={`${styles.bg} border ${styles.border} rounded-lg p-6`}>
       <div className="flex items-start gap-4">
         {/* Icon */}
         <div className={`p-3 rounded-full bg-white dark:bg-gray-900 ${styles.icon} flex-shrink-0`}>
@@ -87,10 +87,10 @@ export function QuotaWarningAlert({ subscription, usageStats, onUpgrade }: Quota
         <div className="flex-1">
           <div className="flex items-start justify-between mb-3">
             <div>
-              <h3 className={`text-lg font-bold ${styles.text} mb-1`}>
-                {isCritical && '🚨 Quota Almost Exhausted'}
-                {isWarning && '⚠️ High Quota Usage'}
-                {!isWarning && !isCritical && '📊 Quota Warning'}
+              <h3 className={`text-lg font-semibold ${styles.text} mb-1`}>
+                {isCritical && 'Quota Almost Exhausted'}
+                {isWarning && 'High Quota Usage'}
+                {!isWarning && !isCritical && 'Quota Warning'}
               </h3>
               <p className={`text-sm ${styles.text}`}>
                 You've used <span className="font-bold">{usageStats.auditsUsed}</span> of{' '}
@@ -116,27 +116,24 @@ export function QuotaWarningAlert({ subscription, usageStats, onUpgrade }: Quota
 
           {/* Stats Grid */}
           <div className="grid grid-cols-2 gap-4 mb-4">
-            <div className="bg-white dark:bg-gray-900 rounded-lg p-3 shadow-sm">
+            <div className="bg-white dark:bg-gray-900 rounded p-3">
               <div className="flex items-center gap-2 mb-1">
                 <Clock className={`w-4 h-4 ${styles.icon}`} />
                 <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
                   Estimated Depletion
                 </span>
               </div>
-              <p className="text-lg font-bold text-gray-900 dark:text-white">
-                {daysUntilExhausted <= 0 ? 'Now' : 
+              <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                {daysUntilExhausted <= 0 ? 'Immediate' : 
                  daysUntilExhausted === 1 ? '1 day' : 
                  `${daysUntilExhausted} days`}
               </p>
             </div>
-            <div className="bg-white dark:bg-gray-900 rounded-lg p-3 shadow-sm">
-              <div className="flex items-center gap-2 mb-1">
-                <TrendingUp className={`w-4 h-4 ${styles.icon}`} />
-                <span className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                  Daily Average
-                </span>
-              </div>
-              <p className="text-lg font-bold text-gray-900 dark:text-white">
+            <div className="bg-white dark:bg-gray-900 rounded p-3">
+              <span className="text-xs font-medium text-gray-600 dark:text-gray-400 block mb-1">
+                Daily Average
+              </span>
+              <p className="text-lg font-semibold text-gray-900 dark:text-white">
                 {dailyAverage.toFixed(1)} audits
               </p>
             </div>
@@ -144,31 +141,23 @@ export function QuotaWarningAlert({ subscription, usageStats, onUpgrade }: Quota
 
           {/* Recommendation */}
           {nextPlan && (
-            <div className="bg-white dark:bg-gray-900 rounded-lg p-4 mb-4 border border-gray-200 dark:border-gray-800">
+            <div className="bg-white dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-800">
               <p className={`text-sm font-medium ${styles.text} mb-2`}>
-                💡 Recommended: Upgrade to {nextPlan.name}
+                Recommended: {nextPlan.name}
               </p>
               <ul className="text-xs text-gray-700 dark:text-gray-300 space-y-1 mb-3">
-                <li>• {nextPlan.auditsPerMonth === -1 ? 'Unlimited' : nextPlan.auditsPerMonth} audits per month</li>
-                <li>• Only ${nextPlan.price} USDC/month</li>
-                <li>• {nextPlan.auditsPerMonth === -1 ? 'Never worry about limits' : `${Math.round((nextPlan.auditsPerMonth - usageStats.auditsQuota) / usageStats.auditsQuota * 100)}% more capacity`}</li>
+                <li>{nextPlan.auditsPerMonth === -1 ? 'Unlimited' : nextPlan.auditsPerMonth} audits per month</li>
+                <li>${nextPlan.price} USDC per month</li>
+                <li>{nextPlan.auditsPerMonth === -1 ? 'No usage limits' : `${Math.round((nextPlan.auditsPerMonth - usageStats.auditsQuota) / usageStats.auditsQuota * 100)}% additional capacity`}</li>
               </ul>
               <button
                 onClick={onUpgrade}
-                className={`w-full ${styles.button} px-4 py-2.5 rounded-lg font-semibold transition-colors shadow-md hover:shadow-lg flex items-center justify-center gap-2`}
+                className={`w-full ${styles.button} px-4 py-2.5 rounded font-semibold transition-colors`}
               >
-                <TrendingUp className="w-4 h-4" />
                 Upgrade to {nextPlan.name}
               </button>
             </div>
           )}
-
-          {/* Future enhancement placeholder */}
-          <div className="border-t border-gray-200 dark:border-gray-700 pt-3">
-            <p className="text-xs text-gray-600 dark:text-gray-400 italic">
-              💳 Need more audits without upgrading? "Buy More Audits" option coming soon!
-            </p>
-          </div>
         </div>
       </div>
     </div>
