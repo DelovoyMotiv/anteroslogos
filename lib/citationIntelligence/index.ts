@@ -58,6 +58,57 @@ export {
   generateImplementationRoadmap,
 } from './quickWinIdentifier';
 
+// Export content optimizer
+export { ContentOptimizer, contentOptimizer } from './contentOptimizer';
+
+// Export recommendation prioritizer
+export {
+  calculateCausalImpact,
+  prioritizeRecommendations,
+  calculateCausalImpactsByType,
+  formatRecommendationWithCausalImpact,
+  generateRecommendationSummary,
+} from './recommendationPrioritizer';
+
+// Export real-time content analyzer
+export {
+  analyzeContentRealTime,
+  analyzeContentBatch,
+  getAnalysisSummary,
+  type RealTimeAnalysisResult,
+} from './realTimeContentAnalyzer';
+
+// Export inline suggestion engine
+export {
+  generateInlineSuggestions,
+  getTopSuggestions,
+  filterSuggestionsByType,
+  filterSuggestionsByPriority,
+  calculateTotalImpact,
+  type InlineSuggestion,
+  type SuggestionEngineResult,
+} from './inlineSuggestionEngine';
+
+// Export dynamic score updater
+export {
+  updateScoresDynamically,
+  ContentChangeTracker,
+  formatScoreComparison,
+  type ContentChange,
+  type ScoreComparison,
+  type DynamicUpdateResult,
+} from './dynamicScoreUpdater';
+
+// Export pre-publication checklist
+export {
+  generatePrePublicationChecklist,
+  getCriticalIssues,
+  getActionableItems,
+  formatChecklistAsMarkdown,
+  type ChecklistItem,
+  type PrePublicationChecklist,
+} from './prePublicationChecklist';
+
 // Import for internal use
 import { postgresGraphAdapter } from './postgresGraphAdapter';
 import { modelRegistry } from './modelRegistry';
