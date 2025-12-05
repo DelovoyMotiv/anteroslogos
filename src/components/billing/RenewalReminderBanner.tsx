@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Clock, X, CreditCard } from 'lucide-react';
+import { Clock, X } from 'lucide-react';
 import { type USDCSubscription } from '../../../lib/dashboard/billing-client';
 
 interface RenewalReminderBannerProps {
@@ -79,22 +79,22 @@ export function RenewalReminderBanner({ subscription, onRenewNow }: RenewalRemin
   
   const urgencyStyles = {
     critical: {
-      bg: 'bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20',
-      border: 'border-red-300 dark:border-red-800',
+      bg: 'bg-red-50 dark:bg-red-900/20',
+      border: 'border-red-200 dark:border-red-800',
       text: 'text-red-900 dark:text-red-100',
       icon: 'text-red-600 dark:text-red-400',
       button: 'bg-red-600 hover:bg-red-700 text-white',
     },
     warning: {
-      bg: 'bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20',
-      border: 'border-yellow-300 dark:border-yellow-800',
+      bg: 'bg-yellow-50 dark:bg-yellow-900/20',
+      border: 'border-yellow-200 dark:border-yellow-800',
       text: 'text-yellow-900 dark:text-yellow-100',
       icon: 'text-yellow-600 dark:text-yellow-400',
       button: 'bg-yellow-600 hover:bg-yellow-700 text-white',
     },
     info: {
-      bg: 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20',
-      border: 'border-blue-300 dark:border-blue-800',
+      bg: 'bg-blue-50 dark:bg-blue-900/20',
+      border: 'border-blue-200 dark:border-blue-800',
       text: 'text-blue-900 dark:text-blue-100',
       icon: 'text-blue-600 dark:text-blue-400',
       button: 'bg-blue-600 hover:bg-blue-700 text-white',
@@ -104,7 +104,7 @@ export function RenewalReminderBanner({ subscription, onRenewNow }: RenewalRemin
   const styles = urgencyStyles[urgencyLevel];
 
   return (
-    <div className={`${styles.bg} border ${styles.border} rounded-xl p-6 shadow-lg animate-slide-down`}>
+    <div className={`${styles.bg} border ${styles.border} rounded-lg p-6 animate-slide-down`}>
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-4 flex-1">
           {/* Icon */}
@@ -114,21 +114,21 @@ export function RenewalReminderBanner({ subscription, onRenewNow }: RenewalRemin
 
           {/* Content */}
           <div className="flex-1">
-            <h3 className={`text-lg font-bold ${styles.text} mb-2`}>
-              {urgencyLevel === 'critical' && '🚨 Subscription Expiring Soon!'}
-              {urgencyLevel === 'warning' && '⚠️ Renewal Reminder'}
-              {urgencyLevel === 'info' && '📅 Upcoming Renewal'}
+            <h3 className={`text-lg font-semibold ${styles.text} mb-2`}>
+              {urgencyLevel === 'critical' && 'Subscription Expiring Soon'}
+              {urgencyLevel === 'warning' && 'Renewal Reminder'}
+              {urgencyLevel === 'info' && 'Upcoming Renewal'}
             </h3>
             <p className={`text-sm ${styles.text} mb-4`}>
-              Your subscription will renew in{' '}
-              <span className="font-bold">
+              Subscription renewal in{' '}
+              <span className="font-semibold">
                 {timeRemaining.days > 0 && `${timeRemaining.days} day${timeRemaining.days !== 1 ? 's' : ''}`}
                 {timeRemaining.days > 0 && timeRemaining.hours > 0 && ', '}
                 {timeRemaining.hours > 0 && `${timeRemaining.hours} hour${timeRemaining.hours !== 1 ? 's' : ''}`}
                 {timeRemaining.days === 0 && timeRemaining.hours > 0 && timeRemaining.minutes > 0 && ', '}
                 {timeRemaining.days === 0 && timeRemaining.minutes > 0 && `${timeRemaining.minutes} minute${timeRemaining.minutes !== 1 ? 's' : ''}`}
               </span>
-              . Make sure you have sufficient USDC in your wallet for automatic renewal.
+              . Ensure sufficient USDC balance in your wallet.
             </p>
 
             {/* Countdown Timer */}
@@ -156,10 +156,9 @@ export function RenewalReminderBanner({ subscription, onRenewNow }: RenewalRemin
             {/* Action Button */}
             <button
               onClick={onRenewNow}
-              className={`${styles.button} px-6 py-3 rounded-lg font-semibold transition-colors flex items-center gap-2 shadow-md hover:shadow-lg`}
+              className={`${styles.button} px-6 py-2.5 rounded font-semibold transition-colors`}
             >
-              <CreditCard className="w-4 h-4" />
-              Renew Now
+              View Plans
             </button>
           </div>
         </div>

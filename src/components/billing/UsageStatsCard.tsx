@@ -57,7 +57,7 @@ export function UsageStatsCard({ subscription, usageStats }: UsageStatsCardProps
   const isUnlimited = usageStats.auditsQuota === -1;
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 shadow-sm hover:shadow-md transition-shadow">
+    <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6">
       <div className="flex items-start justify-between mb-6">
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
           Usage This Period
@@ -170,12 +170,12 @@ export function UsageStatsCard({ subscription, usageStats }: UsageStatsCardProps
 
       {/* Unlimited badge */}
       {isUnlimited && (
-        <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
-          <p className="text-sm font-semibold text-purple-900 dark:text-purple-100 text-center">
-            ✨ Unlimited Audits
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+          <p className="text-sm font-semibold text-gray-900 dark:text-white text-center">
+            Unlimited Audits
           </p>
-          <p className="text-xs text-purple-700 dark:text-purple-300 text-center mt-1">
-            No usage limits on your Enterprise plan
+          <p className="text-xs text-gray-600 dark:text-gray-400 text-center mt-1">
+            No usage limits
           </p>
         </div>
       )}

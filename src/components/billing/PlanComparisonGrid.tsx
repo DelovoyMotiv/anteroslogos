@@ -4,43 +4,14 @@
  * Displays all subscription tiers with enhanced hover states, badges, and tooltips
  */
 
-import { useState } from 'react';
-import { Check, TrendingUp, Loader2, Info, Star, Zap } from 'lucide-react';
+
+import { Loader2 } from 'lucide-react';
 import { PLAN_CONFIG, type USDCSubscription } from '../../../lib/dashboard/billing-client';
 
 interface PlanComparisonGridProps {
   subscription: USDCSubscription | null;
   subscribing: string | null;
   onSubscribe: (planTier: 'starter' | 'pro' | 'enterprise') => void;
-}
-
-interface TooltipProps {
-  text: string;
-  children: React.ReactNode;
-}
-
-function Tooltip({ text, children }: TooltipProps) {
-  const [show, setShow] = useState(false);
-
-  return (
-    <div className="relative inline-flex items-center">
-      <div
-        onMouseEnter={() => setShow(true)}
-        onMouseLeave={() => setShow(false)}
-        className="cursor-help"
-      >
-        {children}
-      </div>
-      {show && (
-        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-xs rounded-lg shadow-lg z-10 whitespace-nowrap">
-          {text}
-          <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
-            <div className="border-4 border-transparent border-t-gray-900 dark:border-t-gray-100" />
-          </div>
-        </div>
-      )}
-    </div>
-  );
 }
 
 export function PlanComparisonGrid({ subscription, subscribing, onSubscribe }: PlanComparisonGridProps) {
@@ -77,33 +48,25 @@ export function PlanComparisonGrid({ subscription, subscribing, onSubscribe }: P
             <div
               key={key}
               className={`
-                relative rounded-2xl border-2 p-6 transition-all duration-300 transform
+                relative rounded-lg border p-6 transition-colors
                 ${
                   isCurrentPlan
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/10 shadow-xl scale-105'
-                    : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-2xl hover:scale-105 hover:-translate-y-1'
+                    ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/10'
+                    : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-gray-300 dark:hover:border-gray-700'
                 }
-                ${isMostPopular && !isCurrentPlan ? 'ring-2 ring-purple-500 ring-offset-2 dark:ring-offset-gray-950' : ''}
+                ${isMostPopular && !isCurrentPlan ? 'border-gray-900 dark:border-white' : ''}
               `}
             >
               {/* Badges */}
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 flex gap-2">
                 {isCurrentPlan && (
-                  <span className="bg-blue-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1">
-                    <Check className="w-3 h-3" />
+                  <span className="bg-blue-600 text-white text-xs font-semibold px-4 py-1 rounded">
                     Current Plan
                   </span>
                 )}
                 {isMostPopular && !isCurrentPlan && (
-                  <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1 animate-pulse">
-                    <Star className="w-3 h-3" />
-                    Most Popular
-                  </span>
-                )}
-                {isEnterprise && !isCurrentPlan && (
-                  <span className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg flex items-center gap-1">
-                    <Zap className="w-3 h-3" />
-                    Best Value
+                  <span className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs font-semibold px-4 py-1 rounded">
+                    Recommended
                   </span>
                 )}
               </div>
@@ -119,58 +82,22 @@ export function PlanComparisonGrid({ subscription, subscribing, onSubscribe }: P
                   </span>
                   <span className="text-gray-600 dark:text-gray-400 text-sm">/month</span>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 font-medium">
-                  {plan.auditsPerMonth === -1 ? (
-                    <span className="text-purple-600 dark:text-purple-400 font-bold">
-                      ✨ Unlimited audits
-                    </span>
-                  ) : (
-                    <>
-                      {plan.auditsPerMonth} audit{plan.auditsPerMonth !== 1 ? 's' : ''} per month
-                    </>
-                  )}
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                  {plan.auditsPerMonth === -1 
+                    ? 'Unlimited audits per month'
+                    : `${plan.auditsPerMonth} audit${plan.auditsPerMonth !== 1 ? 's' : ''} per month`
+                  }
                 </p>
               </div>
 
               {/* Features List */}
-              <ul className="space-y-3 mb-8 min-h-[280px]">
-                {plan.features.map((feature, idx) => {
-                  // Identify features that need tooltips
-                  const needsTooltip = feature.includes('API') || 
-                                       feature.includes('SLA') || 
-                                       feature.includes('White-label') ||
-                                       feature.includes('Webhook');
-                  
-                  const tooltipText = 
-                    feature.includes('API access') ? 'Programmatic access to all GEO audit features' :
-                    feature.includes('SLA') ? 'Guaranteed 99.9% uptime with compensation for downtime' :
-                    feature.includes('White-label') ? 'Remove Anóteros Lógos branding and use your own' :
-                    feature.includes('Webhook') ? 'Real-time notifications for audit completion and events' :
-                    '';
-
-                  return (
-                    <li key={idx} className="flex items-start group">
-                      <div className={`
-                        w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mr-3 mt-0.5
-                        ${isCurrentPlan || isMostPopular 
-                          ? 'bg-green-500 text-white' 
-                          : 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
-                        }
-                        group-hover:scale-110 transition-transform
-                      `}>
-                        <Check className="w-3 h-3" />
-                      </div>
-                      <span className="text-sm text-gray-700 dark:text-gray-300 flex-1">
-                        {feature}
-                        {needsTooltip && (
-                          <Tooltip text={tooltipText}>
-                            <Info className="w-3 h-3 inline-block ml-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200" />
-                          </Tooltip>
-                        )}
-                      </span>
-                    </li>
-                  );
-                })}
+              <ul className="space-y-2.5 mb-8 min-h-[280px]">
+                {plan.features.map((feature, idx) => (
+                  <li key={idx} className="flex items-start text-sm text-gray-700 dark:text-gray-300">
+                    <span className="text-green-600 dark:text-green-400 mr-2 mt-0.5">✓</span>
+                    <span>{feature}</span>
+                  </li>
+                ))}
               </ul>
 
               {/* Action Button */}
@@ -179,75 +106,32 @@ export function PlanComparisonGrid({ subscription, subscribing, onSubscribe }: P
                   <button
                     onClick={() => onSubscribe(key as 'starter' | 'pro' | 'enterprise')}
                     disabled={subscribing === key}
-                    className={`
-                      w-full px-6 py-3.5 rounded-xl font-bold transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl
-                      ${isMostPopular 
-                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white' 
-                        : isEnterprise
-                        ? 'bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white'
-                        : 'bg-blue-600 hover:bg-blue-700 text-white'
-                      }
-                      disabled:opacity-50 disabled:cursor-not-allowed
-                      transform hover:scale-105
-                    `}
+                    className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
-                    {subscribing === key ? (
-                      <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <TrendingUp className="w-5 h-5" />
-                        Upgrade Now
-                      </>
-                    )}
+                    {subscribing === key && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {subscribing === key ? 'Processing' : 'Subscribe'}
                   </button>
                 ) : isCurrentPlan ? (
                   <button
                     disabled
-                    className="w-full px-6 py-3.5 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-xl font-bold cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full px-6 py-3 bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded font-semibold cursor-not-allowed"
                   >
-                    <Check className="w-5 h-5" />
-                    Current Plan
+                    Active
                   </button>
                 ) : key === 'free' ? (
-                  <div className="text-center py-3.5 text-sm text-gray-500 dark:text-gray-400 font-medium">
-                    Default plan for all users
+                  <div className="text-center py-3 text-sm text-gray-500 dark:text-gray-400">
+                    Default tier
                   </div>
                 ) : null}
               </div>
 
-              {/* Value Indicator for Paid Plans */}
-              {isPaidPlan && !isCurrentPlan && (
-                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-                  <p className="text-xs text-center text-gray-600 dark:text-gray-400">
-                    {key === 'starter' && '💰 Best for individuals'}
-                    {key === 'pro' && '🚀 Best for growing teams'}
-                    {key === 'enterprise' && '⭐ Best for organizations'}
-                  </p>
-                </div>
-              )}
+
             </div>
           );
         })}
       </div>
 
-      {/* Comparison Note */}
-      <div className="mt-8 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-6 border border-gray-200 dark:border-gray-800">
-        <div className="flex items-start gap-3">
-          <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-          <div className="text-sm text-gray-700 dark:text-gray-300">
-            <p className="font-semibold mb-2">Need help choosing?</p>
-            <ul className="space-y-1 text-xs">
-              <li>• <strong>Free:</strong> Perfect for trying out GEO audits</li>
-              <li>• <strong>Starter:</strong> Ideal for freelancers and small projects</li>
-              <li>• <strong>Pro:</strong> Best for agencies and growing businesses</li>
-              <li>• <strong>Enterprise:</strong> Unlimited power for large organizations</li>
-            </ul>
-          </div>
-        </div>
-      </div>
+
     </div>
   );
 }
