@@ -226,6 +226,126 @@ describe('Environment Variable Validation', () => {
       );
     });
 
+    it('should validate multi-model configuration with defaults', () => {
+      process.env.NODE_ENV = 'development';
+      process.env.VITE_SUPABASE_URL = 'https://test.supabase.co';
+      process.env.VITE_SUPABASE_ANON_KEY = 'test-key';
+      process.env.VITE_SITE_URL = 'https://example.com';
+      // Don't set multi-model vars to test defaults
+      delete process.env.VITE_OPENROUTER_MODEL_CONTENT_OPT;
+      delete process.env.VITE_OPENROUTER_MODEL_FACT_CHECK;
+      delete process.env.VITE_OPENROUTER_MODEL_SCHEMA;
+      delete process.env.VITE_OPENROUTER_MODEL_ANALYSIS;
+      delete process.env.VITE_OPENROUTER_RATE_LIMIT_RPM;
+      delete process.env.VITE_OPENROUTER_BUDGET_LIMIT;
+      delete process.env.VITE_OPENROUTER_ALERT_THRESHOLD;
+
+      const env = validateEnv();
+      expect(env.VITE_OPENROUTER_MODEL_CONTENT_OPT).toBe('anthropic/claude-sonnet-4.5');
+      expect(env.VITE_OPENROUTER_MODEL_FACT_CHECK).toBe('openai/gpt-5.1');
+      expect(env.VITE_OPENROUTER_MODEL_SCHEMA).toBe('google/gemini-3-pro-preview');
+      expect(env.VITE_OPENROUTER_MODEL_ANALYSIS).toBe('x-ai/grok-4');
+      expect(env.VITE_OPENROUTER_RATE_LIMIT_RPM).toBe(10);
+      expect(env.VITE_OPENROUTER_BUDGET_LIMIT).toBe(100);
+      expect(env.VITE_OPENROUTER_ALERT_THRESHOLD).toBe(80);
+    });
+
+    it('should validate custom multi-model configuration', () => {
+      fc.assert(
+        fc.property(
+          fc.record({
+            contentModel: fc.string({ minLength: 5 }),
+            factCheckModel: fc.string({ minLength: 5 }),
+            schemaModel: fc.string({ minLength: 5 }),
+            analysisModel: fc.string({ minLength: 5 }),
+            rateLimit: fc.integer({ min: 1, max: 100 }),
+            budgetLimit: fc.integer({ min: 1, max: 10000 }),
+            alertThreshold: fc.integer({ min: 0, max: 100 }),
+          }),
+          ({ contentModel, factCheckModel, schemaModel, analysisModel, rateLimit, budgetLimit, alertThreshold }) => {
+            process.env.NODE_ENV = 'development';
+            process.env.VITE_SUPABASE_URL = 'https://test.supabase.co';
+            process.env.VITE_SUPABASE_ANON_KEY = 'test-key';
+            process.env.VITE_SITE_URL = 'https://example.com';
+            process.env.VITE_OPENROUTER_MODEL_CONTENT_OPT = contentModel;
+            process.env.VITE_OPENROUTER_MODEL_FACT_CHECK = factCheckModel;
+            process.env.VITE_OPENROUTER_MODEL_SCHEMA = schemaModel;
+            process.env.VITE_OPENROUTER_MODEL_ANALYSIS = analysisModel;
+            process.env.VITE_OPENROUTER_RATE_LIMIT_RPM = rateLimit.toString();
+            process.env.VITE_OPENROUTER_BUDGET_LIMIT = budgetLimit.toString();
+            process.env.VITE_OPENROUTER_ALERT_THRESHOLD = alertThreshold.toString();
+
+            const env = validateEnv();
+            expect(env.VITE_OPENROUTER_MODEL_CONTENT_OPT).toBe(contentModel);
+            expect(env.VITE_OPENROUTER_MODEL_FACT_CHECK).toBe(factCheckModel);
+            expect(env.VITE_OPENROUTER_MODEL_SCHEMA).toBe(schemaModel);
+            expect(env.VITE_OPENROUTER_MODEL_ANALYSIS).toBe(analysisModel);
+            expect(env.VITE_OPENROUTER_RATE_LIMIT_RPM).toBe(rateLimit);
+            expect(env.VITE_OPENROUTER_BUDGET_LIMIT).toBe(budgetLimit);
+            expect(env.VITE_OPENROUTER_ALERT_THRESHOLD).toBe(alertThreshold);
+          }
+        ),
+        { numRuns: 10 }
+      );
+    });
+
+    it('should reject invalid rate limit values', () => {
+      fc.assert(
+        fc.property(
+          fc.string().filter(s => !s.match(/^\d+$/)),
+          (invalidValue) => {
+            process.env.NODE_ENV = 'development';
+            process.env.VITE_SUPABASE_URL = 'https://test.supabase.co';
+            process.env.VITE_SUPABASE_ANON_KEY = 'test-key';
+            process.env.VITE_SITE_URL = 'https://example.com';
+            process.env.VITE_OPENROUTER_RATE_LIMIT_RPM = invalidValue;
+
+            expect(() => validateEnv()).toThrow();
+          }
+        ),
+        { numRuns: 10 }
+      );
+    });
+
+    it('should reject invalid budget limit values', () => {
+      fc.assert(
+        fc.property(
+          fc.string().filter(s => !s.match(/^\d+(\.\d+)?$/)),
+          (invalidValue) => {
+            process.env.NODE_ENV = 'development';
+            process.env.VITE_SUPABASE_URL = 'https://test.supabase.co';
+            process.env.VITE_SUPABASE_ANON_KEY = 'test-key';
+            process.env.VITE_SITE_URL = 'https://example.com';
+            process.env.VITE_OPENROUTER_BUDGET_LIMIT = invalidValue;
+
+            expect(() => validateEnv()).toThrow();
+          }
+        ),
+        { numRuns: 10 }
+      );
+    });
+
+    it('should reject alert threshold values outside 0-100 range', () => {
+      fc.assert(
+        fc.property(
+          fc.oneof(
+            fc.integer({ min: 101, max: 1000 }),
+            fc.integer({ min: -1000, max: -1 })
+          ),
+          (invalidValue) => {
+            process.env.NODE_ENV = 'development';
+            process.env.VITE_SUPABASE_URL = 'https://test.supabase.co';
+            process.env.VITE_SUPABASE_ANON_KEY = 'test-key';
+            process.env.VITE_SITE_URL = 'https://example.com';
+            process.env.VITE_OPENROUTER_ALERT_THRESHOLD = invalidValue.toString();
+
+            expect(() => validateEnv()).toThrow();
+          }
+        ),
+        { numRuns: 10 }
+      );
+    });
+
     it('should require critical variables in production', () => {
       process.env.NODE_ENV = 'production';
       process.env.VITE_SUPABASE_URL = 'https://test.supabase.co';

@@ -162,7 +162,7 @@ export function validateConfig(): { valid: boolean; errors: string[]; warnings: 
     if (config.siteUrl) {
       new URL(config.siteUrl);
     }
-  } catch (error) {
+  } catch {
     errors.push('Invalid URL format in configuration');
   }
   
