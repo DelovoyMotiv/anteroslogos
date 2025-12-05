@@ -341,6 +341,165 @@ export interface Database {
           updated_at?: string
         }
       }
+      ml_models: {
+        Row: {
+          id: string
+          model_name: string
+          version: string
+          features: Json
+          hyperparameters: Json
+          precision: number | null
+          recall: number | null
+          f1_score: number | null
+          auc: number | null
+          model_path: string | null
+          model_size_bytes: number | null
+          status: 'testing' | 'active' | 'archived'
+          trained_at: string
+          trained_by: string | null
+          training_data_size: number | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          model_name: string
+          version: string
+          features: Json
+          hyperparameters?: Json
+          precision?: number | null
+          recall?: number | null
+          f1_score?: number | null
+          auc?: number | null
+          model_path?: string | null
+          model_size_bytes?: number | null
+          status?: 'testing' | 'active' | 'archived'
+          trained_at: string
+          trained_by?: string | null
+          training_data_size?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          model_name?: string
+          version?: string
+          features?: Json
+          hyperparameters?: Json
+          precision?: number | null
+          recall?: number | null
+          f1_score?: number | null
+          auc?: number | null
+          model_path?: string | null
+          model_size_bytes?: number | null
+          status?: 'testing' | 'active' | 'archived'
+          trained_at?: string
+          trained_by?: string | null
+          training_data_size?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      kg_entities: {
+        Row: {
+          id: string
+          user_id: string | null
+          url: string
+          entity_name: string
+          entity_type: 'Person' | 'Organization' | 'Product' | 'Event' | 'Place' | 'Concept' | 'CreativeWork' | 'Thing'
+          properties: Json
+          authority_score: number | null
+          relationship_density: number | null
+          claim_evidence: number | null
+          external_validation: number | null
+          temporal_consistency: number | null
+          competitive_percentile: number | null
+          mentions_count: number
+          first_seen: string
+          last_seen: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          url: string
+          entity_name: string
+          entity_type: 'Person' | 'Organization' | 'Product' | 'Event' | 'Place' | 'Concept' | 'CreativeWork' | 'Thing'
+          properties?: Json
+          authority_score?: number | null
+          relationship_density?: number | null
+          claim_evidence?: number | null
+          external_validation?: number | null
+          temporal_consistency?: number | null
+          competitive_percentile?: number | null
+          mentions_count?: number
+          first_seen?: string
+          last_seen?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          url?: string
+          entity_name?: string
+          entity_type?: 'Person' | 'Organization' | 'Product' | 'Event' | 'Place' | 'Concept' | 'CreativeWork' | 'Thing'
+          properties?: Json
+          authority_score?: number | null
+          relationship_density?: number | null
+          claim_evidence?: number | null
+          external_validation?: number | null
+          temporal_consistency?: number | null
+          competitive_percentile?: number | null
+          mentions_count?: number
+          first_seen?: string
+          last_seen?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      kg_relationships: {
+        Row: {
+          id: string
+          user_id: string | null
+          url: string
+          source_entity_id: string
+          target_entity_id: string
+          relationship_type: string
+          properties: Json
+          strength: number | null
+          confidence: number | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          url: string
+          source_entity_id: string
+          target_entity_id: string
+          relationship_type: string
+          properties?: Json
+          strength?: number | null
+          confidence?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          url?: string
+          source_entity_id?: string
+          target_entity_id?: string
+          relationship_type?: string
+          properties?: Json
+          strength?: number | null
+          confidence?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       user_audit_summary: {

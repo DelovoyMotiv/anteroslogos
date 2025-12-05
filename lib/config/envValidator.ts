@@ -85,6 +85,18 @@ const envSchema = z.object({
   ),
   VITE_OPENROUTER_MODEL: z.string().default('meta-llama/llama-3.2-3b-instruct:free'),
 
+  // Multi-Model Configuration for Citation Intelligence
+  VITE_OPENROUTER_MODEL_CONTENT_OPT: z.string().default('anthropic/claude-sonnet-4.5'),
+  VITE_OPENROUTER_MODEL_FACT_CHECK: z.string().default('openai/gpt-5.1'),
+  VITE_OPENROUTER_MODEL_SCHEMA: z.string().default('google/gemini-3-pro-preview'),
+  VITE_OPENROUTER_MODEL_ANALYSIS: z.string().default('x-ai/grok-4'),
+  VITE_OPENROUTER_RATE_LIMIT_RPM: z.string().regex(/^\d+$/, 'VITE_OPENROUTER_RATE_LIMIT_RPM must be a positive integer').transform(Number).default('10'),
+  VITE_OPENROUTER_BUDGET_LIMIT: z.string().regex(/^\d+(\.\d+)?$/, 'VITE_OPENROUTER_BUDGET_LIMIT must be a positive number').transform(Number).default('100'),
+  VITE_OPENROUTER_ALERT_THRESHOLD: z.string().regex(/^\d+(\.\d+)?$/, 'VITE_OPENROUTER_ALERT_THRESHOLD must be a number between 0 and 100').transform(Number).refine(
+    (val) => val >= 0 && val <= 100,
+    { message: 'VITE_OPENROUTER_ALERT_THRESHOLD must be between 0 and 100' }
+  ).default('80'),
+
   // Contact Form (Optional)
   VITE_CONTACT_FORM_ENDPOINT: z.string().url().optional(),
   VITE_FORMSPREE_ID: z.string().optional(),
