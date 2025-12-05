@@ -4,7 +4,6 @@
  */
 
 import type { PlanTier, SubscriptionStatus } from '../subscriptions/types';
-import type { SubscriptionWithDetails } from '../../types/lib-extended.types';
 
 // USDC Plan Configuration (Base L2)
 export const PLAN_CONFIG = {
@@ -131,15 +130,34 @@ export async function getSubscription(
     }
     
     const { data, error } = await supabase
-      .from('user_subscriptions')
+      .from('user_subscription_details')
       .select('*')
       .eq('user_id', userId)
-      .eq('status', 'active')
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error('getSubscription error:', error);
-      return { error: 'No active subscription found' };
+      return { error: 'Failed to fetch subscription' };
+    }
+
+    if (!data) {
+      // No active subscription - return free tier
+      const now = new Date();
+      const periodEnd = new Date(now);
+      periodEnd.setMonth(periodEnd.getMonth() + 1);
+      
+      return {
+        subscription_id: 'free-tier',
+        user_id: userId,
+        plan_tier: 'free',
+        status: 'active',
+        current_period_start: now.toISOString(),
+        current_period_end: periodEnd.toISOString(),
+        audits_used_this_period: 0,
+        audits_quota: 1,
+        created_at: now.toISOString(),
+        updated_at: now.toISOString(),
+      } as USDCSubscription;
     }
 
     return data as USDCSubscription;
@@ -165,14 +183,14 @@ export async function getPendingInvoices(
     // Get all subscription IDs for user
     const { data: subscriptions, error: subError } = await supabase
       .from('user_subscriptions')
-      .select('subscription_id')
+      .select('id')
       .eq('user_id', userId);
 
     if (subError || !subscriptions) {
       return { error: 'Failed to fetch subscriptions' };
     }
 
-    const subscriptionIds = subscriptions.map((s: SubscriptionWithDetails) => s.subscription_id);
+    const subscriptionIds = subscriptions.map((s: { id: string }) => s.id);
 
     if (subscriptionIds.length === 0) {
       return [];
