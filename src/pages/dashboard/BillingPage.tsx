@@ -2,6 +2,7 @@
 /**
  * Billing Page - USDC Subscription System
  * Base L2 USDC payments, plan management, usage tracking
+ * Enhanced with improved visual hierarchy, responsive design, and user notifications
  */
 
 import { useEffect, useState } from 'react';
@@ -17,9 +18,14 @@ import {
   type UsageStats
 } from '../../../lib/dashboard/billing-client';
 import { supabase } from '../../../lib/supabase';
-import { Check, Loader2, TrendingUp, Calendar, Wallet, AlertCircle } from 'lucide-react';
+import { Wallet, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { PaymentModal } from '../../components/PaymentModal';
+import { CurrentPlanCard } from '../../components/billing/CurrentPlanCard';
+import { UsageStatsCard } from '../../components/billing/UsageStatsCard';
+import { RenewalReminderBanner } from '../../components/billing/RenewalReminderBanner';
+import { QuotaWarningAlert } from '../../components/billing/QuotaWarningAlert';
+import { PlanComparisonGrid } from '../../components/billing/PlanComparisonGrid';
 
 export function BillingPage() {
   const { user } = useAuth();
@@ -151,117 +157,63 @@ export function BillingPage() {
 
   const currentPlan = subscription?.plan_tier || 'free';
 
+  // Handler for scrolling to plans section
+  const scrollToPlans = () => {
+    const element = document.getElementById('plans-section');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8 px-4 md:px-0">
+      {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Subscription & Billing</h1>
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+        <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white">
+          Subscription & Billing
+        </h1>
+        <p className="mt-2 text-sm md:text-base text-gray-600 dark:text-gray-400">
           Manage your USDC subscription on Base L2
         </p>
       </div>
 
-      {/* Current Plan & Usage */}
+      {/* Renewal Reminder Banner */}
       {subscription && usageStats && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Current Plan */}
-          <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Current Plan
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                  {PLAN_CONFIG[currentPlan as keyof typeof PLAN_CONFIG].name}
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  {subscription.status === 'active' ? (
-                    <span className="inline-flex items-center">
-                      <span className="w-2 h-2 bg-green-500 rounded-full mr-2" />
-                      Active
-                    </span>
-                  ) : subscription.status === 'pending_payment' ? (
-                    <span className="inline-flex items-center">
-                      <span className="w-2 h-2 bg-yellow-500 rounded-full mr-2" />
-                      Pending Payment
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center">
-                      <span className="w-2 h-2 bg-gray-500 rounded-full mr-2" />
-                      {subscription.status}
-                    </span>
-                  )}
-                </p>
-              </div>
-              
-              <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                <Calendar className="w-4 h-4 mr-2" />
-                <span>
-                  Renews {new Date(subscription.current_period_end).toLocaleDateString()}
-                  <span className="ml-2 text-gray-500">({usageStats.daysRemaining} days remaining)</span>
-                </span>
-              </div>
+        <RenewalReminderBanner 
+          subscription={subscription} 
+          onRenewNow={scrollToPlans}
+        />
+      )}
 
-              {currentPlan !== 'free' && subscription.status === 'active' && (
-                <button
-                  onClick={handleCancelSubscription}
-                  className="mt-4 px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg font-medium hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
-                >
-                  Cancel Subscription
-                </button>
-              )}
-            </div>
-          </div>
+      {/* Quota Warning Alert */}
+      {subscription && usageStats && (
+        <QuotaWarningAlert 
+          subscription={subscription} 
+          usageStats={usageStats}
+          onUpgrade={scrollToPlans}
+        />
+      )}
 
-          {/* Usage Stats */}
-          <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Usage This Period
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <div className="flex items-end justify-between mb-2">
-                  <span className="text-sm text-gray-600 dark:text-gray-400">GEO Audits</span>
-                  <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {usageStats.auditsUsed} / {usageStats.auditsQuota === -1 ? '∞' : usageStats.auditsQuota}
-                  </span>
-                </div>
-                
-                {usageStats.auditsQuota !== -1 && (
-                  <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
-                    <div
-                      className={`h-3 rounded-full transition-all ${
-                        usageStats.percentageUsed >= 90
-                          ? 'bg-red-500'
-                          : usageStats.percentageUsed >= 70
-                          ? 'bg-yellow-500'
-                          : 'bg-blue-500'
-                      }`}
-                      style={{ width: `${Math.min(usageStats.percentageUsed, 100)}%` }}
-                    />
-                  </div>
-                )}
-              </div>
-
-              {usageStats.auditsQuota !== -1 && usageStats.percentageUsed >= 80 && (
-                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
-                  <div className="flex items-start">
-                    <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-400 mr-2 mt-0.5 flex-shrink-0" />
-                    <p className="text-sm text-yellow-900 dark:text-yellow-100">
-                      You've used {usageStats.percentageUsed}% of your monthly quota. Consider upgrading for more audits.
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+      {/* Current Plan & Usage - Responsive Grid */}
+      {subscription && usageStats && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+          <CurrentPlanCard 
+            subscription={subscription}
+            usageStats={usageStats}
+            onCancelSubscription={handleCancelSubscription}
+          />
+          <UsageStatsCard 
+            subscription={subscription}
+            usageStats={usageStats}
+          />
         </div>
       )}
 
       {/* Pending Invoices */}
       {invoices.length > 0 && (
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-6">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4 md:p-6 shadow-md">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-yellow-900 dark:text-yellow-100">
+            <h2 className="text-base md:text-lg font-semibold text-yellow-900 dark:text-yellow-100">
               Pending Payments
             </h2>
             <Wallet className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
@@ -270,7 +222,7 @@ export function BillingPage() {
             {invoices.map(invoice => (
               <div
                 key={invoice.invoice_id}
-                className="flex items-center justify-between bg-white dark:bg-gray-900 rounded-lg p-4"
+                className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white dark:bg-gray-900 rounded-lg p-4"
               >
                 <div>
                   <p className="font-medium text-gray-900 dark:text-white">
@@ -290,7 +242,7 @@ export function BillingPage() {
                       invoiceId: invoice.invoice_id,
                     });
                   }}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+                  className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors min-h-[44px] touch-manipulation"
                 >
                   Pay Now
                 </button>
@@ -300,96 +252,12 @@ export function BillingPage() {
         </div>
       )}
 
-      {/* Plan Selector */}
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
-          Available Plans
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {Object.entries(PLAN_CONFIG).map(([key, plan]) => {
-            const isCurrentPlan = key === currentPlan;
-            const isPaidPlan = key !== 'free';
-            const canSubscribe = isPaidPlan && !isCurrentPlan && subscription?.status === 'active';
-
-            return (
-              <div
-                key={key}
-                className={`
-                  relative rounded-xl border-2 p-6 transition-all
-                  ${
-                    isCurrentPlan
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/10 shadow-lg'
-                      : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-blue-300 dark:hover:border-blue-700'
-                  }
-                `}
-              >
-                {isCurrentPlan && (
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <span className="bg-blue-500 text-white text-xs font-semibold px-3 py-1 rounded-full">
-                      Current Plan
-                    </span>
-                  </div>
-                )}
-
-                <div className="mb-4">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                    {plan.name}
-                  </h3>
-                  <div className="mt-3">
-                    <div className="flex items-baseline">
-                      <span className="text-4xl font-bold text-gray-900 dark:text-white">
-                        ${plan.price}
-                      </span>
-                      <span className="text-gray-600 dark:text-gray-400 ml-1">/mo</span>
-                    </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      {plan.auditsPerMonth === -1 ? 'Unlimited' : plan.auditsPerMonth} audit{plan.auditsPerMonth !== 1 ? 's' : ''}
-                    </p>
-                  </div>
-                </div>
-
-                <ul className="space-y-2 mb-6 min-h-[180px]">
-                  {plan.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start">
-                      <Check className="w-4 h-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
-                      <span className="text-xs text-gray-700 dark:text-gray-300">
-                        {feature}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-
-                {canSubscribe ? (
-                  <button
-                    onClick={() => handleSubscribeToPlan(key as 'starter' | 'pro' | 'enterprise')}
-                    disabled={subscribing === key}
-                    className="w-full px-4 py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-                  >
-                    {subscribing === key ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <TrendingUp className="w-4 h-4 mr-2" />
-                        Upgrade
-                      </>
-                    )}
-                  </button>
-                ) : isCurrentPlan ? (
-                  <button
-                    disabled
-                    className="w-full px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-lg font-semibold cursor-not-allowed"
-                  >
-                    Current Plan
-                  </button>
-                ) : null}
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      {/* Plan Comparison Grid - Responsive */}
+      <PlanComparisonGrid 
+        subscription={subscription}
+        subscribing={subscribing}
+        onSubscribe={handleSubscribeToPlan}
+      />
 
       {/* Payment Modal */}
       <PaymentModal

@@ -24,6 +24,7 @@ import {
   invoiceRowToObject,
   usageLogRowToObject,
 } from "./types";
+import { getRedisCache, CacheKeys } from "../database/redisCache";
 
 // =====================================================
 // Environment & Configuration
@@ -226,6 +227,7 @@ export async function createSubscription(input: {
 
 /**
  * Updates subscription status and metadata
+ * Invalidates cache on update
  */
 export async function updateSubscriptionStatus(
   subscriptionId: string,
@@ -273,7 +275,13 @@ export async function updateSubscriptionStatus(
     throw new Error("Subscription updated but no data returned");
   }
 
-  return subscriptionRowToObject(data as UserSubscriptionRow);
+  const subscription = subscriptionRowToObject(data as UserSubscriptionRow);
+
+  // Invalidate cache for this user
+  const cache = getRedisCache();
+  await cache.del(CacheKeys.subscription(subscription.userId));
+
+  return subscription;
 }
 
 /**
@@ -423,6 +431,26 @@ export async function getPendingInvoices(): Promise<SubscriptionInvoice[]> {
 
   if (error) {
     throw new Error(`Failed to fetch pending invoices: ${error.message}`);
+  }
+
+  return (data as SubscriptionInvoiceRow[]).map(invoiceRowToObject);
+}
+
+/**
+ * Gets stuck invoices (pending for more than specified hours)
+ */
+export async function getStuckInvoices(hoursThreshold: number): Promise<SubscriptionInvoice[]> {
+  const thresholdDate = new Date(Date.now() - hoursThreshold * 60 * 60 * 1000);
+  
+  const { data, error } = await supabase
+    .from("subscription_invoices")
+    .select()
+    .eq("status", "pending")
+    .lt("created_at", thresholdDate.toISOString())
+    .gt("expires_at", new Date().toISOString()); // Not expired yet
+
+  if (error) {
+    throw new Error(`Failed to fetch stuck invoices: ${error.message}`);
   }
 
   return (data as SubscriptionInvoiceRow[]).map(invoiceRowToObject);
