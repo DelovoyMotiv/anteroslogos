@@ -162,9 +162,15 @@ export class ExtractionEngine {
       
       for (const proxy of proxies) {
         try {
+          // Create separate AbortController for each proxy with its own timeout
+          const proxyController = new AbortController();
+          const proxyTimeoutId = setTimeout(() => proxyController.abort(), 10000); // 10 seconds per proxy
+          
           const proxyResponse = await fetch(proxy.url, {
-            signal: controller.signal,
+            signal: proxyController.signal,
           });
+          
+          clearTimeout(proxyTimeoutId);
           
           if (proxyResponse.ok) {
             const html = await proxy.parseResponse(proxyResponse);
