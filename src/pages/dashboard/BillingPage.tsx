@@ -23,6 +23,7 @@ import { toast } from 'sonner';
 import { PaymentModal } from '../../components/PaymentModal';
 import { CurrentPlanCard } from '../../components/billing/CurrentPlanCard';
 import { UsageStatsCard } from '../../components/billing/UsageStatsCard';
+import { UsageVisualization } from '../../components/billing/UsageVisualization';
 import { RenewalReminderBanner } from '../../components/billing/RenewalReminderBanner';
 import { QuotaWarningAlert } from '../../components/billing/QuotaWarningAlert';
 import { PlanComparisonGrid } from '../../components/billing/PlanComparisonGrid';
@@ -196,13 +197,17 @@ export function BillingPage() {
 
       {/* Current Plan & Usage - Responsive Grid */}
       {subscription && usageStats && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
           <CurrentPlanCard 
             subscription={subscription}
             usageStats={usageStats}
             onCancelSubscription={handleCancelSubscription}
           />
           <UsageStatsCard 
+            subscription={subscription}
+            usageStats={usageStats}
+          />
+          <UsageVisualization 
             subscription={subscription}
             usageStats={usageStats}
           />
