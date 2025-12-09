@@ -601,7 +601,7 @@ const GeoAuditPage = () => {
                   </p>
                 </div>
                 
-                {/* Right: Export & Share Buttons */}
+                {/* Right: Export & Share Buttons - 9 formats available */}
                 <div className="flex gap-2 flex-shrink-0 flex-wrap justify-center lg:justify-end">
                   <button
                     onClick={downloadPDFReport}
