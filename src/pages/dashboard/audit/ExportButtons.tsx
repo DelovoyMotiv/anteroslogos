@@ -128,8 +128,125 @@ ${result.insights.map(insight => `- ${insight}`).join('\n')}
     linkElement.click();
   };
 
+  const exportHTML = async () => {
+    try {
+      const { exportToHTML } = await import('../../../../utils/exportFormats');
+      exportToHTML(result);
+      toast.success('HTML report downloaded');
+    } catch (error) {
+      console.error('Failed to export HTML:', error);
+      toast.error('Failed to export HTML report');
+    }
+  };
+
+  const exportXML = async () => {
+    try {
+      const { exportToXML } = await import('../../../../utils/exportFormats');
+      exportToXML(result);
+      toast.success('XML report downloaded');
+    } catch (error) {
+      console.error('Failed to export XML:', error);
+      toast.error('Failed to export XML report');
+    }
+  };
+
+  const exportPlainText = async () => {
+    try {
+      const { exportToPlainText } = await import('../../../../utils/exportFormats');
+      exportToPlainText(result);
+      toast.success('Plain text report downloaded');
+    } catch (error) {
+      console.error('Failed to export Plain Text:', error);
+      toast.error('Failed to export plain text report');
+    }
+  };
+
+  const exportYAML = async () => {
+    try {
+      const { exportToYAML } = await import('../../../../utils/exportFormats');
+      exportToYAML(result);
+      toast.success('YAML report downloaded');
+    } catch (error) {
+      console.error('Failed to export YAML:', error);
+      toast.error('Failed to export YAML report');
+    }
+  };
+
+  const exportPDF = async () => {
+    try {
+      const { generatePDFReport } = await import('../../../../utils/pdfReportGenerator');
+      await generatePDFReport(result, {
+        includeCharts: true,
+        includeRecommendations: true,
+        includeDetails: true,
+        companyName: 'Anóteros Lógos',
+        reportDate: new Date().toLocaleDateString(),
+      });
+      toast.success('PDF report generated');
+    } catch (error) {
+      console.error('Failed to generate PDF:', error);
+      toast.error('Failed to generate PDF report');
+    }
+  };
+
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 flex-wrap">
+      <button
+        onClick={exportPDF}
+        className="px-3 py-1.5 bg-black/40 hover:bg-black/60 border border-slate-700/50 text-slate-300 text-xs font-mono uppercase tracking-wider transition-colors flex items-center gap-2"
+        title="Export as PDF"
+      >
+        <FileText className="w-3.5 h-3.5 text-blue-400" />
+        PDF
+      </button>
+      <button
+        onClick={exportHTML}
+        className="px-3 py-1.5 bg-black/40 hover:bg-black/60 border border-slate-700/50 text-slate-300 text-xs font-mono uppercase tracking-wider transition-colors flex items-center gap-2"
+        title="Export as HTML"
+      >
+        <FileText className="w-3.5 h-3.5 text-orange-400" />
+        HTML
+      </button>
+      <button
+        onClick={exportMarkdown}
+        className="px-3 py-1.5 bg-black/40 hover:bg-black/60 border border-slate-700/50 text-slate-300 text-xs font-mono uppercase tracking-wider transition-colors flex items-center gap-2"
+        title="Export as Markdown"
+      >
+        <FileText className="w-3.5 h-3.5 text-green-400" />
+        MD
+      </button>
+      <button
+        onClick={exportXML}
+        className="px-3 py-1.5 bg-black/40 hover:bg-black/60 border border-slate-700/50 text-slate-300 text-xs font-mono uppercase tracking-wider transition-colors flex items-center gap-2"
+        title="Export as XML"
+      >
+        <FileText className="w-3.5 h-3.5 text-red-400" />
+        XML
+      </button>
+      <button
+        onClick={exportPlainText}
+        className="px-3 py-1.5 bg-black/40 hover:bg-black/60 border border-slate-700/50 text-slate-300 text-xs font-mono uppercase tracking-wider transition-colors flex items-center gap-2"
+        title="Export as Plain Text"
+      >
+        <FileText className="w-3.5 h-3.5 text-cyan-400" />
+        TXT
+      </button>
+      <button
+        onClick={exportYAML}
+        className="px-3 py-1.5 bg-black/40 hover:bg-black/60 border border-slate-700/50 text-slate-300 text-xs font-mono uppercase tracking-wider transition-colors flex items-center gap-2"
+        title="Export as YAML"
+      >
+        <FileText className="w-3.5 h-3.5 text-yellow-400" />
+        YAML
+      </button>
+      <button
+        onClick={exportCSV}
+        className="px-3 py-1.5 bg-black/40 hover:bg-black/60 border border-slate-700/50 text-slate-300 text-xs font-mono uppercase tracking-wider transition-colors flex items-center gap-2"
+        title="Export as CSV"
+      >
+        <FileSpreadsheet className="w-3.5 h-3.5 text-purple-400" />
+        CSV
+      </button>
       <button
         onClick={exportJSON}
         className="px-3 py-1.5 bg-black/40 hover:bg-black/60 border border-slate-700/50 text-slate-300 text-xs font-mono uppercase tracking-wider transition-colors flex items-center gap-2"
@@ -137,22 +254,6 @@ ${result.insights.map(insight => `- ${insight}`).join('\n')}
       >
         <FileJson className="w-3.5 h-3.5" />
         JSON
-      </button>
-      <button
-        onClick={exportCSV}
-        className="px-3 py-1.5 bg-black/40 hover:bg-black/60 border border-slate-700/50 text-slate-300 text-xs font-mono uppercase tracking-wider transition-colors flex items-center gap-2"
-        title="Export as CSV"
-      >
-        <FileSpreadsheet className="w-3.5 h-3.5" />
-        CSV
-      </button>
-      <button
-        onClick={exportMarkdown}
-        className="px-3 py-1.5 bg-black/40 hover:bg-black/60 border border-slate-700/50 text-slate-300 text-xs font-mono uppercase tracking-wider transition-colors flex items-center gap-2"
-        title="Export as Markdown"
-      >
-        <FileText className="w-3.5 h-3.5" />
-        MD
       </button>
     </div>
   );
