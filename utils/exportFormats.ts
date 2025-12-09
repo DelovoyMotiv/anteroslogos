@@ -385,3 +385,316 @@ export function exportToHTML(result: AuditResult): void {
   link.click();
   URL.revokeObjectURL(url);
 }
+
+// =============== XML EXPORT (for LLM analysis) ===============
+export function exportToXML(result: AuditResult): void {
+  const hostname = new URL(result.url).hostname;
+  const date = new Date(result.timestamp).toISOString();
+
+  const escapeXML = (str: string): string => {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&apos;');
+  };
+
+  let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+  xml += `<GEOAuditReport>\n`;
+  xml += `  <Metadata>\n`;
+  xml += `    <Website>${escapeXML(hostname)}</Website>\n`;
+  xml += `    <URL>${escapeXML(result.url)}</URL>\n`;
+  xml += `    <AnalysisDate>${date}</AnalysisDate>\n`;
+  xml += `    <Timestamp>${result.timestamp}</Timestamp>\n`;
+  xml += `  </Metadata>\n\n`;
+
+  xml += `  <OverallScore>\n`;
+  xml += `    <Score>${result.overallScore}</Score>\n`;
+  xml += `    <Grade>${result.grade}</Grade>\n`;
+  xml += `    <MaxScore>100</MaxScore>\n`;
+  xml += `  </OverallScore>\n\n`;
+
+  xml += `  <ScoreBreakdown>\n`;
+  Object.entries(result.scores).forEach(([category, score]) => {
+    const categoryName = category.replace(/([A-Z])/g, '_$1').toUpperCase();
+    xml += `    <Category name="${categoryName}">\n`;
+    xml += `      <Score>${score}</Score>\n`;
+    xml += `      <Status>${score >= 80 ? 'Excellent' : score >= 60 ? 'Good' : score >= 40 ? 'Fair' : 'Poor'}</Status>\n`;
+    xml += `    </Category>\n`;
+  });
+  xml += `  </ScoreBreakdown>\n\n`;
+
+  if (result.insights && result.insights.length > 0) {
+    xml += `  <KeyInsights>\n`;
+    result.insights.forEach((insight, idx) => {
+      xml += `    <Insight id="${idx + 1}">${escapeXML(insight)}</Insight>\n`;
+    });
+    xml += `  </KeyInsights>\n\n`;
+  }
+
+  xml += `  <DetailedAnalysis>\n`;
+  Object.entries(result.details).forEach(([category, details]: [string, any]) => {
+    const categoryName = category.replace(/([A-Z])/g, '_$1').toUpperCase();
+    xml += `    <${categoryName}>\n`;
+    
+    if (details.strengths && details.strengths.length > 0) {
+      xml += `      <Strengths>\n`;
+      details.strengths.forEach((strength: string) => {
+        xml += `        <Item>${escapeXML(strength)}</Item>\n`;
+      });
+      xml += `      </Strengths>\n`;
+    }
+
+    if (details.issues && details.issues.length > 0) {
+      xml += `      <Issues>\n`;
+      details.issues.forEach((issue: string) => {
+        xml += `        <Item>${escapeXML(issue)}</Item>\n`;
+      });
+      xml += `      </Issues>\n`;
+    }
+
+    xml += `    </${categoryName}>\n`;
+  });
+  xml += `  </DetailedAnalysis>\n\n`;
+
+  xml += `  <Recommendations>\n`;
+  result.recommendations.forEach((rec, idx) => {
+    xml += `    <Recommendation id="${idx + 1}" priority="${rec.priority}">\n`;
+    xml += `      <Title>${escapeXML(rec.title)}</Title>\n`;
+    xml += `      <Category>${escapeXML(rec.category)}</Category>\n`;
+    xml += `      <Description>${escapeXML(rec.description)}</Description>\n`;
+    if (rec.effort) xml += `      <Effort>${escapeXML(rec.effort)}</Effort>\n`;
+    if (rec.estimatedTime) xml += `      <EstimatedTime>${escapeXML(rec.estimatedTime)}</EstimatedTime>\n`;
+    if (rec.impact) xml += `      <Impact>${escapeXML(rec.impact)}</Impact>\n`;
+    if (rec.implementation) xml += `      <Implementation>${escapeXML(rec.implementation)}</Implementation>\n`;
+    xml += `    </Recommendation>\n`;
+  });
+  xml += `  </Recommendations>\n\n`;
+
+  xml += `  <Statistics>\n`;
+  xml += `    <ValidSchemas>${result.details.schemaMarkup.validSchemas}</ValidSchemas>\n`;
+  xml += `    <AICrawlersAllowed>${result.details.aiCrawlers.totalAICrawlers}</AICrawlersAllowed>\n`;
+  xml += `    <WordCount>${result.details.contentQuality.wordCount}</WordCount>\n`;
+  xml += `    <TotalLinks>${result.details.linkAnalysis.totalLinks}</TotalLinks>\n`;
+  xml += `    <ImageCount>${result.details.contentQuality.imageCount}</ImageCount>\n`;
+  xml += `  </Statistics>\n\n`;
+
+  xml += `</GEOAuditReport>`;
+
+  const blob = new Blob([xml], { type: 'application/xml;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', `GEO-Audit-${hostname}-${Date.now()}.xml`);
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+// =============== PLAIN TEXT EXPORT (token-efficient for LLM) ===============
+export function exportToPlainText(result: AuditResult): void {
+  const hostname = new URL(result.url).hostname;
+  const date = new Date(result.timestamp).toLocaleString();
+
+  let text = `GEO AUDIT REPORT\n`;
+  text += `${'='.repeat(80)}\n\n`;
+  
+  text += `Website: ${hostname}\n`;
+  text += `URL: ${result.url}\n`;
+  text += `Analysis Date: ${date}\n`;
+  text += `Overall Score: ${result.overallScore}/100\n`;
+  text += `Grade: ${result.grade}\n\n`;
+
+  text += `${'='.repeat(80)}\n`;
+  text += `SCORE BREAKDOWN\n`;
+  text += `${'='.repeat(80)}\n\n`;
+
+  Object.entries(result.scores).forEach(([category, score]) => {
+    const categoryName = category.replace(/([A-Z])/g, ' $1').trim();
+    const status = score >= 80 ? 'EXCELLENT' : score >= 60 ? 'GOOD' : score >= 40 ? 'FAIR' : 'POOR';
+    const bar = '█'.repeat(Math.floor(score / 5)) + '░'.repeat(20 - Math.floor(score / 5));
+    text += `${categoryName.padEnd(25)} ${score.toString().padStart(3)}/100 [${bar}] ${status}\n`;
+  });
+
+  text += `\n${'='.repeat(80)}\n`;
+  text += `KEY STATISTICS\n`;
+  text += `${'='.repeat(80)}\n\n`;
+  
+  text += `Valid Schemas: ${result.details.schemaMarkup.validSchemas}\n`;
+  text += `AI Crawlers Allowed: ${result.details.aiCrawlers.totalAICrawlers}\n`;
+  text += `Word Count: ${result.details.contentQuality.wordCount}\n`;
+  text += `Total Links: ${result.details.linkAnalysis.totalLinks}\n`;
+  text += `Images: ${result.details.contentQuality.imageCount}\n`;
+
+  if (result.insights && result.insights.length > 0) {
+    text += `\n${'='.repeat(80)}\n`;
+    text += `KEY INSIGHTS\n`;
+    text += `${'='.repeat(80)}\n\n`;
+    result.insights.forEach((insight, idx) => {
+      text += `${idx + 1}. ${insight}\n`;
+    });
+  }
+
+  text += `\n${'='.repeat(80)}\n`;
+  text += `DETAILED ANALYSIS\n`;
+  text += `${'='.repeat(80)}\n\n`;
+
+  Object.entries(result.details).forEach(([category, details]: [string, any]) => {
+    const categoryName = category.replace(/([A-Z])/g, ' $1').trim().toUpperCase();
+    const score = result.scores[category as keyof typeof result.scores];
+    
+    text += `${categoryName} (Score: ${score}/100)\n`;
+    text += `${'-'.repeat(80)}\n`;
+    
+    if (details.strengths && details.strengths.length > 0) {
+      text += `\nSTRENGTHS:\n`;
+      details.strengths.forEach((strength: string) => {
+        text += `  + ${strength}\n`;
+      });
+    }
+
+    if (details.issues && details.issues.length > 0) {
+      text += `\nISSUES:\n`;
+      details.issues.forEach((issue: string) => {
+        text += `  - ${issue}\n`;
+      });
+    }
+    text += `\n`;
+  });
+
+  text += `${'='.repeat(80)}\n`;
+  text += `RECOMMENDATIONS & ACTION PLAN\n`;
+  text += `${'='.repeat(80)}\n\n`;
+
+  const priorityGroups = {
+    critical: result.recommendations.filter(r => r.priority === 'critical'),
+    high: result.recommendations.filter(r => r.priority === 'high'),
+    medium: result.recommendations.filter(r => r.priority === 'medium'),
+  };
+
+  Object.entries(priorityGroups).forEach(([priority, recs]) => {
+    if (recs.length === 0) return;
+    
+    text += `\n${priority.toUpperCase()} PRIORITY\n`;
+    text += `${'-'.repeat(80)}\n\n`;
+
+    recs.forEach((rec, idx) => {
+      text += `${idx + 1}. ${rec.title}\n`;
+      text += `   Category: ${rec.category}\n`;
+      if (rec.effort) text += `   Effort: ${rec.effort}\n`;
+      if (rec.estimatedTime) text += `   Time: ${rec.estimatedTime}\n`;
+      text += `\n   ${rec.description}\n`;
+      if (rec.impact) text += `\n   Impact: ${rec.impact}\n`;
+      if (rec.implementation) text += `\n   Implementation: ${rec.implementation}\n`;
+      text += `\n`;
+    });
+  });
+
+  text += `${'='.repeat(80)}\n`;
+  text += `Generated by Anóteros Lógos GEO Audit Tool\n`;
+  text += `Visit https://anoteroslogos.com for expert GEO implementation support\n`;
+  text += `${'='.repeat(80)}\n`;
+
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', `GEO-Audit-${hostname}-${Date.now()}.txt`);
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+// =============== YAML EXPORT (for configuration analysis) ===============
+export function exportToYAML(result: AuditResult): void {
+  const hostname = new URL(result.url).hostname;
+  const date = new Date(result.timestamp).toISOString();
+
+  const escapeYAML = (str: string): string => {
+    if (str.includes(':') || str.includes('#') || str.includes('\n')) {
+      return `"${str.replace(/"/g, '\\"')}"`;
+    }
+    return str;
+  };
+
+  let yaml = `---\n`;
+  yaml += `geo_audit_report:\n`;
+  yaml += `  metadata:\n`;
+  yaml += `    website: ${escapeYAML(hostname)}\n`;
+  yaml += `    url: ${escapeYAML(result.url)}\n`;
+  yaml += `    analysis_date: ${date}\n`;
+  yaml += `    timestamp: ${result.timestamp}\n\n`;
+
+  yaml += `  overall_score:\n`;
+  yaml += `    score: ${result.overallScore}\n`;
+  yaml += `    grade: ${result.grade}\n`;
+  yaml += `    max_score: 100\n\n`;
+
+  yaml += `  score_breakdown:\n`;
+  Object.entries(result.scores).forEach(([category, score]) => {
+    const categoryKey = category.replace(/([A-Z])/g, '_$1').toLowerCase();
+    const status = score >= 80 ? 'excellent' : score >= 60 ? 'good' : score >= 40 ? 'fair' : 'poor';
+    yaml += `    ${categoryKey}:\n`;
+    yaml += `      score: ${score}\n`;
+    yaml += `      status: ${status}\n`;
+  });
+
+  if (result.insights && result.insights.length > 0) {
+    yaml += `\n  key_insights:\n`;
+    result.insights.forEach((insight) => {
+      yaml += `    - ${escapeYAML(insight)}\n`;
+    });
+  }
+
+  yaml += `\n  statistics:\n`;
+  yaml += `    valid_schemas: ${result.details.schemaMarkup.validSchemas}\n`;
+  yaml += `    ai_crawlers_allowed: ${result.details.aiCrawlers.totalAICrawlers}\n`;
+  yaml += `    word_count: ${result.details.contentQuality.wordCount}\n`;
+  yaml += `    total_links: ${result.details.linkAnalysis.totalLinks}\n`;
+  yaml += `    image_count: ${result.details.contentQuality.imageCount}\n`;
+
+  yaml += `\n  detailed_analysis:\n`;
+  Object.entries(result.details).forEach(([category, details]: [string, any]) => {
+    const categoryKey = category.replace(/([A-Z])/g, '_$1').toLowerCase();
+    yaml += `    ${categoryKey}:\n`;
+    
+    if (details.strengths && details.strengths.length > 0) {
+      yaml += `      strengths:\n`;
+      details.strengths.forEach((strength: string) => {
+        yaml += `        - ${escapeYAML(strength)}\n`;
+      });
+    }
+
+    if (details.issues && details.issues.length > 0) {
+      yaml += `      issues:\n`;
+      details.issues.forEach((issue: string) => {
+        yaml += `        - ${escapeYAML(issue)}\n`;
+      });
+    }
+  });
+
+  yaml += `\n  recommendations:\n`;
+  result.recommendations.forEach((rec, idx) => {
+    yaml += `    - id: ${idx + 1}\n`;
+    yaml += `      priority: ${rec.priority}\n`;
+    yaml += `      title: ${escapeYAML(rec.title)}\n`;
+    yaml += `      category: ${escapeYAML(rec.category)}\n`;
+    yaml += `      description: ${escapeYAML(rec.description)}\n`;
+    if (rec.effort) yaml += `      effort: ${escapeYAML(rec.effort)}\n`;
+    if (rec.estimatedTime) yaml += `      estimated_time: ${escapeYAML(rec.estimatedTime)}\n`;
+    if (rec.impact) yaml += `      impact: ${escapeYAML(rec.impact)}\n`;
+    if (rec.implementation) yaml += `      implementation: ${escapeYAML(rec.implementation)}\n`;
+  });
+
+  yaml += `\n  generated_by:\n`;
+  yaml += `    tool: "Anóteros Lógos GEO Audit Tool"\n`;
+  yaml += `    website: "https://anoteroslogos.com"\n`;
+  yaml += `    contact: "Peitho@anoteroslogos.com"\n`;
+
+  const blob = new Blob([yaml], { type: 'application/x-yaml;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.setAttribute('href', url);
+  link.setAttribute('download', `GEO-Audit-${hostname}-${Date.now()}.yaml`);
+  link.click();
+  URL.revokeObjectURL(url);
+}

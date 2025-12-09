@@ -200,6 +200,39 @@ const GeoAuditPage = () => {
     }
   };
 
+  const downloadXMLReport = async () => {
+    if (!result) return;
+    try {
+      const { exportToXML } = await import('../utils/exportFormats');
+      exportToXML(result);
+    } catch (error) {
+      console.error('Failed to export XML:', error);
+      alert('Failed to export XML report. Please try again.');
+    }
+  };
+
+  const downloadPlainTextReport = async () => {
+    if (!result) return;
+    try {
+      const { exportToPlainText } = await import('../utils/exportFormats');
+      exportToPlainText(result);
+    } catch (error) {
+      console.error('Failed to export Plain Text:', error);
+      alert('Failed to export Plain Text report. Please try again.');
+    }
+  };
+
+  const downloadYAMLReport = async () => {
+    if (!result) return;
+    try {
+      const { exportToYAML } = await import('../utils/exportFormats');
+      exportToYAML(result);
+    } catch (error) {
+      console.error('Failed to export YAML:', error);
+      alert('Failed to export YAML report. Please try again.');
+    }
+  };
+
   const downloadHTMLReport = async () => {
     if (!result) return;
     try {
@@ -584,10 +617,34 @@ const GeoAuditPage = () => {
                   <button
                     onClick={downloadMarkdownReport}
                     className="p-2.5 hover:bg-white/5 rounded-lg transition-all group"
-                    title="Download Markdown Report"
-                    aria-label="Download markdown report for GitHub/docs"
+                    title="Download Markdown Report (LLM-friendly)"
+                    aria-label="Download markdown report for GitHub/docs/LLM"
                   >
                     <FileText className="w-4 h-4 text-green-400 group-hover:scale-110 transition-transform" />
+                  </button>
+                  <button
+                    onClick={downloadXMLReport}
+                    className="p-2.5 hover:bg-white/5 rounded-lg transition-all group"
+                    title="Download XML Report (LLM-friendly)"
+                    aria-label="Download XML report for structured LLM analysis"
+                  >
+                    <FileText className="w-4 h-4 text-red-400 group-hover:scale-110 transition-transform" />
+                  </button>
+                  <button
+                    onClick={downloadPlainTextReport}
+                    className="p-2.5 hover:bg-white/5 rounded-lg transition-all group"
+                    title="Download Plain Text Report (Token-efficient for LLM)"
+                    aria-label="Download plain text report for token-efficient LLM analysis"
+                  >
+                    <FileText className="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform" />
+                  </button>
+                  <button
+                    onClick={downloadYAMLReport}
+                    className="p-2.5 hover:bg-white/5 rounded-lg transition-all group"
+                    title="Download YAML Report (LLM-friendly)"
+                    aria-label="Download YAML report for configuration analysis"
+                  >
+                    <FileText className="w-4 h-4 text-yellow-400 group-hover:scale-110 transition-transform" />
                   </button>
                   <button
                     onClick={downloadCSVReport}
