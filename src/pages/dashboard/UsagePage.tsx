@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../../lib/dashboard/auth-guard';
 import { getDailyUsage, getTopTools, getUCPTRate } from '../../../lib/dashboard/usage-analytics';
+import { getSubscription, getUsageStats } from '../../../lib/dashboard/billing-client';
 import { Activity, TrendingUp, Zap, ChevronDown } from 'lucide-react';
 
 const CHART_COLORS = [
@@ -24,6 +25,8 @@ export function UsagePage() {
   const [dailyStats, setDailyStats] = useState<any[]>([]);
   const [toolStats, setToolStats] = useState<any[]>([]);
   const [dateRange, setDateRange] = useState('7');
+  const [subscription, setSubscription] = useState<any>(null);
+  const [usageStats, setUsageStats] = useState<any>(null);
 
   useEffect(() => {
     fetchUsageData();
@@ -33,13 +36,20 @@ export function UsagePage() {
     setLoading(true);
     try {
       const days = parseInt(dateRange);
-      const [daily, tools] = await Promise.all([
+      const [daily, tools, subResult] = await Promise.all([
         getDailyUsage(user.id, days),
         getTopTools(user.id, days),
+        getSubscription(user.id),
       ]);
 
       setDailyStats(Array.isArray(daily) ? daily : []);
       setToolStats(Array.isArray(tools) ? tools.slice(0, 10) : []);
+      
+      if (!('error' in subResult)) {
+        setSubscription(subResult);
+        const stats = await getUsageStats(subResult);
+        setUsageStats(stats);
+      }
     } catch (error) {
       console.error('Failed to fetch usage statistics', error);
     } finally {
@@ -85,6 +95,62 @@ export function UsagePage() {
           <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-500 pointer-events-none" />
         </div>
       </div>
+
+      {/* Subscription Usage - Compact */}
+      {subscription && usageStats && (
+        <div className="grid grid-cols-3 gap-3">
+          {/* Current Plan */}
+          <div className="border border-slate-800/50 bg-black/20 backdrop-blur-md p-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Current Plan</span>
+              <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+            </div>
+            <div className="font-mono font-bold text-xl text-slate-100 mb-1">
+              {subscription.plan_tier.charAt(0).toUpperCase() + subscription.plan_tier.slice(1)}
+            </div>
+            <div className="text-[9px] font-mono text-slate-600">
+              {usageStats.auditsQuota === -1 ? 'Unlimited' : `${usageStats.auditsQuota} audits/mo`}
+            </div>
+          </div>
+
+          {/* Usage This Period */}
+          <div className="border border-slate-800/50 bg-black/20 backdrop-blur-md p-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Usage</span>
+              <Activity className="w-3 h-3 text-slate-600" />
+            </div>
+            <div className="font-mono font-bold text-xl text-slate-100 mb-1">
+              {usageStats.auditsUsed}/{usageStats.auditsQuota === -1 ? '∞' : usageStats.auditsQuota}
+            </div>
+            <div className="w-full bg-slate-900/50 h-1.5 overflow-hidden mt-2">
+              <div
+                className={`h-full transition-all ${
+                  usageStats.percentageUsed >= 90 ? 'bg-red-500' :
+                  usageStats.percentageUsed >= 70 ? 'bg-yellow-500' : 'bg-blue-500'
+                }`}
+                style={{ width: `${Math.min(usageStats.percentageUsed, 100)}%` }}
+              />
+            </div>
+            <div className="text-[9px] font-mono text-slate-600 mt-1">
+              {usageStats.percentageUsed}% used
+            </div>
+          </div>
+
+          {/* Days Remaining */}
+          <div className="border border-slate-800/50 bg-black/20 backdrop-blur-md p-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">Period</span>
+              <TrendingUp className="w-3 h-3 text-slate-600" />
+            </div>
+            <div className="font-mono font-bold text-xl text-slate-100 mb-1">
+              {usageStats.daysRemaining}
+            </div>
+            <div className="text-[9px] font-mono text-slate-600">
+              days remaining
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Compact KPI Grid with Inline Charts - OpenRouter Style */}
       <div className="grid grid-cols-3 gap-3">
