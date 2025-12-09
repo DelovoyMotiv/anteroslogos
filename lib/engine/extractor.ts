@@ -139,32 +139,57 @@ export class ExtractionEngine {
         // CORS error or network error - try proxy fallback
       }
       
-      // Strategy 2: CORS proxy fallback
-      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-      const proxyResponse = await fetch(proxyUrl, {
-        signal: controller.signal,
-      });
+      // Strategy 2: CORS proxy fallback with multiple proxies
+      const proxies = [
+        {
+          url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+          parseResponse: async (res: Response) => {
+            const data = await res.json();
+            return data.contents;
+          }
+        },
+        {
+          url: `https://corsproxy.io/?${encodeURIComponent(url)}`,
+          parseResponse: async (res: Response) => await res.text()
+        },
+        {
+          url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+          parseResponse: async (res: Response) => await res.text()
+        }
+      ];
       
-      if (!proxyResponse.ok) {
-        throw new AgentMiddlewareError(
-          ErrorCode.ERR_URL_UNREACHABLE,
-          'Failed to fetch URL via proxy',
-          { url, proxyStatus: proxyResponse.status }
-        );
+      let lastError: Error | null = null;
+      
+      for (const proxy of proxies) {
+        try {
+          const proxyResponse = await fetch(proxy.url, {
+            signal: controller.signal,
+          });
+          
+          if (proxyResponse.ok) {
+            const html = await proxy.parseResponse(proxyResponse);
+            
+            if (html && html.length > 0) {
+              clearTimeout(timeoutId);
+              return html;
+            }
+          }
+          
+          lastError = new Error(`Proxy returned status ${proxyResponse.status}`);
+        } catch (error) {
+          lastError = error instanceof Error ? error : new Error(String(error));
+          console.warn(`CORS proxy ${proxy.url} failed:`, lastError.message);
+          continue;
+        }
       }
       
-      const data = await proxyResponse.json();
+      // All proxies failed
       clearTimeout(timeoutId);
-      
-      if (!data.contents) {
-        throw new AgentMiddlewareError(
-          ErrorCode.ERR_URL_UNREACHABLE,
-          'Proxy returned empty content',
-          { url }
-        );
-      }
-      
-      return data.contents;
+      throw new AgentMiddlewareError(
+        ErrorCode.ERR_URL_UNREACHABLE,
+        'All CORS proxies failed',
+        { url, lastError: lastError?.message }
+      );
     } catch (error) {
       clearTimeout(timeoutId);
       
