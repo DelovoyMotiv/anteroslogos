@@ -1,7 +1,7 @@
 # Anóteros Lógos - Enterprise AI Knowledge Infrastructure
 
 ![License](https://img.shields.io/badge/License-Proprietary-red)
-![Version](https://img.shields.io/badge/version-4.1.1-blue)
+![Version](https://img.shields.io/badge/version-4.2.1-blue)
 ![Node](https://img.shields.io/badge/node-20.x-green)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)
 ![React](https://img.shields.io/badge/React-19.2-cyan)
@@ -11,7 +11,7 @@ AI knowledge infrastructure platform providing cryptographically verifiable prov
 
 Production URL: https://anoteroslogos.com
 
-Codebase: 878 files | 276,203 lines
+Codebase: 1,072 files | 244,207 lines
 
 ---
 
@@ -35,6 +35,7 @@ Enterprise platform for optimizing digital content and brand presence for AI lan
 12. **Content Intelligence** - NLP analysis, query intent classification, competitive monitoring
 13. **Gold Standard System** - Citation prediction, learning feedback, network effects amplification
 14. **TypeScript SDK** - Production-grade client library with resilience patterns and type-safe API integration
+15. **Agent Middleware** - Token-efficient extraction API with Redis caching and semantic serialization for autonomous agents
 
 ### Production Hardening
 
@@ -765,7 +766,45 @@ Official client library for programmatic API access.
 - `packages/sdk/src/services/citation.ts` - Citation Intelligence
 - `packages/sdk/src/services/ccc.ts` - CCC balance and transfer
 
-### 18. Frontend Application
+### 18. Agent Middleware
+
+Token-efficient extraction API for autonomous agents with semantic serialization and Redis caching.
+
+**Capabilities:**
+- Web content extraction with entity recognition and relationship mapping
+- Semantic serialization in columnar format reducing token costs by 40-60%
+- Redis caching with 24-hour TTL and SHA-256 key generation
+- Authentication middleware with quota tracking and usage limits
+- Rate limiting with per-key and global thresholds
+- Comprehensive error handling with machine-readable codes
+- Structured logging with request correlation and performance metrics
+
+**Extraction Modes:**
+- Fast mode: Minimal data extraction optimized for speed
+- Deep mode: Comprehensive analysis with full knowledge graph
+
+**Output Formats:**
+- Compact JSON: Schema-separated columnar structure for token efficiency
+- JSON-LD: Standard linked data format with full context
+
+**API Features:**
+- Bearer token authentication with Supabase validation
+- Automatic cache invalidation and graceful degradation
+- OpenAPI 3.0 documentation endpoint with examples
+- Response time under 15 seconds with timeout handling
+- Protocol version header for client compatibility
+
+**Components:**
+- `lib/engine/extractor.ts` - Core extraction engine with fallback strategies
+- `lib/engine/entityExtractor.ts` - Entity recognition and normalization
+- `lib/engine/serializer.ts` - Token-efficient serialization algorithms
+- `lib/engine/cache.ts` - Redis cache service with TTL management
+- `lib/middleware/agentAuth.ts` - Authentication and quota enforcement
+- `lib/middleware/agentRateLimiter.ts` - Rate limiting with token bucket
+- `api/v1/agent/wrap.ts` - Main API endpoint with request validation
+- `api/v1/agent/wrap-openapi.ts` - OpenAPI documentation generator
+
+### 19. Frontend Application
 
 React 19 SPA with route-based code splitting and production-grade UI components.
 
@@ -859,31 +898,24 @@ BASE_RPC_URL=https://mainnet.base.org
 # AI Integration
 VITE_OPENROUTER_API_KEY=...
 VITE_OPENROUTER_MODEL=minimax/minimax-m2:free
+
+# Agent Middleware
+REDIS_URL=redis://...
+AGENT_API_VERSION=1.0.0
+AGENT_API_TIMEOUT=15000
+ENABLE_HEADLESS_BROWSER=false
+ENABLE_DEEP_MODE=true
+SENTRY_DSN=...
+SENTRY_ENVIRONMENT=production
 ```
 
-**Database Migrations:**
-```bash
-psql $DATABASE_URL < supabase/migrations/001_initial_schema.sql
-psql $DATABASE_URL < supabase/migrations/002_gold_standard_schema.sql
-psql $DATABASE_URL < supabase/migrations/003_auth_schema.sql
-psql $DATABASE_URL < supabase/migrations/004_apa_payments_schema.sql
-psql $DATABASE_URL < supabase/migrations/005_pricing_matrix_table.sql
-psql $DATABASE_URL < supabase/migrations/006_payment_correlation_index.sql
-psql $DATABASE_URL < supabase/migrations/007_multi_tenancy_isolation.sql
-psql $DATABASE_URL < supabase/migrations/008_audit_trail_worm.sql
-psql $DATABASE_URL < supabase/migrations/009_bft_schema.sql
-psql $DATABASE_URL < supabase/migrations/010_subscription_billing.sql
-psql $DATABASE_URL < supabase/migrations/011_free_plan_auto_activation.sql
-psql $DATABASE_URL < supabase/migrations/012_agent_mesh_network.sql
-psql $DATABASE_URL < supabase/migrations/013_a2a_full_support.sql
-psql $DATABASE_URL < supabase/migrations/014_hotstuff_tenant_context.sql
-psql $DATABASE_URL < supabase/migrations/015_intent_payments_tenant.sql
-psql $DATABASE_URL < supabase/migrations/016_job_queue_system.sql
-```
+
 
 ---
 
 ## API Integration
+
+### A2A Protocol API
 
 **Endpoint:** `POST https://anoteroslogos.com/api/a2a`
 
@@ -917,6 +949,49 @@ Basic:      60 req/min   | 1,000 req/hour
 Pro:        300 req/min  | 10,000 req/hour
 Enterprise: 1,000 req/min| 50,000 req/hour
 ```
+
+### Agent Middleware API
+
+**Endpoint:** `POST https://anoteroslogos.com/api/v1/agent/wrap`
+
+**Authentication:** Bearer token with Supabase API key validation
+
+**Example Request:**
+```bash
+curl -X POST https://anoteroslogos.com/api/v1/agent/wrap \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer your_api_key" \
+  -d '{
+    "url": "https://example.com",
+    "mode": "fast",
+    "format": "compact"
+  }'
+```
+
+**Response Structure:**
+```json
+{
+  "meta": {
+    "url": "https://example.com",
+    "timestamp": "2025-12-09T10:00:00Z",
+    "mode": "fast",
+    "format": "compact",
+    "cache_hit": false,
+    "latency_ms": 1234
+  },
+  "content": {
+    "title": "Page Title",
+    "description": "Meta description",
+    "schema": []
+  },
+  "knowledge_graph": {
+    "entities": [],
+    "relationships": []
+  }
+}
+```
+
+**Documentation:** `GET https://anoteroslogos.com/api/v1/agent/wrap` returns OpenAPI 3.0 schema
 
 ---
 
@@ -974,12 +1049,19 @@ lib/
     verifier.ts                   # Signature verification
     serializer.ts                 # Canonical CBOR (RFC 8949)
   mcp/                            # MCP Sandbox
+  engine/                         # Agent Middleware
+    extractor.ts                  # Web content extraction
+    entityExtractor.ts            # Entity recognition
+    serializer.ts                 # Token-efficient serialization
+    cache.ts                      # Redis cache service
+  middleware/                     # Authentication and rate limiting
+    agentAuth.ts                  # Bearer token validation
+    agentRateLimiter.ts           # Token bucket algorithm
   aiSyndication/                  # Platform sync
   nlu/                            # NLU Foundation
   security/                       # CSRF protection
   auth/                           # JWT authentication
   validation/                     # Input validation
-  middleware/                     # Rate limiting
   database/                       # Query optimization
   reliability/                    # Circuit breakers and retry
   logging/                        # Structured logging
@@ -1118,6 +1200,16 @@ tests/
 - `KNOWLEDGE_GRAPH_ENGINE.md` - KG architecture
 - `CITATION_LEARNING_ENGINE.md` - ML feedback loop
 - `GOLD_STANDARD_INNOVATIONS.md` - Persistence layer
+- `.kiro/specs/agent-middleware/` - Agent Middleware specification
+
+**Deployment:**
+- `docs/AGENT_MIDDLEWARE_DEPLOYMENT.md` - Full deployment guide
+- `docs/AGENT_MIDDLEWARE_QUICKSTART.md` - 5-minute quick start
+- `docs/REDIS_SETUP.md` - Redis configuration
+- `docs/SENTRY_INTEGRATION.md` - Error tracking setup
+- `docs/AGENT_MIDDLEWARE_DEPLOYMENT_CHECKLIST.md` - Deployment checklist
+- `docs/BUILD_VERIFICATION_REPORT.md` - Build verification
+- `docs/AGENT_MIDDLEWARE_DATABASE_AUDIT.md` - Database audit
 
 **Examples:**
 - `examples/agent-client.ts` - AI agent implementation
@@ -1128,8 +1220,8 @@ tests/
 ## Statistics
 
 **Codebase:**
-- Total files: 878
-- Total lines: 276,203
+- Total files: 1,072
+- Total lines: 244,207
 - TypeScript: 94.2%
 - PLpgSQL: 5.0%
 - CSS: 0.8%
@@ -1160,6 +1252,7 @@ tests/
 - UCPT Provenance Token with Ed25519 signatures
 - NLU Foundation with intent classification
 - Subscription Billing with USDC payments
+- Agent Middleware with token-efficient extraction
 - Frontend: Production-grade UI with mobile optimization
 
 ---
@@ -1170,5 +1263,5 @@ Proprietary - All rights reserved
 
 ---
 
-Last Updated: December 4, 2025
-Version: 4.1.1
+Last Updated: December 9, 2025
+Version: 4.2.1

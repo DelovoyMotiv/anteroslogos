@@ -5,6 +5,10 @@
   "functions": {
     "api/**/*.ts": {
       "maxDuration": 10
+    },
+    "api/v1/agent/wrap.ts": {
+      "maxDuration": 30,
+      "memory": 1024
     }
   },
   "rewrites": [

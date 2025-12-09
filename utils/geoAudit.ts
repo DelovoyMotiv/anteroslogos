@@ -3,6 +3,9 @@
  * Client-side website analysis for Generative Engine Optimization
  */
 
+import { createExtractionEngine } from '../lib/engine/extractor';
+import type { ExtractionResult } from '../types/agent-middleware.types';
+
 export interface AuditResult {
   url: string;
   timestamp: string;
@@ -103,23 +106,24 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
   // Normalize URL
   const normalizedUrl = normalizeUrl(url);
   
-  // Fetch HTML content via CORS proxy or direct fetch
-  let htmlContent: string;
+  // Use new Extraction Engine for fetching and parsing
+  let extractionResult: ExtractionResult;
   try {
-    htmlContent = await fetchHTML(normalizedUrl);
-  } catch {
+    const engine = createExtractionEngine();
+    extractionResult = await engine.extract(normalizedUrl, { mode: 'fast' });
+  } catch (error) {
     throw new Error('Failed to fetch website. Please check the URL and try again.');
   }
 
-  // Parse HTML
+  // Parse HTML for audit-specific analysis
   const parser = new DOMParser();
-  const doc = parser.parseFromString(htmlContent, 'text/html');
+  const doc = parser.parseFromString(extractionResult.html, 'text/html');
 
   // Run all audits
   const schemaMarkup = auditSchemaMarkup(doc);
   const metaTags = auditMetaTags(doc);
   const structure = auditStructure(doc);
-  const performance = auditPerformance(htmlContent, doc);
+  const performance = auditPerformance(extractionResult.html, doc);
   const eeat = auditEEAT(doc);
   
   // Try to fetch robots.txt
@@ -188,32 +192,7 @@ function normalizeUrl(url: string): string {
   return normalized;
 }
 
-/**
- * Fetch HTML content (with CORS handling)
- */
-async function fetchHTML(url: string): Promise<string> {
-  // Try direct fetch first (will work if target allows CORS)
-  try {
-    const response = await fetch(url, {
-      method: 'GET',
-      mode: 'cors',
-    });
-    if (response.ok) {
-      return await response.text();
-    }
-  } catch {
-    // CORS error expected - use proxy fallback
-  }
-
-  // Fallback: Use allorigins.win as CORS proxy
-  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
-  const response = await fetch(proxyUrl);
-  if (!response.ok) {
-    throw new Error('Failed to fetch via proxy');
-  }
-  const data = await response.json();
-  return data.contents;
-}
+// fetchHTML function removed - now using Extraction Engine from lib/engine/extractor.ts
 
 /**
  * Audit Schema.org markup

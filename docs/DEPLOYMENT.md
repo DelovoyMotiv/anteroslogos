@@ -71,6 +71,13 @@ Common issues and solutions:
 2. **Build errors**: Verify all dependencies installed
 3. **Environment variables**: Ensure all required vars set
 
+## Agent Middleware Deployment
+
+For deploying the Agent Middleware system, see:
+- [Agent Middleware Deployment Guide](AGENT_MIDDLEWARE_DEPLOYMENT.md)
+- [Redis Setup Guide](REDIS_SETUP.md)
+- [Sentry Integration Guide](SENTRY_INTEGRATION.md)
+
 ## Support
 
 For issues, check:

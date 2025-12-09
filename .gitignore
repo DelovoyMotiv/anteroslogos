@@ -112,6 +112,7 @@ SIGNUP_FIX_INSTRUCTIONS.md
 
 # Deployment guides (keep essential ones in docs/)
 VERCEL_DEPLOYMENT.md
+VERCEL_DEPLOYMENT_ISSUE.md
 VERCEL_ENV_SETUP.md
 DNS_SETUP.md
 OPEN_GRAPH_SETUP.md

@@ -41,7 +41,15 @@ export default defineConfig(({ mode }) => {
         cssMinify: true,
         chunkSizeWarningLimit: 100, // 100KB warning threshold
         rollupOptions: {
-          external: ['vfile', 'node:path', 'node:url', 'node:process', 'module'],
+          external: [
+            'vfile', 
+            'node:path', 
+            'node:url', 
+            'node:process', 
+            'module',
+            'jsdom', // Exclude jsdom from browser bundle
+            'vitest', // Exclude vitest from browser bundle
+          ],
           output: {
             manualChunks: {
               'react-vendor': ['react', 'react-dom'],

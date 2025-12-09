@@ -3,6 +3,8 @@
  * Advanced website analysis for Generative Engine Optimization
  */
 
+import { createExtractionEngine } from '../lib/engine/extractor';
+import type { ExtractionResult } from '../types/agent-middleware.types';
 import type { AIDAgentInfo } from './aidDiscovery';
 import type { KnowledgeGraph } from './knowledgeGraph/builder';
 import {
@@ -272,14 +274,17 @@ export async function auditWebsite(
   
   const normalizedUrl = normalizeUrl(url);
   
-  let htmlContent: string;
+  // Use new Extraction Engine for fetching
+  let extractionResult: ExtractionResult;
   try {
     onProgress?.('Fetching website content...');
-    htmlContent = await fetchHTML(normalizedUrl);
+    const engine = createExtractionEngine();
+    extractionResult = await engine.extract(normalizedUrl, { mode: 'fast' });
   } catch {
     throw new Error('Failed to fetch website. Please check the URL and try again.');
   }
 
+  const htmlContent = extractionResult.html;
   const parser = new DOMParser();
   const doc = parser.parseFromString(htmlContent, 'text/html');
 
@@ -520,101 +525,7 @@ function normalizeUrl(url: string): string {
   return normalized;
 }
 
-async function fetchHTML(url: string): Promise<string> {
-  // Try direct fetch first (with timeout)
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
-    
-    const response = await fetch(url, {
-      method: 'GET',
-      mode: 'cors',
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'GEO-Audit/2.0 (+https://anoteroslogos.com)',
-      },
-    });
-    
-    clearTimeout(timeoutId);
-    
-    if (response.ok) {
-      const html = await response.text();
-      if (html && html.length > 100) { // Min 100 chars for valid HTML
-        console.log('✓ Direct fetch successful');
-        return html;
-      }
-    }
-  } catch (error) {
-    // Expected CORS error or timeout - will use proxy
-    const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-    console.log(`Direct fetch failed (${errorMsg}), using proxy...`);
-  }
-
-  // Multiple proxy options for reliability
-  const proxies = [
-    (url: string) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
-    (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-    (url: string) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-  ];
-  
-  const maxRetries = 2;
-  let lastError: Error | null = null;
-  
-  for (const proxyFn of proxies) {
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
-        
-        const proxyUrl = proxyFn(url);
-        const response = await fetch(proxyUrl, {
-          signal: controller.signal,
-        });
-        
-        clearTimeout(timeoutId);
-        
-        if (!response.ok) {
-          throw new Error(`Proxy returned status ${response.status}`);
-        }
-        
-        // Different proxies return different formats
-        const contentType = response.headers.get('content-type') || '';
-        let html: string;
-        
-        if (contentType.includes('application/json')) {
-          const data = await response.json();
-          html = data.contents || data.content || data.data || '';
-        } else {
-          html = await response.text();
-        }
-        
-        if (!html || html.length < 100) {
-          throw new Error('Proxy returned empty or invalid content');
-        }
-        
-        console.log(`✓ Proxy fetch successful (${proxyUrl.split('?')[0]}, attempt ${attempt})`);
-        return html;
-        
-      } catch (error) {
-        lastError = error instanceof Error ? error : new Error('Unknown error');
-        console.warn(`Proxy attempt ${attempt}/${maxRetries} failed:`, lastError.message);
-        
-        // Wait before retry (exponential backoff)
-        if (attempt < maxRetries) {
-          await new Promise(resolve => setTimeout(resolve, attempt * 1000));
-        }
-      }
-    }
-  }
-  
-  // All attempts failed
-  console.error('All fetch attempts failed:', lastError);
-  throw new Error(
-    `Unable to fetch website after ${maxRetries} attempts. ` +
-    `The site may be blocking automated access, temporarily down, or the URL is incorrect. ` +
-    `Error: ${lastError?.message || 'Unknown error'}`
-  );
-}
+// fetchHTML function removed - now using Extraction Engine from lib/engine/extractor.ts
 
 // ==================== ENHANCED AUDIT FUNCTIONS ====================
 
