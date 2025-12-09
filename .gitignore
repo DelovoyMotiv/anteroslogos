@@ -93,9 +93,13 @@ test-migrations-individually.md
 DASHBOARD_*.md
 STARTUP_*.md
 
-# Audit reports
+# Development files - reports, audits, instructions (only in .kiro/)
+*_REPORT.md
 *_AUDIT.md
-*_AUDIT_REPORT.md
+*_INSTRUCTIONS.md
+*_FIX.md
+*_VERIFICATION.md
+*_ISSUE.md
 CODE_DUPLICATION_REPORT.md
 PRODUCTION_AUDIT_REPORT.md
 TODO_FIXME_AUDIT.md
@@ -108,7 +112,6 @@ TODO_FIXME_PROCESS.md
 *_FIXES_*.md
 OG_*.md
 POST_DEPLOY_*.md
-SIGNUP_FIX_INSTRUCTIONS.md
 
 # Deployment guides (keep essential ones in docs/)
 VERCEL_DEPLOYMENT.md
