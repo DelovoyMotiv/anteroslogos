@@ -3,8 +3,7 @@
  * Professional PDF reports with charts, branding, recommendations
  */
 
-import jsPDF from 'jspdf';
-import { AuditResult } from './geoAuditEnhanced';
+import type { AuditResult } from './geoAuditEnhanced';
 
 interface PDFReportOptions {
   includeCharts?: boolean;
@@ -24,6 +23,9 @@ export async function generatePDFReport(
     companyName = 'Anóteros Lógos',
     reportDate = new Date().toLocaleDateString(),
   } = options;
+
+  // Dynamic import to avoid ESM issues
+  const jsPDF = (await import('jspdf')).default;
 
   // Initialize PDF (A4 size)
   const pdf = new jsPDF({
