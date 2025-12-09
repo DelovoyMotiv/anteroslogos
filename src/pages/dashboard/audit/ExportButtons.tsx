@@ -176,7 +176,7 @@ ${result.insights.map(insight => `- ${insight}`).join('\n')}
     try {
       const { generatePDFReport } = await import('../../../../utils/pdfReportGenerator');
       await generatePDFReport(result, {
-        includeCharts: true,
+        includeCharts: false, // Disable charts for dashboard version
         includeRecommendations: true,
         includeDetails: true,
         companyName: 'Anóteros Lógos',
@@ -185,7 +185,8 @@ ${result.insights.map(insight => `- ${insight}`).join('\n')}
       toast.success('PDF report generated');
     } catch (error) {
       console.error('Failed to generate PDF:', error);
-      toast.error('Failed to generate PDF report');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      toast.error(`Failed to generate PDF: ${errorMessage}`);
     }
   };
 
