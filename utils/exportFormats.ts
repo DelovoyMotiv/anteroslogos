@@ -29,11 +29,11 @@ export function exportToCSV(result: AuditResult): void {
   rows.push(['']);
   rows.push(['Quick Statistics']);
   rows.push(['Metric', 'Value']);
-  rows.push(['Valid Schemas', result.details.schemaMarkup.validSchemas.toString()]);
-  rows.push(['AI Crawlers Allowed', result.details.aiCrawlers.totalAICrawlers.toString()]);
-  rows.push(['Word Count', result.details.contentQuality.wordCount.toString()]);
-  rows.push(['Total Links', result.details.linkAnalysis.totalLinks.toString()]);
-  rows.push(['Images', result.details.contentQuality.imageCount.toString()]);
+  rows.push(['Valid Schemas', (result.details?.schemaMarkup?.validSchemas || 0).toString()]);
+  rows.push(['AI Crawlers Allowed', (result.details?.aiCrawlers?.totalAICrawlers || 0).toString()]);
+  rows.push(['Word Count', (result.details?.contentQuality?.wordCount || 0).toString()]);
+  rows.push(['Total Links', (result.details?.linkAnalysis?.totalLinks || 0).toString()]);
+  rows.push(['Images', (result.details?.contentQuality?.imageCount || 0).toString()]);
 
   rows.push(['']);
   rows.push(['Recommendations']);
@@ -91,11 +91,11 @@ export function exportToMarkdown(result: AuditResult): void {
   });
 
   md += `\n## Quick Statistics\n\n`;
-  md += `- **Schemas Found:** ${result.details.schemaMarkup.validSchemas}\n`;
-  md += `- **AI Crawlers Allowed:** ${result.details.aiCrawlers.totalAICrawlers}\n`;
-  md += `- **Word Count:** ${result.details.contentQuality.wordCount}\n`;
-  md += `- **Total Links:** ${result.details.linkAnalysis.totalLinks}\n`;
-  md += `- **Images:** ${result.details.contentQuality.imageCount}\n\n`;
+  md += `- **Schemas Found:** ${result.details?.schemaMarkup?.validSchemas || 0}\n`;
+  md += `- **AI Crawlers Allowed:** ${result.details?.aiCrawlers?.totalAICrawlers || 0}\n`;
+  md += `- **Word Count:** ${result.details?.contentQuality?.wordCount || 0}\n`;
+  md += `- **Total Links:** ${result.details?.linkAnalysis?.totalLinks || 0}\n`;
+  md += `- **Images:** ${result.details?.contentQuality?.imageCount || 0}\n\n`;
 
   if (result.insights && result.insights.length > 0) {
     md += `## Key Insights\n\n`;
@@ -106,30 +106,32 @@ export function exportToMarkdown(result: AuditResult): void {
   }
 
   md += `## Detailed Category Analysis\n\n`;
-  Object.entries(result.details)
-    .filter(([category]) => category !== 'aidAgent') // AID has its own section
-    .forEach(([category, details]: [string, any]) => {
-      const categoryName = category.replace(/([A-Z])/g, ' $1').trim();
-      const score = result.scores[category as keyof typeof result.scores];
-      
-      md += `### ${categoryName} (Score: ${score}/100)\n\n`;
-      
-      if (details.strengths && details.strengths.length > 0) {
-        md += `**✅ Strengths:**\n\n`;
-        details.strengths.forEach((strength: string) => {
-          md += `- ${strength}\n`;
-        });
-        md += `\n`;
-      }
+  if (result.details) {
+    Object.entries(result.details)
+      .filter(([category]) => category !== 'aidAgent') // AID has its own section
+      .forEach(([category, details]: [string, any]) => {
+        const categoryName = category.replace(/([A-Z])/g, ' $1').trim();
+        const score = result.scores[category as keyof typeof result.scores];
+        
+        md += `### ${categoryName} (Score: ${score || 0}/100)\n\n`;
+        
+        if (details?.strengths && details.strengths.length > 0) {
+          md += `**✅ Strengths:**\n\n`;
+          details.strengths.forEach((strength: string) => {
+            md += `- ${strength}\n`;
+          });
+          md += `\n`;
+        }
 
-      if (details.issues && details.issues.length > 0) {
-        md += `**⚠️ Issues:**\n\n`;
-        details.issues.forEach((issue: string) => {
-          md += `- ${issue}\n`;
-        });
-        md += `\n`;
-      }
-    });
+        if (details?.issues && details.issues.length > 0) {
+          md += `**⚠️ Issues:**\n\n`;
+          details.issues.forEach((issue: string) => {
+            md += `- ${issue}\n`;
+          });
+          md += `\n`;
+        }
+      });
+  }
 
   md += `## Recommendations & Action Plan\n\n`;
 
@@ -434,28 +436,30 @@ export function exportToXML(result: AuditResult): void {
   }
 
   xml += `  <DetailedAnalysis>\n`;
-  Object.entries(result.details).forEach(([category, details]: [string, any]) => {
-    const categoryName = category.replace(/([A-Z])/g, '_$1').toUpperCase();
-    xml += `    <${categoryName}>\n`;
-    
-    if (details.strengths && details.strengths.length > 0) {
-      xml += `      <Strengths>\n`;
-      details.strengths.forEach((strength: string) => {
-        xml += `        <Item>${escapeXML(strength)}</Item>\n`;
-      });
-      xml += `      </Strengths>\n`;
-    }
+  if (result.details) {
+    Object.entries(result.details).forEach(([category, details]: [string, any]) => {
+      const categoryName = category.replace(/([A-Z])/g, '_$1').toUpperCase();
+      xml += `    <${categoryName}>\n`;
+      
+      if (details?.strengths && details.strengths.length > 0) {
+        xml += `      <Strengths>\n`;
+        details.strengths.forEach((strength: string) => {
+          xml += `        <Item>${escapeXML(strength)}</Item>\n`;
+        });
+        xml += `      </Strengths>\n`;
+      }
 
-    if (details.issues && details.issues.length > 0) {
-      xml += `      <Issues>\n`;
-      details.issues.forEach((issue: string) => {
-        xml += `        <Item>${escapeXML(issue)}</Item>\n`;
-      });
-      xml += `      </Issues>\n`;
-    }
+      if (details?.issues && details.issues.length > 0) {
+        xml += `      <Issues>\n`;
+        details.issues.forEach((issue: string) => {
+          xml += `        <Item>${escapeXML(issue)}</Item>\n`;
+        });
+        xml += `      </Issues>\n`;
+      }
 
-    xml += `    </${categoryName}>\n`;
-  });
+      xml += `    </${categoryName}>\n`;
+    });
+  }
   xml += `  </DetailedAnalysis>\n\n`;
 
   xml += `  <Recommendations>\n`;
@@ -473,11 +477,11 @@ export function exportToXML(result: AuditResult): void {
   xml += `  </Recommendations>\n\n`;
 
   xml += `  <Statistics>\n`;
-  xml += `    <ValidSchemas>${result.details.schemaMarkup.validSchemas}</ValidSchemas>\n`;
-  xml += `    <AICrawlersAllowed>${result.details.aiCrawlers.totalAICrawlers}</AICrawlersAllowed>\n`;
-  xml += `    <WordCount>${result.details.contentQuality.wordCount}</WordCount>\n`;
-  xml += `    <TotalLinks>${result.details.linkAnalysis.totalLinks}</TotalLinks>\n`;
-  xml += `    <ImageCount>${result.details.contentQuality.imageCount}</ImageCount>\n`;
+  xml += `    <ValidSchemas>${result.details?.schemaMarkup?.validSchemas || 0}</ValidSchemas>\n`;
+  xml += `    <AICrawlersAllowed>${result.details?.aiCrawlers?.totalAICrawlers || 0}</AICrawlersAllowed>\n`;
+  xml += `    <WordCount>${result.details?.contentQuality?.wordCount || 0}</WordCount>\n`;
+  xml += `    <TotalLinks>${result.details?.linkAnalysis?.totalLinks || 0}</TotalLinks>\n`;
+  xml += `    <ImageCount>${result.details?.contentQuality?.imageCount || 0}</ImageCount>\n`;
   xml += `  </Statistics>\n\n`;
 
   xml += `</GEOAuditReport>`;
@@ -520,11 +524,11 @@ export function exportToPlainText(result: AuditResult): void {
   text += `KEY STATISTICS\n`;
   text += `${'='.repeat(80)}\n\n`;
   
-  text += `Valid Schemas: ${result.details.schemaMarkup.validSchemas}\n`;
-  text += `AI Crawlers Allowed: ${result.details.aiCrawlers.totalAICrawlers}\n`;
-  text += `Word Count: ${result.details.contentQuality.wordCount}\n`;
-  text += `Total Links: ${result.details.linkAnalysis.totalLinks}\n`;
-  text += `Images: ${result.details.contentQuality.imageCount}\n`;
+  text += `Valid Schemas: ${result.details?.schemaMarkup?.validSchemas || 0}\n`;
+  text += `AI Crawlers Allowed: ${result.details?.aiCrawlers?.totalAICrawlers || 0}\n`;
+  text += `Word Count: ${result.details?.contentQuality?.wordCount || 0}\n`;
+  text += `Total Links: ${result.details?.linkAnalysis?.totalLinks || 0}\n`;
+  text += `Images: ${result.details?.contentQuality?.imageCount || 0}\n`;
 
   if (result.insights && result.insights.length > 0) {
     text += `\n${'='.repeat(80)}\n`;
@@ -539,28 +543,30 @@ export function exportToPlainText(result: AuditResult): void {
   text += `DETAILED ANALYSIS\n`;
   text += `${'='.repeat(80)}\n\n`;
 
-  Object.entries(result.details).forEach(([category, details]: [string, any]) => {
-    const categoryName = category.replace(/([A-Z])/g, ' $1').trim().toUpperCase();
-    const score = result.scores[category as keyof typeof result.scores];
-    
-    text += `${categoryName} (Score: ${score}/100)\n`;
-    text += `${'-'.repeat(80)}\n`;
-    
-    if (details.strengths && details.strengths.length > 0) {
-      text += `\nSTRENGTHS:\n`;
-      details.strengths.forEach((strength: string) => {
-        text += `  + ${strength}\n`;
-      });
-    }
+  if (result.details) {
+    Object.entries(result.details).forEach(([category, details]: [string, any]) => {
+      const categoryName = category.replace(/([A-Z])/g, ' $1').trim().toUpperCase();
+      const score = result.scores[category as keyof typeof result.scores];
+      
+      text += `${categoryName} (Score: ${score || 0}/100)\n`;
+      text += `${'-'.repeat(80)}\n`;
+      
+      if (details?.strengths && details.strengths.length > 0) {
+        text += `\nSTRENGTHS:\n`;
+        details.strengths.forEach((strength: string) => {
+          text += `  + ${strength}\n`;
+        });
+      }
 
-    if (details.issues && details.issues.length > 0) {
-      text += `\nISSUES:\n`;
-      details.issues.forEach((issue: string) => {
-        text += `  - ${issue}\n`;
-      });
-    }
-    text += `\n`;
-  });
+      if (details?.issues && details.issues.length > 0) {
+        text += `\nISSUES:\n`;
+        details.issues.forEach((issue: string) => {
+          text += `  - ${issue}\n`;
+        });
+      }
+      text += `\n`;
+    });
+  }
 
   text += `${'='.repeat(80)}\n`;
   text += `RECOMMENDATIONS & ACTION PLAN\n`;
@@ -646,31 +652,33 @@ export function exportToYAML(result: AuditResult): void {
   }
 
   yaml += `\n  statistics:\n`;
-  yaml += `    valid_schemas: ${result.details.schemaMarkup.validSchemas}\n`;
-  yaml += `    ai_crawlers_allowed: ${result.details.aiCrawlers.totalAICrawlers}\n`;
-  yaml += `    word_count: ${result.details.contentQuality.wordCount}\n`;
-  yaml += `    total_links: ${result.details.linkAnalysis.totalLinks}\n`;
-  yaml += `    image_count: ${result.details.contentQuality.imageCount}\n`;
+  yaml += `    valid_schemas: ${result.details?.schemaMarkup?.validSchemas || 0}\n`;
+  yaml += `    ai_crawlers_allowed: ${result.details?.aiCrawlers?.totalAICrawlers || 0}\n`;
+  yaml += `    word_count: ${result.details?.contentQuality?.wordCount || 0}\n`;
+  yaml += `    total_links: ${result.details?.linkAnalysis?.totalLinks || 0}\n`;
+  yaml += `    image_count: ${result.details?.contentQuality?.imageCount || 0}\n`;
 
   yaml += `\n  detailed_analysis:\n`;
-  Object.entries(result.details).forEach(([category, details]: [string, any]) => {
-    const categoryKey = category.replace(/([A-Z])/g, '_$1').toLowerCase();
-    yaml += `    ${categoryKey}:\n`;
-    
-    if (details.strengths && details.strengths.length > 0) {
-      yaml += `      strengths:\n`;
-      details.strengths.forEach((strength: string) => {
-        yaml += `        - ${escapeYAML(strength)}\n`;
-      });
-    }
+  if (result.details) {
+    Object.entries(result.details).forEach(([category, details]: [string, any]) => {
+      const categoryKey = category.replace(/([A-Z])/g, '_$1').toLowerCase();
+      yaml += `    ${categoryKey}:\n`;
+      
+      if (details?.strengths && details.strengths.length > 0) {
+        yaml += `      strengths:\n`;
+        details.strengths.forEach((strength: string) => {
+          yaml += `        - ${escapeYAML(strength)}\n`;
+        });
+      }
 
-    if (details.issues && details.issues.length > 0) {
-      yaml += `      issues:\n`;
-      details.issues.forEach((issue: string) => {
-        yaml += `        - ${escapeYAML(issue)}\n`;
-      });
-    }
-  });
+      if (details?.issues && details.issues.length > 0) {
+        yaml += `      issues:\n`;
+        details.issues.forEach((issue: string) => {
+          yaml += `        - ${escapeYAML(issue)}\n`;
+        });
+      }
+    });
+  }
 
   yaml += `\n  recommendations:\n`;
   result.recommendations.forEach((rec, idx) => {

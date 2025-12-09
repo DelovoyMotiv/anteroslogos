@@ -89,7 +89,12 @@ const GeoAuditPage = () => {
     setIsAnalyzing(true);
     
     try {
-      const auditResult = await auditWebsite(sanitizedUrl);
+      const auditResult = await auditWebsite(sanitizedUrl, {
+        useAI: true,
+        onProgress: (stage: string) => {
+          console.log('Audit progress:', stage);
+        }
+      });
       
       // 3. Validate audit result
       if (!validateAuditResult(auditResult as any)) {
