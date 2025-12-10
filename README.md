@@ -1,7 +1,7 @@
 # Anóteros Lógos - Enterprise AI Knowledge Infrastructure
 
 ![License](https://img.shields.io/badge/License-Proprietary-red)
-![Version](https://img.shields.io/badge/version-4.2.1-blue)
+![Version](https://img.shields.io/badge/version-4.2.4-blue)
 ![Node](https://img.shields.io/badge/node-20.x-green)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)
 ![React](https://img.shields.io/badge/React-19.2-cyan)
@@ -11,7 +11,7 @@ AI knowledge infrastructure platform providing cryptographically verifiable prov
 
 Production URL: https://anoteroslogos.com
 
-Codebase: 1,072 files | 244,207 lines
+Codebase: 1,087 files | 340,476 lines
 
 ---
 
@@ -28,7 +28,7 @@ Enterprise platform for optimizing digital content and brand presence for AI lan
 5. **Universal Agent Protocol** - UAP v1.0 transport layer with cryptographic trust attestation
 6. **Agent-Pay-Agent Layer** - USDC micropayments on Base L2 with automatic detection
 7. **Causal Contribution Credits** - Contribution-based economic layer with integrated trust scoring and APA payment discounts
-8. **Subscription Billing System** - Freemium tier model with USDC payments for SaaS plans
+8. **Native Economy System** - Multi-tenant billing infrastructure with Stripe integration, usage-based metering, and webhook retry mechanisms
 9. **Agent Mesh Network** - Distributed peer discovery, capability routing, trust propagation via DHT
 10. **Byzantine Fault Tolerance** - PBFT consensus with Causal Consensus Oracle for provenance-based quorum weighting
 11. **MCP Integration** - Model Context Protocol v2.0 with isolated execution sandbox and Anthropic Advanced Tool Use support
@@ -418,47 +418,54 @@ USDC-based payments on Base L2 for autonomous agents.
 - `lib/payments/reorgMonitor.ts` - Reorg protection
 - `lib/payments/rpcProvider.ts` - RPC failover
 
-### 10. Subscription Billing System
+### 10. Native Economy System
 
-SaaS subscription management with USDC payments on Base L2.
+Enterprise-grade multi-tenant billing infrastructure with comprehensive payment processing and usage tracking.
 
-**Tiers:**
-- Free: 1 audit per month, basic analysis, community support
-- Starter: 10 audits per month, $49/month USDC
-- Pro: 100 audits per month, $149/month USDC
-- Enterprise: Unlimited audits, $499/month USDC
+**Billing Service:**
+- Stripe integration with webhook event processing for subscription lifecycle management
+- Usage-based metering with credit consumption tracking and quota enforcement
+- Multi-tenant isolation with row-level security and tenant-scoped operations
+- Transaction history with audit logging and balance reconciliation
+- Webhook retry mechanism with exponential backoff for failed payment events
 
-**Features:**
-- Freemium tier with automatic activation for all users
-- USDC direct payment integration for paid plans
-- Automatic quota consumption after each audit
-- Subscription lifecycle management (create, activate, renew, cancel)
-- Payment detection via blockchain scanning
-- Automatic renewal invoicing 7 days before period end
-- Grace period allows 7 days after expiration before access blocking
+**Cost Management:**
+- Dynamic pricing engine with operation-based cost calculation
+- Credit purchase flow with Stripe Checkout integration
+- Balance tracking with real-time updates and transaction history
+- Refund processing with automatic credit adjustments
+- Migration service for legacy subscription data with validation
 
-**Billing Flow:**
-```
-1. User subscribes to plan
-2. System generates USDC invoice with 7-day expiration
-3. User sends USDC to platform wallet on Base L2
-4. CRON job detects payment within 5 minutes
-5. Subscription activates immediately upon confirmation
-6. Quota becomes available for audits
-```
+**Security Features:**
+- Authorization middleware with role-based access control
+- Audit logging for all financial operations with immutable records
+- Encrypted sensitive data storage with AES-256-GCM
+- Rate limiting on billing endpoints with token bucket algorithm
+- CSRF protection on state-changing operations
+
+**Webhook Infrastructure:**
+- Automatic retry with exponential backoff (1s, 2s, 4s, 8s, 16s delays)
+- Maximum 5 retry attempts with failure alerting
+- Queue management for failed webhooks with priority ordering
+- Statistics tracking and cleanup utilities
+- Background worker for continuous retry processing
 
 **Database Schema:**
-- `subscription_plans` - Plan metadata and pricing
-- `user_subscriptions` - User subscription state and billing periods
-- `subscription_invoices` - USDC invoice tracking per billing cycle
-- `subscription_usage_logs` - Audit quota consumption history
+- `billing_accounts` - Tenant billing state with balance tracking
+- `billing_transactions` - Immutable transaction ledger
+- `billing_costs` - Operation pricing with temporal validity
+- `billing_usage_logs` - Detailed usage tracking per operation
+- `webhook_retry_queue` - Failed webhook management with retry state
 
 **Components:**
-- `lib/subscriptions/types.ts` - Zod schemas and interfaces
-- `lib/subscriptions/storage.ts` - Database operations
-- `lib/subscriptions/manager.ts` - Subscription lifecycle management
-- `lib/subscriptions/paymentDetector.ts` - Automatic payment detection
-- `lib/subscriptions/renewalEngine.ts` - Auto-renewal processing
+- `lib/billing/BillingService.ts` - Core billing operations
+- `lib/billing/stripe.ts` - Stripe integration layer
+- `lib/billing/costs.ts` - Cost calculation engine
+- `lib/billing/webhookRetry.ts` - Retry mechanism with exponential backoff
+- `lib/billing/authorizationMiddleware.ts` - Access control
+- `lib/billing/auditLogger.ts` - Financial audit trail
+- `lib/billing/MigrationService.ts` - Legacy data migration
+- `scripts/process-webhook-retries.ts` - Background retry worker
 
 ### 11. MCP Integration
 
@@ -1220,8 +1227,8 @@ tests/
 ## Statistics
 
 **Codebase:**
-- Total files: 1,072
-- Total lines: 244,207
+- Total files: 1,087
+- Total lines: 340,476
 - TypeScript: 94.2%
 - PLpgSQL: 5.0%
 - CSS: 0.8%
@@ -1251,7 +1258,7 @@ tests/
 - Analytics Infrastructure with cross-tenant insights
 - UCPT Provenance Token with Ed25519 signatures
 - NLU Foundation with intent classification
-- Subscription Billing with USDC payments
+- Native Economy System with Stripe integration
 - Agent Middleware with token-efficient extraction
 - Frontend: Production-grade UI with mobile optimization
 
@@ -1263,5 +1270,5 @@ Proprietary - All rights reserved
 
 ---
 
-Last Updated: December 9, 2025
-Version: 4.2.1
+Last Updated: December 10, 2025
+Version: 4.2.4
