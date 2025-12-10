@@ -156,7 +156,7 @@ async function handleGet(req: VercelRequest, res: VercelResponse): Promise<Verce
   const offsetNum = typeof offset === 'string' ? parseInt(offset, 10) : 0;
 
   // List all tenants user has access to with pagination
-  const { data: memberships, error: memberError, count } = await supabase
+  const query = supabase
     .from('tenant_members')
     .select(`
       tenant_id,
@@ -178,6 +178,8 @@ async function handleGet(req: VercelRequest, res: VercelResponse): Promise<Verce
     .eq('status', 'active')
     .order('created_at', { ascending: false })
     .range(offsetNum, offsetNum + limitNum - 1);
+
+  const { data: memberships, error: memberError, count } = await query;
 
   if (memberError) {
     return res.status(500).json({ error: 'Failed to fetch tenants' });
@@ -205,13 +207,14 @@ async function handleGet(req: VercelRequest, res: VercelResponse): Promise<Verce
 async function handlePost(
   req: VercelRequest,
   res: VercelResponse,
-  validated?: { body: z.infer<typeof CreateTenantSchema> }
+  validated?: TenantValidated
 ): Promise<VercelResponse> {
   if (!supabase) {
     return res.status(503).json({ error: 'Service unavailable' });
   }
 
-  if (!validated?.body) {
+  const body = validated?.body as TenantCreateRequest | undefined;
+  if (!body) {
     return res.status(400).json({ error: 'Invalid request body' });
   }
 
@@ -224,7 +227,7 @@ async function handlePost(
   const { data: existing } = await supabase
     .from('tenants')
     .select('id')
-    .eq('slug', validated.body.slug)
+    .eq('slug', (body as any).slug)
     .maybeSingle();
 
   if (existing) {
@@ -236,10 +239,10 @@ async function handlePost(
     .from('tenants')
     .insert({
       owner_id: user.id,
-      name: validated.body.name,
-      slug: validated.body.slug,
-      description: validated.body.description || null,
-      settings: validated.body.settings || {},
+      name: (body as any).name,
+      slug: (body as any).slug,
+      description: (body as any).description || null,
+      settings: (body as any).settings || {},
       status: 'active',
     } as any)
     .select()
@@ -271,7 +274,7 @@ async function handlePost(
     action: 'tenant.created',
     resource_type: 'tenant',
     resource_id: tenant.id,
-    metadata: { name: validated.body.name, slug: validated.body.slug },
+    metadata: { name: (body as any).name, slug: (body as any).slug },
   } as any);
 
   return res.status(201).json(tenant);
@@ -283,13 +286,14 @@ async function handlePost(
 async function handlePut(
   req: VercelRequest,
   res: VercelResponse,
-  validated?: { body: z.infer<typeof UpdateTenantSchema> }
+  validated?: TenantValidated
 ): Promise<VercelResponse> {
   if (!supabase) {
     return res.status(503).json({ error: 'Service unavailable' });
   }
 
-  if (!validated?.body) {
+  const body = validated?.body as TenantUpdateRequest | undefined;
+  if (!body) {
     return res.status(400).json({ error: 'Invalid request body' });
   }
 
@@ -313,7 +317,7 @@ async function handlePut(
   const { data: updated, error: updateError } = await supabase
     .from('tenants')
     .update({
-      ...validated.body,
+      ...body,
       updated_at: new Date().toISOString(),
     } as any)
     .eq('id', id)
@@ -330,7 +334,7 @@ async function handlePut(
     action: 'tenant.updated',
     resource_type: 'tenant',
     resource_id: id,
-    metadata: validated.body,
+    metadata: body,
   } as any);
 
   return res.status(200).json(updated);
@@ -390,7 +394,12 @@ async function handleDelete(req: VercelRequest, res: VercelResponse): Promise<Ve
 // MAIN HANDLER
 // =====================================================
 
-import type { TenantValidated, OptionalValidatedApiHandler } from '../types/api.types';
+import type { 
+  TenantValidated, 
+  OptionalValidatedApiHandler,
+  TenantCreateRequest,
+  TenantUpdateRequest 
+} from '../types/api.types';
 
 async function mainHandler(
   req: VercelRequest,

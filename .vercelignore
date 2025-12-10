@@ -37,3 +37,9 @@ api/metrics.ts
 # Use api/auth.ts instead
 api/challenge.ts
 api/handshake.ts
+
+# Exclude AID registry (not used in production yet)
+api/aid-registry.ts
+
+# Exclude wrap-openapi (use wrap-with-billing instead)
+api/v1/agent/wrap-openapi.ts
