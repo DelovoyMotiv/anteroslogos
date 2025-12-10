@@ -500,6 +500,126 @@ export interface Database {
           updated_at?: string
         }
       }
+      billing_ledger: {
+        Row: {
+          id: string
+          user_id: string
+          amount: number
+          event_type: 'DEPOSIT_STRIPE' | 'DEPOSIT_CRYPTO' | 'MIGRATION_CREDIT' | 'SPEND_API' | 'SPEND_AUDIT' | 'SPEND_CONSENSUS' | 'REWARD_CONTRIBUTION'
+          description: string
+          metadata: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          amount: number
+          event_type: 'DEPOSIT_STRIPE' | 'DEPOSIT_CRYPTO' | 'MIGRATION_CREDIT' | 'SPEND_API' | 'SPEND_AUDIT' | 'SPEND_CONSENSUS' | 'REWARD_CONTRIBUTION'
+          description: string
+          metadata?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          amount?: number
+          event_type?: 'DEPOSIT_STRIPE' | 'DEPOSIT_CRYPTO' | 'MIGRATION_CREDIT' | 'SPEND_API' | 'SPEND_AUDIT' | 'SPEND_CONSENSUS' | 'REWARD_CONTRIBUTION'
+          description?: string
+          metadata?: Json
+          created_at?: string
+        }
+      }
+      user_balances: {
+        Row: {
+          user_id: string
+          balance: number
+          last_transaction_id: string | null
+          last_updated: string
+        }
+        Insert: {
+          user_id: string
+          balance?: number
+          last_transaction_id?: string | null
+          last_updated?: string
+        }
+        Update: {
+          user_id?: string
+          balance?: number
+          last_transaction_id?: string | null
+          last_updated?: string
+        }
+      }
+      credit_packages: {
+        Row: {
+          id: string
+          name: string
+          ccc_amount: number
+          usd_cost: number
+          cost_per_credit: number
+          stripe_price_id: string | null
+          is_active: boolean
+          display_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          ccc_amount: number
+          usd_cost: number
+          stripe_price_id?: string | null
+          is_active?: boolean
+          display_order?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          ccc_amount?: number
+          usd_cost?: number
+          stripe_price_id?: string | null
+          is_active?: boolean
+          display_order?: number
+          created_at?: string
+        }
+      }
+      webhook_retry_queue: {
+        Row: {
+          id: string
+          event_id: string
+          event_type: string
+          event_data: Json
+          attempt_count: number
+          max_attempts: number
+          next_retry_at: string
+          last_error: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          event_id: string
+          event_type: string
+          event_data: Json
+          attempt_count?: number
+          max_attempts?: number
+          next_retry_at: string
+          last_error?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          event_id?: string
+          event_type?: string
+          event_data?: Json
+          attempt_count?: number
+          max_attempts?: number
+          next_retry_at?: string
+          last_error?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       user_audit_summary: {

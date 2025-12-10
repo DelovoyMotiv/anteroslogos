@@ -122,7 +122,6 @@ const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick }, ref) => 
                                 <div className="absolute right-0 mt-2 w-64 bg-brand-bg/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl shadow-black/50 overflow-hidden">
                                     <div className="px-4 py-3 border-b border-white/10">
                                         <p className="text-sm text-white/90 font-medium truncate">{user.email}</p>
-                                        <p className="text-xs text-white/50 mt-0.5">Free Plan</p>
                                     </div>
                                     <div className="py-2">
                                         <button

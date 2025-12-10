@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../lib/dashboard/auth-guard';
+import { BalanceDisplay } from './BalanceDisplay';
 
 interface NavItem {
   name: string;
@@ -49,7 +50,6 @@ export function Sidebar() {
   const location = useLocation();
   const { user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
-  const [currentPlan, setCurrentPlan] = useState<'free' | 'pro' | 'agency'>('free');
 
   // Load collapsed state from localStorage
   useEffect(() => {
@@ -77,24 +77,6 @@ export function Sidebar() {
     
     await supabase.auth.signOut();
     window.location.href = '/';
-  };
-
-  const planColors = {
-    free: 'border-slate-700/50 bg-slate-900/50',
-    pro: 'border-blue-500/30 bg-blue-950/30',
-    agency: 'border-purple-500/30 bg-purple-950/30',
-  };
-
-  const planDots = {
-    free: 'bg-slate-500',
-    pro: 'bg-blue-400',
-    agency: 'bg-purple-400',
-  };
-
-  const planLabels = {
-    free: 'FREE',
-    pro: 'PRO',
-    agency: 'AGENCY',
   };
 
   return (
@@ -207,17 +189,9 @@ export function Sidebar() {
 
       {/* Footer - System Status + Version */}
       <div className="border-t border-slate-800/50 p-3 space-y-2">
-        {/* Plan Badge */}
-        {!collapsed && currentPlan === 'free' && (
-          <div className="flex items-center justify-between px-2 py-1.5 rounded bg-slate-900/30 border border-slate-800/50">
-            <span className="text-[10px] font-mono text-slate-500 uppercase">Free Plan</span>
-            <Link
-              to="/dashboard/billing"
-              className="text-[10px] font-mono text-blue-400 hover:text-blue-300 uppercase tracking-wider"
-            >
-              Upgrade
-            </Link>
-          </div>
+        {/* Balance Display */}
+        {user && (
+          <BalanceDisplay userId={user.id} collapsed={collapsed} />
         )}
 
         {/* User + Sign Out */}
