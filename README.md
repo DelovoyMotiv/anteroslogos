@@ -1,7 +1,7 @@
 # Anóteros Lógos - Enterprise AI Knowledge Infrastructure
 
 ![License](https://img.shields.io/badge/License-Proprietary-red)
-![Version](https://img.shields.io/badge/version-4.2.4-blue)
+![Version](https://img.shields.io/badge/version-4.2.6-blue)
 ![Node](https://img.shields.io/badge/node-20.x-green)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)
 ![React](https://img.shields.io/badge/React-19.2-cyan)
@@ -11,7 +11,7 @@ AI knowledge infrastructure platform providing cryptographically verifiable prov
 
 Production URL: https://anoteroslogos.com
 
-Codebase: 1,087 files | 340,476 lines
+Codebase: 1,183 files | 362,793 lines
 
 ---
 
@@ -45,9 +45,10 @@ Enterprise-grade security, performance, and reliability improvements:
 - JWT authentication with 15-minute TTL and refresh token rotation
 - CSRF protection with token validation on state-changing operations
 - Input validation using Zod schemas on all API endpoints
-- SQL injection prevention via parameterized queries
+- SQL injection prevention via parameterized queries and type-safe query helpers
 - Rate limiting with token bucket algorithm (60 req/min authenticated, 10 req/min anonymous)
 - Environment variable validation at startup
+- User role endpoint with Bearer token authentication and metadata extraction
 
 **Performance:**
 - Database query optimization with N+1 query elimination
@@ -77,13 +78,17 @@ Enterprise-grade security, performance, and reliability improvements:
 - Rollback scripts for all schema changes
 - Foreign key and check constraints for data integrity
 - Automated testing for migration idempotency
+- Type-safe query wrappers with runtime validation
+- Comprehensive schema definitions for all database entities
 
 **Code Quality:**
 - Zero hardcoded secrets (environment variables only)
-- Comprehensive TypeScript typing (no any types)
+- Comprehensive TypeScript typing with strict mode enforcement
+- Type-safe database operations via Zod schema validation
 - Design pattern implementation (Factory, Builder, Observer)
 - Code duplication under 5% threshold
 - Property-based testing for core algorithms
+- Zero compilation errors in production builds
 
 ---
 
@@ -1032,12 +1037,14 @@ src/
 
 lib/
   payments/                       # APA Layer
+    web3Types.ts                  # Web3 type extensions for viem
   subscriptions/                  # Subscription Billing
     types.ts                      # Zod schemas and types
     storage.ts                    # Database operations
     manager.ts                    # Subscription lifecycle
     paymentDetector.ts            # Auto-detection
     renewalEngine.ts              # Auto-renewal
+    schemas.ts                    # Subscription Zod schemas
   a2a/                            # A2A Protocol
     persistentQueue.ts            # Database-backed queue
     webhooks.ts                   # HMAC webhook delivery
@@ -1064,12 +1071,19 @@ lib/
   middleware/                     # Authentication and rate limiting
     agentAuth.ts                  # Bearer token validation
     agentRateLimiter.ts           # Token bucket algorithm
+  dashboard/                      # Dashboard utilities
+    schemas.ts                    # Dashboard Zod schemas
+    api-keys-client.ts            # API key management
+    usage-analytics.ts            # Usage tracking
+  database/                       # Database utilities
+    queryHelpers.ts               # Type-safe query wrappers
+  utils/                          # Utility functions
+    typeGuards.ts                 # Type guards and validators
   aiSyndication/                  # Platform sync
   nlu/                            # NLU Foundation
   security/                       # CSRF protection
   auth/                           # JWT authentication
   validation/                     # Input validation
-  database/                       # Query optimization
   reliability/                    # Circuit breakers and retry
   logging/                        # Structured logging
   metrics/                        # Prometheus metrics
@@ -1078,6 +1092,10 @@ lib/
   webhooks/                       # Webhook receiver
   accessibility/                  # Keyboard navigation
   patterns/                       # Design patterns
+
+api/
+  auth/
+    user-role.ts                  # User role endpoint with metadata
 
 src/
   protocols/uap/                  # Universal Agent Protocol
@@ -1227,8 +1245,8 @@ tests/
 ## Statistics
 
 **Codebase:**
-- Total files: 1,087
-- Total lines: 340,476
+- Total files: 1,183
+- Total lines: 362,793
 - TypeScript: 94.2%
 - PLpgSQL: 5.0%
 - CSS: 0.8%
@@ -1270,5 +1288,5 @@ Proprietary - All rights reserved
 
 ---
 
-Last Updated: December 10, 2025
-Version: 4.2.4
+Last Updated: December 11, 2025
+Version: 4.2.6
