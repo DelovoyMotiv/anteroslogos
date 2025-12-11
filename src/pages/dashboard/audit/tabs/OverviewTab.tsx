@@ -102,10 +102,18 @@ export function OverviewTab({ result }: OverviewTabProps) {
 }
 
 /**
- * Score Card Component
+ * Score Card Component - Ultra-Compact Professional Design
  * 
  * Displays individual category score with color coding.
- * Optimized for compact display with visual hierarchy.
+ * Optimized for maximum information density with minimal space.
+ * 
+ * Improvements:
+ * - Reduced padding: 10-14px → 8px (-43%)
+ * - Reduced font size: 20-24px → 18px (-25%)
+ * - Reduced progress bar: 4-6px → 2px (-67%)
+ * - Added /100 indicator for context
+ * - Added tooltip on hover
+ * - Improved visual hierarchy
  * 
  * Color scheme:
  * - Emerald (≥80): Excellent
@@ -145,28 +153,41 @@ function ScoreCard({ label, score }: { label: string; score: number }) {
   return (
     <div 
       className={`
+        relative
         bg-gradient-to-br ${getBgGradient(score)} 
         border ${getBorderColor(score)} 
-        p-2.5 md:p-3.5 rounded-lg
+        p-2 rounded-md
         transition-all duration-300 ease-out
-        hover:scale-[1.03] hover:shadow-xl ${getShadowColor(score)}
+        hover:scale-[1.02] hover:shadow-lg ${getShadowColor(score)}
         hover:border-opacity-60
         cursor-default
         group
       `}
     >
-      <div className="text-[9px] md:text-[10px] font-mono text-slate-500 uppercase tracking-wider mb-1.5 md:mb-2 truncate group-hover:text-slate-400 transition-colors" title={label}>
+      {/* Label - Compact */}
+      <div className="text-[8px] md:text-[9px] font-mono text-slate-500 uppercase tracking-wider mb-1 truncate group-hover:text-slate-400 transition-colors" title={label}>
         {label}
       </div>
-      <div className={`text-xl md:text-2xl font-bold font-mono ${getColor(score)} leading-none mb-2 group-hover:scale-105 transition-transform duration-300`}>
-        {score.toFixed(1)}
+      
+      {/* Score with /100 indicator - Compact */}
+      <div className="flex items-baseline gap-0.5 md:gap-1 mb-1.5">
+        <span className={`text-lg md:text-xl font-bold font-mono ${getColor(score)} leading-none group-hover:scale-105 transition-transform duration-300`}>
+          {score.toFixed(1)}
+        </span>
+        <span className="text-[7px] md:text-[8px] text-slate-600 font-medium">/100</span>
       </div>
-      {/* Visual indicator bar with animation */}
-      <div className="h-1 md:h-1.5 bg-slate-800/50 rounded-full overflow-hidden">
+      
+      {/* Visual indicator bar - Ultra-thin */}
+      <div className="h-0.5 bg-slate-800/50 rounded-full overflow-hidden">
         <div 
           className={`h-full ${getColor(score).replace('text-', 'bg-')} transition-all duration-700 ease-out rounded-full`}
           style={{ width: `${score}%` }}
         />
+      </div>
+      
+      {/* Tooltip on hover */}
+      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-black/90 text-white text-[9px] md:text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+        {label}: {score.toFixed(1)}/100
       </div>
     </div>
   );
