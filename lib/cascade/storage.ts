@@ -321,7 +321,7 @@ export async function getCascadeTokensBatch(
       try {
         const entry = JSON.parse(result) as CascadeEntry;
         entries.set(ucptTokens[index], entry);
-      } catch (error) {
+      } catch {
         console.error(`[CascadeStorage] Failed to parse entry at index ${index}`);
       }
     }

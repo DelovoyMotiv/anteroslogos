@@ -338,8 +338,7 @@ function generateForecast(
  */
 export function generateForecasts(
   _currentScore: number,
-  historicalTrend: TemporalData[],
-  _plannedInterventions: any[] = []
+  historicalTrend: TemporalData[]
 ): ForecastResult {
   // Generate forecasts for each horizon
   const horizons: ForecastResult['horizons'] = [

@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Usage Stats Card Component
  * Compact, data-dense usage tracking with trend analysis
@@ -13,7 +12,7 @@ interface UsageStatsCardProps {
   usageStats: UsageStats;
 }
 
-export function UsageStatsCard({ subscription, usageStats }: UsageStatsCardProps) {
+export function UsageStatsCard({ usageStats }: UsageStatsCardProps) {
   const [animatedProgress, setAnimatedProgress] = useState(0);
   
   useEffect(() => {

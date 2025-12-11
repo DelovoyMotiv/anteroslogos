@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Dashboard Sidebar
  * Collapsible navigation with Vercel/Linear/Claude UX

@@ -11,6 +11,7 @@ import type { A2AAuditResult } from './protocol';
 import { logger } from './logger';
 import { config } from '../config';
 import type { JSONValue } from '../../types/common.types';
+import { toJSONValue } from '../utils/typeGuards';
 
 // =====================================================
 // DATABASE SCHEMA TYPES
@@ -350,7 +351,7 @@ export class SupabaseQueueStorage {
       started_at: job.started_at ? new Date(job.started_at).toISOString() : null,
       completed_at: job.completed_at ? new Date(job.completed_at).toISOString() : null,
       progress: job.progress,
-      result: (job.result || null) as JSONValue,
+      result: job.result ? toJSONValue(job.result) : null,
       error: job.error || null,
       metadata: job.metadata,
     };
@@ -516,7 +517,7 @@ export class SupabaseAuditCache {
     const dbResult: Partial<DbAuditResult> = {
       audit_id: auditId,
       url,
-      result: result as unknown as JSONValue,
+      result: toJSONValue(result),
       cached_until: cachedUntil,
       created_at: new Date().toISOString(),
     };

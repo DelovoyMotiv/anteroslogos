@@ -46,7 +46,7 @@ const AnalysisProgress = ({ isAnalyzing, url }: AnalysisProgressProps) => {
     let progressInterval: NodeJS.Timeout | null = null;
     let isMounted = true;
 
-  const advanceStep = () => {
+  const advanceStep = (): void => {
       if (!isMounted) {
         return;
       }
@@ -63,14 +63,14 @@ const AnalysisProgress = ({ isAnalyzing, url }: AnalysisProgressProps) => {
       const step = ANALYSIS_STEPS[stepIndex];
       progressInterval = setInterval(() => {
         if (!isMounted) return;
-        // @ts-ignore - TypeScript has issues with setState updater function type inference
+        // @ts-expect-error - TypeScript has issues with setState updater function type inference
         setProgress((prev) => Math.min(prev + 100 / (step.duration / 50), 100));
       }, 50);
 
       timeoutId = setTimeout(() => {
         if (!isMounted) return;
         if (progressInterval) clearInterval(progressInterval);
-        // @ts-ignore - TypeScript has issues with setState updater function type inference
+        // @ts-expect-error - TypeScript has issues with setState updater function type inference
         setCompletedSteps((prev) => { const newSet = new Set(prev); newSet.add(stepIndex); return newSet; });
         setProgress(0);
         stepIndex++;

@@ -396,7 +396,6 @@ async function handleDelete(req: VercelRequest, res: VercelResponse): Promise<Ve
 
 import type { 
   TenantValidated, 
-  OptionalValidatedApiHandler,
   TenantCreateRequest,
   TenantUpdateRequest 
 } from '../types/api.types';

@@ -12,10 +12,7 @@
  * **Validates: Requirements 3.1, 3.2, 3.3**
  */
 
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { compose } from '../../../lib/middleware/billingMiddleware';
 import { withApiWrapperBilling } from '../../../lib/middleware/billingPresets';
-import { withRateLimit } from '../../../lib/middleware/rateLimiter';
 
 // Import the original handler from wrap.ts
 // In production, you would move the handler logic here or import it

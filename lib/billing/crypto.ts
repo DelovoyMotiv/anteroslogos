@@ -165,7 +165,7 @@ export async function verifyUSDCTransaction(
             break;
           }
         }
-      } catch (error) {
+      } catch {
         // Not a Transfer event or parsing failed, continue
         continue;
       }
@@ -256,7 +256,7 @@ export class CryptoPaymentMonitor {
   private chainId: number;
   private isMonitoring: boolean = false;
   
-  constructor(chainId: number, _billingService: BillingService) {
+  constructor(chainId: number) {
     this.chainId = chainId;
     this.provider = getProvider(chainId);
     this.platformWallet = getPlatformWalletAddress();
@@ -346,7 +346,7 @@ export class CryptoPaymentMonitor {
  * Create and start payment monitors for all configured chains
  */
 export function startPaymentMonitors(
-  billingService: BillingService,
+  _billingService: BillingService,
   onPaymentDetected: (tx: VerifiedTransaction, chainId: number) => Promise<void>
 ): CryptoPaymentMonitor[] {
   const monitors: CryptoPaymentMonitor[] = [];
@@ -361,7 +361,7 @@ export function startPaymentMonitors(
   
   for (const chainId of chainIds) {
     try {
-      const monitor = new CryptoPaymentMonitor(chainId, billingService);
+      const monitor = new CryptoPaymentMonitor(chainId);
       
       monitor.startMonitoring(async (tx) => {
         await onPaymentDetected(tx, chainId);

@@ -159,7 +159,7 @@ export const ChallengeTester = ({ enableAutoKeygen = true }: ChallengeTesterProp
       } else {
         setResult({ status: 'error', message: data.error || 'Failed to generate identity' });
       }
-    } catch (error) {
+    } catch {
       setResult({ status: 'error', message: 'Network error generating identity' });
     } finally {
       setIsGeneratingKeys(false);
@@ -190,7 +190,7 @@ export const ChallengeTester = ({ enableAutoKeygen = true }: ChallengeTesterProp
       } else {
         setResult({ status: 'error', message: data.error || 'Failed to generate challenge' });
       }
-    } catch (error) {
+    } catch {
       setResult({ status: 'error', message: 'Network error' });
     }
   };
@@ -262,7 +262,7 @@ export const ChallengeTester = ({ enableAutoKeygen = true }: ChallengeTesterProp
       } else {
         setResult({ status: 'error', message: data.error || 'Signature verification failed' });
       }
-    } catch (error) {
+    } catch {
       setResult({ status: 'error', message: 'Network error' });
     }
   };
@@ -324,8 +324,8 @@ export const ChallengeTester = ({ enableAutoKeygen = true }: ChallengeTesterProp
       } else {
         throw new Error(verifyData.error || 'Verification failed');
       }
-    } catch (error) {
-      setResult({ status: 'error', message: `Flow failed: ${error instanceof Error ? error.message : 'Unknown error'}` });
+    } catch (err) {
+      setResult({ status: 'error', message: `Flow failed: ${err instanceof Error ? err.message : 'Unknown error'}` });
     }
   }, []);
 

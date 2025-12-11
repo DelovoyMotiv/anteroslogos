@@ -266,7 +266,7 @@ export const SubscriptionPlanSchema = z.object({
   isActive: z.boolean(),
   createdAt: z.date(),
   updatedAt: z.date(),
-});
+}).strict();
 
 export const UserSubscriptionSchema = z.object({
   id: z.string().uuid(),
@@ -283,7 +283,7 @@ export const UserSubscriptionSchema = z.object({
   cancelledAt: z.date().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
-});
+}).strict();
 
 export const SubscriptionInvoiceSchema = z.object({
   id: z.string().uuid(),
@@ -308,7 +308,7 @@ export const SubscriptionInvoiceSchema = z.object({
   paidAt: z.date().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
-});
+}).strict();
 
 export const SubscriptionUsageLogSchema = z.object({
   id: z.string().uuid(),
@@ -321,7 +321,7 @@ export const SubscriptionUsageLogSchema = z.object({
   quotaRemaining: z.number().int().nonnegative(),
   metadata: z.record(z.string(), z.unknown()),
   timestamp: z.date(),
-});
+}).strict();
 
 // =====================================================
 // INPUT SCHEMAS (for API validation)
@@ -404,9 +404,9 @@ export interface SubscribeResponse {
  * Converts database row to SubscriptionPlan object
  */
 export function planRowToObject(row: SubscriptionPlanRow): SubscriptionPlan {
-  return SubscriptionPlanSchema.parse({
+  const planData = {
     id: row.id,
-    planName: row.plan_name,
+    planName: row.plan_name as PlanTier,
     displayName: row.display_name,
     priceUsd: Number(row.price_usd),
     billingCycleDays: row.billing_cycle_days,
@@ -416,7 +416,8 @@ export function planRowToObject(row: SubscriptionPlanRow): SubscriptionPlan {
     isActive: row.is_active,
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
-  });
+  };
+  return SubscriptionPlanSchema.parse(planData) as SubscriptionPlan;
 }
 
 /**
@@ -425,11 +426,11 @@ export function planRowToObject(row: SubscriptionPlanRow): SubscriptionPlan {
 export function subscriptionRowToObject(
   row: UserSubscriptionRow
 ): UserSubscription {
-  return UserSubscriptionSchema.parse({
+  const subscriptionData = {
     id: row.id,
     userId: row.user_id,
     planId: row.plan_id,
-    status: row.status,
+    status: row.status as SubscriptionStatus,
     billingWalletAddress: row.billing_wallet_address || undefined,
     currentPeriodStart: row.current_period_start
       ? new Date(row.current_period_start)
@@ -441,7 +442,8 @@ export function subscriptionRowToObject(
     cancelledAt: row.cancelled_at ? new Date(row.cancelled_at) : undefined,
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
-  });
+  };
+  return UserSubscriptionSchema.parse(subscriptionData) as UserSubscription;
 }
 
 /**
@@ -450,17 +452,17 @@ export function subscriptionRowToObject(
 export function invoiceRowToObject(
   row: SubscriptionInvoiceRow
 ): SubscriptionInvoice {
-  return SubscriptionInvoiceSchema.parse({
+  const invoiceData = {
     id: row.id,
     invoiceId: row.invoice_id,
     subscriptionId: row.subscription_id,
     userId: row.user_id,
     amount: Number(row.amount),
-    token: row.token,
-    chainId: row.chain_id,
+    token: row.token as "USDC",
+    chainId: row.chain_id as 8453,
     recipientAddress: row.recipient_address,
     memoHash: row.memo_hash,
-    status: row.status,
+    status: row.status as SubscriptionInvoiceStatus,
     txHash: row.tx_hash || undefined,
     blockNumber: row.block_number ? BigInt(row.block_number) : undefined,
     confirmations: row.confirmations,
@@ -470,7 +472,8 @@ export function invoiceRowToObject(
     paidAt: row.paid_at ? new Date(row.paid_at) : undefined,
     createdAt: new Date(row.created_at),
     updatedAt: new Date(row.updated_at),
-  });
+  };
+  return SubscriptionInvoiceSchema.parse(invoiceData) as SubscriptionInvoice;
 }
 
 /**
@@ -479,16 +482,17 @@ export function invoiceRowToObject(
 export function usageLogRowToObject(
   row: SubscriptionUsageLogRow
 ): SubscriptionUsageLog {
-  return SubscriptionUsageLogSchema.parse({
+  const usageLogData = {
     id: row.id,
     subscriptionId: row.subscription_id,
     userId: row.user_id,
     auditId: row.audit_id || undefined,
-    eventType: row.event_type,
-    resourceType: row.resource_type,
+    eventType: row.event_type as UsageEventType,
+    resourceType: row.resource_type as "geo_audit",
     costUnits: row.cost_units,
     quotaRemaining: row.quota_remaining,
     metadata: row.metadata || {},
     timestamp: new Date(row.timestamp),
-  });
+  };
+  return SubscriptionUsageLogSchema.parse(usageLogData) as SubscriptionUsageLog;
 }

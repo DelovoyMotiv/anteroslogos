@@ -108,7 +108,7 @@ async function handleCancel(req: VercelRequest, res: VercelResponse, userId: str
   res.status(200).json(result);
 }
 
-async function handleVerify(req: VercelRequest, res: VercelResponse, userId: string): Promise<void> {
+async function handleVerify(req: VercelRequest, res: VercelResponse): Promise<void> {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;

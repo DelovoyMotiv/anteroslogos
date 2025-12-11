@@ -5,9 +5,6 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-// AggregationJob type is used in comments and type annotations
-// @ts-expect-error - Type imported for documentation purposes
-import type { AggregationJob } from '../../types/lib.types';
 
 // =====================================================
 // TYPES

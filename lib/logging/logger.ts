@@ -22,9 +22,9 @@ const correlationIdStorage = new AsyncLocalStorage<string>();
 // Sensitive data patterns to mask
 const SENSITIVE_PATTERNS = [
   // API keys and tokens (more flexible pattern)
-  /api[_\s-]?key[s]?["\s:=]+([a-zA-Z0-9_\-]{10,})/gi,
-  /bearer\s+([a-zA-Z0-9_\-\.]{20,})/gi,
-  /token["\s:=]+([a-zA-Z0-9_\-\.]{10,})/gi,
+  /api[_\s-]?key[s]?["\s:=]+([a-zA-Z0-9_-]{10,})/gi,
+  /bearer\s+([a-zA-Z0-9_.]{20,})/gi,
+  /token["\s:=]+([a-zA-Z0-9_.]{10,})/gi,
   
   // Passwords (match "password: value" or "password=value" or "password is value")
   /password[\s:=]+(?:is\s+)?([^\s"',}]+)/gi,
@@ -113,25 +113,35 @@ function maskSensitiveString(str: string): string {
 }
 
 import type { JSONValue, JSONObject } from '../../types/common.types';
+import { isJSONValue, toJSONValue as convertToJSONValue } from '../utils/typeGuards';
 
 /**
  * Recursively mask sensitive data in objects
  */
-function maskSensitiveData(obj: unknown): JSONValue | null | undefined {
-  if (obj === null || obj === undefined) {
-    return obj;
+function maskSensitiveData(obj: unknown): JSONValue {
+  if (obj === null) {
+    return null;
+  }
+  
+  if (obj === undefined) {
+    return null;
   }
   
   if (typeof obj === 'string') {
     return maskSensitiveString(obj);
   }
   
+  if (typeof obj === 'number' || typeof obj === 'boolean') {
+    return obj;
+  }
+  
   if (typeof obj !== 'object') {
-    return obj as JSONValue;
+    // For non-JSON types, convert to string
+    return String(obj);
   }
   
   if (Array.isArray(obj)) {
-    return obj.map(item => maskSensitiveData(item)) as JSONValue;
+    return obj.map(item => maskSensitiveData(item));
   }
   
   const masked: Record<string, JSONValue> = {};
@@ -145,9 +155,11 @@ function maskSensitiveData(obj: unknown): JSONValue | null | undefined {
     } else if (typeof value === 'string') {
       masked[key] = maskSensitiveString(value);
     } else if (typeof value === 'object' && value !== null) {
-      masked[key] = maskSensitiveData(value) as JSONValue;
+      masked[key] = maskSensitiveData(value);
+    } else if (value === undefined) {
+      masked[key] = null;
     } else {
-      masked[key] = (value ?? null) as JSONValue;
+      masked[key] = maskSensitiveData(value);
     }
   }
   
@@ -157,11 +169,13 @@ function maskSensitiveData(obj: unknown): JSONValue | null | undefined {
 /**
  * Custom serializer that masks sensitive data
  * @internal - Reserved for future use
+ * 
+ * Commented out to avoid unused variable warning.
+ * Uncomment when custom serialization is needed.
  */
-// @ts-expect-error - Reserved for future use
-const sensitiveDataSerializer = (obj: unknown): JSONValue => {
-  return maskSensitiveData(obj) as JSONValue;
-};
+// const sensitiveDataSerializer = (obj: unknown): JSONValue => {
+//   return maskSensitiveData(obj) as JSONValue;
+// };
 
 /**
  * Create logger instance with configuration
@@ -185,7 +199,7 @@ function createLogger() {
       req: (req: unknown) => {
         // Mask sensitive data in request
         const reqObj = req as Record<string, unknown>;
-        return maskSensitiveData({
+        const masked = maskSensitiveData({
           id: reqObj.id,
           method: reqObj.method,
           url: reqObj.url,
@@ -193,13 +207,16 @@ function createLogger() {
           remoteAddress: reqObj.remoteAddress,
           remotePort: reqObj.remotePort,
         });
+        // Ensure return value is JSONValue compatible
+        return isJSONValue(masked) ? masked : convertToJSONValue(masked);
       },
       res: (res: unknown) => {
         const resObj = res as Record<string, unknown>;
-        return {
+        const result = {
           statusCode: resObj.statusCode,
           headers: resObj.headers,
         };
+        return isJSONValue(result) ? result : convertToJSONValue(result);
       },
     },
     
@@ -297,7 +314,10 @@ export async function withCorrelationIdAsync<T>(
  * Create a child logger with additional context
  */
 export function createChildLogger(context: JSONObject) {
-  return logger.child(maskSensitiveData(context) as any);
+  const masked = maskSensitiveData(context);
+  // Ensure the masked data is JSONValue compatible before passing to pino
+  const safeContext = isJSONValue(masked) ? masked : convertToJSONValue(masked);
+  return logger.child(safeContext as any);
 }
 
 /**

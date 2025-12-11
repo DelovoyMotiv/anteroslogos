@@ -15,12 +15,12 @@ const NotFound = () => {
 
     useEffect(() => {
         const timer = setInterval(() => {
-            // @ts-ignore - TypeScript has issues with setState updater function type inference
+            // @ts-expect-error - TypeScript has issues with setState updater function type inference
             setSeconds((prev) => prev + 1);
         }, 1000);
 
         const quoteRotation = setInterval(() => {
-            // @ts-ignore - TypeScript has issues with setState updater function type inference
+            // @ts-expect-error - TypeScript has issues with setState updater function type inference
             setExistentialQuote((prev) => (prev + 1) % quotes.length);
         }, 4000);
 

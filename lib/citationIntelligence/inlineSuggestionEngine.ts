@@ -231,8 +231,7 @@ function generateClaimSuggestions(
  * Generate structural improvement suggestions
  */
 function generateStructureSuggestions(
-  content: string,
-  _analysis: RealTimeAnalysisResult
+  content: string
 ): InlineSuggestion[] {
   const suggestions: InlineSuggestion[] = [];
   
@@ -431,7 +430,7 @@ export function generateInlineSuggestions(
   // Generate suggestions by category
   const entitySuggestions = generateEntitySuggestions(content, analysis);
   const claimSuggestions = generateClaimSuggestions(content, analysis);
-  const structureSuggestions = generateStructureSuggestions(content, analysis);
+  const structureSuggestions = generateStructureSuggestions(content);
   const schemaSuggestions = generateSchemaSuggestions(content, analysis);
   
   // Combine all suggestions

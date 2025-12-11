@@ -280,7 +280,6 @@ export class GoldStandardPersistence {
           variants: entity.variants as Json,
           last_updated: new Date().toISOString(),
         } as never)
-        // @ts-ignore - Supabase type issue
         .eq('id', existing.id);
 
       if (error) throw error;
@@ -299,9 +298,7 @@ export class GoldStandardPersistence {
         variants: entity.variants as Json,
       };
 
-      // @ts-ignore - Supabase type issue
       const { error } = await supabase
-        // @ts-ignore - Supabase type issue
         .from('global_entities')
         .insert(insert as any);
 
@@ -357,9 +354,7 @@ export class GoldStandardPersistence {
       contributing_domains: effect.contributing_domains,
     };
 
-    // @ts-ignore - Supabase type issue
     const { error } = await supabase
-      // @ts-ignore - Supabase type issue
       .from('network_effects')
       .insert(insert as any);
 
@@ -382,9 +377,7 @@ export class GoldStandardPersistence {
       total_duration_ms: operation.total_duration_ms || null,
     };
 
-    // @ts-ignore - Supabase type issue
     const { error } = await supabase
-      // @ts-ignore - Supabase type issue
       .from('sync_operations')
       .insert(insert as any);
 
@@ -413,9 +406,7 @@ export class GoldStandardPersistence {
       time_to_citation_optimistic: prediction.time_to_citation.optimistic,
     };
 
-    // @ts-ignore - Supabase type issue
     const { error } = await supabase
-      // @ts-ignore - Supabase type issue
       .from('citation_predictions')
       .insert(insert as any);
 
@@ -442,17 +433,13 @@ export class GoldStandardPersistence {
       ? Math.min(1, pred.overall_probability / (actualCitations * 100))
       : 0;
 
-    // @ts-ignore - Supabase type issue
     const { error } = await supabase
-      // @ts-ignore - Supabase type issue
       .from('citation_predictions')
-      // @ts-ignore - Supabase type issue
       .update({
         actual_citations_received: actualCitations,
         actual_time_to_first_citation: actualTimeToCitation || null,
         prediction_accuracy: accuracy,
-      } as any)
-      // @ts-ignore - Supabase type issue
+      } as never)
       .eq('id', predictionId);
 
     if (error) throw error;

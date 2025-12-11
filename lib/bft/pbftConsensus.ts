@@ -115,7 +115,7 @@ export class PBFTConsensus {
     try {
       // Validate request
       ConsensusRequestSchema.parse(request);
-    } catch (error) {
+    } catch {
       return this.createFailureResult(request.requestId, 'Invalid request schema');
     }
     
@@ -574,7 +574,7 @@ export class PBFTConsensus {
                 referenceEntity,
                 this.causalGraph
               );
-            } catch (error) {
+            } catch {
               console.warn(`[PBFT] Off-chain oracle failed for ${node.nodeId}, using distributed cache`);
               
               // Fallback to distributed cache with PageRank-based approximation
@@ -589,7 +589,7 @@ export class PBFTConsensus {
               // Higher PageRank = higher causal weight
               causalWeight = Math.min(1.0, pageRankResult.rank * 10);
             }
-          } catch (fallbackError) {
+          } catch {
             console.warn(`[PBFT] Distributed cache fallback failed for ${node.nodeId}`);
           }
         }

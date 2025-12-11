@@ -1,28 +1,14 @@
-// @ts-nocheck
 /**
  * API Keys Management - Client-side functions
  * Browser-safe operations without Node.js crypto
  */
 
 import { supabase } from '../supabase';
+import { APIKeySchema, type APIKey } from './schemas';
+import { selectQuery } from '../database/queryHelpers';
 
-export interface APIKey {
-  id: string;
-  user_id: string;
-  name: string;
-  key_prefix: string;
-  scoped_tools: string[] | null;
-  rate_limit_per_minute: number;
-  rate_limit_per_hour: number;
-  expires_at: string | null;
-  last_used_at: string | null;
-  usage_count: number;
-  revoked: boolean;
-  revoked_at: string | null;
-  revoked_reason: string | null;
-  created_at: string;
-  updated_at: string;
-}
+// Re-export APIKey type for external use
+export type { APIKey };
 
 /**
  * List all API keys for authenticated user
@@ -41,12 +27,12 @@ export async function listAPIKeys(): Promise<APIKey[] | { error: string }> {
       return { error: 'Unauthorized' };
     }
 
-    const { data: keys, error } = await supabase
-      .from('api_keys')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('revoked', false)
-      .order('created_at', { ascending: false });
+    const { data: keys, error } = await selectQuery(
+      supabase,
+      'api_keys',
+      APIKeySchema,
+      { user_id: user.id, is_active: true }
+    );
 
     if (error) {
       console.error('listAPIKeys error:', error);

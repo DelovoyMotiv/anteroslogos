@@ -269,7 +269,7 @@ export const TracerViz: React.FC<TracerVizProps> = ({
   const [pan, setPan] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [_selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
+  const [, setSelectedNode] = useState<GraphNode | null>(null);
   const [hoveredNode, setHoveredNode] = useState<GraphNode | null>(null);
 
   // Build graph data

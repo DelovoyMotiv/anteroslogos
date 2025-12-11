@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Usage Visualization Component
  * Bar chart visualization inspired by OpenRouter's activity dashboard

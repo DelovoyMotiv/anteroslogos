@@ -161,7 +161,7 @@ export function UIStatesDemo() {
               <RetryError
                 message="Failed to fetch data from the server. Network timeout occurred."
                 onRetry={() => {
-                  // @ts-ignore - TypeScript has issues with setState updater function type inference
+                  // @ts-expect-error - TypeScript has issues with setState updater function type inference
                   setRetryCount((prev) => prev + 1);
                 }}
                 attempts={retryCount}

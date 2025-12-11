@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Dashboard Overview Page - HUD Style
  * High-density, data-first dashboard with scientific aesthetic
@@ -9,7 +8,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../../lib/dashboard/auth-guard';
 import { getCurrentCycleUsage, getUCPTRate } from '../../../lib/dashboard/usage-analytics';
 import { getSubscription, getUsageStats, type USDCSubscription, type UsageStats } from '../../../lib/dashboard/billing-client';
-import { Activity, TrendingUp, Shield, CreditCard, ArrowUpRight, Terminal, Cpu, Zap } from 'lucide-react';
+import { Activity, Shield, ArrowUpRight, Terminal, Cpu, Zap } from 'lucide-react';
 
 interface Stats {
   totalCalls: number;
@@ -42,17 +41,30 @@ export function OverviewPage() {
         return;
       }
 
+      // Type guard: ensure cycleUsage has the expected properties
+      const hasValidCycleUsage = typeof cycleUsage === 'object' && 
+        cycleUsage !== null && 
+        'total_calls' in cycleUsage &&
+        'successful_calls' in cycleUsage &&
+        'total_tokens' in cycleUsage;
+
       setStats({
-        totalCalls: typeof cycleUsage === 'object' ? cycleUsage.total_calls : 0,
-        successfulCalls: typeof cycleUsage === 'object' ? cycleUsage.successful_calls : 0,
-        totalTokens: typeof cycleUsage === 'object' ? cycleUsage.total_tokens : 0,
+        totalCalls: hasValidCycleUsage ? cycleUsage.total_calls : 0,
+        successfulCalls: hasValidCycleUsage ? cycleUsage.successful_calls : 0,
+        totalTokens: hasValidCycleUsage ? cycleUsage.total_tokens : 0,
         ucptRate: typeof ucptRate === 'number' ? ucptRate : 0,
       });
       
+      // Type guard: ensure subscriptionResult is a valid subscription
       const hasSubError = typeof subscriptionResult === 'object' && subscriptionResult !== null && 'error' in subscriptionResult;
-      if (!hasSubError && subscriptionResult) {
-        setSubscription(subscriptionResult);
-        getUsageStats(subscriptionResult).then(setUsageStats);
+      const isValidSubscription = !hasSubError && 
+        subscriptionResult !== null &&
+        typeof subscriptionResult === 'object' &&
+        'subscription_id' in subscriptionResult;
+      
+      if (isValidSubscription) {
+        setSubscription(subscriptionResult as USDCSubscription);
+        getUsageStats(subscriptionResult as USDCSubscription).then(setUsageStats);
       }
       
       setLoading(false);

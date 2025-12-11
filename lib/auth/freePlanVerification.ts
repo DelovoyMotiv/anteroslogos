@@ -201,7 +201,14 @@ export async function verifySignupFlow(userId: string): Promise<ComprehensiveSig
       .limit(1)
       .single();
 
-    const hasTenant = !tenantError && !!tenantMember;
+    // Type guard to check if tenantMember has the expected structure
+    const isValidTenantMember = (data: unknown): data is TenantMemberRow => {
+      if (!data || typeof data !== 'object') return false;
+      const obj = data as Record<string, unknown>;
+      return 'tenant_id' in obj && typeof obj.tenant_id === 'string';
+    };
+
+    const hasTenant = !tenantError && !!tenantMember && isValidTenantMember(tenantMember);
     if (!hasTenant) missingSteps.push('tenant');
 
     // 5. Check onboarding
@@ -227,8 +234,8 @@ export async function verifySignupFlow(userId: string): Promise<ComprehensiveSig
       subscription,
       
       hasTenant,
-      tenantId: (tenantMember as TenantMemberRow | null)?.tenant_id || null,
-      tenantSlug: (tenantMember as TenantMemberRow | null)?.tenants?.slug || null,
+      tenantId: hasTenant && tenantMember && isValidTenantMember(tenantMember) ? tenantMember.tenant_id : null,
+      tenantSlug: hasTenant && tenantMember && isValidTenantMember(tenantMember) && tenantMember.tenants ? tenantMember.tenants.slug : null,
       
       onboardingCompleted,
       

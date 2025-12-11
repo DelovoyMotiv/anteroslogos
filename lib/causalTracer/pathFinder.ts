@@ -189,8 +189,7 @@ export function scorePath(
  */
 function heuristic(
   currentNode: CausalNode,
-  goalNode: CausalNode,
-  _query: string
+  goalNode: CausalNode
 ): number {
   // Semantic distance based on entity overlap
   const currentEntities = new Set(currentNode.entities);
@@ -359,8 +358,8 @@ export function findBestPath(
     pathNodes: [startNodeId],
     pathEdges: [],
     gScore: 0,
-    fScore: heuristic(startNode, endNode, query),
-  }, heuristic(startNode, endNode, query));
+    fScore: heuristic(startNode, endNode),
+  }, heuristic(startNode, endNode));
 
   let iterations = 0;
   const maxIterations = config.maxPathsToExplore;
@@ -430,7 +429,7 @@ export function findBestPath(
         pathNodes: [...current.pathNodes, nextNodeId],
         pathEdges: [...current.pathEdges, edge.id],
         gScore: tentativeGScore,
-        fScore: tentativeGScore + heuristic(nextNode, endNode, query),
+        fScore: tentativeGScore + heuristic(nextNode, endNode),
       };
 
       openSet.enqueue(neighbor, neighbor.fScore);

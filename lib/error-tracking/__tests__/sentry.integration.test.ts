@@ -4,7 +4,7 @@
  * Tests the complete error tracking flow with real Sentry SDK
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import * as Sentry from '@sentry/node';
 
 // Mock Sentry for integration tests

@@ -366,7 +366,7 @@ export class AIDRegistry {
     filters?: { protocols?: string[]; capabilities?: string[] }
   ): Promise<AIDRegistration[]> {
     try {
-      let query = this.supabase.from('aid_discovery').select('*');
+      const query = this.supabase.from('aid_discovery').select('*');
 
       // NOTE: aid_discovery is a VIEW, not the full aid_registry table
       // It only shows verified, federated agents

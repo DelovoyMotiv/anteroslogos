@@ -66,7 +66,13 @@ export function legacyToUnified(node: LegacyDHTNode): UnifiedDHTNode {
     metadata: node.metadata ? {
       version: node.metadata.version,
       publicKey: node.metadata.publicKey,
-      costPerCall: node.metadata.costPerCall,
+      // Only include costPerCall if it has both required fields
+      costPerCall: node.metadata.costPerCall?.token && node.metadata.costPerCall?.amount !== undefined
+        ? {
+            token: node.metadata.costPerCall.token,
+            amount: node.metadata.costPerCall.amount,
+          }
+        : undefined,
     } : undefined,
   };
 }
@@ -263,7 +269,13 @@ export class LegacyDHTAdapter implements IDHTAdapter {
       metadata: node.metadata ? {
         version: node.metadata.version,
         publicKey: node.metadata.publicKey,
-        costPerCall: node.metadata.costPerCall,
+        // Only include costPerCall if it has both required fields
+        costPerCall: node.metadata.costPerCall?.token && node.metadata.costPerCall?.amount !== undefined
+          ? {
+              token: node.metadata.costPerCall.token,
+              amount: node.metadata.costPerCall.amount,
+            }
+          : undefined,
       } : undefined,
     };
 

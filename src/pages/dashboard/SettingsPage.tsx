@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Settings Page
  * User profile management, preferences, and account actions
@@ -12,7 +11,7 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
 export function SettingsPage() {
-  const { user, signOut } = useAuth();
+  const { signOut } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState({

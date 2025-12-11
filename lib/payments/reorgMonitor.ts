@@ -1,4 +1,3 @@
-// @ts-nocheck - Complex viem and Supabase type interactions
 /**
  * @file lib/payments/reorgMonitor.ts
  * @description Blockchain reorg monitoring and invoice re-verification
@@ -10,12 +9,11 @@
  */
 
 import { createClient } from "@supabase/supabase-js";
-import { type Hash } from "viem";
-import { getRpcClient, getRpcProviderManager } from "./rpcProvider";
+import { type Hash, type PublicClient } from "viem";
+import { getRpcProviderManager } from "./rpcProvider";
 import { getConfirmations, verifyTransaction } from "./chainWatcher";
 import { updateInvoice } from "./invoice";
 import { createResilientSupabaseClient } from "../reliability/externalApi";
-// import type { InvoiceRow } from "./types"; // Unused
 
 // =====================================================
 // Environment & Configuration
@@ -42,19 +40,10 @@ const supabase = createResilientSupabaseClient(supabaseClient, {
 });
 
 /**
- * Gets RPC client with automatic fallback
- */
-function getPublicClient() {
-  return getRpcClient();
-}
-
-/**
  * Execute RPC call with resilience (retry + circuit breaker)
  */
-import type { MinimalRpcClient, RpcOperation } from '../../types/lib-extended.types';
-
-async function executeRpcCall<T>(operation: RpcOperation<T>): Promise<T> {
-  return getRpcProviderManager().executeWithResilience(operation);
+async function executeRpcCall<T>(operation: (client: any) => Promise<T>): Promise<T> {
+  return getRpcProviderManager().executeWithResilience(operation as any);
 }
 
 // Reorg protection constants
@@ -98,7 +87,7 @@ async function fetchInvoicesForReVerification(
   limit: number = MAX_INVOICES_PER_RUN
 ): Promise<InvoiceToReVerify[]> {
   const result = await supabase.query(
-    () => supabaseClient
+    async () => await supabaseClient
       .from("a2a_invoices")
       .select("id, invoice_id, tx_hash, block_number, confirmations, amount, token, recipient_address")
       .in("status", ["confirming", "paid"])
@@ -144,12 +133,14 @@ async function reVerifyInvoice(invoice: InvoiceToReVerify): Promise<boolean> {
 
   try {
     // 1. Check if transaction still exists on-chain
-    let receipt;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let receipt: any;
     try {
       receipt = await executeRpcCall((client) =>
-        client.getTransactionReceipt({ hash: tx_hash as Hash })
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (client as any).getTransactionReceipt({ hash: tx_hash as Hash })
       );
-    } catch (error) {
+    } catch {
       // Transaction not found - possible reorg
       console.warn(
         `[ReorgMonitor] Transaction ${tx_hash} not found for invoice ${invoice_id}. ` +
@@ -177,7 +168,7 @@ async function reVerifyInvoice(invoice: InvoiceToReVerify): Promise<boolean> {
 
     // 4. Get current confirmations
     const currentBlock = await executeRpcCall((client) => client.getBlockNumber());
-    const newConfirmations = Number(currentBlock - receipt.blockNumber);
+    const newConfirmations = Number(currentBlock) - Number(receipt.blockNumber);
 
     // 5. Verify payment details against invoice
     const verification = await verifyTransaction(tx_hash, invoice_id);

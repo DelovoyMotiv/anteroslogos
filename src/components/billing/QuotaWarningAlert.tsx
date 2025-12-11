@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Quota Warning Alert Component
  * Displays warning when user has consumed > 80% of their monthly quota

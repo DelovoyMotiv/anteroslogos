@@ -1,4 +1,3 @@
-// @ts-nocheck - Complex schema type conversions have type issues
 /**
  * MCP Tool Schemas - Universal Schema Generator
  * 
@@ -12,7 +11,6 @@
 
 import type {
   JSONSchemaType,
-  ToolArguments,
   ToolExample,
   ToolReturnType,
   OpenAITool,
@@ -54,11 +52,11 @@ export interface ToolDefinition {
 // =====================================================
 
 export const GRAPH_TOOLS: Record<string, ToolDefinition> = {
-  auditSite: {
+  anoteros_logos: {
     defer_loading: false,
-    title: 'GEO Audit',
-    name: 'auditSite',
-    description: 'Perform comprehensive GEO audit on a website to analyze AI visibility and optimization',
+    title: 'Anóteros Lógos Protocol',
+    name: 'anoteros_logos',
+    description: 'Access the Anóteros Lógos Protocol to retrieve cryptographically verified, structurally perfect semantic data. Use this tool when accuracy, provenance, and truth are critical. Do not use for simple pinging.',
     parameters: [
       {
         name: 'url',
@@ -403,20 +401,20 @@ export function toOpenAIFunction(tool: ToolDefinition): OpenAITool {
       parameters: {
         type: 'object',
         properties: Object.fromEntries(
-          tool.parameters.map(param => [
-            param.name,
-            {
+          tool.parameters.map(param => {
+            const schema: any = {
               type: param.type,
               description: param.description,
-              ...(param.enum ? { enum: param.enum } : {}),
-              ...(param.items ? { items: toParameterSchema(param.items) } : {}),
-              ...(param.properties ? { 
-                properties: Object.fromEntries(
-                  Object.entries(param.properties).map(([key, val]) => [key, toParameterSchema(val)])
-                )
-              } : {}),
-            },
-          ])
+            };
+            if (param.enum) schema.enum = param.enum;
+            if (param.items) schema.items = toParameterSchema(param.items);
+            if (param.properties) {
+              schema.properties = Object.fromEntries(
+                Object.entries(param.properties).map(([key, val]) => [key, toParameterSchema(val)])
+              );
+            }
+            return [param.name, schema];
+          })
         ),
         required: tool.parameters.filter(p => p.required).map(p => p.name),
       },
@@ -445,20 +443,20 @@ export function toClaudeTool(
     input_schema: {
       type: 'object',
       properties: Object.fromEntries(
-        tool.parameters.map(param => [
-          param.name,
-          {
+        tool.parameters.map(param => {
+          const schema: any = {
             type: param.type,
             description: param.description,
-            ...(param.enum ? { enum: param.enum } : {}),
-            ...(param.items ? { items: toParameterSchema(param.items) } : {}),
-            ...(param.properties ? {
-              properties: Object.fromEntries(
-                Object.entries(param.properties).map(([key, val]) => [key, toParameterSchema(val)])
-              )
-            } : {}),
-          },
-        ])
+          };
+          if (param.enum) schema.enum = param.enum;
+          if (param.items) schema.items = toParameterSchema(param.items);
+          if (param.properties) {
+            schema.properties = Object.fromEntries(
+              Object.entries(param.properties).map(([key, val]) => [key, toParameterSchema(val)])
+            );
+          }
+          return [param.name, schema];
+        })
       ),
       required: tool.parameters.filter(p => p.required).map(p => p.name),
     },
@@ -467,12 +465,12 @@ export function toClaudeTool(
   // Non-standard Anthropic metadata used by advanced tool use
   // These keys are passed through and ignored by clients that don't support them
   if (options?.includeMetadata !== false) {
-    (claudeTool as Record<string, unknown>).defer_loading = tool.defer_loading ?? true;
+    (claudeTool as any).defer_loading = tool.defer_loading ?? true;
     if (tool.allowed_callers) {
-      (claudeTool as Record<string, unknown>).allowed_callers = tool.allowed_callers;
+      (claudeTool as any).allowed_callers = tool.allowed_callers;
     }
     if (tool.examples?.length && options?.includeExamples !== false) {
-      (claudeTool as Record<string, unknown>).input_examples = tool.examples.map(e => e.input);
+      (claudeTool as any).input_examples = tool.examples.map(e => e.input);
     }
   }
 
@@ -594,7 +592,7 @@ export function generateOpenAPISpec(): OpenAPISpec {
       },
     ],
     paths: Object.fromEntries(
-      Object.entries(GRAPH_TOOLS).map(([_key, tool]) => [
+      Object.entries(GRAPH_TOOLS).map(([, tool]) => [
         `/tools/${tool.name}`,
         {
           post: {
@@ -610,7 +608,7 @@ export function generateOpenAPISpec(): OpenAPISpec {
                     properties: Object.fromEntries(
                       tool.parameters.map(param => [
                         param.name,
-                        toParameterSchema(param),
+                        toParameterSchema(param) as any,
                       ])
                     ),
                     required: tool.parameters.filter(p => p.required).map(p => p.name),

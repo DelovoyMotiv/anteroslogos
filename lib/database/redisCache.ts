@@ -4,7 +4,7 @@
  * Production-ready with connection pooling and error handling
  */
 
-// @ts-ignore - redis types are not available
+// @ts-expect-error - redis types may not be available in all environments
 import { createClient, RedisClientType } from 'redis';
 
 export interface CacheOptions {

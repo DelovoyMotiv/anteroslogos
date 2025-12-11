@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Rate Limiter
  * Sliding window rate limiting for API keys and users
@@ -12,13 +11,6 @@ interface RateLimitResult {
   remaining: number;
   reset: number; // Unix timestamp
   retryAfter?: number; // Seconds
-}
-
-interface RateLimitBucket {
-  key: string;
-  count: number;
-  window_start: string;
-  expires_at: string;
 }
 
 /**

@@ -1,4 +1,3 @@
-// @ts-nocheck - Sentry React integration has complex type issues
 /**
  * React-specific error tracking utilities
  * 
@@ -35,7 +34,6 @@ export function initSentryReact(config: SentryConfig): void {
       tracesSampleRate: config.tracesSampleRate ?? 0.1,
       debug: config.debug ?? false,
       attachStacktrace: config.attachStacktrace ?? true,
-      autoSessionTracking: config.autoSessionTracking ?? true,
       maxBreadcrumbs: config.maxBreadcrumbs ?? 100,
       
       integrations: [
@@ -72,13 +70,17 @@ export function initSentryReact(config: SentryConfig): void {
         
         // Call custom beforeSend if provided
         if (config.beforeSend) {
-          return config.beforeSend(event, hint);
+          return config.beforeSend(event as any, hint as any) as any;
         }
         
         return event;
       },
       
-      beforeBreadcrumb: config.beforeBreadcrumb,
+      beforeBreadcrumb: config.beforeBreadcrumb 
+        ? (breadcrumb, hint) => {
+            return config.beforeBreadcrumb!(breadcrumb as any, hint as any) as any;
+          }
+        : undefined,
     });
 
     isInitialized = true;
@@ -139,10 +141,8 @@ export const withErrorBoundary = Sentry.withErrorBoundary;
  * }
  * ```
  */
-import type { JSONValue } from '../../types/common.types';
-
 export function useSentryError() {
-  return (error: Error | unknown, context?: JSONValue) => {
+  return (error: Error | unknown, context?: any) => {
     if (!isInitialized) {
       console.warn('Sentry not initialized, error not captured');
       return '';
@@ -173,7 +173,7 @@ export function useSentryError() {
  * ```
  */
 export function useSentryUser() {
-  return (user: JSONValue) => {
+  return (user: any) => {
     if (!isInitialized) {
       return;
     }
@@ -204,19 +204,19 @@ export function useSentryUser() {
  * ```
  */
 export function useSentryBreadcrumb() {
-  return (breadcrumb: JSONValue) => {
+  return (breadcrumb: any, hint?: any) => {
     if (!isInitialized) {
       return;
     }
     
-    Sentry.addBreadcrumb(breadcrumb);
+    Sentry.addBreadcrumb(breadcrumb, hint);
   };
 }
 
 /**
- * Create a Sentry-wrapped React Router
+ * Create a Sentry-wrapped React Router v6
  */
-export const wrapCreateBrowserRouter = Sentry.wrapCreateBrowserRouter;
+export const wrapCreateBrowserRouter = Sentry.wrapCreateBrowserRouterV6;
 
 /**
  * Profiler component for performance monitoring

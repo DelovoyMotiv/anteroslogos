@@ -462,7 +462,7 @@ export function classifyIntentBatch(queries: string[]): IntentResult[] {
   return queries.map(query => {
     try {
       return classifyIntent(query);
-    } catch (error) {
+    } catch {
       // Return default informational intent on error
       return {
         intent: 'informational',

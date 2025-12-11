@@ -303,7 +303,7 @@ export class CitationTracker {
     
     if (typeof window !== 'undefined') {
       try {
-        // @ts-ignore - Dynamic import
+        // @ts-expect-error - Dynamic import for client-side Supabase
         const { default: supabase } = await import('../../lib/supabase');
         
         // Query competitor citations for each competitor

@@ -424,7 +424,7 @@ export function parseSSEEvent(raw: string): SSEEvent | null {
   const lines = raw.trim().split('\n');
   const event: Partial<SSEEvent> = {};
   
-  let dataLines: string[] = [];
+  const dataLines: string[] = [];
   
   for (const line of lines) {
     if (line.startsWith('event:')) {

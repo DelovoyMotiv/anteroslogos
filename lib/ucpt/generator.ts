@@ -147,7 +147,7 @@ export async function generateUCPT(
       ).catch(error => {
         console.error('[UCPT] Cascade failed:', error);
       });
-    } catch (error) {
+    } catch {
       // Cascade protocol not initialized - skip cascade
       console.debug('[UCPT] Cascade protocol not available, skipping cascade');
     }

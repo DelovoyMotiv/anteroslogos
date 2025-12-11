@@ -10,7 +10,6 @@
  */
 
 import type {
-  CitationProbabilityResult,
   FeatureVector,
 } from '../../types/citation-intelligence.types';
 
@@ -42,10 +41,8 @@ interface QuickWinAnalysis {
  * Analyze feature vector and identify quick wins
  */
 export function identifyQuickWins(
-  featureVector: FeatureVector,
-  _citationResult: CitationProbabilityResult
+  featureVector: FeatureVector
 ): QuickWinAnalysis {
-  // _citationResult can be used for future enhancements
   const quickWins: QuickWin[] = [];
   
   // Content Quality Quick Wins

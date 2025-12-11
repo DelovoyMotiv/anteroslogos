@@ -57,7 +57,7 @@ const CookieConsent: React.FC = () => {
 
     const togglePreference = (key: keyof typeof preferences) => {
         if (key === 'necessary') return; // Necessary cookies cannot be disabled
-        // @ts-ignore - TypeScript has issues with setState updater function type inference
+        // @ts-expect-error - TypeScript has issues with setState updater function type inference
         setPreferences(prev => ({ ...prev, [key]: !prev[key] }));
     };
 

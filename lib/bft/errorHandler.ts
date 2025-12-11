@@ -391,6 +391,14 @@ export class ByzantineResistanceErrorHandler {
       message: `Operating in degraded mode: ${component} unavailable`,
     };
   }
+  
+  /**
+   * Get circuit breaker statistics
+   * Used for monitoring dashboard and health checks
+   */
+  getCircuitBreakerStats(): Map<string, CircuitBreakerState> {
+    return new Map(this.circuitBreakers);
+  }
 }
 
 interface CircuitBreakerState {

@@ -60,7 +60,7 @@ export class ModelRegistry {
     }
 
     // Insert model into registry
-    // @ts-ignore - ml_models table not in generated types yet
+    // ml_models table not in generated types yet
     const { data, error } = await (supabase
       .from('ml_models') as any)
       .insert({
@@ -169,7 +169,7 @@ export class ModelRegistry {
    */
   async activateModel(modelId: string): Promise<void> {
     // First, archive all currently active models
-    // @ts-ignore - ml_models table not in generated types yet
+    // ml_models table not in generated types yet
     await (supabase
       .from('ml_models') as any)
       .update({ status: 'archived' })
@@ -177,7 +177,7 @@ export class ModelRegistry {
       .eq('status', 'active');
 
     // Activate the new model
-    // @ts-ignore - ml_models table not in generated types yet
+    // ml_models table not in generated types yet
     const { error } = await (supabase
       .from('ml_models') as any)
       .update({ status: 'active' })
@@ -192,7 +192,7 @@ export class ModelRegistry {
    * Archive a model
    */
   async archiveModel(modelId: string): Promise<void> {
-    // @ts-ignore - ml_models table not in generated types yet
+    // ml_models table not in generated types yet
     const { error } = await (supabase
       .from('ml_models') as any)
       .update({ status: 'archived' })

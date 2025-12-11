@@ -327,12 +327,10 @@ export async function deleteCloudAudit(auditId: string): Promise<CloudDeleteResu
       return { success: false, error: 'Supabase not configured' };
     }
     
-    const result: any = await supabase
+    const { error } = await supabase
       .from('audits')
-      // @ts-ignore - Supabase type issue
-      .update({ deleted_at: new Date().toISOString() })
+      .update({ deleted_at: new Date().toISOString() } as never)
       .eq('id', auditId);
-    const { error } = result;
     
     if (error) {
       console.error('Error deleting audit:', error);
@@ -356,12 +354,10 @@ export async function updateAuditPublicStatus(auditId: string, isPublic: boolean
       return { success: false, error: 'Supabase not configured' };
     }
     
-    const result: any = await supabase
+    const { error } = await supabase
       .from('audits')
-      // @ts-ignore - Supabase type issue
-      .update({ is_public: isPublic })
+      .update({ is_public: isPublic } as never)
       .eq('id', auditId);
-    const { error } = result;
     
     if (error) {
       console.error('Error updating audit public status:', error);

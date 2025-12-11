@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Renewal Reminder Banner Component
  * Displays prominent notification when subscription renewal is approaching (< 7 days)

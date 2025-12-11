@@ -9,7 +9,9 @@
  * ```
  */
 
-import { contentOptimizer } from '../contentOptimizer';
+import { ContentOptimizer } from '../contentOptimizer';
+
+const contentOptimizer = new ContentOptimizer();
 import type { KnowledgeGraph, OptimizationConstraints } from '../../../types/citation-intelligence.types';
 
 /**

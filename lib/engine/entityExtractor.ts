@@ -219,6 +219,7 @@ export class EntityExtractor {
    * @returns Array of entities from content
    */
   private extractFromContent(_html: string): Entity[] {
+    // Parameter _html is reserved for future NLP/pattern matching implementation
     // For now, return empty array
     // This can be enhanced with NLP or pattern matching in the future
     return [];

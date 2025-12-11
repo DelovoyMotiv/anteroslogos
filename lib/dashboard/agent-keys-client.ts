@@ -1,22 +1,14 @@
-// @ts-nocheck
 /**
  * Agent Keys Management - Client-side functions
  * Browser-safe operations
  */
 
 import { supabase } from '../supabase';
+import { AgentKeySchema, type AgentKey } from './schemas';
+import { selectQuery, updateQuery } from '../database/queryHelpers';
 
-export interface AgentKey {
-  id: string;
-  user_id: string;
-  agent_name: string;
-  domain: string;
-  aid_uri: string;
-  public_key: string;
-  created_at: string;
-  revoked: boolean;
-  revoked_at: string | null;
-}
+// Re-export AgentKey type for external use
+export type { AgentKey };
 
 /**
  * List all agent keys for authenticated user
@@ -28,12 +20,15 @@ export async function listAgentKeys(): Promise<AgentKey[] | { error: string }> {
       return { error: 'Unauthorized' };
     }
 
-    const { data: keys, error } = await supabase
-      .from('agent_keys')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('revoked', false)
-      .order('created_at', { ascending: false });
+    const { data: keys, error } = await selectQuery(
+      supabase,
+      'agent_keys',
+      AgentKeySchema,
+      {
+        user_id: user.id,
+        revoked: false,
+      }
+    );
 
     if (error) {
       console.error('listAgentKeys error:', error);
@@ -59,16 +54,22 @@ export async function revokeAgentKey(
       return { success: false, error: 'Unauthorized' };
     }
 
-    const { error } = await supabase
-      .from('agent_keys')
-      .update({
+    const { data, error } = await updateQuery(
+      supabase,
+      'agent_keys',
+      {
         revoked: true,
         revoked_at: new Date().toISOString(),
-      })
-      .eq('id', keyId)
-      .eq('user_id', user.id);
+        updated_at: new Date().toISOString(),
+      },
+      {
+        id: keyId,
+        user_id: user.id,
+      },
+      AgentKeySchema
+    );
 
-    if (error) {
+    if (error || !data || data.length === 0) {
       console.error('revokeAgentKey error:', error);
       return { success: false, error: 'Failed to revoke agent key' };
     }

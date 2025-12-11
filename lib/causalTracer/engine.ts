@@ -155,10 +155,7 @@ export async function traceCitationPath(
 
   // Generate improvements
   const suggestedImprovements = await generateImprovements(
-    targetSiteGraph,
-    paths,
-    competitorComparison,
-    config
+    paths
   );
 
   // Categorize improvements
@@ -394,8 +391,7 @@ export async function counterfactualImpact(
 export async function predictiveGapAnalysis(
   ourGraph: CausalGraph,
   competitorGraph: CausalGraph,
-  query: string,
-  _config: Partial<TracerConfig> = {}
+  query: string
 ): Promise<GapAnalysisResult> {
   
   // Get competitor's strong nodes
@@ -662,10 +658,7 @@ async function analyzeCompetitors(
 }
 
 async function generateImprovements(
-  _graph: CausalGraph,
-  paths: CausalPath[],
-  _competitors: CompetitorComparison[],
-  _config: TracerConfig
+  paths: CausalPath[]
 ): Promise<Improvement[]> {
   const improvements: Improvement[] = [];
 
@@ -815,8 +808,7 @@ export class CausalTracerEngine {
   async traceCitationPath(
     graphId: string,
     _targetNodeId: string,
-    query: string,
-    _platform: LLMPlatform
+    query: string
   ): Promise<CitationTraceResult> {
     const graph = this.graphs.get(graphId);
     if (!graph) {
@@ -921,8 +913,7 @@ export class CausalTracerEngine {
     return await predictiveGapAnalysis(
       graph,
       competitorGraphs[0],
-      query,
-      this.config
+      query
     );
   }
 }

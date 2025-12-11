@@ -113,7 +113,7 @@ async function agentConsensusHandler(
   }
 
   // Validate request body
-  const { operation, data, options }: ConsensusRequest = req.body;
+  const { operation, data }: ConsensusRequest = req.body;
 
   if (!operation || !data) {
     return res.status(400).json({

@@ -147,7 +147,7 @@ export class EnterpriseSandboxV2 {
     try {
       Buffer.from(publicKey, 'base64');
       Buffer.from(privateKey, 'base64');
-    } catch (error) {
+    } catch {
       throw new Error('Keys must be valid base64-encoded strings');
     }
     

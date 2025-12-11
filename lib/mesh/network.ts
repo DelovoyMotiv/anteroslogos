@@ -200,7 +200,7 @@ export class MeshNetworkRouter {
       if (this.localTenantId) {
         console.log(`[MeshRouter] Tenant isolation enabled: ${this.localTenantId}`);
       }
-    } catch (error) {
+    } catch {
       // Tenant isolation not available - continue without it
       console.debug('[MeshRouter] Tenant isolation not available');
     }
@@ -871,7 +871,7 @@ export class MeshNetworkRouter {
           body: JSON.stringify(gossipMessage),
           signal: AbortSignal.timeout(5000),
         });
-      } catch (error) {
+      } catch {
         this.recordFailure(peer.nodeId);
       }
     });

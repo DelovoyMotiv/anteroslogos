@@ -215,14 +215,14 @@ export async function executeProgrammatic(
     if (context) {
       try {
         context.release();
-      } catch (e) {
+      } catch {
         // Ignore cleanup errors
       }
     }
     if (isolate) {
       try {
         isolate.dispose();
-      } catch (e) {
+      } catch {
         // Ignore cleanup errors
       }
     }

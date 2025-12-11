@@ -338,18 +338,18 @@ export async function createCustodialWallet(
   const insertedRow = await insertWalletRow(row);
 
   // Return public wallet data (never expose private key)
-  const wallet: CustodialWallet = {
+  const walletData = {
     id: insertedRow.id,
     userId: insertedRow.user_id || undefined,
     agentId: insertedRow.agent_id || undefined,
     address: insertedRow.address,
     chainId: insertedRow.chain_id as 8453,
-    isCustodial: true,
+    isCustodial: true as const,
     encryptionAlgorithm: insertedRow.encryption_algorithm!,
     createdAt: new Date(insertedRow.created_at),
   };
 
-  return CustodialWalletSchema.parse(wallet);
+  return CustodialWalletSchema.parse(walletData) as CustodialWallet;
 }
 
 /**
@@ -389,17 +389,17 @@ export async function registerNonCustodialWallet(
   const insertedRow = await insertWalletRow(row);
 
   // Return wallet data
-  const wallet: NonCustodialWallet = {
+  const walletData = {
     id: insertedRow.id,
     userId: insertedRow.user_id || undefined,
     agentId: insertedRow.agent_id || undefined,
     address: insertedRow.address,
     chainId: insertedRow.chain_id as 8453,
-    isCustodial: false,
+    isCustodial: false as const,
     createdAt: new Date(insertedRow.created_at),
   };
 
-  return NonCustodialWalletSchema.parse(wallet);
+  return NonCustodialWalletSchema.parse(walletData) as NonCustodialWallet;
 }
 
 /**
@@ -414,28 +414,28 @@ export async function getWalletForUser(
   if (!row) return null;
 
   if (row.is_custodial) {
-    const wallet: CustodialWallet = {
+    const walletData = {
       id: row.id,
       userId: row.user_id || undefined,
       agentId: row.agent_id || undefined,
       address: row.address,
       chainId: row.chain_id as 8453,
-      isCustodial: true,
+      isCustodial: true as const,
       encryptionAlgorithm: row.encryption_algorithm!,
       createdAt: new Date(row.created_at),
     };
-    return CustodialWalletSchema.parse(wallet);
+    return CustodialWalletSchema.parse(walletData) as CustodialWallet;
   } else {
-    const wallet: NonCustodialWallet = {
+    const walletData = {
       id: row.id,
       userId: row.user_id || undefined,
       agentId: row.agent_id || undefined,
       address: row.address,
       chainId: row.chain_id as 8453,
-      isCustodial: false,
+      isCustodial: false as const,
       createdAt: new Date(row.created_at),
     };
-    return NonCustodialWalletSchema.parse(wallet);
+    return NonCustodialWalletSchema.parse(walletData) as NonCustodialWallet;
   }
 }
 
@@ -451,28 +451,28 @@ export async function getWalletForAgent(
   if (!row) return null;
 
   if (row.is_custodial) {
-    const wallet: CustodialWallet = {
+    const walletData = {
       id: row.id,
       userId: row.user_id || undefined,
       agentId: row.agent_id || undefined,
       address: row.address,
       chainId: row.chain_id as 8453,
-      isCustodial: true,
+      isCustodial: true as const,
       encryptionAlgorithm: row.encryption_algorithm!,
       createdAt: new Date(row.created_at),
     };
-    return CustodialWalletSchema.parse(wallet);
+    return CustodialWalletSchema.parse(walletData) as CustodialWallet;
   } else {
-    const wallet: NonCustodialWallet = {
+    const walletData = {
       id: row.id,
       userId: row.user_id || undefined,
       agentId: row.agent_id || undefined,
       address: row.address,
       chainId: row.chain_id as 8453,
-      isCustodial: false,
+      isCustodial: false as const,
       createdAt: new Date(row.created_at),
     };
-    return NonCustodialWalletSchema.parse(wallet);
+    return NonCustodialWalletSchema.parse(walletData) as NonCustodialWallet;
   }
 }
 
@@ -555,28 +555,28 @@ export async function listWalletsForUser(
 
   return (data as WalletRow[]).map((row) => {
     if (row.is_custodial) {
-      const wallet: CustodialWallet = {
+      const walletData = {
         id: row.id,
         userId: row.user_id || undefined,
         agentId: row.agent_id || undefined,
         address: row.address,
         chainId: row.chain_id as 8453,
-        isCustodial: true,
+        isCustodial: true as const,
         encryptionAlgorithm: row.encryption_algorithm!,
         createdAt: new Date(row.created_at),
       };
-      return CustodialWalletSchema.parse(wallet);
+      return CustodialWalletSchema.parse(walletData) as CustodialWallet;
     } else {
-      const wallet: NonCustodialWallet = {
+      const walletData = {
         id: row.id,
         userId: row.user_id || undefined,
         agentId: row.agent_id || undefined,
         address: row.address,
         chainId: row.chain_id as 8453,
-        isCustodial: false,
+        isCustodial: false as const,
         createdAt: new Date(row.created_at),
       };
-      return NonCustodialWalletSchema.parse(wallet);
+      return NonCustodialWalletSchema.parse(walletData) as NonCustodialWallet;
     }
   });
 }

@@ -126,8 +126,8 @@ describe('Correlation ID Middleware', () => {
     
     try {
       await wrappedHandler(req, res);
-    } catch (error) {
-      // Expected
+    } catch {
+      // Expected error, ignore
     }
     
     expect(res.setHeader).toHaveBeenCalledWith(

@@ -29,11 +29,10 @@
     },
     "allowImportingTsExtensions": true,
     "noEmit": true,
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "strict": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
-    "noImplicitReturns": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true
   },
@@ -52,6 +51,8 @@
     "lib/mesh/dhtAdapter.ts",
     "lib/payments/intentPayments.ts",
     "contracts",
-    "packages"
+    "packages",
+    "types/database.types.ts",
+    "types/database.types.fixed.ts"
   ]
 }

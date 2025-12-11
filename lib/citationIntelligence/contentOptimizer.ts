@@ -284,9 +284,9 @@ function generateHTMLMarkup(
     }
     
     // Check if it's a list (contains bullet points or numbers)
-    if (/^[\-\*•]\s/.test(trimmed) || /^\d+\.\s/.test(trimmed)) {
+    if (/^[-*•]\s/.test(trimmed) || /^\d+\.\s/.test(trimmed)) {
       const items = trimmed.split('\n').map(item => {
-        const cleaned = item.replace(/^[\-\*•]\s/, '').replace(/^\d+\.\s/, '').trim();
+        const cleaned = item.replace(/^[-*•]\s/, '').replace(/^\d+\.\s/, '').trim();
         return `  <li>${escapeHtml(cleaned)}</li>`;
       });
       return `<ul>\n${items.join('\n')}\n</ul>`;
@@ -445,7 +445,7 @@ function generateStructuralRecommendations(
     const trimmed = p.trim();
     return trimmed.length < 100 && !trimmed.endsWith('.');
   });
-  const hasLists = /^[\-\*•]\s/m.test(content) || /^\d+\.\s/m.test(content);
+  const hasLists = /^[-*•]\s/m.test(content) || /^\d+\.\s/m.test(content);
   
   // Heading recommendations
   if (!hasHeadings) {
@@ -1174,7 +1174,7 @@ function extractCitations(content: string): {
   const types = new Set<'numeric' | 'parenthetical' | 'inline'>();
   
   // Numeric citations: [1], [2,3], [1-5]
-  const numericPattern = /\[[\d,\s\-]+\]/g;
+  const numericPattern = /\[[\d,\s-]+\]/g;
   let match;
   while ((match = numericPattern.exec(content)) !== null) {
     citations.push(match[0]);

@@ -14,9 +14,7 @@
  * @module lib/reliability/health
  */
 
-// createClient reserved for future use
-// @ts-expect-error - Reserved for future use
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { SupabaseClient } from '@supabase/supabase-js';
 
 /**
  * Health check status

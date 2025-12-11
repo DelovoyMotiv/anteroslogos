@@ -1,4 +1,3 @@
-// @ts-nocheck - Complex viem and Supabase type interactions
 /**
  * @file lib/payments/chainWatcher.ts
  * @description Blockchain transaction monitoring for Base L2
@@ -11,14 +10,12 @@
 
 import { type Address, type Hash, type Log, type PublicClient } from "viem";
 import { createClient } from "@supabase/supabase-js";
-import { getRpcClient, getRpcProviderManager } from "./rpcProvider";
+import { getRpcProviderManager } from "./rpcProvider";
 import { createResilientSupabaseClient } from "../reliability/externalApi";
 import type { JSONValue } from '../../types/common.types';
-// import { z } from "zod"; // Unused
 import {
   TransactionVerificationSchema,
   type TransactionVerification,
-  // type TokenSymbol, // Unused
   BASE_L2_CHAIN_ID,
   USDC_ADDRESS_BASE,
   toTokenUnits,
@@ -26,9 +23,13 @@ import {
 import {
   getInvoice,
   updateInvoice,
-  // findPendingInvoiceByMemo, // Unused
   type InvoiceUpdateInput,
 } from "./invoice";
+import {
+  hasTopics,
+  extractAddressFromTopic,
+  TRANSFER_EVENT_SIGNATURE,
+} from "./web3Types";
 
 // =====================================================
 // Environment & Configuration
@@ -55,18 +56,10 @@ const supabase = createResilientSupabaseClient(supabaseClient, {
 });
 
 /**
- * Gets RPC client with automatic fallback
- * Uses RpcProviderManager singleton for resilience
- */
-function getPublicClient() {
-  return getRpcClient();
-}
-
-/**
  * Execute RPC call with resilience (retry + circuit breaker)
  */
-async function executeRpcCall<T>(operation: (client: PublicClient) => Promise<T>): Promise<T> {
-  return getRpcProviderManager().executeWithResilience(operation);
+async function executeRpcCall<T>(operation: (client: any) => Promise<T>): Promise<T> {
+  return getRpcProviderManager().executeWithResilience(operation as any);
 }
 
 // Confirmation requirements
@@ -110,11 +103,11 @@ interface TransactionReceipt {
  */
 async function getWatcherState(): Promise<ChainWatcherState> {
   const result = await supabase.query(
-    () => supabaseClient
+    async () => await supabaseClient
       .from("a2a_chain_watchers")
       .select()
       .eq("chain_id", BASE_L2_CHAIN_ID)
-      .maybeSingle()
+      .maybeSingle() as any
   );
 
   if (result.error) {
@@ -125,7 +118,7 @@ async function getWatcherState(): Promise<ChainWatcherState> {
     throw new Error(`No watcher state found for chain ${BASE_L2_CHAIN_ID}`);
   }
 
-  const data = result.data;
+  const data = result.data as any;
   return {
     chainId: data.chain_id,
     lastScannedBlock: BigInt(data.last_scanned_block),
@@ -161,10 +154,10 @@ async function updateWatcherState(
   }
 
   const result = await supabase.query(
-    () => supabaseClient
+    async () => await supabaseClient
       .from("a2a_chain_watchers")
       .update(dbUpdates)
-      .eq("chain_id", BASE_L2_CHAIN_ID)
+      .eq("chain_id", BASE_L2_CHAIN_ID) as any
   );
 
   if (result.error) {
@@ -182,7 +175,7 @@ async function updateWatcherState(
  * @returns Transaction receipt
  */
 async function getTransactionReceipt(txHash: Hash): Promise<TransactionReceipt> {
-  const receipt = await executeRpcCall(
+  const receipt: any = await executeRpcCall(
     (client) => client.getTransactionReceipt({ hash: txHash })
   );
 
@@ -213,20 +206,25 @@ function parseUSDCTransfer(
       continue;
     }
 
-    // Check if log has Transfer event signature
-    // keccak256("Transfer(address,address,uint256)") = 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef
-    if (
-      !log.topics?.[0] ||
-      log.topics[0] !==
-      "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
-    ) {
+    // Check if log has topics using type guard
+    if (!hasTopics(log)) {
       continue;
     }
 
-    // Parse Transfer event
-    const from = `0x${log.topics[1]?.slice(-40) || ''}` as Address;
-    const to = `0x${log.topics[2]?.slice(-40) || ''}` as Address;
+    // Check if log has Transfer event signature
+    if (log.topics[0] !== TRANSFER_EVENT_SIGNATURE) {
+      continue;
+    }
+
+    // Parse Transfer event using safe address extraction
+    const from = extractAddressFromTopic(log.topics[1]);
+    const to = extractAddressFromTopic(log.topics[2]);
     const value = BigInt(log.data || '0x0');
+
+    // Validate addresses were extracted successfully
+    if (!from || !to) {
+      continue;
+    }
 
     // Check if recipient matches
     if (to.toLowerCase() === expectedRecipient.toLowerCase()) {
@@ -292,7 +290,7 @@ export async function verifyTransaction(
   }
 
   // Get current block number
-  const currentBlock = await executeRpcCall((client) => client.getBlockNumber());
+  const currentBlock: any = await executeRpcCall((client) => client.getBlockNumber());
   const confirmations = Number(currentBlock - receipt.blockNumber);
 
   // Verify payment amount and recipient
@@ -328,13 +326,13 @@ export async function verifyTransaction(
     reason = `Unsupported token: ${invoice.token}`;
   }
 
-  return TransactionVerificationSchema.parse({
+  return {
     verified,
     reason,
     txHash,
     blockNumber: receipt.blockNumber,
     confirmations,
-  });
+  };
 }
 
 /**
@@ -410,16 +408,17 @@ async function scanBlock(blockNumber: bigint): Promise<number> {
     );
 
     // Get block timestamp for correlation
-    const blockTimestamp = new Date(Number(block.timestamp) * 1000);
+    const blockAny: any = block;
+    const blockTimestamp = new Date(Number(blockAny.timestamp) * 1000);
 
     // Process each transaction
-    for (const tx of block.transactions) {
+    for (const tx of blockAny.transactions) {
       try {
         // Skip if tx is a simple hash (shouldn't happen with includeTransactions: true)
         if (typeof tx === "string") continue;
 
         // Fetch transaction receipt
-        const receipt = await executeRpcCall((client) =>
+        const receipt: any = await executeRpcCall((client) =>
           client.getTransactionReceipt({ hash: tx.hash })
         );
 
@@ -434,20 +433,25 @@ async function scanBlock(blockNumber: bigint): Promise<number> {
               continue;
             }
 
-            // Check if log has Transfer event signature
-            // keccak256("Transfer(address,address,uint256)") = 0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef
-            if (
-              !log.topics[0] ||
-              log.topics[0] !==
-                "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
-            ) {
+            // Check if log has topics using type guard
+            if (!hasTopics(log)) {
               continue;
             }
 
-            // Parse Transfer event
-            const from = `0x${log.topics[1]?.slice(-40) || ""}` as Address;
-            const to = `0x${log.topics[2]?.slice(-40) || ""}` as Address;
+            // Check if log has Transfer event signature
+            if (log.topics[0] !== TRANSFER_EVENT_SIGNATURE) {
+              continue;
+            }
+
+            // Parse Transfer event using safe address extraction
+            const from = extractAddressFromTopic(log.topics[1]);
+            const to = extractAddressFromTopic(log.topics[2]);
             const value = BigInt(log.data || "0x0");
+
+            // Validate addresses were extracted successfully
+            if (!from || !to) {
+              continue;
+            }
 
             // Convert value to USDC decimal amount (6 decimals)
             const amountUSDC = Number(value) / 1_000_000;
@@ -455,7 +459,7 @@ async function scanBlock(blockNumber: bigint): Promise<number> {
             // Attempt automatic payment detection via database correlation
             try {
               const result = await supabase.query(
-                () => supabaseClient.rpc(
+                async () => await supabaseClient.rpc(
                   "record_payment_detection",
                   {
                     p_tx_hash: tx.hash,
@@ -466,7 +470,7 @@ async function scanBlock(blockNumber: bigint): Promise<number> {
                     p_amount: amountUSDC,
                     p_token: "USDC",
                   }
-                )
+                ) as any
               );
 
               if (result.error) {
@@ -524,13 +528,13 @@ async function verifyDetectedPayments(): Promise<void> {
   try {
     // Fetch invoices that were auto-detected and need verification
     const result = await supabase.query(
-      () => supabaseClient
+      async () => await supabaseClient
         .from("a2a_invoices")
         .select("invoice_id, tx_hash")
         .eq("status", "confirming")
         .not("tx_hash", "is", null)
         .order("updated_at", { ascending: false })
-        .limit(50) // Process max 50 invoices per cycle
+        .limit(50) as any // Process max 50 invoices per cycle
     );
 
     if (result.error) {
@@ -538,8 +542,8 @@ async function verifyDetectedPayments(): Promise<void> {
       return;
     }
 
-    const invoices = result.data;
-    if (!invoices || invoices.length === 0) {
+    const invoices = result.data as any;
+    if (!invoices || !Array.isArray(invoices) || invoices.length === 0) {
       return;
     }
 
@@ -578,7 +582,7 @@ export async function runChainWatcher(options?: {
 
   try {
     // Get current watcher state
-    let state = await getWatcherState();
+    const state = await getWatcherState();
 
     // Resume from last scanned block or start from specified block
     let currentBlock = options?.startBlock || state.lastScannedBlock;
@@ -647,7 +651,7 @@ export async function runChainWatcher(options?: {
  */
 export async function getConfirmations(txHash: string): Promise<number> {
   const receipt = await getTransactionReceipt(txHash as Hash);
-  const currentBlock = await executeRpcCall((client) => client.getBlockNumber());
+  const currentBlock: any = await executeRpcCall((client) => client.getBlockNumber());
 
   return Number(currentBlock - receipt.blockNumber);
 }

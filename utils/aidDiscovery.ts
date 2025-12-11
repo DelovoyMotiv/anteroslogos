@@ -494,7 +494,7 @@ export async function discoverAIDAgent(url: string): Promise<AIDAgentInfo> {
             result.registeredInRegistry = false;
             result.warnings.push('Agent not registered in AID registry - ownership cannot be verified');
           }
-        } catch (error) {
+        } catch {
           result.warnings.push('Failed to check AID registry');
         }
       }

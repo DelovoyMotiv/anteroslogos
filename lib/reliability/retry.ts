@@ -14,9 +14,7 @@
  * @module lib/reliability/retry
  */
 
-// getCorrelationId reserved for future use
-// @ts-expect-error - Reserved for future use
-import { isRetryableError, getCorrelationId } from './errors';
+import { isRetryableError } from './errors';
 
 /**
  * Retry configuration options

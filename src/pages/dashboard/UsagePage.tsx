@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Usage Analytics Page - OpenRouter Style
  * Compact, efficient data visualization with inline charts
@@ -6,7 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../../lib/dashboard/auth-guard';
-import { getDailyUsage, getTopTools, getUCPTRate } from '../../../lib/dashboard/usage-analytics';
+import { getDailyUsage, getTopTools } from '../../../lib/dashboard/usage-analytics';
 import { getSubscription, getUsageStats } from '../../../lib/dashboard/billing-client';
 import { Activity, TrendingUp, Zap, ChevronDown } from 'lucide-react';
 

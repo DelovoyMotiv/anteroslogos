@@ -1,9 +1,3 @@
-/**
- * Database Types
- * TypeScript types generated from PostgreSQL schema
- * Provides full type safety for Supabase queries
- */
-
 export type Json =
   | string
   | number
@@ -12,667 +6,325 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+export type Database = {
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5"
+  }
   public: {
     Tables: {
-      profiles: {
-        Row: {
-          id: string
-          email: string
-          full_name: string | null
-          company_name: string | null
-          industry: string | null
-          website_url: string | null
-          avatar_url: string | null
-          plan_type: 'free' | 'premium' | 'enterprise'
-          stripe_customer_id: string | null
-          subscription_status: 'active' | 'inactive' | 'canceled' | 'past_due'
-          subscription_ends_at: string | null
-          credits_remaining: number
-          total_audits: number
-          created_at: string
-          updated_at: string
-          metadata: Json
-        }
-        Insert: {
-          id: string
-          email: string
-          full_name?: string | null
-          company_name?: string | null
-          industry?: string | null
-          website_url?: string | null
-          avatar_url?: string | null
-          plan_type?: 'free' | 'premium' | 'enterprise'
-          stripe_customer_id?: string | null
-          subscription_status?: 'active' | 'inactive' | 'canceled' | 'past_due'
-          subscription_ends_at?: string | null
-          credits_remaining?: number
-          total_audits?: number
-          created_at?: string
-          updated_at?: string
-          metadata?: Json
-        }
-        Update: {
-          id?: string
-          email?: string
-          full_name?: string | null
-          company_name?: string | null
-          industry?: string | null
-          website_url?: string | null
-          avatar_url?: string | null
-          plan_type?: 'free' | 'premium' | 'enterprise'
-          stripe_customer_id?: string | null
-          subscription_status?: 'active' | 'inactive' | 'canceled' | 'past_due'
-          subscription_ends_at?: string | null
-          credits_remaining?: number
-          total_audits?: number
-          created_at?: string
-          updated_at?: string
-          metadata?: Json
-        }
-      }
-      audits: {
-        Row: {
-          id: string
-          user_id: string | null
-          url: string
-          normalized_url: string
-          domain: string
-          timestamp: string
-          duration_ms: number | null
-          user_agent: string | null
-          ip_address: string | null
-          overall_score: number
-          grade: 'A+' | 'A' | 'B' | 'C' | 'D' | 'F'
-          score_schema_markup: number
-          score_meta_tags: number
-          score_ai_crawlers: number
-          score_eeat: number
-          score_structure: number
-          score_performance: number
-          score_content_quality: number
-          score_citation_potential: number
-          score_technical_seo: number
-          score_link_analysis: number
-          schema_findings: Json
-          meta_findings: Json
-          crawler_findings: Json
-          eeat_findings: Json
-          structure_findings: Json
-          performance_findings: Json
-          content_findings: Json
-          citation_findings: Json
-          technical_findings: Json
-          link_findings: Json
-          ai_recommendations: Json
-          priority_actions: Json
-          has_organization_schema: boolean
-          has_person_schema: boolean
-          has_article_schema: boolean
-          has_breadcrumb_schema: boolean
-          has_author_markup: boolean
-          has_eeat_signals: boolean
-          robots_txt_allows_ai: boolean
-          is_public: boolean
-          anonymized_domain: string | null
-          created_at: string
-          updated_at: string
-          deleted_at: string | null
-        }
-        Insert: {
-          id?: string
-          user_id?: string | null
-          url: string
-          normalized_url: string
-          domain: string
-          timestamp?: string
-          duration_ms?: number | null
-          user_agent?: string | null
-          ip_address?: string | null
-          overall_score: number
-          grade: 'A+' | 'A' | 'B' | 'C' | 'D' | 'F'
-          score_schema_markup?: number
-          score_meta_tags?: number
-          score_ai_crawlers?: number
-          score_eeat?: number
-          score_structure?: number
-          score_performance?: number
-          score_content_quality?: number
-          score_citation_potential?: number
-          score_technical_seo?: number
-          score_link_analysis?: number
-          schema_findings?: Json
-          meta_findings?: Json
-          crawler_findings?: Json
-          eeat_findings?: Json
-          structure_findings?: Json
-          performance_findings?: Json
-          content_findings?: Json
-          citation_findings?: Json
-          technical_findings?: Json
-          link_findings?: Json
-          ai_recommendations?: Json
-          priority_actions?: Json
-          has_organization_schema?: boolean
-          has_person_schema?: boolean
-          has_article_schema?: boolean
-          has_breadcrumb_schema?: boolean
-          has_author_markup?: boolean
-          has_eeat_signals?: boolean
-          robots_txt_allows_ai?: boolean
-          is_public?: boolean
-          anonymized_domain?: string | null
-          created_at?: string
-          updated_at?: string
-          deleted_at?: string | null
-        }
-        Update: {
-          id?: string
-          user_id?: string | null
-          url?: string
-          normalized_url?: string
-          domain?: string
-          timestamp?: string
-          duration_ms?: number | null
-          user_agent?: string | null
-          ip_address?: string | null
-          overall_score?: number
-          grade?: 'A+' | 'A' | 'B' | 'C' | 'D' | 'F'
-          score_schema_markup?: number
-          score_meta_tags?: number
-          score_ai_crawlers?: number
-          score_eeat?: number
-          score_structure?: number
-          score_performance?: number
-          score_content_quality?: number
-          score_citation_potential?: number
-          score_technical_seo?: number
-          score_link_analysis?: number
-          schema_findings?: Json
-          meta_findings?: Json
-          crawler_findings?: Json
-          eeat_findings?: Json
-          structure_findings?: Json
-          performance_findings?: Json
-          content_findings?: Json
-          citation_findings?: Json
-          technical_findings?: Json
-          link_findings?: Json
-          ai_recommendations?: Json
-          priority_actions?: Json
-          has_organization_schema?: boolean
-          has_person_schema?: boolean
-          has_article_schema?: boolean
-          has_breadcrumb_schema?: boolean
-          has_author_markup?: boolean
-          has_eeat_signals?: boolean
-          robots_txt_allows_ai?: boolean
-          is_public?: boolean
-          anonymized_domain?: string | null
-          created_at?: string
-          updated_at?: string
-          deleted_at?: string | null
-        }
-      }
-      global_insights: {
-        Row: {
-          id: string
-          insight_type: 'industry' | 'score_range' | 'schema_type' | 'best_practices' | 'trends'
-          segment: string
-          timeframe: '7d' | '30d' | '90d' | 'all'
-          total_audits: number
-          average_score: number | null
-          median_score: number | null
-          avg_schema_score: number | null
-          avg_eeat_score: number | null
-          avg_content_score: number | null
-          avg_technical_score: number | null
-          organization_schema_rate: number | null
-          person_schema_rate: number | null
-          eeat_signals_rate: number | null
-          ai_crawler_allowed_rate: number | null
-          top_scoring_features: Json
-          common_issues: Json
-          computed_at: string
-          sample_size: number
-          confidence_level: number | null
-          expires_at: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          insight_type: 'industry' | 'score_range' | 'schema_type' | 'best_practices' | 'trends'
-          segment: string
-          timeframe: '7d' | '30d' | '90d' | 'all'
-          total_audits?: number
-          average_score?: number | null
-          median_score?: number | null
-          avg_schema_score?: number | null
-          avg_eeat_score?: number | null
-          avg_content_score?: number | null
-          avg_technical_score?: number | null
-          organization_schema_rate?: number | null
-          person_schema_rate?: number | null
-          eeat_signals_rate?: number | null
-          ai_crawler_allowed_rate?: number | null
-          top_scoring_features?: Json
-          common_issues?: Json
-          computed_at?: string
-          sample_size: number
-          confidence_level?: number | null
-          expires_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          insight_type?: 'industry' | 'score_range' | 'schema_type' | 'best_practices' | 'trends'
-          segment?: string
-          timeframe?: '7d' | '30d' | '90d' | 'all'
-          total_audits?: number
-          average_score?: number | null
-          median_score?: number | null
-          avg_schema_score?: number | null
-          avg_eeat_score?: number | null
-          avg_content_score?: number | null
-          avg_technical_score?: number | null
-          organization_schema_rate?: number | null
-          person_schema_rate?: number | null
-          eeat_signals_rate?: number | null
-          ai_crawler_allowed_rate?: number | null
-          top_scoring_features?: Json
-          common_issues?: Json
-          computed_at?: string
-          sample_size?: number
-          confidence_level?: number | null
-          expires_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      audit_alerts: {
-        Row: {
-          id: string
-          user_id: string
-          audit_id: string
-          alert_type: 'score_drop' | 'critical_issue' | 'improvement' | 'anomaly'
-          severity: 'low' | 'medium' | 'high' | 'critical'
-          title: string
-          message: string
-          category: string | null
-          metadata: Json
-          is_read: boolean
-          is_resolved: boolean
-          resolved_at: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          audit_id: string
-          alert_type: 'score_drop' | 'critical_issue' | 'improvement' | 'anomaly'
-          severity: 'low' | 'medium' | 'high' | 'critical'
-          title: string
-          message: string
-          category?: string | null
-          metadata?: Json
-          is_read?: boolean
-          is_resolved?: boolean
-          resolved_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          audit_id?: string
-          alert_type?: 'score_drop' | 'critical_issue' | 'improvement' | 'anomaly'
-          severity?: 'low' | 'medium' | 'high' | 'critical'
-          title?: string
-          message?: string
-          category?: string | null
-          metadata?: Json
-          is_read?: boolean
-          is_resolved?: boolean
-          resolved_at?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      ml_models: {
-        Row: {
-          id: string
-          model_name: string
-          version: string
-          features: Json
-          hyperparameters: Json
-          precision: number | null
-          recall: number | null
-          f1_score: number | null
-          auc: number | null
-          model_path: string | null
-          model_size_bytes: number | null
-          status: 'testing' | 'active' | 'archived'
-          trained_at: string
-          trained_by: string | null
-          training_data_size: number | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          model_name: string
-          version: string
-          features: Json
-          hyperparameters?: Json
-          precision?: number | null
-          recall?: number | null
-          f1_score?: number | null
-          auc?: number | null
-          model_path?: string | null
-          model_size_bytes?: number | null
-          status?: 'testing' | 'active' | 'archived'
-          trained_at: string
-          trained_by?: string | null
-          training_data_size?: number | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          model_name?: string
-          version?: string
-          features?: Json
-          hyperparameters?: Json
-          precision?: number | null
-          recall?: number | null
-          f1_score?: number | null
-          auc?: number | null
-          model_path?: string | null
-          model_size_bytes?: number | null
-          status?: 'testing' | 'active' | 'archived'
-          trained_at?: string
-          trained_by?: string | null
-          training_data_size?: number | null
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      kg_entities: {
-        Row: {
-          id: string
-          user_id: string | null
-          url: string
-          entity_name: string
-          entity_type: 'Person' | 'Organization' | 'Product' | 'Event' | 'Place' | 'Concept' | 'CreativeWork' | 'Thing'
-          properties: Json
-          authority_score: number | null
-          relationship_density: number | null
-          claim_evidence: number | null
-          external_validation: number | null
-          temporal_consistency: number | null
-          competitive_percentile: number | null
-          mentions_count: number
-          first_seen: string
-          last_seen: string
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id?: string | null
-          url: string
-          entity_name: string
-          entity_type: 'Person' | 'Organization' | 'Product' | 'Event' | 'Place' | 'Concept' | 'CreativeWork' | 'Thing'
-          properties?: Json
-          authority_score?: number | null
-          relationship_density?: number | null
-          claim_evidence?: number | null
-          external_validation?: number | null
-          temporal_consistency?: number | null
-          competitive_percentile?: number | null
-          mentions_count?: number
-          first_seen?: string
-          last_seen?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string | null
-          url?: string
-          entity_name?: string
-          entity_type?: 'Person' | 'Organization' | 'Product' | 'Event' | 'Place' | 'Concept' | 'CreativeWork' | 'Thing'
-          properties?: Json
-          authority_score?: number | null
-          relationship_density?: number | null
-          claim_evidence?: number | null
-          external_validation?: number | null
-          temporal_consistency?: number | null
-          competitive_percentile?: number | null
-          mentions_count?: number
-          first_seen?: string
-          last_seen?: string
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      kg_relationships: {
-        Row: {
-          id: string
-          user_id: string | null
-          url: string
-          source_entity_id: string
-          target_entity_id: string
-          relationship_type: string
-          properties: Json
-          strength: number | null
-          confidence: number | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id?: string | null
-          url: string
-          source_entity_id: string
-          target_entity_id: string
-          relationship_type: string
-          properties?: Json
-          strength?: number | null
-          confidence?: number | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string | null
-          url?: string
-          source_entity_id?: string
-          target_entity_id?: string
-          relationship_type?: string
-          properties?: Json
-          strength?: number | null
-          confidence?: number | null
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      billing_ledger: {
-        Row: {
-          id: string
-          user_id: string
-          amount: number
-          event_type: 'DEPOSIT_STRIPE' | 'DEPOSIT_CRYPTO' | 'MIGRATION_CREDIT' | 'SPEND_API' | 'SPEND_AUDIT' | 'SPEND_CONSENSUS' | 'REWARD_CONTRIBUTION'
-          description: string
-          metadata: Json
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          user_id: string
-          amount: number
-          event_type: 'DEPOSIT_STRIPE' | 'DEPOSIT_CRYPTO' | 'MIGRATION_CREDIT' | 'SPEND_API' | 'SPEND_AUDIT' | 'SPEND_CONSENSUS' | 'REWARD_CONTRIBUTION'
-          description: string
-          metadata?: Json
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string
-          amount?: number
-          event_type?: 'DEPOSIT_STRIPE' | 'DEPOSIT_CRYPTO' | 'MIGRATION_CREDIT' | 'SPEND_API' | 'SPEND_AUDIT' | 'SPEND_CONSENSUS' | 'REWARD_CONTRIBUTION'
-          description?: string
-          metadata?: Json
-          created_at?: string
-        }
-      }
-      user_balances: {
-        Row: {
-          user_id: string
-          balance: number
-          last_transaction_id: string | null
-          last_updated: string
-        }
-        Insert: {
-          user_id: string
-          balance?: number
-          last_transaction_id?: string | null
-          last_updated?: string
-        }
-        Update: {
-          user_id?: string
-          balance?: number
-          last_transaction_id?: string | null
-          last_updated?: string
-        }
-      }
-      credit_packages: {
-        Row: {
-          id: string
-          name: string
-          ccc_amount: number
-          usd_cost: number
-          cost_per_credit: number
-          stripe_price_id: string | null
-          is_active: boolean
-          display_order: number
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          ccc_amount: number
-          usd_cost: number
-          stripe_price_id?: string | null
-          is_active?: boolean
-          display_order?: number
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          ccc_amount?: number
-          usd_cost?: number
-          stripe_price_id?: string | null
-          is_active?: boolean
-          display_order?: number
-          created_at?: string
-        }
-      }
-      webhook_retry_queue: {
-        Row: {
-          id: string
-          event_id: string
-          event_type: string
-          event_data: Json
-          attempt_count: number
-          max_attempts: number
-          next_retry_at: string
-          last_error: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          event_id: string
-          event_type: string
-          event_data: Json
-          attempt_count?: number
-          max_attempts?: number
-          next_retry_at: string
-          last_error?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          event_id?: string
-          event_type?: string
-          event_data?: Json
-          attempt_count?: number
-          max_attempts?: number
-          next_retry_at?: string
-          last_error?: string | null
-          created_at?: string
-          updated_at?: string
-        }
+      [key: string]: {
+        Row: Record<string, any>
+        Insert: Record<string, any>
+        Update: Record<string, any>
+        Relationships: any[]
       }
     }
     Views: {
-      user_audit_summary: {
-        Row: {
-          user_id: string | null
-          total_audits: number | null
-          avg_score: number | null
-          best_score: number | null
-          worst_score: number | null
-          unique_domains: number | null
-          last_audit_at: string | null
-        }
-      }
-      domain_trends: {
-        Row: {
-          normalized_url: string | null
-          domain: string | null
-          audit_count: number | null
-          avg_score: number | null
-          score_range: number | null
-          score_history: Json | null
-        }
-      }
-      global_stats: {
-        Row: {
-          total_users: number | null
-          total_audits: number | null
-          avg_score: number | null
-          org_schema_count: number | null
-          eeat_count: number | null
-          ai_friendly_count: number | null
-          computed_at: string | null
-        }
+      [key: string]: {
+        Row: Record<string, any>
+        Relationships: any[]
       }
     }
     Functions: {
-      anonymize_domain: {
-        Args: { input_domain: string }
-        Returns: string
-      }
-      refresh_global_stats: {
-        Args: Record<string, never>
-        Returns: void
+      [key: string]: {
+        Args: Record<string, any>
+        Returns: any
       }
     }
-    Enums: {
-      plan_type: 'free' | 'premium' | 'enterprise'
-      subscription_status: 'active' | 'inactive' | 'canceled' | 'past_due'
-      grade: 'A+' | 'A' | 'B' | 'C' | 'D' | 'F'
-      insight_type: 'industry' | 'score_range' | 'schema_type' | 'best_practices' | 'trends'
-      timeframe: '7d' | '30d' | '90d' | 'all'
-      alert_type: 'score_drop' | 'critical_issue' | 'improvement' | 'anomaly'
-      severity: 'low' | 'medium' | 'high' | 'critical'
-    }
+    Enums: { [_ in never]: never }
+    CompositeTypes: { [_ in never]: never }
   }
+}
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<T extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"]) | { schema: keyof DatabaseWithoutInternals }, N extends T extends { schema: keyof DatabaseWithoutInternals } ? keyof (DatabaseWithoutInternals[T["schema"]]["Tables"] & DatabaseWithoutInternals[T["schema"]]["Views"]) : never = never> = T extends { schema: keyof DatabaseWithoutInternals } ? (DatabaseWithoutInternals[T["schema"]]["Tables"] & DatabaseWithoutInternals[T["schema"]]["Views"])[N] extends { Row: infer R } ? R : never : T extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"]) ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[T] extends { Row: infer R } ? R : never : never
+
+export type TablesInsert<T extends keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals }, N extends T extends { schema: keyof DatabaseWithoutInternals } ? keyof DatabaseWithoutInternals[T["schema"]]["Tables"] : never = never> = T extends { schema: keyof DatabaseWithoutInternals } ? DatabaseWithoutInternals[T["schema"]]["Tables"][N] extends { Insert: infer I } ? I : never : T extends keyof DefaultSchema["Tables"] ? DefaultSchema["Tables"][T] extends { Insert: infer I } ? I : never : never
+
+export type TablesUpdate<T extends keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals }, N extends T extends { schema: keyof DatabaseWithoutInternals } ? keyof DatabaseWithoutInternals[T["schema"]]["Tables"] : never = never> = T extends { schema: keyof DatabaseWithoutInternals } ? DatabaseWithoutInternals[T["schema"]]["Tables"][N] extends { Update: infer U } ? U : never : T extends keyof DefaultSchema["Tables"] ? DefaultSchema["Tables"][T] extends { Update: infer U } ? U : never : never
+
+export type Enums<T extends keyof DefaultSchema["Enums"] | { schema: keyof DatabaseWithoutInternals }, N extends T extends { schema: keyof DatabaseWithoutInternals } ? keyof DatabaseWithoutInternals[T["schema"]]["Enums"] : never = never> = T extends { schema: keyof DatabaseWithoutInternals } ? DatabaseWithoutInternals[T["schema"]]["Enums"][N] : T extends keyof DefaultSchema["Enums"] ? DefaultSchema["Enums"][T] : never
+
+export type CompositeTypes<T extends keyof DefaultSchema["CompositeTypes"] | { schema: keyof DatabaseWithoutInternals }, N extends T extends { schema: keyof DatabaseWithoutInternals } ? keyof DatabaseWithoutInternals[T["schema"]]["CompositeTypes"] : never = never> = T extends { schema: keyof DatabaseWithoutInternals } ? DatabaseWithoutInternals[T["schema"]]["CompositeTypes"][N] : T extends keyof DefaultSchema["CompositeTypes"] ? DefaultSchema["CompositeTypes"][T] : never
+
+export const Constants = {
+  public: {
+    Enums: {},
+  },
+} as const
+
+// =====================================================
+// EXPLICIT ROW TYPE INTERFACES
+// =====================================================
+// These interfaces provide explicit typing for database rows,
+// ensuring type safety throughout the application.
+
+/**
+ * Agent Key row from agent_keys table
+ */
+export interface AgentKeyRow {
+  id: string;
+  user_id: string;
+  tenant_id?: string;
+  aid_registry_id?: string;
+  name: string;
+  aid_uri: string;
+  public_key: string;
+  key_algorithm: string;
+  permissions: string[];
+  metadata: Json;
+  revoked: boolean;
+  revoked_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * API Key row from api_keys table
+ */
+export interface APIKeyRow {
+  id: string;
+  user_id: string;
+  name: string;
+  key_prefix: string;
+  key_hash: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  last_used_at: string | null;
+  rate_limit_per_minute: number;
+  allowed_origins: string[] | null;
+  expires_at: string | null;
+  scopes: string[];
+  metadata: Json | null;
+  tenant_id: string | null;
+}
+
+/**
+ * Credit Package row from credit_packages table
+ */
+export interface CreditPackageRow {
+  id: string;
+  name: string;
+  ccc_amount: number;
+  usd_cost: number;
+  bonus_percentage: number;
+  is_active: boolean;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+  description: string | null;
+}
+
+/**
+ * Usage Event row from usage_events table
+ */
+export interface UsageEventRow {
+  id: string;
+  user_id: string;
+  api_key_id: string;
+  tool_name: string;
+  status: 'success' | 'error';
+  error_message: string | null;
+  response_time_ms: number;
+  tokens_used: number | null;
+  cost_ccc: number;
+  metadata: Json | null;
+  created_at: string;
+  tenant_id: string | null;
+  ucpt_hash: string | null;
+}
+
+/**
+ * Daily Usage aggregated statistics
+ */
+export interface DailyUsageRow {
+  date: string;
+  user_id: string;
+  total_calls: number;
+  successful_calls: number;
+  failed_calls: number;
+  total_tokens: number;
+  total_cost_ccc: number;
+  unique_tools: number;
+  avg_response_time_ms: number;
+  p95_response_time_ms: number;
+  p99_response_time_ms: number;
+}
+
+/**
+ * Wallet row from a2a_wallets table
+ */
+export interface WalletRow {
+  id: string;
+  user_id: string;
+  address: string;
+  chain_id: number;
+  is_custodial: boolean;
+  agent_id: string | null;
+  encrypted_private_key: string | null;
+  encryption_algorithm: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Ledger Entry row from a2a_ledger table
+ */
+export interface LedgerRow {
+  id: string;
+  user_id: string;
+  wallet_id: string;
+  amount: number;
+  entry_type: 'deposit' | 'debit' | 'refund';
+  balance_after: number;
+  tx_hash: string | null;
+  reference_type: string | null;
+  reference_id: string | null;
+  description: string | null;
+  token: 'USDC' | 'ETH';
+  created_at: string;
+}
+
+/**
+ * Invoice row from a2a_invoices table
+ */
+export interface InvoiceRow {
+  id: string;
+  invoice_id: string;
+  user_id: string;
+  subscription_id: string | null;
+  amount_due: number;
+  amount_paid: number;
+  token: 'USDC';
+  status: 'pending' | 'paid' | 'expired';
+  due_date: string;
+  paid_at: string | null;
+  tx_hash: string | null;
+  wallet_address: string | null;
+  metadata: Json | null;
+  created_at: string;
+  updated_at: string;
+  expires_at: string;
+}
+
+/**
+ * Subscription Plan row from subscription_plans table
+ */
+export interface SubscriptionPlanRow {
+  id: string;
+  plan_name: 'free' | 'starter' | 'pro' | 'enterprise';
+  display_name: string;
+  description: string | null;
+  price_usd: number;
+  billing_cycle_days: number;
+  audit_quota: number;
+  features: string[];
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * User Subscription row from user_subscriptions table
+ */
+export interface UserSubscriptionRow {
+  id: string;
+  user_id: string;
+  plan_id: string;
+  status: 'active' | 'cancelled' | 'expired' | 'pending_payment';
+  current_period_start: string;
+  current_period_end: string;
+  cancel_at_period_end: boolean;
+  cancelled_at: string | null;
+  billing_wallet_address: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Subscription Invoice row from subscription_invoices table
+ */
+export interface SubscriptionInvoiceRow {
+  id: string;
+  invoice_id: string;
+  subscription_id: string;
+  user_id: string;
+  amount_due: number;
+  amount_paid: number;
+  token: 'USDC';
+  status: 'pending' | 'paid' | 'expired';
+  due_date: string;
+  paid_at: string | null;
+  tx_hash: string | null;
+  wallet_address: string | null;
+  payment_method: string | null;
+  stripe_invoice_id: string | null;
+  metadata: Json | null;
+  created_at: string;
+  updated_at: string;
+  expires_at: string;
+}
+
+/**
+ * Subscription Usage Log row from subscription_usage_logs table
+ */
+export interface SubscriptionUsageLogRow {
+  id: string;
+  subscription_id: string;
+  user_id: string;
+  event_type: 'audit_completed' | 'audit_failed';
+  resource_type: 'geo_audit';
+  audit_id: string | null;
+  cost_units: number;
+  quota_remaining: number;
+  metadata: Json | null;
+  timestamp: string;
+}
+
+/**
+ * Tenant Member row from tenant_members table
+ */
+export interface TenantMemberRow {
+  id: string;
+  tenant_id: string;
+  user_id: string;
+  role: string;
+  created_at: string;
+  updated_at: string;
+  tenants: {
+    slug: string;
+  } | null;
+}
+
+/**
+ * USDC Subscription row from usdc_subscriptions table
+ */
+export interface USDCSubscriptionRow {
+  subscription_id: string;
+  user_id: string;
+  plan_tier: 'free' | 'starter' | 'pro' | 'enterprise';
+  status: 'active' | 'cancelled' | 'expired';
+  wallet_address: string;
+  current_period_start: string;
+  current_period_end: string;
+  created_at: string;
+  updated_at: string;
+  auto_renew: boolean;
+  payment_token: 'USDC';
+}
+
+/**
+ * Usage Stats aggregated view
+ */
+export interface UsageStatsRow {
+  total_calls: number;
+  successful_calls: number;
+  failed_calls: number;
+  total_tokens: number;
+  total_cost_ccc: number;
+  unique_tools: number;
+  avg_response_time_ms: number;
 }

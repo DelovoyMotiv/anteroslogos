@@ -2677,7 +2677,7 @@ print(f"GEO Score: {audit['score']}")`
                     {
                       language: 'bash',
                       label: 'HTTP (BM25/Fuse.js)',
-                      code: `curl \"https://anoteroslogos.com/api/tools/search?query=audit&limit=3\"`
+                      code: `curl "https://anoteroslogos.com/api/tools/search?query=audit&limit=3"`
                     },
                     {
                       language: 'typescript',

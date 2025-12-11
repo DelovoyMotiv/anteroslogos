@@ -1,10 +1,12 @@
-// @ts-nocheck
 /**
  * Usage Analytics
  * Query aggregations and real-time usage statistics
  */
 
 import { supabase, isSupabaseConfigured } from '../supabase';
+import { UsageEventSchema, DailyUsageSchema, UsageStatsSchema } from './schemas';
+import { selectQuery } from '../database/queryHelpers';
+import { isDatabaseRow } from '../utils/typeGuards';
 
 export interface UsageStats {
   total_calls: number;
@@ -128,14 +130,14 @@ async function getUsageStatsManual(
     };
   }
 
-  const { data: events } = await supabase
+  const { data: rawEvents } = await supabase
     .from('usage_events')
     .select('*')
     .eq('user_id', userId)
     .gte('timestamp', startDate.toISOString())
     .lte('timestamp', endDate.toISOString());
 
-  if (!events || events.length === 0) {
+  if (!rawEvents || rawEvents.length === 0) {
     return {
       total_calls: 0,
       successful_calls: 0,
@@ -149,6 +151,16 @@ async function getUsageStatsManual(
     };
   }
 
+  // Type guard to ensure events have required properties
+  const events = rawEvents.filter((e): e is Record<string, unknown> & {
+    status: string;
+    tokens_used?: number;
+    cost_usd?: number;
+    tool_name: string;
+    ucpt_hash?: string | null;
+    duration_ms?: number;
+  } => isDatabaseRow(e, ['status', 'tool_name']));
+
   const stats = {
     total_calls: events.length,
     successful_calls: events.filter(e => e.status === 'success').length,
@@ -157,7 +169,7 @@ async function getUsageStatsManual(
     total_tokens: events.reduce((sum, e) => sum + (e.tokens_used || 0), 0),
     total_cost: events.reduce((sum, e) => sum + parseFloat(String(e.cost_usd || 0)), 0),
     unique_tools: new Set(events.map(e => e.tool_name)).size,
-    ucpt_verified_calls: events.filter(e => e.ucpt_hash).length,
+    ucpt_verified_calls: events.filter(e => e.ucpt_hash && e.ucpt_hash !== null).length,
     avg_duration_ms: Math.round(
       events.reduce((sum, e) => sum + (e.duration_ms || 0), 0) / events.length
     ),
@@ -196,7 +208,20 @@ export async function getDailyUsage(
       return await getDailyUsageManual(userId, days);
     }
 
-    return data || [];
+    // Validate and parse the data
+    if (!data) return [];
+    
+    const parsed = data
+      .map(row => {
+        try {
+          return DailyUsageSchema.parse(row);
+        } catch {
+          return null;
+        }
+      })
+      .filter((item): item is DailyUsage => item !== null);
+    
+    return parsed;
   } catch (error) {
     console.error('getDailyUsage error:', error);
     return { error: 'Failed to fetch daily usage' };
@@ -218,16 +243,22 @@ async function getDailyUsageManual(
   const startDate = new Date();
   startDate.setDate(startDate.getDate() - days);
 
-  const { data: events } = await supabase
+  const { data: rawEvents } = await supabase
     .from('usage_events')
     .select('*')
     .eq('user_id', userId)
     .gte('timestamp', startDate.toISOString())
     .order('timestamp', { ascending: false });
 
-  if (!events || events.length === 0) {
+  if (!rawEvents || rawEvents.length === 0) {
     return [];
   }
+
+  // Type guard to ensure events have required properties
+  const events = rawEvents.filter((e): e is UsageEvent & {
+    timestamp: string;
+    ucpt_hash?: string | null;
+  } => isDatabaseRow(e, ['timestamp', 'status', 'tool_name'])) as UsageEvent[];
 
   // Group by date
   const grouped = new Map<string, UsageEvent[]>();
@@ -251,7 +282,10 @@ async function getDailyUsageManual(
       total_tokens: dayEvents.reduce((sum, e) => sum + (e.tokens_used || 0), 0),
       total_cost: dayEvents.reduce((sum, e) => sum + parseFloat(String(e.cost_usd || 0)), 0),
       unique_tools: new Set(dayEvents.map(e => e.tool_name)).size,
-      ucpt_verified_calls: dayEvents.filter(e => e.ucpt_hash).length,
+      ucpt_verified_calls: dayEvents.filter(e => {
+        const evt = e as unknown as Record<string, unknown>;
+        return evt.ucpt_hash && evt.ucpt_hash !== null;
+      }).length,
       avg_duration_ms: Math.round(
         dayEvents.reduce((sum, e) => sum + (e.duration_ms || 0), 0) / dayEvents.length
       ),
@@ -347,7 +381,20 @@ export async function getRecentUsage(
       return { error: 'Failed to fetch recent usage' };
     }
 
-    return events || [];
+    // Validate and parse the events
+    if (!events) return [];
+    
+    const parsed = events
+      .map(row => {
+        try {
+          return UsageEventSchema.parse(row);
+        } catch {
+          return null;
+        }
+      })
+      .filter((item): item is UsageEvent => item !== null);
+    
+    return parsed;
   } catch (error) {
     console.error('getRecentUsage error:', error);
     return { error: 'Failed to fetch recent usage' };
@@ -382,14 +429,14 @@ export async function getAPIKeyUsage(
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
-    const { data: events } = await supabase
+    const { data: rawEvents } = await supabase
       .from('usage_events')
       .select('*')
       .eq('user_id', userId)
       .eq('api_key_id', apiKeyId)
       .gte('timestamp', startDate.toISOString());
 
-    if (!events || events.length === 0) {
+    if (!rawEvents || rawEvents.length === 0) {
       return {
         total_calls: 0,
         successful_calls: 0,
@@ -403,6 +450,16 @@ export async function getAPIKeyUsage(
       };
     }
 
+    // Type guard to ensure events have required properties
+    const events = rawEvents.filter((e): e is Record<string, unknown> & {
+      status: string;
+      tokens_used?: number;
+      cost_usd?: number;
+      tool_name: string;
+      ucpt_hash?: string | null;
+      duration_ms?: number;
+    } => isDatabaseRow(e, ['status', 'tool_name']));
+
     return {
       total_calls: events.length,
       successful_calls: events.filter(e => e.status === 'success').length,
@@ -411,7 +468,7 @@ export async function getAPIKeyUsage(
       total_tokens: events.reduce((sum, e) => sum + (e.tokens_used || 0), 0),
       total_cost: events.reduce((sum, e) => sum + parseFloat(String(e.cost_usd || 0)), 0),
       unique_tools: new Set(events.map(e => e.tool_name)).size,
-      ucpt_verified_calls: events.filter(e => e.ucpt_hash).length,
+      ucpt_verified_calls: events.filter(e => e.ucpt_hash && e.ucpt_hash !== null).length,
       avg_duration_ms: Math.round(
         events.reduce((sum, e) => sum + (e.duration_ms || 0), 0) / events.length
       ),
@@ -488,17 +545,22 @@ export async function getUCPTRate(
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
 
-    const { data: events } = await supabase
+    const { data: rawEvents } = await supabase
       .from('usage_events')
       .select('ucpt_hash')
       .eq('user_id', userId)
       .gte('timestamp', startDate.toISOString());
 
-    if (!events || events.length === 0) {
+    if (!rawEvents || rawEvents.length === 0) {
       return 0;
     }
 
-    const verifiedCount = events.filter(e => e.ucpt_hash).length;
+    // Type guard to ensure events have ucpt_hash property
+    const events = rawEvents.filter((e): e is Record<string, unknown> & {
+      ucpt_hash: string | null;
+    } => typeof e === 'object' && e !== null && 'ucpt_hash' in e);
+
+    const verifiedCount = events.filter(e => e.ucpt_hash !== null).length;
     return Math.round((verifiedCount / events.length) * 100);
   } catch (error) {
     console.error('getUCPTRate error:', error);

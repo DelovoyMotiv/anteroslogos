@@ -258,7 +258,7 @@ export async function getCitationIntelligenceStatus(): Promise<{
         },
       },
     };
-  } catch (error) {
+  } catch {
     return {
       healthy: false,
       components: {

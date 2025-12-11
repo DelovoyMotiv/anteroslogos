@@ -365,7 +365,7 @@ export function useModal(): {
 
   const open = React.useCallback(() => setIsOpen(true), []);
   const close = React.useCallback(() => setIsOpen(false), []);
-  // @ts-ignore - React setState functional update
+  // @ts-expect-error - React setState functional update type inference
   const toggle = React.useCallback(() => setIsOpen(prev => !prev), []);
 
   return { isOpen, open, close, toggle };

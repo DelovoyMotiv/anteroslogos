@@ -33,7 +33,6 @@ export const handlerWithMiddleware = withMetrics(async function(req: VercelReque
 
 // Example 2: Manual metrics tracking
 export async function handlerManual(req: VercelRequest, res: VercelResponse) {
-  // @ts-expect-error - Reserved for future timing implementation
   const startTime = Date.now();
   
   try {

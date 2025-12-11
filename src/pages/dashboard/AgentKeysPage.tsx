@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Agent Keys Management Page
  * Generate, list, revoke Ed25519 agent keypairs with AID protocol support
@@ -7,12 +6,12 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../../lib/dashboard/auth-guard';
 import { listAgentKeys, type AgentKey } from '../../../lib/dashboard/agent-keys-client';
-import { Plus, Download, Trash2, Copy, Key, Shield } from 'lucide-react';
+import { Plus, Trash2, Copy, Key, Shield } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '../../../lib/supabase';
 
 export function AgentKeysPage() {
-  const { user } = useAuth();
+  useAuth();
   const [keys, setKeys] = useState<AgentKey[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -178,7 +177,7 @@ export function AgentKeysPage() {
                     <div className="flex items-center space-x-2">
                       <Key className="w-4 h-4 text-gray-400" />
                       <span className="text-sm font-medium text-gray-900 dark:text-white">
-                        {key.agent_name}
+                        {key.name}
                       </span>
                     </div>
                   </td>

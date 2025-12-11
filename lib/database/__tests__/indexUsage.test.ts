@@ -129,7 +129,7 @@ describe('Database Index Usage', () => {
 
   describe('Index recommendation validation', () => {
     it('should recommend B-tree index for WHERE clause columns', () => {
-      const query = 'SELECT * FROM audits WHERE user_id = $1 AND deleted_at IS NULL';
+      // Example query context: SELECT * FROM audits WHERE user_id = $1 AND deleted_at IS NULL
       const recommendation = {
         table: 'audits',
         columns: ['user_id', 'deleted_at'],
@@ -142,7 +142,7 @@ describe('Database Index Usage', () => {
     });
 
     it('should recommend GIN index for JSONB columns', () => {
-      const query = 'SELECT * FROM audits WHERE schema_findings @> $1';
+      // Example query context: SELECT * FROM audits WHERE schema_findings @> $1
       const recommendation = {
         table: 'audits',
         columns: ['schema_findings'],
@@ -155,7 +155,7 @@ describe('Database Index Usage', () => {
     });
 
     it('should recommend composite index for multi-column queries', () => {
-      const query = 'SELECT * FROM audits WHERE user_id = $1 ORDER BY timestamp DESC';
+      // Example query context: SELECT * FROM audits WHERE user_id = $1 ORDER BY timestamp DESC
       const recommendation = {
         table: 'audits',
         columns: ['user_id', 'timestamp'],
@@ -167,7 +167,7 @@ describe('Database Index Usage', () => {
     });
 
     it('should recommend partial index for filtered queries', () => {
-      const query = 'SELECT * FROM audits WHERE deleted_at IS NULL';
+      // Example query context: SELECT * FROM audits WHERE deleted_at IS NULL
       const recommendation = {
         table: 'audits',
         columns: ['deleted_at'],

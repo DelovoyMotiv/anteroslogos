@@ -26,7 +26,6 @@ import { BYZANTINE_PARAMS } from '../../types/byzantine.types';
  */
 export class CircularDependencyDetector {
   // Node ID for logging and error reporting (currently unused but reserved for future logging)
-  // @ts-expect-error - nodeId is reserved for future logging functionality
   private nodeId: string;
   
   constructor(nodeId: string = 'default-node') {

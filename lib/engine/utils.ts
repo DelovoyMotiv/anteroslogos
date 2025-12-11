@@ -63,7 +63,7 @@ export function normalizeUrl(url: string): string {
     }
     
     return normalized;
-  } catch (error) {
+  } catch {
     throw new Error(`Invalid URL: ${url}`);
   }
 }
@@ -122,7 +122,7 @@ export function extractDomain(url: string): string {
   try {
     const parsed = new URL(url);
     return parsed.hostname;
-  } catch (error) {
+  } catch {
     throw new Error(`Invalid URL: ${url}`);
   }
 }

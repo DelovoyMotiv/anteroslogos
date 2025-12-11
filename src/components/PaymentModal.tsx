@@ -1,10 +1,9 @@
-// @ts-nocheck
 /**
  * USDC Payment Modal
  * Shows payment instructions with QR code for USDC transfers on Base L2
  */
 
-import { useState } from 'react';
+import { useState, type Dispatch, type SetStateAction } from 'react';
 import { X, Copy, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { QRCodeSVG } from 'qrcode.react';
@@ -28,17 +27,18 @@ export function PaymentModal({
   walletAddress,
   onPaymentVerified,
 }: PaymentModalProps) {
-  const [copied, setCopied] = useState<{ address?: boolean; amount?: boolean; invoice?: boolean }>({});
+  type CopiedState = { address?: boolean; amount?: boolean; invoice?: boolean };
+  const [copied, setCopied]: [CopiedState, Dispatch<SetStateAction<CopiedState>>] = useState<CopiedState>({ address: false, amount: false, invoice: false });
   const [isVerifying, setIsVerifying] = useState(false);
 
   const handleCopy = async (text: string, field: 'address' | 'amount' | 'invoice') => {
     try {
       await navigator.clipboard.writeText(text);
-      setCopied(prev => ({ ...prev, [field]: true }));
+      setCopied(function(prev: CopiedState): CopiedState { return { ...prev, [field]: true }; });
       toast.success(`${field.charAt(0).toUpperCase() + field.slice(1)} copied to clipboard`);
       
       setTimeout(() => {
-        setCopied(prev => ({ ...prev, [field]: false }));
+        setCopied(function(prev: CopiedState): CopiedState { return { ...prev, [field]: false }; });
       }, 2000);
     } catch (err) {
       toast.error('Failed to copy to clipboard');

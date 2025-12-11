@@ -4,8 +4,7 @@
  * @module types/mesh.types
  */
 
-// @ts-expect-error - JSONObject reserved for future use
-import type { JSONValue, JSONObject } from './common.types';
+import type { JSONValue } from './common.types';
 
 /**
  * CBOR encodable value

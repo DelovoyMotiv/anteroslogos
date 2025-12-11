@@ -44,7 +44,7 @@ const Header = forwardRef<HTMLElement, HeaderProps>(({ onMethodClick }, ref) => 
 
     // Close user menu when clicking outside
     useEffect(() => {
-        if (!userMenuOpen) return;
+        if (!userMenuOpen) return undefined;
         
         const handleClickOutside = (event: MouseEvent) => {
             const target = event.target as HTMLElement;

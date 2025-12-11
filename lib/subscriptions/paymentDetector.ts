@@ -684,7 +684,7 @@ export async function detectPaymentForInvoice(
  * @returns Promise resolving to operation result
  */
 async function executeRpcWithResilience<T>(
-  operation: (client: PublicClient) => Promise<T>,
+  operation: (client: any) => Promise<T>,
   operationName: string
 ): Promise<T> {
   const rpcManager = getRpcProviderManager();

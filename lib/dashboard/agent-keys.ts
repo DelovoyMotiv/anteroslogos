@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Agent Keys Management
  * Ed25519 keypair generation and AID protocol integration with tenant isolation
@@ -6,26 +5,10 @@
 
 import { supabase } from '../supabase';
 import { ed25519 } from '@noble/curves/ed25519.js';
-import { randomBytes } from '@noble/hashes/utils.js';
 import { registerAgent } from '../tenancy/aidRegistry';
-import { getCurrentTenantId, getCurrentTenantIdOrNull } from '../tenancy/context';
-
-export interface AgentKey {
-  id: string;
-  user_id: string;
-  tenant_id?: string; // Tenant isolation
-  aid_registry_id?: string; // Link to aid_registry
-  name: string;
-  aid_uri: string;
-  public_key: string; // Base64
-  key_algorithm: string;
-  permissions: string[];
-  metadata: Record<string, unknown>;
-  revoked: boolean;
-  revoked_at: string | null;
-  created_at: string;
-  updated_at: string;
-}
+import { getCurrentTenantIdOrNull } from '../tenancy/context';
+import { AgentKeySchema, type AgentKey } from './schemas';
+import { selectQuery, selectSingle, insertSingle, insertQuery, updateQuery, deleteQuery } from '../database/queryHelpers';
 
 export interface GenerateAgentKeyParams {
   name: string;
@@ -50,7 +33,8 @@ export function generateEd25519Keypair(): {
   privateKey: Uint8Array;
   publicKey: Uint8Array;
 } {
-  const privateKey = ed25519.utils.randomPrivateKey();
+  // Generate random 32-byte private key
+  const privateKey = crypto.getRandomValues(new Uint8Array(32));
   const publicKey = ed25519.getPublicKey(privateKey);
   
   return { privateKey, publicKey };
@@ -126,7 +110,9 @@ async function getUserDomain(userId: string): Promise<string> {
     try {
       const url = new URL(profile.website_url);
       return url.hostname;
-    } catch {}
+    } catch {
+      // Invalid URL, continue to email extraction
+    }
   }
 
   // Extract from email
@@ -218,9 +204,10 @@ export async function generateAgentKey(
     }
 
     // Insert into agent_keys table with aid_registry_id link
-    const { data: agentKey, error: insertError } = await supabase
-      .from('agent_keys')
-      .insert({
+    const { data: agentKey, error: insertError } = await insertSingle(
+      supabase,
+      'agent_keys',
+      {
         user_id: user.id,
         tenant_id: tenantId,
         aid_registry_id: registryResult.id,
@@ -229,14 +216,17 @@ export async function generateAgentKey(
         public_key: publicKeyBase64,
         key_algorithm: 'Ed25519',
         permissions,
+        revoked: false,
         metadata: {
           domain,
           generated_at: new Date().toISOString(),
           aid_registry_id: registryResult.id,
         },
-      })
-      .select()
-      .single();
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      },
+      AgentKeySchema
+    );
 
     if (insertError || !agentKey) {
       console.error('Agent key creation error:', insertError);
@@ -280,13 +270,16 @@ export async function listAgentKeys(): Promise<AgentKey[] | { error: string }> {
     }
 
     // RLS policies will automatically filter by tenant_id
-    const { data: keys, error } = await supabase
-      .from('agent_keys')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('tenant_id', tenantId)
-      .eq('revoked', false)
-      .order('created_at', { ascending: false });
+    const { data: keys, error } = await selectQuery(
+      supabase,
+      'agent_keys',
+      AgentKeySchema,
+      {
+        user_id: user.id,
+        tenant_id: tenantId,
+        revoked: false,
+      }
+    );
 
     if (error) {
       console.error('listAgentKeys error:', error);
@@ -312,16 +305,22 @@ export async function revokeAgentKey(
       return { success: false, error: 'Unauthorized' };
     }
 
-    const { error } = await supabase
-      .from('agent_keys')
-      .update({
+    const { data, error } = await updateQuery(
+      supabase,
+      'agent_keys',
+      {
         revoked: true,
         revoked_at: new Date().toISOString(),
-      })
-      .eq('id', keyId)
-      .eq('user_id', user.id);
+        updated_at: new Date().toISOString(),
+      },
+      {
+        id: keyId,
+        user_id: user.id,
+      },
+      AgentKeySchema
+    );
 
-    if (error) {
+    if (error || !data || data.length === 0) {
       console.error('revokeAgentKey error:', error);
       return { success: false, error: 'Failed to revoke agent key' };
     }
@@ -353,13 +352,16 @@ export async function deleteAgentKey(
       return { success: false, error: 'Unauthorized' };
     }
 
-    const { error } = await supabase
-      .from('agent_keys')
-      .delete()
-      .eq('id', keyId)
-      .eq('user_id', user.id);
+    const { data, error } = await deleteQuery(
+      supabase,
+      'agent_keys',
+      {
+        id: keyId,
+        user_id: user.id,
+      }
+    );
 
-    if (error) {
+    if (error || !data) {
       console.error('deleteAgentKey error:', error);
       return { success: false, error: 'Failed to delete agent key' };
     }
@@ -412,16 +414,21 @@ export async function getAgentKeyByAID(
     }
 
     // Query with RLS - will respect tenant isolation
-    const { data: key, error } = await supabase
-      .from('agent_keys')
-      .select('*')
-      .eq('aid_uri', aidUri)
-      .eq('revoked', false)
-      .maybeSingle();
+    const { data: keys, error } = await selectQuery(
+      supabase,
+      'agent_keys',
+      AgentKeySchema,
+      {
+        aid_uri: aidUri,
+        revoked: false,
+      }
+    );
 
-    if (error || !key) {
+    if (error || !keys || keys.length === 0) {
       return null;
     }
+
+    const key = keys[0];
 
     // Additional validation: check AID registry for verification status
     const currentTenantId = getCurrentTenantIdOrNull();

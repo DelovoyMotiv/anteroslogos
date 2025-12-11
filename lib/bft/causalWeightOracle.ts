@@ -393,7 +393,7 @@ export async function calculateWeightWithEpoch(
       
       try {
         // If graph not provided, fetch from epoch commit
-        let graphToUse = graph;
+        const graphToUse = graph;
         if (!graphToUse) {
           const epochManager = getEpochManager();
           const graphCommit = await epochManager.getCommitForEpoch(epochNumber);

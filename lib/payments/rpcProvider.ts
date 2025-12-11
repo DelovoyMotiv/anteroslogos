@@ -133,7 +133,7 @@ class RpcProviderManager {
         transport: http(endpoint.url, {
           timeout: HEALTH_CHECK_TIMEOUT,
         }),
-      }) as PublicClient;
+      }) as any as PublicClient;
 
       this.clients.set(endpoint.url, client);
     }

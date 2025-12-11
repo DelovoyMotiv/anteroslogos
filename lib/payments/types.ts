@@ -83,7 +83,7 @@ export const CustodialWalletSchema = z.object({
   isCustodial: z.literal(true),
   encryptionAlgorithm: z.string(),
   createdAt: z.date(),
-});
+}).strict();
 
 export const NonCustodialWalletSchema = z.object({
   id: z.string().uuid(),
@@ -93,7 +93,7 @@ export const NonCustodialWalletSchema = z.object({
   chainId: z.literal(8453),
   isCustodial: z.literal(false),
   createdAt: z.date(),
-});
+}).strict();
 
 export const WalletCreateInputSchema = z.object({
   userId: z.string().uuid().optional(),
@@ -251,7 +251,7 @@ export const LedgerEntrySchema = z.object({
   txHash: z.string().regex(/^0x[a-fA-F0-9]{64}$/).optional(),
   description: z.string().optional(),
   createdAt: z.date(),
-});
+}).strict();
 
 // =====================================================
 // TRANSACTION VERIFICATION

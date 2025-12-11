@@ -187,7 +187,6 @@ export class MeshDiscoveryService {
   /**
    * Parse DNS TXT records to peer announcements
    */
-  // @ts-expect-error - Method reserved for future DNS TXT implementation
   private parseDNSTxtRecords(records: string[][]): PeerAnnouncement[] {
     const peers: PeerAnnouncement[] = [];
 

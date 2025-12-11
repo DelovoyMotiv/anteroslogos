@@ -1,11 +1,10 @@
-// @ts-nocheck
 /**
  * Current Plan Card Component
  * Compact, information-dense display of subscription status
  */
 
 import { useState } from 'react';
-import { Calendar, ChevronDown, XCircle, CheckCircle, Clock } from 'lucide-react';
+import { ChevronDown, XCircle, CheckCircle, Clock } from 'lucide-react';
 import { PLAN_CONFIG, type USDCSubscription, type UsageStats } from '../../../lib/dashboard/billing-client';
 
 interface CurrentPlanCardProps {
@@ -31,7 +30,6 @@ export function CurrentPlanCard({ subscription, usageStats, onCancelSubscription
   };
 
   const status = statusConfig[subscription.status as keyof typeof statusConfig] || statusConfig.active;
-  const StatusIcon = status.icon;
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 p-4">

@@ -20,7 +20,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
   useEffect(() => {
     if (!isOpen) {
-      return;
+      return undefined;
     }
     
     previouslyFocusedElement.current = document.activeElement as HTMLElement;

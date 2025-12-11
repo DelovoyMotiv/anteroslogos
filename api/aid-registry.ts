@@ -114,7 +114,8 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'No tenant context found' });
   }
 
-  const registry = new AIDRegistry(supabase);
+  // Registry instance available for future use
+  // const registry = new AIDRegistry(supabase);
   const id = getIdFromQuery(req);
 
   // Get specific AID
@@ -139,7 +140,7 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
   const offsetNum = typeof offset === 'string' ? parseInt(offset, 10) : 0;
 
   // List AIDs for tenant with pagination
-  let query = supabase
+  const query = supabase
     .from('aid_registry')
     .select('*', { count: 'exact' })
     .eq('tenant_id', tenantId)

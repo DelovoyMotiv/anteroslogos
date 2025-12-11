@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * API Keys Management
  * Enterprise-grade API key CRUD operations with scrypt hashing
@@ -8,7 +7,8 @@ import { supabase } from '../supabase';
 import { scrypt, randomBytes } from 'crypto';
 import { promisify } from 'util';
 import type { UserProfileWithSubscription } from '../../types/lib-extended.types';
-import type { JSONValue } from '../../types/common.types';
+import { APIKeySchema, type APIKey, apiKeyFromDb } from './schemas';
+import { selectQuery, insertSingle, insertQuery } from '../database/queryHelpers';
 
 const scryptAsync = promisify(scrypt);
 
@@ -18,24 +18,6 @@ const TIER_PREFIXES = {
   pro: 'pro',
   agency: 'agc',
 } as const;
-
-export interface APIKey {
-  id: string;
-  user_id: string;
-  name: string;
-  key_prefix: string;
-  scoped_tools: string[] | null;
-  rate_limit_per_minute: number;
-  rate_limit_per_hour: number;
-  expires_at: string | null;
-  last_used_at: string | null;
-  usage_count: number;
-  revoked: boolean;
-  revoked_at: string | null;
-  revoked_reason: string | null;
-  created_at: string;
-  updated_at: string;
-}
 
 export interface CreateAPIKeyParams {
   name: string;
@@ -160,20 +142,20 @@ export async function createAPIKey(
       : null;
 
     // Insert into database
-    const { data: key, error: insertError } = await supabase
-      .from('api_keys')
-      .insert({
+    const { data: key, error: insertError } = await insertSingle(
+      supabase,
+      'api_keys',
+      {
         user_id: user.id,
         name: params.name,
         key_hash: keyHash,
         key_prefix: keyPrefix,
-        scoped_tools: params.scoped_tools || null,
+        scopes: params.scoped_tools || [],
         rate_limit_per_minute: rateLimits.per_minute,
-        rate_limit_per_hour: rateLimits.per_hour,
         expires_at: expiresAt,
-      } as JSONValue)
-      .select()
-      .single();
+      },
+      APIKeySchema
+    );
 
     if (insertError || !key) {
       console.error('API key creation error:', insertError);
@@ -190,7 +172,7 @@ export async function createAPIKey(
     });
 
     return {
-      key,
+      key: key as APIKey,
       plaintext_key: plaintextKey,
     };
   } catch (error) {
@@ -209,12 +191,12 @@ export async function listAPIKeys(): Promise<APIKey[] | { error: string }> {
       return { error: 'Unauthorized' };
     }
 
-    const { data: keys, error } = await supabase
-      .from('api_keys')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('revoked', false)
-      .order('created_at', { ascending: false });
+    const { data: keys, error } = await selectQuery(
+      supabase,
+      'api_keys',
+      APIKeySchema,
+      { user_id: user.id, is_active: true }
+    );
 
     if (error) {
       console.error('listAPIKeys error:', error);
@@ -327,11 +309,13 @@ export async function validateAPIKeyFromHeader(
   if (!key.startsWith('sk_')) return null;
 
   try {
-    // Fetch all non-revoked keys (need to check hash)
-    const { data: keys, error } = await supabase
-      .from('api_keys')
-      .select('*')
-      .eq('revoked', false);
+    // Fetch all active keys (need to check hash)
+    const { data: keys, error } = await selectQuery(
+      supabase,
+      'api_keys',
+      APIKeySchema,
+      { is_active: true }
+    );
 
     if (error || !keys) return null;
 
@@ -344,12 +328,11 @@ export async function validateAPIKeyFromHeader(
           return null;
         }
 
-        // Update last_used_at and usage_count
+        // Update last_used_at
         await supabase
           .from('api_keys')
           .update({
             last_used_at: new Date().toISOString(),
-            usage_count: storedKey.usage_count + 1,
           })
           .eq('id', storedKey.id);
 

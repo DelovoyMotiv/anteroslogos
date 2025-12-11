@@ -143,8 +143,8 @@ export interface SupabaseError {
  */
 export interface MinimalSupabaseClient {
   from(table: string): unknown;
-  rpc(fn: string, params?: JSONObject): Promise<SupabaseQueryResult>;
-  [key: string]: unknown;
+  rpc(fn: string, params?: JSONObject): unknown;
+  [key: string]: any;
 }
 
 /**

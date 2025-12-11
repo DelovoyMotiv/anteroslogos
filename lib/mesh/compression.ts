@@ -1,4 +1,3 @@
-// @ts-nocheck - CBOR encoding has complex type issues with JSONValue
 /**
  * Message Compression for Agent Mesh Network
  * CBOR (Concise Binary Object Representation) encoding/decoding
@@ -35,6 +34,7 @@ export interface CompressionStats {
 }
 
 import type { JSONValue } from '../../types/common.types';
+import { isJSONValue, toJSONValue } from '../utils/typeGuards';
 
 /**
  * Message batch
@@ -92,7 +92,7 @@ export class CBOREncoder {
   /**
    * Encode any value
    */
-  private encodeValue(value: JSONValue): void {
+  private encodeValue(value: JSONValue | Uint8Array | Date | undefined): void {
     if (value === null) {
       this.encodeNull();
     } else if (value === undefined) {
@@ -103,12 +103,12 @@ export class CBOREncoder {
       this.encodeNumber(value);
     } else if (typeof value === 'string') {
       this.encodeString(value);
-    } else if (Array.isArray(value)) {
-      this.encodeArray(value);
     } else if (value instanceof Uint8Array) {
       this.encodeBytes(value);
     } else if (value instanceof Date) {
       this.encodeDate(value);
+    } else if (Array.isArray(value)) {
+      this.encodeArray(value);
     } else if (typeof value === 'object') {
       this.encodeObject(value);
     } else {
@@ -364,9 +364,9 @@ export class CBORDecoder {
   }
 
   /**
-   * Decode byte string
+   * Decode byte string (internal use)
    */
-  private decodeBytes(additionalInfo: number): Uint8Array {
+  private decodeBytesInternal(additionalInfo: number): Uint8Array {
     const length = this.decodeUnsignedInt(additionalInfo);
     const bytes = this.data.slice(this.offset, this.offset + length);
     this.offset += length;
@@ -374,10 +374,19 @@ export class CBORDecoder {
   }
 
   /**
+   * Decode byte string (for JSONValue compatibility)
+   */
+  private decodeBytes(additionalInfo: number): number[] {
+    const bytes = this.decodeBytesInternal(additionalInfo);
+    // Convert Uint8Array to regular array for JSONValue compatibility
+    return Array.from(bytes);
+  }
+
+  /**
    * Decode text string
    */
   private decodeString(additionalInfo: number): string {
-    const bytes = this.decodeBytes(additionalInfo);
+    const bytes = this.decodeBytesInternal(additionalInfo);
     return new TextDecoder().decode(bytes);
   }
 
@@ -405,7 +414,18 @@ export class CBORDecoder {
     for (let i = 0; i < length; i++) {
       const key = this.decodeValue();
       const value = this.decodeValue();
-      map[key] = value;
+      
+      // Ensure key is a string for object indexing
+      const keyString = typeof key === 'string' ? key : String(key);
+      
+      // Ensure value is JSONValue compatible
+      if (isJSONValue(value)) {
+        map[keyString] = value;
+      } else {
+        // Convert non-JSONValue types to JSONValue
+        const converted = toJSONValue(value);
+        map[keyString] = converted !== null ? converted : null;
+      }
     }
     
     return map;
@@ -418,11 +438,17 @@ export class CBORDecoder {
     if (tag === 1) {
       // Tag 1 = epoch timestamp
       const epochSeconds = this.decodeValue();
-      return new Date(epochSeconds * 1000);
+      // Convert Date to ISO string for JSONValue compatibility
+      if (typeof epochSeconds === 'number') {
+        return new Date(epochSeconds * 1000).toISOString();
+      }
+      return null;
     }
     
     // Unknown tag - just decode value
-    return this.decodeValue();
+    const value = this.decodeValue();
+    // Ensure return value is JSONValue compatible
+    return isJSONValue(value) ? value : (toJSONValue(value) ?? null);
   }
 
   /**
@@ -436,7 +462,8 @@ export class CBORDecoder {
     } else if (additionalInfo === 22) {
       return null;
     } else if (additionalInfo === 23) {
-      return undefined;
+      // undefined is not a valid JSONValue, convert to null
+      return null;
     } else if (additionalInfo === 27) {
       // 64-bit float
       const buffer = new ArrayBuffer(8);
@@ -470,8 +497,11 @@ export class MessageCompressor {
   compress(message: JSONValue): { data: Uint8Array; stats: CompressionStats } {
     const startTime = Date.now();
     
+    // Ensure message is JSONValue compatible
+    const safeMessage = isJSONValue(message) ? message : (toJSONValue(message) ?? null);
+    
     // Deduplicate if possible
-    const hash = this.hashMessage(message);
+    const hash = this.hashMessage(safeMessage);
     const cached = this.deduplicationCache.get(hash);
     
     if (cached) {
@@ -479,7 +509,7 @@ export class MessageCompressor {
       return {
         data: this.encoder.encode(cached.data),
         stats: {
-          originalSize: JSON.stringify(message).length,
+          originalSize: JSON.stringify(safeMessage).length,
           compressedSize: this.encoder.encode(cached.data).length,
           compressionRatio: 0, // Will be calculated
           timeTaken: Date.now() - startTime,
@@ -488,12 +518,12 @@ export class MessageCompressor {
     }
 
     // Encode to CBOR
-    const compressed = this.encoder.encode(message);
+    const compressed = this.encoder.encode(safeMessage);
     
     // Cache for deduplication
-    this.cacheMessage(hash, message);
+    this.cacheMessage(hash, safeMessage);
 
-    const originalSize = JSON.stringify(message).length;
+    const originalSize = JSON.stringify(safeMessage).length;
     const compressedSize = compressed.length;
 
     const stats: CompressionStats = {
@@ -517,21 +547,52 @@ export class MessageCompressor {
    * Batch multiple messages
    */
   batchMessages(messages: JSONValue[]): { data: Uint8Array; stats: CompressionStats } {
+    // Ensure all messages are JSONValue compatible
+    const safeMessages = messages.map(msg => 
+      isJSONValue(msg) ? msg : (toJSONValue(msg) ?? null)
+    );
+    
     const batch: MessageBatch = {
-      messages,
+      messages: safeMessages,
       timestamp: Date.now(),
       batchId: this.generateBatchId(),
     };
 
-    return this.compress(batch);
+    // Convert MessageBatch to JSONValue for compression
+    const batchAsJSON = toJSONValue(batch);
+    if (!batchAsJSON) {
+      throw new Error('Failed to convert batch to JSONValue');
+    }
+
+    return this.compress(batchAsJSON);
   }
 
   /**
    * Unbatch messages
    */
   unbatchMessages(data: Uint8Array): JSONValue[] {
-    const batch = this.decompress(data) as MessageBatch;
-    return batch.messages;
+    const decoded = this.decompress(data);
+    
+    // Type guard to ensure decoded data is a MessageBatch-like object
+    if (
+      typeof decoded === 'object' &&
+      decoded !== null &&
+      !Array.isArray(decoded) &&
+      'messages' in decoded &&
+      'timestamp' in decoded &&
+      'batchId' in decoded
+    ) {
+      const batchObj = decoded as Record<string, JSONValue>;
+      const messages = batchObj.messages;
+      
+      if (Array.isArray(messages)) {
+        return messages;
+      }
+    }
+    
+    // If not a valid batch, return empty array
+    console.error('Invalid batch format in unbatchMessages');
+    return [];
   }
 
   /**

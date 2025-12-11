@@ -466,7 +466,7 @@ export class IntentPaymentSystem {
           await this.publicClient.getTransactionReceipt({
             hash: execution.txHash,
           });
-        } catch (error) {
+        } catch {
           // Transaction not found, likely reorged
           console.log(`[IntentPayments] Intent ${intentId} affected by reorg, initiating refund`);
           

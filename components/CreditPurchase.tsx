@@ -7,20 +7,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../lib/dashboard/auth-guard';
 import { supabase } from '../lib/supabase';
 import { CreditCard, Check, Loader2, AlertCircle } from 'lucide-react';
-
-/**
- * Credit package interface matching database schema
- */
-export interface CreditPackage {
-  id: string;
-  name: string;
-  ccc_amount: number;
-  usd_cost: number;
-  cost_per_credit: number;
-  stripe_price_id: string | null;
-  is_active: boolean;
-  display_order: number;
-}
+import { CreditPackageSchema, type CreditPackage } from '../lib/dashboard/schemas';
+import { parseDbResults } from '../lib/utils/typeGuards';
 
 interface CreditPurchaseProps {
   onBalanceRefresh?: () => void;
@@ -53,7 +41,7 @@ export const CreditPurchase: React.FC<CreditPurchaseProps> = ({
         throw new Error('Database connection not available');
       }
 
-      const { data, error: fetchError } = await supabase
+      const { data: rawData, error: fetchError } = await supabase
         .from('credit_packages')
         .select('*')
         .eq('is_active', true)
@@ -63,7 +51,16 @@ export const CreditPurchase: React.FC<CreditPurchaseProps> = ({
         throw new Error(`Failed to load packages: ${fetchError.message}`);
       }
 
-      setPackages(data || []);
+      // Validate and parse results using schema
+      const validatedPackages = parseDbResults(rawData || [], CreditPackageSchema);
+      
+      // Calculate cost_per_credit for each package if not present
+      const packagesWithCost = validatedPackages.map(pkg => ({
+        ...pkg,
+        cost_per_credit: pkg.cost_per_credit || pkg.usd_cost / pkg.ccc_amount,
+      }));
+
+      setPackages(packagesWithCost);
     } catch (err) {
       console.error('Error loading packages:', err);
       setError(err instanceof Error ? err.message : 'Failed to load credit packages');

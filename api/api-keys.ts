@@ -15,8 +15,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { 
   createAPIKey, 
-  listAPIKeys, 
-  revokeAPIKey, 
   deleteAPIKey 
 } from '../lib/dashboard/api-keys';
 import { supabase } from '../lib/supabase';

@@ -329,7 +329,7 @@ export class OrchestrationManager {
   /**
    * Cancel orchestration
    */
-  cancelOrchestration(orchestrationId: string, _reason?: string): Orchestration | null {
+  cancelOrchestration(orchestrationId: string): Orchestration | null {
     const orchestration = this.orchestrations.get(orchestrationId);
     
     if (!orchestration) {

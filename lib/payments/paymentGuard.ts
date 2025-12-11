@@ -271,7 +271,7 @@ export async function enforcePayment(
       // Check if we have an invoice for this tx
       const { getInvoiceByTransaction } = await import("./invoice");
       invoice = await getInvoiceByTransaction(txHash);
-    } catch (error) {
+    } catch {
       // Invoice not found by txHash - need to create one and verify
     }
 

@@ -204,7 +204,7 @@ export function verifySignature(
     }
 
     return timingSafeEqual(providedBuffer, expectedBuffer);
-  } catch (error) {
+  } catch {
     // Any error in verification means invalid signature
     return false;
   }

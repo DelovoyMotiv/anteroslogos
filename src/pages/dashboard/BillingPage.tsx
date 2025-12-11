@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Billing Page - USDC Subscription System
  * Base L2 USDC payments, plan management, usage tracking
@@ -18,7 +17,7 @@ import {
   type UsageStats
 } from '../../../lib/dashboard/billing-client';
 import { supabase } from '../../../lib/supabase';
-import { Wallet, AlertCircle } from 'lucide-react';
+import { Wallet } from 'lucide-react';
 import { toast } from 'sonner';
 import { PaymentModal } from '../../components/PaymentModal';
 import { CurrentPlanCard } from '../../components/billing/CurrentPlanCard';
@@ -152,8 +151,6 @@ export function BillingPage() {
   if (loading) {
     return <LoadingSkeleton />;
   }
-
-  const currentPlan = subscription?.plan_tier || 'free';
 
   // Handler for scrolling to plans section
   const scrollToPlans = () => {

@@ -182,11 +182,13 @@ export interface SubscriptionWithDetails {
 
 /**
  * RPC provider client (minimal interface)
+ * Matches viem PublicClient interface
  */
 export interface MinimalRpcClient {
-  getBlockNumber(): Promise<number>;
-  getBlock(blockNumber: number): Promise<RpcBlock | null>;
-  getTransaction(txHash: string): Promise<RpcTransaction | null>;
+  getBlockNumber(): Promise<bigint>;
+  getBlock(params: { blockNumber: bigint }): Promise<RpcBlock | null>;
+  getTransaction(params: { hash: string }): Promise<RpcTransaction | null>;
+  getTransactionReceipt(params: { hash: string }): Promise<RpcTransactionReceipt | null>;
   call(transaction: RpcTransactionRequest): Promise<string>;
   estimateGas(transaction: RpcTransactionRequest): Promise<bigint>;
   sendTransaction(signedTx: string): Promise<string>;
@@ -196,17 +198,17 @@ export interface MinimalRpcClient {
  * RPC block
  */
 export interface RpcBlock {
-  number: number;
+  number: bigint;
   hash: string;
   parentHash: string;
-  timestamp: number;
+  timestamp: bigint;
   transactions: string[];
   miner?: string;
-  difficulty?: string;
-  totalDifficulty?: string;
-  size?: number;
-  gasLimit?: string;
-  gasUsed?: string;
+  difficulty?: bigint;
+  totalDifficulty?: bigint;
+  size?: bigint;
+  gasLimit?: bigint;
+  gasUsed?: bigint;
 }
 
 /**
@@ -216,14 +218,47 @@ export interface RpcTransaction {
   hash: string;
   from: string;
   to: string | null;
-  value: string;
-  gas: string;
-  gasPrice: string;
+  value: bigint;
+  gas: bigint;
+  gasPrice: bigint;
   nonce: number;
   input: string;
-  blockNumber?: number;
+  blockNumber?: bigint;
   blockHash?: string;
   transactionIndex?: number;
+}
+
+/**
+ * RPC transaction receipt
+ */
+export interface RpcTransactionReceipt {
+  transactionHash: string;
+  blockNumber: bigint;
+  blockHash: string;
+  status: 'success' | 'reverted';
+  from: string;
+  to: string | null;
+  gasUsed: bigint;
+  cumulativeGasUsed: bigint;
+  effectiveGasPrice: bigint;
+  logs: RpcLog[];
+  logsBloom: string;
+  transactionIndex: number;
+}
+
+/**
+ * RPC log
+ */
+export interface RpcLog {
+  address: string;
+  topics: string[];
+  data: string;
+  blockNumber: bigint;
+  transactionHash: string;
+  transactionIndex: number;
+  blockHash: string;
+  logIndex: number;
+  removed: boolean;
 }
 
 /**

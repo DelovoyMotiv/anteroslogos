@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * API Keys Management Page
  * Create, list, revoke API keys with Stripe-style UX
@@ -7,12 +6,12 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../../lib/dashboard/auth-guard';
 import { listAPIKeys, type APIKey } from '../../../lib/dashboard/api-keys-client';
-import { Plus, Copy, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Plus, Copy, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '../../../lib/supabase';
 
 export function APIKeysPage() {
-  const { user } = useAuth();
+  useAuth();
   const [keys, setKeys] = useState<APIKey[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);

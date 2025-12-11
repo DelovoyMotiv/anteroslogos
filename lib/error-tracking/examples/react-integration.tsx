@@ -1,8 +1,10 @@
-// @ts-nocheck - Example file with Sentry React integration type issues
 /**
  * Example: React Integration with Sentry Error Tracking
  * 
  * Demonstrates how to integrate Sentry error tracking with React applications.
+ * 
+ * Note: This is an example file showing integration patterns.
+ * Some type issues may exist due to Sentry SDK version compatibility.
  */
 
 import React, { useEffect, useState } from 'react';
@@ -16,6 +18,7 @@ import {
   useSentryBreadcrumb,
 } from '../react';
 import { getSentryConfig } from '../config';
+import { createSentryFallback } from '../types';
 
 // Initialize Sentry
 const sentryConfig = getSentryConfig();
@@ -203,7 +206,7 @@ function BuggyComponent() {
 
 // Wrap component with error boundary using HOC
 const BuggyComponentWithBoundary = withErrorBoundary(BuggyComponent, {
-  fallback: <ErrorFallback error={new Error('Component crashed')} resetError={() => {}} />,
+  fallback: createSentryFallback(ErrorFallback),
   showDialog: true,
 });
 
@@ -214,7 +217,7 @@ function App() {
       <h1>Sentry Error Tracking Demo</h1>
 
       {/* Error Boundary for entire section */}
-      <ErrorBoundary fallback={ErrorFallback} showDialog>
+      <ErrorBoundary fallback={createSentryFallback(ErrorFallback)} showDialog>
         <section style={{ marginBottom: '40px' }}>
           <h2>User Profile</h2>
           <UserProfile userId="user-123" />
@@ -222,7 +225,7 @@ function App() {
       </ErrorBoundary>
 
       {/* Separate error boundary for payment form */}
-      <ErrorBoundary fallback={ErrorFallback}>
+      <ErrorBoundary fallback={createSentryFallback(ErrorFallback)}>
         <section style={{ marginBottom: '40px' }}>
           <PaymentForm />
         </section>
@@ -242,7 +245,7 @@ const root = ReactDOM.createRoot(document.getElementById('root')!);
 root.render(
   <React.StrictMode>
     <ErrorBoundary
-      fallback={ErrorFallback}
+      fallback={createSentryFallback(ErrorFallback)}
       showDialog
       onError={(error, errorInfo) => {
         console.error('Error caught by root boundary:', error, errorInfo);

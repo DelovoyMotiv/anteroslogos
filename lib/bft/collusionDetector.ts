@@ -550,8 +550,8 @@ export class CollusionDetector {
       
       const avgJaccard = jaccardCount > 0 ? totalJaccard / jaccardCount : 0;
       
-      // For graph similarity, we would need actual graph structures
-      // For now, use a placeholder based on entity overlap
+      // For graph similarity, use entity overlap as proxy
+      // In production, this would analyze actual graph structures
       const graphSimilarity = avgJaccard;
       
       // Build evidence array
@@ -738,10 +738,9 @@ export class CollusionDetector {
    * In production, penalties should be persisted to database
    * for audit trail and historical analysis.
    * 
-   * @param _agentId - Agent identifier
    * @returns Array of penalties (empty for now)
    */
-  getPenaltyHistory(_agentId: string): ReputationPenalty[] {
+  getPenaltyHistory(): ReputationPenalty[] {
     // TODO: Implement penalty persistence to database
     // For now, return empty array
     return [];

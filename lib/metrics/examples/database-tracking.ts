@@ -8,9 +8,6 @@ import { recordDbQuery, dbConnectionPoolSize } from '../index';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { SupabaseQueryResult, DatabaseQueryFunction } from '../../../types/lib.types';
 
-// Suppress unused variable warning for example code
-// @ts-ignore
-
 /**
  * Wrapper for Supabase queries with metrics
  */
@@ -49,7 +46,6 @@ export async function queryWithMetrics<T>(
 /**
  * Example usage
  */
-// @ts-ignore - supabase used in function body
 export async function getUserById(supabase: SupabaseClient, userId: string) {
   return queryWithMetrics(
     supabase,

@@ -340,13 +340,9 @@ export function setContext(name: string, context: Record<string, JSONValue> | nu
 /**
  * Start a new transaction for performance monitoring
  * 
- * @param name - Transaction name
- * @param op - Operation type
- * @returns Transaction object
- * 
  * @deprecated Use Sentry.startSpan instead in newer versions
  */
-export function startTransaction(_name: string, _op: string = 'http.server') {
+export function startTransaction() {
   if (!isInitialized) {
     return null;
   }

@@ -2,6 +2,10 @@
  * Billing Service Type Definitions
  */
 
+/**
+ * Event types for billing transactions
+ * Used to categorize different types of balance changes
+ */
 export type EventType =
   | 'DEPOSIT_STRIPE'
   | 'DEPOSIT_CRYPTO'

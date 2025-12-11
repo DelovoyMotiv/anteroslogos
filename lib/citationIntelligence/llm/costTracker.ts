@@ -455,7 +455,7 @@ export class CostTracker {
     // Calculate date range
     const now = new Date();
     let start: Date;
-    let end: Date = endDate || now;
+    const end: Date = endDate || now;
     
     if (period === 'custom' && startDate) {
       start = startDate;

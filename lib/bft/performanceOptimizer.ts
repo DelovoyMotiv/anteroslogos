@@ -85,7 +85,7 @@ export class PerformanceOptimizer {
     
     // Sample from each type
     const sampled: Entity[] = [];
-    for (const [_type, typeEntities] of byType) {
+    for (const typeEntities of byType.values()) {
       const sampleSize = Math.max(
         1,
         Math.floor(typeEntities.length * this.config.samplingRate)

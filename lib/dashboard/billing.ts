@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * Billing Management - SERVER-ONLY
  * Stripe integration for subscriptions and payments
@@ -367,17 +366,17 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription) {
       stripe_customer_id: subscription.customer as string,
       plan_id: planId,
       status: subscription.status,
-      current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-      current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-      cancel_at_period_end: subscription.cancel_at_period_end,
-      canceled_at: subscription.canceled_at
-        ? new Date(subscription.canceled_at * 1000).toISOString()
+      current_period_start: new Date((subscription as any).current_period_start * 1000).toISOString(),
+      current_period_end: new Date((subscription as any).current_period_end * 1000).toISOString(),
+      cancel_at_period_end: (subscription as any).cancel_at_period_end,
+      canceled_at: (subscription as any).canceled_at
+        ? new Date((subscription as any).canceled_at * 1000).toISOString()
         : null,
-      trial_start: subscription.trial_start
-        ? new Date(subscription.trial_start * 1000).toISOString()
+      trial_start: (subscription as any).trial_start
+        ? new Date((subscription as any).trial_start * 1000).toISOString()
         : null,
-      trial_end: subscription.trial_end
-        ? new Date(subscription.trial_end * 1000).toISOString()
+      trial_end: (subscription as any).trial_end
+        ? new Date((subscription as any).trial_end * 1000).toISOString()
         : null,
       metadata: subscription.metadata as Record<string, unknown>,
     });
@@ -437,7 +436,17 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
  * Handle successful payment
  */
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
-  const userId = invoice.subscription_details?.metadata?.user_id;
+  // Get user_id from subscription metadata if subscription exists
+  let userId: string | undefined;
+  
+  const invoiceAny = invoice as any;
+  if (invoiceAny.subscription && typeof invoiceAny.subscription !== 'string') {
+    userId = invoiceAny.subscription.metadata?.user_id;
+  } else if (invoiceAny.subscription && typeof invoiceAny.subscription === 'string') {
+    // Fetch subscription to get metadata
+    const subscription = await getStripe().subscriptions.retrieve(invoiceAny.subscription);
+    userId = subscription.metadata?.user_id;
+  }
 
   if (!userId) return;
 
@@ -458,7 +467,8 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
  * Handle failed payment
  */
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
-  const userId = invoice.subscription_details?.metadata?.user_id;
+  const invoiceAny = invoice as any;
+  const userId = invoiceAny.subscription_details?.metadata?.user_id;
 
   if (!userId) return;
 
@@ -466,7 +476,7 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
   await supabase
     .from('subscriptions')
     .update({ status: 'past_due' })
-    .eq('stripe_subscription_id', invoice.subscription as string);
+    .eq('stripe_subscription_id', invoiceAny.subscription as string);
 
   // Log audit event
   await supabase.from('audit_log').insert({

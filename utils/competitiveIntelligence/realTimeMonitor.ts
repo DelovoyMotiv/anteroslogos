@@ -162,18 +162,15 @@ export interface MarketIntelligence {
 export class CompetitiveIntelligenceMonitor {
   private competitors: Map<string, CompetitorProfile> = new Map();
   private threats: Map<string, CompetitiveThreat> = new Map();
-  // @ts-ignore - Initialized in constructor
   private supabase: MinimalSupabaseClient;
-  // @ts-ignore - Used for tenant isolation
   private tenantId: string | null = null;
   
-  // @ts-ignore - ourDomain may be used in future for domain-specific logic
   constructor(private ourDomain: string, tenantId?: string) {
     this.tenantId = tenantId || null;
     // Initialize Supabase client
     if (typeof window !== 'undefined') {
       // Client-side
-      // @ts-ignore - Dynamic import
+      // @ts-expect-error - Dynamic import for client-side Supabase
       import('../../lib/supabase').then(({ default: supabase }) => {
         this.supabase = supabase;
       });

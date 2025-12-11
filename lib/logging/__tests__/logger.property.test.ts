@@ -224,7 +224,7 @@ describe('Property 41: No PII in Logs', () => {
   it('should not leak sensitive data in string masking', () => {
     fc.assert(
       fc.property(
-        fc.stringMatching(/^[a-zA-Z0-9_\-]{20,50}$/),
+        fc.stringMatching(/^[a-zA-Z0-9_-]{20,50}$/),
         (apiKey) => {
           const input = `API key: ${apiKey}`;
           const masked = maskSensitiveString(input);

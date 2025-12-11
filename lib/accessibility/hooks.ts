@@ -14,7 +14,7 @@ export const useFocusTrap = (isActive: boolean) => {
   const focusTrapRef = useRef<FocusTrap | null>(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current) return undefined;
 
     if (isActive) {
       focusTrapRef.current = new FocusTrap(containerRef.current);
@@ -42,7 +42,7 @@ export const useRovingTabIndex = (
   const rovingTabIndexRef = useRef<RovingTabIndex | null>(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current) return undefined;
 
     rovingTabIndexRef.current = new RovingTabIndex(containerRef.current, orientation);
 
@@ -62,7 +62,7 @@ export const useRovingTabIndex = (
  */
 export const useEscapeKey = (callback: () => void, isActive: boolean = true) => {
   useEffect(() => {
-    if (!isActive) return;
+    if (!isActive) return undefined;
 
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape' || e.key === 'Esc') {

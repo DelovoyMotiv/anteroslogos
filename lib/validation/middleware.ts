@@ -58,36 +58,42 @@ export function withValidation(
     // Validate body
     if (options.bodySchema) {
       const bodyResult = validateInput(options.bodySchema, req.body);
-      if (!bodyResult.success) {
+      if (bodyResult.success === false) {
+        // Type narrowed: bodyResult is { success: false; error: z.ZodError }
         return res.status(400).json({
           error: 'Invalid request body',
           ...formatValidationError(bodyResult.error),
         });
       }
+      // Type narrowed: bodyResult is { success: true; data: T }
       validated.body = bodyResult.data;
     }
 
     // Validate query
     if (options.querySchema) {
       const queryResult = validateInput(options.querySchema, req.query);
-      if (!queryResult.success) {
+      if (queryResult.success === false) {
+        // Type narrowed: queryResult is { success: false; error: z.ZodError }
         return res.status(400).json({
           error: 'Invalid query parameters',
           ...formatValidationError(queryResult.error),
         });
       }
+      // Type narrowed: queryResult is { success: true; data: T }
       validated.query = queryResult.data;
     }
 
     // Validate params (for dynamic routes)
     if (options.paramsSchema && isRequestWithParams(req)) {
       const paramsResult = validateInput(options.paramsSchema, req.params);
-      if (!paramsResult.success) {
+      if (paramsResult.success === false) {
+        // Type narrowed: paramsResult is { success: false; error: z.ZodError }
         return res.status(400).json({
           error: 'Invalid route parameters',
           ...formatValidationError(paramsResult.error),
         });
       }
+      // Type narrowed: paramsResult is { success: true; data: T }
       validated.params = paramsResult.data;
     }
 
@@ -160,7 +166,8 @@ export function withJsonRpcValidation(
     const methodSchema = methodSchemas[request.method];
     if (methodSchema) {
       const paramsResult = validateInput(methodSchema, request.params || {});
-      if (!paramsResult.success) {
+      if (paramsResult.success === false) {
+        // Type narrowed: paramsResult is { success: false; error: z.ZodError }
         const formatted = formatValidationError(paramsResult.error);
         return res.status(400).json({
           jsonrpc: '2.0',
@@ -173,6 +180,7 @@ export function withJsonRpcValidation(
         });
       }
 
+      // Type narrowed: paramsResult is { success: true; data: T }
       return handler(req, res, {
         method: request.method,
         params: paramsResult.data,

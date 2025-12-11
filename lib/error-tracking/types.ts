@@ -2,6 +2,7 @@
  * Type definitions for error tracking
  */
 
+import * as React from 'react';
 import type { JSONValue } from '../../types/common.types';
 
 /**
@@ -116,4 +117,43 @@ export interface ErrorContext {
   
   /** Severity level */
   level?: ErrorSeverity;
+}
+
+/**
+ * Error fallback component type for React error boundaries
+ */
+export type ErrorFallbackComponent = React.ComponentType<{
+  error: Error;
+  resetError: () => void;
+}>;
+
+/**
+ * Adapter to convert our fallback component to Sentry's expected type
+ * 
+ * Sentry's ErrorBoundary expects a FallbackRender function that receives
+ * errorData with { error: unknown, componentStack, eventId, resetError }.
+ * This adapter converts our simpler ErrorFallbackComponent to that format.
+ * 
+ * @param Component - Our error fallback component
+ * @returns A function compatible with Sentry's fallback prop
+ */
+export function createSentryFallback(
+  Component: ErrorFallbackComponent
+): (errorData: {
+  error: unknown;
+  componentStack: string;
+  eventId: string;
+  resetError(): void;
+}) => React.ReactElement {
+  return (errorData) => {
+    // Convert unknown error to Error type
+    const error = errorData.error instanceof Error 
+      ? errorData.error 
+      : new Error(String(errorData.error));
+    
+    return React.createElement(Component, {
+      error,
+      resetError: errorData.resetError,
+    });
+  };
 }

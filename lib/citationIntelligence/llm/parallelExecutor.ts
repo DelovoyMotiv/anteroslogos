@@ -242,7 +242,7 @@ export class ParallelExecutor {
   ): AggregatedResult<T> {
     const successful: ParallelResult<T>[] = [];
     const failed: ParallelResult<T>[] = [];
-    let totalTime = 0;
+    const totalTime = 0;
     
     // Separate successful and failed results
     results.forEach((value, id) => {

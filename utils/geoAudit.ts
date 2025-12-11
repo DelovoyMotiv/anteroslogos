@@ -111,7 +111,7 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
   try {
     const engine = createExtractionEngine();
     extractionResult = await engine.extract(normalizedUrl, { mode: 'fast' });
-  } catch (error) {
+  } catch {
     throw new Error('Failed to fetch website. Please check the URL and try again.');
   }
 

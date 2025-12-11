@@ -15,8 +15,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import {
   generateAgentKey,
-  listAgentKeys,
-  revokeAgentKey,
   deleteAgentKey,
 } from '../lib/dashboard/agent-keys';
 import { supabase } from '../lib/supabase';

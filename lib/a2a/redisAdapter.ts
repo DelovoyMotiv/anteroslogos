@@ -65,7 +65,7 @@ export function createRedisClient(): RedisClient {
       });
       
       return client;
-    } catch (error) {
+    } catch {
       if (process.env.NODE_ENV === 'production') {
         throw new Error('Redis module (ioredis) not available in production. Install with: npm install ioredis');
       }

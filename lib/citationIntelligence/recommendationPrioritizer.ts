@@ -100,7 +100,7 @@ export function calculateCausalImpact(
   
   // Calculate confidence intervals (95% CI using t-distribution approximation)
   const degreesOfFreedom = before.length + after.length - 2;
-  const tCritical = getTCritical(degreesOfFreedom, 0.05);
+  const tCritical = getTCritical(degreesOfFreedom);
   const marginOfError = tCritical * standardError;
   
   const confidence = {
@@ -130,8 +130,9 @@ export function calculateCausalImpact(
 /**
  * Get t-critical value for confidence interval calculation
  * Approximation for common degrees of freedom
+ * Currently uses 95% CI (alpha = 0.05)
  */
-function getTCritical(df: number, _alpha: number): number {
+function getTCritical(df: number): number {
   // For 95% CI (alpha = 0.05), approximate t-critical values
   if (df >= 30) return 1.96; // Normal approximation
   if (df >= 20) return 2.086;

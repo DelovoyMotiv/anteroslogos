@@ -22,8 +22,12 @@ if (!isConfigured) {
 /**
  * Supabase client instance
  * Configured with production settings for optimal performance
- * Will be null if env variables are not set
+ * Throws error if env variables are not set in production
  */
+if (!isConfigured && process.env.NODE_ENV === 'production') {
+  throw new Error('Supabase configuration required in production. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY');
+}
+
 export const supabase = isConfigured ? createClient<Database>(supabaseUrl!, supabaseAnonKey!, {
   auth: {
     autoRefreshToken: true,
@@ -54,6 +58,17 @@ export const supabase = isConfigured ? createClient<Database>(supabaseUrl!, supa
  */
 export function isSupabaseConfigured(): boolean {
   return isConfigured;
+}
+
+/**
+ * Get Supabase client with proper error handling
+ * Throws error if not configured to help catch configuration issues early
+ */
+export function getSupabaseClient() {
+  if (!supabase) {
+    throw new Error('Supabase client not configured. Check environment variables.');
+  }
+  return supabase;
 }
 
 /**

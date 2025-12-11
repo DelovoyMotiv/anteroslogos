@@ -8,9 +8,6 @@
 import { trace, context, SpanStatusCode, Span, propagation } from '@opentelemetry/api';
 import { getTracer } from './tracer';
 import type { Request, Response, NextFunction } from 'express';
-// ResponseEndArgs reserved for future use
-// @ts-expect-error - Reserved for future use
-import type { ResponseEndArgs } from '../../types/lib.types';
 
 export const TRACE_PARENT_HEADER = 'traceparent';
 export const TRACE_STATE_HEADER = 'tracestate';

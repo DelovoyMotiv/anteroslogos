@@ -368,12 +368,10 @@ export interface AbuseCheckResult {
 /**
  * Perform comprehensive abuse check for signup
  * @param ipAddress - Client IP
- * @param _email - User email (reserved for future use)
  * @returns Combined abuse check result
  */
 export async function checkSignupAbuse(
-  ipAddress: string,
-  _email: string
+  ipAddress: string
 ): Promise<AbuseCheckResult> {
   const rateLimitResult = await checkSignupRateLimit(ipAddress);
 

@@ -11,7 +11,6 @@
  * - SHA-256 hashing of refresh tokens in database
  */
 
-// @ts-ignore - jsonwebtoken types are not available
 import jwt from 'jsonwebtoken';
 import { createHash, randomBytes } from 'crypto';
 import { supabase } from '../supabase';

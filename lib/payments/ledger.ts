@@ -155,7 +155,7 @@ export async function listLedgerEntries(
   }
 
   return (data as LedgerRow[]).map((row) => {
-    const entry: LedgerEntry = {
+    const entryData = {
       id: row.id,
       userId: row.user_id,
       walletId: row.wallet_id || undefined,
@@ -169,7 +169,7 @@ export async function listLedgerEntries(
       description: row.description || undefined,
       createdAt: new Date(row.created_at),
     };
-    return LedgerEntrySchema.parse(entry);
+    return LedgerEntrySchema.parse(entryData) as LedgerEntry;
   });
 }
 
@@ -231,7 +231,7 @@ export async function recordDeposit(input: DepositInput): Promise<LedgerEntry> {
   const row = ledgerRow as LedgerRow;
 
   // Convert to public type
-  const entry: LedgerEntry = {
+  const entryData = {
     id: row.id,
     userId: row.user_id,
     walletId: row.wallet_id || undefined,
@@ -246,7 +246,7 @@ export async function recordDeposit(input: DepositInput): Promise<LedgerEntry> {
     createdAt: new Date(row.created_at),
   };
 
-  return LedgerEntrySchema.parse(entry);
+  return LedgerEntrySchema.parse(entryData) as LedgerEntry;
 }
 
 /**
@@ -329,7 +329,7 @@ export async function recordRefund(input: RefundInput): Promise<LedgerEntry> {
   const row = ledgerRow as LedgerRow;
 
   // Convert to public type
-  const entry: LedgerEntry = {
+  const entryData = {
     id: row.id,
     userId: row.user_id,
     walletId: row.wallet_id || undefined,
@@ -344,7 +344,7 @@ export async function recordRefund(input: RefundInput): Promise<LedgerEntry> {
     createdAt: new Date(row.created_at),
   };
 
-  return LedgerEntrySchema.parse(entry);
+  return LedgerEntrySchema.parse(entryData) as LedgerEntry;
 }
 
 /**

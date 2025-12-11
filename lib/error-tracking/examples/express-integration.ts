@@ -150,7 +150,7 @@ app.get('/api/crash', () => {
 // app.use(sentryErrorMiddleware());
 
 // Custom error handler (after Sentry)
-app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+app.use((err: Error, _req: express.Request, res: express.Response) => {
   if (err instanceof ApplicationError) {
     res.status(err.statusCode).json(err.toAPIResponse());
   } else {

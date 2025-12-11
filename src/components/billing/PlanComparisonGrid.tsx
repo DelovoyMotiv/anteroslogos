@@ -1,9 +1,7 @@
-// @ts-nocheck
 /**
  * Plan Comparison Grid Component
  * Displays all subscription tiers with enhanced hover states, badges, and tooltips
  */
-
 
 import { Loader2 } from 'lucide-react';
 import { PLAN_CONFIG, type USDCSubscription } from '../../../lib/dashboard/billing-client';
@@ -16,14 +14,6 @@ interface PlanComparisonGridProps {
 
 export function PlanComparisonGrid({ subscription, subscribing, onSubscribe }: PlanComparisonGridProps) {
   const currentPlan = subscription?.plan_tier || 'free';
-
-  // Scroll to plans section
-  const scrollToPlans = () => {
-    const element = document.getElementById('plans-section');
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
 
   return (
     <div id="plans-section" className="scroll-mt-8">
@@ -42,7 +32,6 @@ export function PlanComparisonGrid({ subscription, subscribing, onSubscribe }: P
           const isPaidPlan = key !== 'free';
           const canSubscribe = isPaidPlan && !isCurrentPlan && subscription?.status === 'active';
           const isMostPopular = key === 'pro';
-          const isEnterprise = key === 'enterprise';
 
           return (
             <div

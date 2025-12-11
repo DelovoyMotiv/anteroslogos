@@ -112,7 +112,6 @@ export interface ContentStrategy {
 
 export class ContentGapDetector {
   private gaps: Map<string, ContentGap> = new Map();
-  // @ts-ignore - ourDomain may be used in future for domain-specific logic
   constructor(private ourDomain: string) {}
   
   /**

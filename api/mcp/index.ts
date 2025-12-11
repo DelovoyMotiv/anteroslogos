@@ -16,7 +16,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { ALL_TOOLS, INFRA_TOOLS, toClaudeTool, toOpenAIFunction } from '../../lib/mcp/schemas';
+import { ALL_TOOLS, toClaudeTool, toOpenAIFunction } from '../../lib/mcp/schemas';
 import { createClient } from '@supabase/supabase-js';
 import { executeProgrammatic } from '../../app/api/mcp/programmatic/route';
 import { MeshNetworkRouter, type UCPTCascadeMessage } from '../../lib/mesh/network';
@@ -31,17 +31,12 @@ import {
   McpResourcesReadParamsSchema,
   McpPromptsGetParamsSchema,
 } from '../../lib/validation/apiSchemas';
+import type { isInitializableRouter, ValidatedApiHandler } from '../../types/api.types';
+import type { JSONObject } from '../../types/common.types';
 
 // =====================================================
 // MCP PROTOCOL TYPES (2024-11-05 Spec)
 // =====================================================
-
-interface JsonRpcRequest {
-  jsonrpc: '2.0';
-  id: string | number;
-  method: string;
-  params?: Record<string, unknown>;
-}
 
 interface JsonRpcResponse {
   jsonrpc: '2.0';
@@ -74,7 +69,7 @@ const MCP_SERVER_INFO = {
 // =====================================================
 
 function getMcpTools() {
-  return Object.entries(ALL_TOOLS).map(([_key, tool]) => ({
+  return Object.entries(ALL_TOOLS).map(([, tool]) => ({
     name: tool.name,
     title: tool.name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()), // MCP 2025-06-18: title field
     description: tool.description,
@@ -208,8 +203,6 @@ async function broadcastUCPTCascade(
   sourceAid: string
 ): Promise<void> {
   const router = getMeshRouter();
-  
-import type { InitializableRouter, isInitializableRouter, ValidatedApiHandler } from '../../types/api.types';
 
   // Ensure router is initialized
   if (isInitializableRouter(router) && !router.initialized) {
@@ -301,7 +294,7 @@ async function executeToolCall(
         break;
       }
 
-      case 'auditSite': {
+      case 'anoteros_logos': {
         const url = args.url as string;
         const useAI = Boolean(args.useAI || false);
         if (!url) throw new Error('Missing required parameter: url');
@@ -389,8 +382,6 @@ async function executeToolCall(
         // Enforce allowed_callers policy: these heavy tools must be called from code_execution
         const allowedFromCode = ['synthesizeNode', 'causal_citation_trace', 'predictive_synthesis', 'federated_authority_boost'];
         if (allowedFromCode.includes(name)) {
-import type { JSONObject } from '../../types/common.types';
-
           const caller = (args.caller as JSONObject | undefined)?.type as string | undefined;
           if (caller !== 'code_execution_20250825' && caller !== 'code_execution') {
             throw new Error(`Tool ${name} must be invoked via Programmatic Tool Calling (caller=code_execution_20250825).`);
@@ -548,7 +539,7 @@ async function handlePromptsGet(params: Record<string, unknown>): Promise<unknow
           role: 'user',
           content: {
             type: 'text',
-            text: `Analyze the GEO audit results for ${args.url || '[URL]'}${args.focus_area ? ` with focus on ${args.focus_area}` : ''}. Use the auditSite tool to get the current scores, then provide actionable recommendations to improve AI visibility and citation probability.`,
+            text: `Analyze the GEO audit results for ${args.url || '[URL]'}${args.focus_area ? ` with focus on ${args.focus_area}` : ''}. Use the anoteros_logos tool to get the current scores, then provide actionable recommendations to improve AI visibility and citation probability.`,
           },
         },
       ];
@@ -734,3 +725,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
   return postHandler(req, res);
 }
+
+// Export executeToolCall for testing
+export { executeToolCall };

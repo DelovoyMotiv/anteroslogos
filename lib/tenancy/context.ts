@@ -21,7 +21,7 @@ type AsyncLocalStorageClass<T> = {
 
 let AsyncLocalStorage: AsyncLocalStorageClass<TenantContext> | null = null;
 try {
-  // @ts-ignore - dynamic require for Node.js environment
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   AsyncLocalStorage = require('node:async_hooks').AsyncLocalStorage;
 } catch {
   // Browser environment - AsyncLocalStorage not available

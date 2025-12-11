@@ -185,7 +185,7 @@ export class ErrorFactory {
           options.cause || new Error(options.message)
         );
       
-      case ErrorType.EXTERNAL_SERVICE:
+      case ErrorType.EXTERNAL_SERVICE: {
         const extOptions = options as ExternalServiceErrorOptions;
         return new ExternalServiceError(
           extOptions.message,
@@ -193,41 +193,46 @@ export class ErrorFactory {
           extOptions.service,
           extOptions.retryable ?? true
         );
+      }
       
-      case ErrorType.NETWORK:
+      case ErrorType.NETWORK: {
         return new NetworkError(
           options.message,
           correlationId,
           true,
           options.metadata
         );
+      }
       
-      case ErrorType.RATE_LIMIT:
+      case ErrorType.RATE_LIMIT: {
         const rateLimitOptions = options as RateLimitErrorOptions;
         return new RateLimitError(
           rateLimitOptions.message,
           correlationId,
           rateLimitOptions.retryAfter
         );
+      }
       
-      case ErrorType.NOT_FOUND:
+      case ErrorType.NOT_FOUND: {
         const notFoundOptions = options as NotFoundErrorOptions;
         return new NotFoundError(
           notFoundOptions.message,
           correlationId,
           notFoundOptions.resource
         );
+      }
       
-      case ErrorType.CONFLICT:
+      case ErrorType.CONFLICT: {
         const conflictOptions = options as ConflictErrorOptions;
         return new ConflictError(
           conflictOptions.message,
           correlationId,
           { resource: conflictOptions.resource, conflictType: conflictOptions.conflictType, ...conflictOptions.metadata }
         );
+      }
       
       case ErrorType.GENERIC:
-      default:
+      default: {
         const genericOptions = typeof options === 'string' ? { message: options } : options;
         return new ApplicationError(
           genericOptions.message,
@@ -236,6 +241,7 @@ export class ErrorFactory {
           correlationId,
           (genericOptions as any).metadata as Record<string, unknown> | undefined
         );
+      }
     }
   }
 

@@ -13,12 +13,10 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { supabase } from '../lib/supabase';
 import { 
   createAPIKey, 
-  listAPIKeys, 
   deleteAPIKey 
 } from '../lib/dashboard/api-keys';
 import {
   generateAgentKey,
-  listAgentKeys,
   deleteAgentKey,
 } from '../lib/dashboard/agent-keys';
 
@@ -137,7 +135,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           return res.status(201).json(result);
         }
 
-      case 'PUT':
+      case 'PUT': {
         // Update key
         if (!id || typeof id !== 'string') {
           return res.status(400).json({ error: 'Missing key ID' });
@@ -181,8 +179,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         } as any);
 
         return res.status(200).json(updated);
+      }
 
-      case 'DELETE':
+      case 'DELETE': {
         // Delete key
         if (!id || typeof id !== 'string') {
           return res.status(400).json({ error: 'Missing key ID' });
@@ -196,6 +195,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
 
         return res.status(204).end();
+      }
 
       default:
         return res.status(405).json({ error: 'Method not allowed' });

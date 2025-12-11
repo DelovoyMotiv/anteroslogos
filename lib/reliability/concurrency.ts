@@ -14,9 +14,7 @@
  */
 
 import { SupabaseClient } from '@supabase/supabase-js';
-// ConflictError reserved for future use
-// @ts-expect-error - Reserved for future use
-import { ConflictError, DatabaseError } from './errors';
+import { DatabaseError } from './errors';
 
 /**
  * Execute a database operation with pessimistic locking (SELECT FOR UPDATE)

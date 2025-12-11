@@ -212,15 +212,15 @@ export function useFormState<T extends Record<string, string>>(
 
   const handleChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    // @ts-ignore - React setState functional update
+    // @ts-expect-error - React setState functional update type inference
     setValues(prev => ({ ...prev, [name]: value } as T));
     // Clear error when user starts typing
-    // @ts-ignore - React setState functional update
+    // @ts-expect-error - React setState functional update type inference
     setErrorsState(prev => ({ ...prev, [name]: undefined }));
   }, []);
 
   const setError = React.useCallback((field: keyof T, error: string | undefined) => {
-    // @ts-ignore - React setState functional update
+    // @ts-expect-error - React setState functional update type inference
     setErrorsState(prev => ({ ...prev, [field as string]: error }));
   }, []);
 

@@ -147,7 +147,7 @@ export class UCPTCascadeProtocol {
     }
     
     // Verify token if requested
-    let verificationPassed = true;
+    const verificationPassed = true;
     if (verifyBeforeStore) {
       const verification = await verifyUCPT(ucpt, {
         skipRateLimit: true,
