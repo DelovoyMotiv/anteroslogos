@@ -21,39 +21,45 @@ export function calculateAIVisibilityScore(result: AuditResult): {
   overall: number;
   factors: VisibilityFactor[];
 } {
+  // Safety check
+  if (!result || !result.scores) {
+    console.error('calculateAIVisibilityScore: Invalid result object', result);
+    return { overall: 0, factors: [] };
+  }
+
   // Key factors for AI visibility with weights
   const factors: VisibilityFactor[] = [
     {
       name: 'AI Access',
-      score: result.scores.aiCrawlers,
+      score: result.scores.aiCrawlers ?? 0,
       weight: 0.25, // 25% - Most critical
       icon: Eye,
       color: 'text-purple-400',
     },
     {
       name: 'Authority',
-      score: result.scores.eeat,
+      score: result.scores.eeat ?? 0,
       weight: 0.20, // 20% - Trust signals
       icon: Shield,
       color: 'text-blue-400',
     },
     {
       name: 'Structure',
-      score: (result.scores.schemaMarkup + result.scores.structure) / 2,
+      score: ((result.scores.schemaMarkup ?? 0) + (result.scores.structure ?? 0)) / 2,
       weight: 0.20, // 20% - Parsability
       icon: FileText,
       color: 'text-green-400',
     },
     {
       name: 'Content',
-      score: (result.scores.contentQuality + result.scores.citationPotential) / 2,
+      score: ((result.scores.contentQuality ?? 0) + (result.scores.citationPotential ?? 0)) / 2,
       weight: 0.20, // 20% - Quality & citeability
       icon: TrendingUp,
       color: 'text-yellow-400',
     },
     {
       name: 'Technical',
-      score: (result.scores.technicalSEO + result.scores.performance) / 2,
+      score: ((result.scores.technicalSEO ?? 0) + (result.scores.performance ?? 0)) / 2,
       weight: 0.15, // 15% - Accessibility
       icon: Zap,
       color: 'text-orange-400',

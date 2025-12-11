@@ -31,7 +31,7 @@ const ExecutiveSummary = ({ result, advancedMetrics }: ExecutiveSummaryProps) =>
 
   // Calculate performance from advanced metrics or fallback
   const performanceScore = advancedMetrics?.coreWebVitals?.performanceScore ?? result.scores.performance;
-  const securityScore = advancedMetrics?.security?.securityScore ?? (result.details.technicalSEO.isHTTPS ? 75 : 30);
+  const securityScore = advancedMetrics?.security?.securityScore ?? (result.details?.technicalSEO?.isHTTPS ? 75 : 30);
   const mobileScore = advancedMetrics?.mobile?.mobileFriendlyScore ?? 70;
   const accessibilityScore = advancedMetrics?.accessibility?.accessibilityScore ?? 60;
 
@@ -110,7 +110,7 @@ const ExecutiveSummary = ({ result, advancedMetrics }: ExecutiveSummaryProps) =>
     {
       label: 'Link Analysis',
       score: result.scores.linkAnalysis,
-      grade: `${result.details.linkAnalysis.totalLinks} links`,
+      grade: `${result.details?.linkAnalysis?.totalLinks ?? 0} links`,
     },
   ];
 
@@ -240,23 +240,23 @@ const ExecutiveSummary = ({ result, advancedMetrics }: ExecutiveSummaryProps) =>
       <div className="grid grid-cols-6 gap-2">
         <div className="p-2 bg-white/5 rounded text-center">
           <div className="text-[9px] text-white/40 mb-0.5 uppercase font-medium">Schemas</div>
-          <div className="text-base font-bold tabular-nums">{result.details.schemaMarkup.validSchemas}</div>
+          <div className="text-base font-bold tabular-nums">{result.details?.schemaMarkup?.validSchemas ?? 0}</div>
         </div>
         <div className="p-2 bg-white/5 rounded text-center">
           <div className="text-[9px] text-white/40 mb-0.5 uppercase font-medium">AI Crawlers</div>
-          <div className="text-base font-bold tabular-nums">{result.details.aiCrawlers.totalAICrawlers}</div>
+          <div className="text-base font-bold tabular-nums">{result.details?.aiCrawlers?.totalAICrawlers ?? 0}</div>
         </div>
         <div className="p-2 bg-white/5 rounded text-center">
           <div className="text-[9px] text-white/40 mb-0.5 uppercase font-medium">Word Count</div>
-          <div className="text-base font-bold tabular-nums">{result.details.contentQuality.wordCount}</div>
+          <div className="text-base font-bold tabular-nums">{result.details?.contentQuality?.wordCount ?? 0}</div>
         </div>
         <div className="p-2 bg-white/5 rounded text-center">
           <div className="text-[9px] text-white/40 mb-0.5 uppercase font-medium">Links</div>
-          <div className="text-base font-bold tabular-nums">{result.details.linkAnalysis.totalLinks}</div>
+          <div className="text-base font-bold tabular-nums">{result.details?.linkAnalysis?.totalLinks ?? 0}</div>
         </div>
         <div className="p-2 bg-white/5 rounded text-center">
           <div className="text-[9px] text-white/40 mb-0.5 uppercase font-medium">Images</div>
-          <div className="text-base font-bold tabular-nums">{result.details.contentQuality.imageCount}</div>
+          <div className="text-base font-bold tabular-nums">{result.details?.contentQuality?.imageCount ?? 0}</div>
         </div>
         <div className="p-2 bg-white/5 rounded text-center">
           <div className="text-[9px] text-white/40 mb-0.5 uppercase font-medium">Issues</div>
