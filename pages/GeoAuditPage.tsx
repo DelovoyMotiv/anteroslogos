@@ -139,6 +139,25 @@ const GeoAuditPage = () => {
         console.log('Competitive comparison:', competitiveComparison);
       }
       
+      // DEBUG: Log audit result structure
+      console.log('=== AUDIT RESULT DEBUG ===');
+      console.log('Full Result:', auditResult);
+      console.log('Details:', auditResult.details);
+      console.log('Details keys:', Object.keys(auditResult.details));
+      console.log('Recommendations count:', auditResult.recommendations?.length || 0);
+      console.log('Insights count:', auditResult.insights?.length || 0);
+      console.log('Knowledge Graph:', auditResult.knowledgeGraph ? 'Present' : 'Missing');
+      
+      // Check each detail category
+      Object.entries(auditResult.details).forEach(([category, details]) => {
+        console.log(`Category: ${category}`, {
+          hasIssues: Array.isArray((details as any).issues),
+          issuesCount: (details as any).issues?.length || 0,
+          hasStrengths: Array.isArray((details as any).strengths),
+          strengthsCount: (details as any).strengths?.length || 0,
+        });
+      });
+      
       setResult(auditResult);
       setError(''); // Clear any previous errors on success
     } catch (err) {
@@ -794,10 +813,28 @@ const GeoAuditPage = () => {
             {/* Detailed Analysis - Compact Grid */}
             <div className="mb-12">
               <h3 className="text-xl font-bold text-white mb-4 tracking-tight">Detailed Analysis</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {Object.entries(result.details)
-                  .filter(([category]) => category !== 'aidAgent') // AID has dedicated section
-                  .map(([category, details]: [string, any]) => (
+              {(() => {
+                console.log('=== RENDERING DETAILED ANALYSIS ===');
+                console.log('result.details exists:', !!result.details);
+                console.log('result.details keys:', result.details ? Object.keys(result.details) : 'N/A');
+                const entries = Object.entries(result.details || {});
+                console.log('Total entries:', entries.length);
+                const filtered = entries.filter(([category]) => category !== 'aidAgent');
+                console.log('Filtered entries:', filtered.length);
+                return null;
+              })()}
+              {result.details ? (
+                Object.keys(result.details).length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {Object.entries(result.details)
+                      .filter(([category]) => category !== 'aidAgent') // AID has dedicated section
+                      .map(([category, details]: [string, any]) => {
+                        console.log(`Rendering category: ${category}`, {
+                          hasDetails: !!details,
+                          hasIssues: Array.isArray(details?.issues),
+                          hasStrengths: Array.isArray(details?.strengths),
+                        });
+                        return (
                   <div key={category} className="p-3 bg-white/5 border border-white/10 rounded-lg space-y-3">
                     <h4 className="text-xs font-bold text-white uppercase tracking-wide pb-2 border-b border-white/10">
                       {category.replace(/([A-Z])/g, ' $1').trim()}
@@ -831,8 +868,19 @@ const GeoAuditPage = () => {
                       </div>
                     )}
                   </div>
-                ))}
-              </div>
+                        );
+                      })}
+                  </div>
+                ) : (
+                  <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                    <p className="text-yellow-400">⚠️ No detailed analysis data available (details object is empty)</p>
+                  </div>
+                )
+              ) : (
+                <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg">
+                  <p className="text-red-400">❌ Details object is undefined or null</p>
+                </div>
+              )}
             </div>
 
             {/* Monitoring Alerts - Grid Layout */}
