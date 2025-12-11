@@ -30,7 +30,14 @@ export default defineConfig(({ mode }) => {
       },
       optimizeDeps: {
         include: ['@noble/curves', '@noble/hashes', '@noble/ed25519'],
-        exclude: ['vfile'],
+        exclude: [
+          'vfile',
+          'puppeteer',
+          'puppeteer-core',
+          'playwright',
+          'playwright-core',
+          'chromium-bidi',
+        ],
         esbuildOptions: {
           target: 'esnext',
         },
@@ -49,6 +56,11 @@ export default defineConfig(({ mode }) => {
             'module',
             'jsdom', // Exclude jsdom from browser bundle
             'vitest', // Exclude vitest from browser bundle
+            'puppeteer', // Exclude Puppeteer from browser bundle
+            'puppeteer-core',
+            'playwright', // Exclude Playwright from browser bundle
+            'playwright-core',
+            'chromium-bidi',
           ],
           output: {
             manualChunks: {

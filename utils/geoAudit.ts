@@ -3,7 +3,8 @@
  * Client-side website analysis for Generative Engine Optimization
  */
 
-import { createExtractionEngine } from '../lib/engine/extractor';
+// Dynamic import to avoid bundling server-side dependencies (Puppeteer) in browser bundle
+// import { createExtractionEngine } from '../lib/engine/extractor';
 import type { ExtractionResult } from '../types/agent-middleware.types';
 
 export interface AuditResult {
@@ -126,6 +127,9 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
   
   try {
     const browserEnabled = process.env.BROWSER_ENABLED !== 'false';
+    
+    // Dynamic import to avoid bundling Puppeteer in browser bundle
+    const { createExtractionEngine } = await import('../lib/engine/extractor');
     const engine = createExtractionEngine({ enableBrowser: browserEnabled });
     extractionResult = await engine.extract(normalizedUrl, { mode: 'fast' });
     
@@ -357,6 +361,8 @@ function auditMetaTags(doc: Document): MetaTagsDetails {
  */
 async function auditAICrawlers(baseUrl: string): Promise<AICrawlersDetails> {
   // Use enhanced validation from ExtractionEngine
+  // Dynamic import to avoid bundling Puppeteer in browser bundle
+  const { createExtractionEngine } = await import('../lib/engine/extractor');
   const engine = createExtractionEngine();
   const robotsValidation = await engine.validateRobotsTxt(baseUrl);
   

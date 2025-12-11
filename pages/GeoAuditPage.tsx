@@ -888,7 +888,7 @@ const GeoAuditPage = () => {
                       {category.replace(/([A-Z])/g, ' $1').trim()}
                     </h4>
                     
-                    {details.strengths.length > 0 && (
+                    {details?.strengths && Array.isArray(details.strengths) && details.strengths.length > 0 && (
                       <div className="space-y-1.5">
                         <p className="text-[10px] text-green-400 font-bold uppercase tracking-wide">Strengths</p>
                         <ul className="space-y-1.5">
@@ -902,7 +902,7 @@ const GeoAuditPage = () => {
                       </div>
                     )}
 
-                    {details.issues.length > 0 && (
+                    {details?.issues && Array.isArray(details.issues) && details.issues.length > 0 && (
                       <div className="space-y-1.5">
                         <p className="text-[10px] text-orange-400 font-bold uppercase tracking-wide">Issues</p>
                         <ul className="space-y-1.5">
@@ -913,6 +913,12 @@ const GeoAuditPage = () => {
                             </li>
                           ))}
                         </ul>
+                      </div>
+                    )}
+                    
+                    {(!details?.strengths || details.strengths.length === 0) && (!details?.issues || details.issues.length === 0) && (
+                      <div className="text-center py-4">
+                        <p className="text-xs text-white/40">No data available for this category</p>
                       </div>
                     )}
                   </div>
