@@ -422,7 +422,7 @@ async function mainHandler(
 // Apply middleware: CORS -> Rate Limiting -> Validation
 export default compose(
   withCors,
-  (handler) => withRateLimit(handler, { limit: 60, window: 60000 }),
+  (handler) => withRateLimit(handler, { maxRequests: 60, windowMs: 60000 }),
   (handler) => withValidation(
     {
       bodySchema: z.union([CreateTenantSchema, UpdateTenantSchema]).optional(),

@@ -149,8 +149,11 @@ async function handleGet(req: VercelRequest, res: VercelResponse) {
 async function handlePost(
   req: VercelRequest,
   res: VercelResponse,
-  validated: { body: z.infer<typeof CreateSubscriptionSchema> }
+  validated?: { body: z.infer<typeof CreateSubscriptionSchema> }
 ) {
+  if (!validated) {
+    return res.status(400).json({ error: 'Invalid request body' });
+  }
   const user = await getAuthenticatedUser(req);
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -229,8 +232,11 @@ async function handlePost(
 async function handlePut(
   req: VercelRequest,
   res: VercelResponse,
-  validated: { body: z.infer<typeof UpdateSubscriptionSchema> }
+  validated?: { body: z.infer<typeof UpdateSubscriptionSchema> }
 ) {
+  if (!validated) {
+    return res.status(400).json({ error: 'Invalid request body' });
+  }
   const user = await getAuthenticatedUser(req);
   if (!user) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -360,7 +366,7 @@ async function mainHandler(
   req: VercelRequest,
   res: VercelResponse,
   validated?: SubscriptionValidated
-): Promise<void> {
+): Promise<void | VercelResponse> {
   switch (req.method) {
     case 'GET':
       return handleGet(req, res);
