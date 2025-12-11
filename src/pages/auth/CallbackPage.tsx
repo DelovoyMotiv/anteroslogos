@@ -65,23 +65,12 @@ export function CallbackPage() {
           }
         }
 
-        // Success - check if onboarding completed
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('onboarding_completed')
-          .eq('id', session.user.id)
-          .single();
-
+        // Success - redirect directly to dashboard
         setState('success');
         
-        // Redirect to onboarding if not completed, otherwise dashboard
+        // Always redirect to dashboard (onboarding is now optional)
         setTimeout(() => {
-          const hasCompleted = (profile as unknown as { onboarding_completed?: boolean })?.onboarding_completed;
-          if (!hasCompleted) {
-            navigate('/onboarding', { replace: true });
-          } else {
-            navigate('/dashboard', { replace: true });
-          }
+          navigate('/dashboard', { replace: true });
         }, 1500);
       } catch (err: unknown) {
         console.error('Auth callback error:', err);
