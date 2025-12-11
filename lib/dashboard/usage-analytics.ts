@@ -592,11 +592,13 @@ export async function getCurrentCycleUsage(
     }
     
     // Get subscription to determine cycle dates
-    const { data: subscription } = await supabase
+    const { data: subscriptions } = await supabase
       .from('subscriptions')
       .select('current_period_start, current_period_end')
       .eq('user_id', userId)
-      .single();
+      .limit(1);
+
+    const subscription = subscriptions?.[0];
 
     const startDate = subscription?.current_period_start
       ? new Date(subscription.current_period_start)

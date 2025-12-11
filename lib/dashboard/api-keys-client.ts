@@ -31,7 +31,7 @@ export async function listAPIKeys(): Promise<APIKey[] | { error: string }> {
       supabase,
       'api_keys',
       APIKeySchema,
-      { user_id: user.id, is_active: true }
+      { user_id: user.id, revoked: false }
     );
 
     if (error) {
