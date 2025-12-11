@@ -1276,35 +1276,103 @@ function auditMetaTags(doc: Document): MetaTagsDetails {
 }
 
 async function auditAICrawlers(baseUrl: string): Promise<AICrawlersDetails> {
-  // Fetch robots.txt
+  // Fetch robots.txt with CORS proxy fallback
   let robotsTxtFound = false;
   let robotsTxt = '';
   
+  const robotsUrl = new URL('/robots.txt', baseUrl).href;
+  const corsProxies = [
+    'https://api.allorigins.win/raw?url=',
+    'https://corsproxy.io/?',
+  ];
+  
+  // Try direct fetch first
   try {
-    const robotsUrl = new URL('/robots.txt', baseUrl).href;
-    const response = await fetch(robotsUrl);
+    const response = await fetch(robotsUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; GEOAuditBot/1.0)',
+      },
+    });
+    
     if (response.ok) {
-      robotsTxt = (await response.text()).toLowerCase();
-      robotsTxtFound = true;
+      const text = await response.text();
+      // Check if it's actually robots.txt (not HTML 404 page)
+      if (!text.trim().startsWith('<!DOCTYPE') && !text.trim().startsWith('<html')) {
+        robotsTxt = text.toLowerCase();
+        robotsTxtFound = true;
+      }
     }
   } catch (error) {
-    console.log('Failed to fetch robots.txt:', error);
+    console.log('Direct fetch of robots.txt failed, trying CORS proxies...');
+  }
+  
+  // Try CORS proxies if direct fetch failed
+  if (!robotsTxtFound) {
+    for (const proxy of corsProxies) {
+      try {
+        const response = await fetch(proxy + encodeURIComponent(robotsUrl));
+        if (response.ok) {
+          const text = await response.text();
+          // Check if it's actually robots.txt (not HTML 404 page)
+          if (!text.trim().startsWith('<!DOCTYPE') && !text.trim().startsWith('<html')) {
+            robotsTxt = text.toLowerCase();
+            robotsTxtFound = true;
+            break;
+          }
+        }
+      } catch (error) {
+        console.log(`Proxy ${proxy} failed for robots.txt, trying next...`);
+      }
+    }
+  }
+  
+  if (!robotsTxtFound) {
+    console.log('Failed to fetch robots.txt after all attempts');
   }
   
   // Check for specific AI crawlers
-  const checkCrawler = (name: string) => robotsTxt.includes(name.toLowerCase()) && !robotsTxt.includes(`user-agent: ${name.toLowerCase()}\ndisallow: /`);
+  // A crawler is considered "allowed" if:
+  // 1. It's NOT explicitly blocked with "Disallow: /" 
+  // 2. OR it's not mentioned at all (default allow)
+  const checkCrawler = (names: string[]) => {
+    if (!robotsTxtFound) return false;
+    
+    for (const name of names) {
+      const lowerName = name.toLowerCase();
+      // Check if this crawler is explicitly blocked
+      const userAgentPattern = new RegExp(`user-agent:\\s*${lowerName}[\\s\\n]`, 'i');
+      const match = robotsTxt.match(userAgentPattern);
+      
+      if (match) {
+        // Found user-agent, check if it's blocked
+        const startIndex = robotsTxt.indexOf(match[0]);
+        const nextUserAgentIndex = robotsTxt.indexOf('user-agent:', startIndex + match[0].length);
+        const section = nextUserAgentIndex > -1 
+          ? robotsTxt.substring(startIndex, nextUserAgentIndex)
+          : robotsTxt.substring(startIndex);
+        
+        // Check if this section has "Disallow: /"
+        const isBlocked = /disallow:\s*\/\s*($|\n)/i.test(section);
+        if (!isBlocked) return true; // Explicitly allowed or partially allowed
+      }
+    }
+    
+    // If not mentioned, assume allowed (default behavior)
+    return true;
+  };
   
-  const allowsGPTBot = checkCrawler('gptbot');
-  const allowsClaude = checkCrawler('claude-web') || checkCrawler('claudebot');
-  const allowsPerplexity = checkCrawler('perplexitybot');
-  const allowsGoogleExtended = checkCrawler('google-extended');
-  const allowsAnthropicAI = checkCrawler('anthropic-ai');
-  const allowsCohere = checkCrawler('cohere-ai');
-  const allowsCCBot = checkCrawler('ccbot');
+  const allowsGPTBot = checkCrawler(['gptbot', 'chatgpt-user']);
+  const allowsClaude = checkCrawler(['claude-web', 'claudebot', 'anthropic-ai']);
+  const allowsPerplexity = checkCrawler(['perplexitybot']);
+  const allowsGoogleExtended = checkCrawler(['google-extended']);
+  const allowsAnthropicAI = checkCrawler(['anthropic-ai']);
+  const allowsCohere = checkCrawler(['cohere-ai', 'cohere']);
+  const allowsCCBot = checkCrawler(['ccbot']);
 
+  // Count how many AI crawlers are explicitly mentioned (blocked or allowed)
   const aiCrawlers = [
-    'gptbot', 'claude', 'perplexity', 'google-extended', 
-    'anthropic', 'cohere', 'ccbot', 'bingbot', 'applebot'
+    'gptbot', 'chatgpt', 'claude', 'perplexity', 'google-extended', 
+    'anthropic', 'cohere', 'ccbot', 'bingbot', 'applebot', 'gemini'
   ];
   const totalAICrawlers = aiCrawlers.filter(c => robotsTxt.includes(c)).length;
 
@@ -1323,17 +1391,30 @@ async function auditAICrawlers(baseUrl: string): Promise<AICrawlersDetails> {
   if (!hasSitemap) issues.push('No sitemap declared in robots.txt');
   else strengths.push('Sitemap declared');
 
-  if (!allowsGPTBot) issues.push('GPTBot not explicitly allowed');
-  else strengths.push('ChatGPT crawler allowed');
+  // Only report as issue if explicitly blocked, not if just not mentioned
+  if (!allowsGPTBot && robotsTxt.includes('gptbot')) {
+    issues.push('GPTBot explicitly blocked');
+  } else if (allowsGPTBot) {
+    strengths.push('ChatGPT crawler allowed');
+  }
 
-  if (!allowsClaude) issues.push('Claude crawler not allowed');
-  else strengths.push('Claude crawler allowed');
+  if (!allowsClaude && (robotsTxt.includes('claude') || robotsTxt.includes('anthropic'))) {
+    issues.push('Claude crawler blocked');
+  } else if (allowsClaude) {
+    strengths.push('Claude crawler allowed');
+  }
 
-  if (!allowsPerplexity) issues.push('Perplexity crawler not allowed');
-  else strengths.push('Perplexity crawler allowed');
+  if (!allowsPerplexity && robotsTxt.includes('perplexity')) {
+    issues.push('Perplexity crawler blocked');
+  } else if (allowsPerplexity) {
+    strengths.push('Perplexity crawler allowed');
+  }
 
-  if (totalAICrawlers < 3) issues.push('Limited AI crawler support');
-  else if (totalAICrawlers >= 5) strengths.push('Comprehensive AI crawler support');
+  if (totalAICrawlers >= 5) {
+    strengths.push('Comprehensive AI crawler support');
+  } else if (totalAICrawlers > 0) {
+    strengths.push(`${totalAICrawlers} AI crawlers configured`);
+  }
 
   return {
     robotsTxtFound,
