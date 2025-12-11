@@ -3,8 +3,8 @@
  * Advanced website analysis for Generative Engine Optimization
  */
 
-// Dynamic import to avoid bundling server-side dependencies (Puppeteer) in browser bundle
-// import { createExtractionEngine } from '../lib/engine/extractor';
+// Note: ExtractionEngine with Puppeteer is server-side only
+// For browser, we use simple fetch() to get HTML
 import type { ExtractionResult } from '../types/agent-middleware.types';
 import type { AIDAgentInfo } from './aidDiscovery';
 import type { KnowledgeGraph } from './knowledgeGraph/builder';
@@ -278,6 +278,48 @@ export interface LinkAnalysisDetails {
   strengths: string[];
 }
 
+// ==================== HELPER FUNCTIONS ====================
+
+/**
+ * Fetch HTML content from URL (browser-compatible)
+ * Uses CORS proxy for cross-origin requests
+ */
+async function fetchHTML(url: string): Promise<string> {
+  const corsProxies = [
+    'https://api.allorigins.win/raw?url=',
+    'https://corsproxy.io/?',
+  ];
+
+  // Try direct fetch first
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; GEOAuditBot/1.0)',
+      },
+    });
+    
+    if (response.ok) {
+      return await response.text();
+    }
+  } catch (error) {
+    console.log('Direct fetch failed, trying CORS proxies...');
+  }
+
+  // Try CORS proxies
+  for (const proxy of corsProxies) {
+    try {
+      const response = await fetch(proxy + encodeURIComponent(url));
+      if (response.ok) {
+        return await response.text();
+      }
+    } catch (error) {
+      console.log(`Proxy ${proxy} failed, trying next...`);
+    }
+  }
+
+  throw new Error('Failed to fetch website. Please check the URL and try again.');
+}
+
 // ==================== MAIN AUDIT FUNCTION ====================
 
 export async function auditWebsite(
@@ -288,27 +330,12 @@ export async function auditWebsite(
   
   const normalizedUrl = normalizeUrl(url);
   
-  // Use new Extraction Engine for fetching
-  // Browser support is enabled by default via BROWSER_ENABLED environment variable
-  let extractionResult: ExtractionResult;
-  let fallbackWarnings: string[] = [];
+  // Fetch HTML content (browser-compatible)
+  let htmlContent: string;
   
   try {
     onProgress?.('Fetching website content...');
-    const browserEnabled = process.env.BROWSER_ENABLED !== 'false';
-    
-    // Dynamic import to avoid bundling Puppeteer in browser bundle
-    const { createExtractionEngine } = await import('../lib/engine/extractor');
-    const engine = createExtractionEngine({ enableBrowser: browserEnabled });
-    extractionResult = await engine.extract(normalizedUrl, { mode: 'fast' });
-    
-    // Check for fallback warnings
-    if ((extractionResult as any).warnings) {
-      fallbackWarnings = (extractionResult as any).warnings;
-    }
-    
-    // Cleanup browser resources
-    await engine.cleanup();
+    htmlContent = await fetchHTML(normalizedUrl);
   } catch (error) {
     // Handle specific error codes from enhanced error handler
     if (error instanceof Error) {
@@ -329,7 +356,7 @@ export async function auditWebsite(
     throw new Error('Failed to fetch website. Please check the URL and try again.');
   }
 
-  const htmlContent = extractionResult.html;
+  // Parse HTML
   let doc: Document;
   if (typeof DOMParser !== 'undefined') {
     // Browser environment
@@ -511,8 +538,8 @@ export async function auditWebsite(
     },
     recommendations: defaultRecommendations,
     insights: defaultInsights,
-    // Pass through browser metadata from ExtractionEngine
-    browserMetadata: extractionResult.browserMetadata,
+    // Browser metadata not available in client-side mode
+    browserMetadata: undefined,
   };
 
   // === KNOWLEDGE GRAPH EXTRACTION ===
@@ -562,12 +589,6 @@ export async function auditWebsite(
   }
 
   onProgress?.('Analysis complete!');
-  
-  // Add fallback warnings if browser rendering failed
-  if (fallbackWarnings.length > 0) {
-    (baseResult as any).warnings = fallbackWarnings;
-    (baseResult as any).csrSupport = 'unavailable';
-  }
   
   return baseResult;
 }
@@ -1255,13 +1276,20 @@ function auditMetaTags(doc: Document): MetaTagsDetails {
 }
 
 async function auditAICrawlers(baseUrl: string): Promise<AICrawlersDetails> {
-  // Use enhanced validation from ExtractionEngine
-  const { createExtractionEngine } = await import('../lib/engine/extractor');
-  const engine = createExtractionEngine();
-  const robotsValidation = await engine.validateRobotsTxt(baseUrl);
+  // Fetch robots.txt
+  let robotsTxtFound = false;
+  let robotsTxt = '';
   
-  const robotsTxtFound = robotsValidation.found && !robotsValidation.isSoft404;
-  const robotsTxt = robotsValidation.content?.toLowerCase() || '';
+  try {
+    const robotsUrl = new URL('/robots.txt', baseUrl).href;
+    const response = await fetch(robotsUrl);
+    if (response.ok) {
+      robotsTxt = (await response.text()).toLowerCase();
+      robotsTxtFound = true;
+    }
+  } catch (error) {
+    console.log('Failed to fetch robots.txt:', error);
+  }
   
   // Check for specific AI crawlers
   const checkCrawler = (name: string) => robotsTxt.includes(name.toLowerCase()) && !robotsTxt.includes(`user-agent: ${name.toLowerCase()}\ndisallow: /`);

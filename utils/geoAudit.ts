@@ -114,32 +114,56 @@ export interface Recommendation {
 }
 
 /**
+ * Fetch HTML content from URL (browser-compatible)
+ */
+async function fetchHTML(url: string): Promise<string> {
+  const corsProxies = [
+    'https://api.allorigins.win/raw?url=',
+    'https://corsproxy.io/?',
+  ];
+
+  // Try direct fetch first
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; GEOAuditBot/1.0)',
+      },
+    });
+    
+    if (response.ok) {
+      return await response.text();
+    }
+  } catch (error) {
+    console.log('Direct fetch failed, trying CORS proxies...');
+  }
+
+  // Try CORS proxies
+  for (const proxy of corsProxies) {
+    try {
+      const response = await fetch(proxy + encodeURIComponent(url));
+      if (response.ok) {
+        return await response.text();
+      }
+    } catch (error) {
+      console.log(`Proxy ${proxy} failed, trying next...`);
+    }
+  }
+
+  throw new Error('Failed to fetch website. Please check the URL and try again.');
+}
+
+/**
  * Main audit function - analyzes a URL for GEO optimization
  */
 export async function auditWebsite(url: string): Promise<AuditResult> {
   // Normalize URL
   const normalizedUrl = normalizeUrl(url);
   
-  // Use new Extraction Engine for fetching and parsing
-  // Browser support is enabled by default via BROWSER_ENABLED environment variable
-  let extractionResult: ExtractionResult;
-  let fallbackWarnings: string[] = [];
+  // Fetch HTML content
+  let htmlContent: string;
   
   try {
-    const browserEnabled = process.env.BROWSER_ENABLED !== 'false';
-    
-    // Dynamic import to avoid bundling Puppeteer in browser bundle
-    const { createExtractionEngine } = await import('../lib/engine/extractor');
-    const engine = createExtractionEngine({ enableBrowser: browserEnabled });
-    extractionResult = await engine.extract(normalizedUrl, { mode: 'fast' });
-    
-    // Check for fallback warnings
-    if ((extractionResult as any).warnings) {
-      fallbackWarnings = (extractionResult as any).warnings;
-    }
-    
-    // Cleanup browser resources
-    await engine.cleanup();
+    htmlContent = await fetchHTML(normalizedUrl);
   } catch (error) {
     // Handle specific error codes from enhanced error handler
     if (error instanceof Error) {
@@ -160,16 +184,16 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
     throw new Error('Failed to fetch website. Please check the URL and try again.');
   }
 
-  // Parse HTML for audit-specific analysis
+  // Parse HTML
   let doc: Document;
   if (typeof DOMParser !== 'undefined') {
     // Browser environment
     const parser = new DOMParser();
-    doc = parser.parseFromString(extractionResult.html, 'text/html');
+    doc = parser.parseFromString(htmlContent, 'text/html');
   } else {
     // Node.js environment - use jsdom
     const { JSDOM } = await import('jsdom');
-    const dom = new JSDOM(extractionResult.html);
+    const dom = new JSDOM(htmlContent);
     doc = dom.window.document;
   }
 
@@ -177,7 +201,7 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
   const schemaMarkup = auditSchemaMarkup(doc);
   const metaTags = auditMetaTags(doc);
   const structure = auditStructure(doc);
-  const performance = auditPerformance(extractionResult.html, doc);
+  const performance = auditPerformance(htmlContent, doc);
   const eeat = auditEEAT(doc);
   
   // Try to fetch robots.txt
@@ -228,12 +252,6 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
     },
     recommendations,
   };
-  
-  // Add fallback warnings if browser rendering failed
-  if (fallbackWarnings.length > 0) {
-    (result as any).warnings = fallbackWarnings;
-    (result as any).csrSupport = 'unavailable';
-  }
   
   return result;
 }
@@ -360,14 +378,20 @@ function auditMetaTags(doc: Document): MetaTagsDetails {
  * Audit AI crawler support via robots.txt
  */
 async function auditAICrawlers(baseUrl: string): Promise<AICrawlersDetails> {
-  // Use enhanced validation from ExtractionEngine
-  // Dynamic import to avoid bundling Puppeteer in browser bundle
-  const { createExtractionEngine } = await import('../lib/engine/extractor');
-  const engine = createExtractionEngine();
-  const robotsValidation = await engine.validateRobotsTxt(baseUrl);
+  // Fetch robots.txt
+  let robotsTxtFound = false;
+  let robotsTxt = '';
   
-  const robotsTxtFound = robotsValidation.found && !robotsValidation.isSoft404;
-  const robotsTxt = robotsValidation.content?.toLowerCase() || '';
+  try {
+    const robotsUrl = new URL('/robots.txt', baseUrl).href;
+    const response = await fetch(robotsUrl);
+    if (response.ok) {
+      robotsTxt = (await response.text()).toLowerCase();
+      robotsTxtFound = true;
+    }
+  } catch (error) {
+    console.log('Failed to fetch robots.txt:', error);
+  }
   const allowsGPTBot = robotsTxt.includes('gptbot') && !robotsTxt.includes('user-agent: gptbot\ndisallow');
   const allowsClaude = robotsTxt.includes('claude') && !robotsTxt.includes('user-agent: claude-web\ndisallow');
   const allowsPerplexity = robotsTxt.includes('perplexity') && !robotsTxt.includes('user-agent: perplexitybot\ndisallow');
