@@ -815,42 +815,60 @@ const GeoAuditPage = () => {
               </div>
             </div>
 
-            {/* Score Breakdown - Compact Dashboard Grid */}
-            <div className="mb-12">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold text-white tracking-tight">Score Breakdown</h3>
+            {/* Category Scores Overview - Ultra-Compact Professional Grid */}
+            <div className="mb-10">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-bold text-white/80 tracking-tight uppercase text-[11px]">Category Scores Overview</h3>
                 {comparison?.previous && (
-                  <div className="flex items-center gap-1.5 text-[10px] text-white/40">
-                    <History className="w-3 h-3" />
+                  <div className="flex items-center gap-1 text-[9px] text-white/30">
+                    <History className="w-2.5 h-2.5" />
                     <span>vs. {new Date(comparison.previous.timestamp).toLocaleDateString()}</span>
                   </div>
                 )}
               </div>
-              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
                 {Object.entries(result.scores).map(([key, score]) => {
                   const change = comparison?.changes?.[key as keyof typeof comparison.changes] || 0;
+                  const categoryName = key.replace(/([A-Z])/g, ' $1').trim();
+                  
                   return (
-                  <div key={key} className="p-3 bg-white/5 border border-white/10 rounded-lg hover:border-brand-accent/30 transition-all space-y-2">
-                    <div className="flex items-start justify-between gap-2">
-                      <h4 className="text-[10px] text-white/40 uppercase tracking-wide font-medium leading-tight">
-                        {key.replace(/([A-Z])/g, ' $1').trim()}
+                  <div 
+                    key={key} 
+                    className="relative p-2 bg-white/[0.03] border border-white/[0.08] rounded-md hover:border-brand-accent/30 hover:bg-white/[0.05] transition-all group"
+                  >
+                    {/* Header with category name and change indicator */}
+                    <div className="flex items-center justify-between gap-1 mb-1.5">
+                      <h4 className="text-[9px] text-white/50 uppercase tracking-wider font-semibold leading-none truncate">
+                        {categoryName}
                       </h4>
                       {change !== 0 && (
-                        <span className={`text-[10px] font-bold tabular-nums px-1 py-0.5 rounded ${
+                        <span className={`text-[8px] font-bold tabular-nums px-1 py-0.5 rounded ${
                           change > 0 ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'
                         }`}>
                           {change > 0 ? '+' : ''}{change}
                         </span>
                       )}
                     </div>
-                    <div className={`text-3xl font-bold tabular-nums ${getScoreColor(score)}`}>
-                      {score}
+                    
+                    {/* Score - Large and prominent */}
+                    <div className="flex items-baseline gap-1 mb-1.5">
+                      <span className={`text-2xl font-bold tabular-nums leading-none ${getScoreColor(score)}`}>
+                        {score.toFixed(1)}
+                      </span>
+                      <span className="text-[8px] text-white/20 font-medium">/100</span>
                     </div>
-                    <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                    
+                    {/* Compact progress bar */}
+                    <div className="h-0.5 bg-white/[0.08] rounded-full overflow-hidden">
                       <div 
-                        className={`h-full bg-gradient-to-r ${getScoreGradient(score)} transition-all duration-1000`}
+                        className={`h-full bg-gradient-to-r ${getScoreGradient(score)} transition-all duration-700`}
                         style={{ width: `${score}%` }}
                       ></div>
+                    </div>
+                    
+                    {/* Tooltip on hover - shows full category name if truncated */}
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-black/90 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                      {categoryName}: {score.toFixed(1)}/100
                     </div>
                   </div>
                   );
