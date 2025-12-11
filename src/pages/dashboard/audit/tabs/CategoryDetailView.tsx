@@ -416,7 +416,7 @@ function CitationPotentialView({ details }: { details: any }) {
 }
 
 /**
- * Link Analysis View
+ * Link Analysis View - Enhanced with Anchor Text Patterns, Link Context, and Domain Authority
  */
 function LinkAnalysisView({ details }: { details: any }) {
   return (
@@ -441,6 +441,95 @@ function LinkAnalysisView({ details }: { details: any }) {
           <MetricCard label="Link Depth" value={details.linkDepth} />
         </div>
       </div>
+
+      {/* Enhanced: Anchor Text Patterns */}
+      {details.anchorTextPatterns && (
+        <div className="bg-emerald-500/5 border border-emerald-500/20 p-4 rounded-lg">
+          <h4 className="text-xs font-mono text-emerald-400 uppercase tracking-wider mb-3">
+            Anchor Text Patterns
+          </h4>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <MetricCard label="Exact Match" value={details.anchorTextPatterns.exactMatch} valueColor="text-yellow-400" />
+            <MetricCard label="Partial Match" value={details.anchorTextPatterns.partialMatch} valueColor="text-emerald-400" />
+            <MetricCard label="Branded" value={details.anchorTextPatterns.branded} valueColor="text-blue-400" />
+            <MetricCard label="Generic" value={details.anchorTextPatterns.generic} valueColor="text-slate-400" />
+            <MetricCard label="Naked URL" value={details.anchorTextPatterns.nakedUrl} valueColor="text-orange-400" />
+            <MetricCard label="Image" value={details.anchorTextPatterns.image} valueColor="text-purple-400" />
+          </div>
+        </div>
+      )}
+
+      {/* Enhanced: Link Context Distribution */}
+      {details.linkContextDistribution && (
+        <div className="bg-cyan-500/5 border border-cyan-500/20 p-4 rounded-lg">
+          <h4 className="text-xs font-mono text-cyan-400 uppercase tracking-wider mb-3">
+            Link Context Distribution
+          </h4>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <MetricCard label="Main Content" value={details.linkContextDistribution.mainContent} valueColor="text-emerald-400" />
+            <MetricCard label="Navigation" value={details.linkContextDistribution.navigation} valueColor="text-blue-400" />
+            <MetricCard label="Header" value={details.linkContextDistribution.header} valueColor="text-cyan-400" />
+            <MetricCard label="Footer" value={details.linkContextDistribution.footer} valueColor="text-slate-400" />
+            <MetricCard label="Sidebar" value={details.linkContextDistribution.sidebar} valueColor="text-purple-400" />
+            <MetricCard label="Other" value={details.linkContextDistribution.other} valueColor="text-slate-500" />
+          </div>
+        </div>
+      )}
+
+      {/* Enhanced: Follow/Nofollow Distribution */}
+      {details.followDistribution && (
+        <div className="bg-indigo-500/5 border border-indigo-500/20 p-4 rounded-lg">
+          <h4 className="text-xs font-mono text-indigo-400 uppercase tracking-wider mb-3">
+            Follow/Nofollow Distribution
+          </h4>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <MetricCard label="Internal Follow" value={details.followDistribution.internalFollow} valueColor="text-emerald-400" />
+            <MetricCard label="Internal Nofollow" value={details.followDistribution.internalNofollow} valueColor="text-slate-400" />
+            <MetricCard label="External Follow" value={details.followDistribution.externalFollow} valueColor="text-blue-400" />
+            <MetricCard label="External Nofollow" value={details.followDistribution.externalNofollow} valueColor="text-slate-400" />
+          </div>
+        </div>
+      )}
+
+      {/* Enhanced: External Domain Quality */}
+      {details.externalDomainQuality && (
+        <div className="bg-amber-500/5 border border-amber-500/20 p-4 rounded-lg">
+          <h4 className="text-xs font-mono text-amber-400 uppercase tracking-wider mb-3">
+            External Domain Authority Distribution
+          </h4>
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            <MetricCard label="High Authority (DA 70+)" value={details.externalDomainQuality.highAuthority} valueColor="text-emerald-400" />
+            <MetricCard label="Medium Authority (DA 40-69)" value={details.externalDomainQuality.mediumAuthority} valueColor="text-yellow-400" />
+            <MetricCard label="Low Authority (DA 0-39)" value={details.externalDomainQuality.lowAuthority} valueColor="text-red-400" />
+          </div>
+          
+          {/* Top External Domains by Authority */}
+          {details.externalDomainQuality.topDomains && details.externalDomainQuality.topDomains.length > 0 && (
+            <div>
+              <h5 className="text-[10px] font-mono text-amber-300 uppercase tracking-wider mb-2">
+                Top External Domains by Authority
+              </h5>
+              <div className="space-y-2">
+                {details.externalDomainQuality.topDomains.slice(0, 5).map((domain: any, idx: number) => (
+                  <div key={idx} className="flex items-center justify-between text-sm bg-black/20 p-2 rounded">
+                    <span className="text-slate-400 truncate flex-1">{domain.domain}</span>
+                    <div className="flex items-center gap-2 ml-2">
+                      <span className={`text-xs font-mono px-2 py-0.5 rounded ${
+                        domain.estimatedAuthority >= 70 ? 'bg-emerald-500/20 text-emerald-400' :
+                        domain.estimatedAuthority >= 40 ? 'bg-yellow-500/20 text-yellow-400' :
+                        'bg-red-500/20 text-red-400'
+                      }`}>
+                        DA {domain.estimatedAuthority}
+                      </span>
+                      <span className="text-amber-400 font-mono text-xs">{domain.linkCount} links</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Top Internal Pages */}
       {details.topInternalPages.length > 0 && (

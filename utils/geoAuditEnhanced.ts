@@ -274,6 +274,38 @@ export interface LinkAnalysisDetails {
   externalDomains: string[];
   topInternalPages: Array<{ url: string; count: number }>;
   linkDistribution: 'poor' | 'fair' | 'good' | 'excellent';
+  // Enhanced: Anchor Text Pattern Analysis
+  anchorTextPatterns: {
+    exactMatch: number;
+    partialMatch: number;
+    branded: number;
+    generic: number;
+    nakedUrl: number;
+    image: number;
+  };
+  // Enhanced: Link Context Analysis
+  linkContextDistribution: {
+    header: number;
+    footer: number;
+    navigation: number;
+    mainContent: number;
+    sidebar: number;
+    other: number;
+  };
+  // Enhanced: External Domain Quality
+  externalDomainQuality: {
+    highAuthority: number;    // Estimated DA 70+
+    mediumAuthority: number;  // Estimated DA 40-69
+    lowAuthority: number;     // Estimated DA 0-39
+    topDomains: Array<{ domain: string; estimatedAuthority: number; linkCount: number }>;
+  };
+  // Enhanced: Follow/Nofollow Distribution
+  followDistribution: {
+    internalFollow: number;
+    internalNofollow: number;
+    externalFollow: number;
+    externalNofollow: number;
+  };
   issues: string[];
   strengths: string[];
 }
@@ -1549,18 +1581,48 @@ function auditLinkAnalysis(doc: Document, baseUrl: string): LinkAnalysisDetails 
   let emptyAnchors = 0;
   let imageLinks = 0;
   
+  // Enhanced: Follow/Nofollow tracking
+  let internalFollow = 0;
+  let internalNofollow = 0;
+  let externalFollow = 0;
+  let externalNofollow = 0;
+  
+  // Enhanced: Anchor text pattern tracking
+  let exactMatchAnchors = 0;
+  let partialMatchAnchors = 0;
+  let brandedAnchors = 0;
+  let genericAnchors = 0;
+  let nakedUrlAnchors = 0;
+  let imageAnchors = 0;
+  
+  // Enhanced: Link context tracking
+  let headerLinks = 0;
+  let footerLinks = 0;
+  let navigationLinks = 0;
+  let mainContentLinks = 0;
+  let sidebarLinks = 0;
+  let otherLinks = 0;
+  
   const internalUrls = new Set<string>();
   const externalUrls = new Set<string>();
   const externalDomains = new Set<string>();
   const internalPageCount = new Map<string, number>();
+  const externalDomainCount = new Map<string, number>();
+  
+  // Extract brand name from base URL for branded anchor detection
+  const brandName = baseHostname.split('.')[0];
+  
+  // Extract page title for exact match detection
+  const pageTitle = doc.title.toLowerCase();
   
   allLinks.forEach(link => {
     const href = link.getAttribute('href') || '';
     const text = link.textContent?.trim() || '';
     const rel = link.getAttribute('rel') || '';
+    const isNofollow = rel.includes('nofollow');
     
     // Check for nofollow
-    if (rel.includes('nofollow')) {
+    if (isNofollow) {
       nofollowLinks++;
     }
     
@@ -1570,8 +1632,20 @@ function auditLinkAnalysis(doc: Document, baseUrl: string): LinkAnalysisDetails 
     }
     
     // Check for image links
-    if (link.querySelector('img')) {
+    const hasImage = !!link.querySelector('img');
+    if (hasImage) {
       imageLinks++;
+    }
+    
+    // Enhanced: Determine link context (position in DOM)
+    const linkContext = determineLinkContext(link);
+    switch (linkContext) {
+      case 'header': headerLinks++; break;
+      case 'footer': footerLinks++; break;
+      case 'navigation': navigationLinks++; break;
+      case 'mainContent': mainContentLinks++; break;
+      case 'sidebar': sidebarLinks++; break;
+      default: otherLinks++; break;
     }
     
     // Categorize link
@@ -1581,26 +1655,61 @@ function auditLinkAnalysis(doc: Document, baseUrl: string): LinkAnalysisDetails 
         return;
       }
       
+      let isInternal = false;
+      let targetDomain = '';
+      
       if (href.startsWith('/') || href.startsWith('./') || href.startsWith('../')) {
         // Relative URL - internal
+        isInternal = true;
         internalLinks++;
         const normalizedPath = href.split('?')[0].split('#')[0];
         internalUrls.add(normalizedPath);
         internalPageCount.set(normalizedPath, (internalPageCount.get(normalizedPath) || 0) + 1);
+        
+        // Track follow/nofollow
+        if (isNofollow) internalNofollow++;
+        else internalFollow++;
       } else if (href.startsWith('http')) {
         // Absolute URL
         const linkUrl = new URL(href);
         const linkHostname = linkUrl.hostname.replace('www.', '');
+        targetDomain = linkHostname;
         
         if (linkHostname === baseHostname) {
+          isInternal = true;
           internalLinks++;
           const normalizedPath = linkUrl.pathname + linkUrl.search;
           internalUrls.add(normalizedPath);
           internalPageCount.set(normalizedPath, (internalPageCount.get(normalizedPath) || 0) + 1);
+          
+          // Track follow/nofollow
+          if (isNofollow) internalNofollow++;
+          else internalFollow++;
         } else {
           externalLinks++;
           externalUrls.add(href);
           externalDomains.add(linkHostname);
+          externalDomainCount.set(linkHostname, (externalDomainCount.get(linkHostname) || 0) + 1);
+          
+          // Track follow/nofollow
+          if (isNofollow) externalNofollow++;
+          else externalFollow++;
+        }
+      }
+      
+      // Enhanced: Classify anchor text pattern
+      if (hasImage) {
+        imageAnchors++;
+      } else if (!text) {
+        // Empty anchor (already counted)
+      } else {
+        const anchorPattern = classifyAnchorText(text, href, brandName, pageTitle, isInternal);
+        switch (anchorPattern) {
+          case 'exact': exactMatchAnchors++; break;
+          case 'partial': partialMatchAnchors++; break;
+          case 'branded': brandedAnchors++; break;
+          case 'generic': genericAnchors++; break;
+          case 'naked': nakedUrlAnchors++; break;
         }
       }
     } catch {
@@ -1629,6 +1738,28 @@ function auditLinkAnalysis(doc: Document, baseUrl: string): LinkAnalysisDetails 
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
     .map(([url, count]) => ({ url, count }));
+  
+  // Enhanced: Estimate external domain authority and get top domains
+  const topExternalDomains = Array.from(externalDomainCount.entries())
+    .map(([domain, count]) => ({
+      domain,
+      estimatedAuthority: estimateDomainAuthority(domain),
+      linkCount: count
+    }))
+    .sort((a, b) => b.estimatedAuthority - a.estimatedAuthority)
+    .slice(0, 10);
+  
+  // Enhanced: Calculate external domain quality distribution
+  let highAuthorityDomains = 0;
+  let mediumAuthorityDomains = 0;
+  let lowAuthorityDomains = 0;
+  
+  for (const domain of externalDomains) {
+    const authority = estimateDomainAuthority(domain);
+    if (authority >= 70) highAuthorityDomains++;
+    else if (authority >= 40) mediumAuthorityDomains++;
+    else lowAuthorityDomains++;
+  }
   
   // Calculate link distribution
   let linkDistribution: 'poor' | 'fair' | 'good' | 'excellent' = 'poor';
@@ -1682,6 +1813,43 @@ function auditLinkAnalysis(doc: Document, baseUrl: string): LinkAnalysisDetails 
     strengths.push(`Links to ${externalDomains.size} unique domains show diverse sources`);
   }
   
+  // Enhanced: Anchor text pattern analysis
+  const totalTextAnchors = exactMatchAnchors + partialMatchAnchors + brandedAnchors + genericAnchors + nakedUrlAnchors;
+  const exactMatchPercentage = totalTextAnchors > 0 ? (exactMatchAnchors / totalTextAnchors) * 100 : 0;
+  
+  if (exactMatchPercentage > 30) {
+    issues.push(`High exact match anchor text (${Math.round(exactMatchPercentage)}%) - may appear over-optimized`);
+  } else if (exactMatchPercentage > 0 && exactMatchPercentage <= 15) {
+    strengths.push('Natural anchor text distribution - good balance');
+  }
+  
+  if (brandedAnchors > 0) {
+    strengths.push(`${brandedAnchors} branded anchors strengthen brand identity`);
+  }
+  
+  // Enhanced: Link context analysis
+  const contentLinksPercentage = totalLinks > 0 ? (mainContentLinks / totalLinks) * 100 : 0;
+  if (contentLinksPercentage >= 60) {
+    strengths.push(`${Math.round(contentLinksPercentage)}% of links in main content - high quality placement`);
+  } else if (contentLinksPercentage < 30) {
+    issues.push('Most links in header/footer/sidebar - consider adding more contextual links');
+  }
+  
+  // Enhanced: External domain quality
+  if (highAuthorityDomains > 0) {
+    strengths.push(`${highAuthorityDomains} high-authority external domains (DA 70+) boost credibility`);
+  }
+  
+  if (lowAuthorityDomains > externalDomains.size * 0.5) {
+    issues.push('Majority of external links to low-authority domains - link to more authoritative sources');
+  }
+  
+  // Enhanced: Follow/Nofollow distribution insights
+  const externalFollowPercentage = externalLinks > 0 ? (externalFollow / externalLinks) * 100 : 0;
+  if (externalFollowPercentage < 20) {
+    issues.push('Most external links are nofollow - consider following high-quality sources');
+  }
+  
   return {
     totalLinks,
     internalLinks,
@@ -1698,9 +1866,197 @@ function auditLinkAnalysis(doc: Document, baseUrl: string): LinkAnalysisDetails 
     externalDomains: Array.from(externalDomains).slice(0, 10),
     topInternalPages,
     linkDistribution,
+    // Enhanced: Anchor text patterns
+    anchorTextPatterns: {
+      exactMatch: exactMatchAnchors,
+      partialMatch: partialMatchAnchors,
+      branded: brandedAnchors,
+      generic: genericAnchors,
+      nakedUrl: nakedUrlAnchors,
+      image: imageAnchors,
+    },
+    // Enhanced: Link context distribution
+    linkContextDistribution: {
+      header: headerLinks,
+      footer: footerLinks,
+      navigation: navigationLinks,
+      mainContent: mainContentLinks,
+      sidebar: sidebarLinks,
+      other: otherLinks,
+    },
+    // Enhanced: External domain quality
+    externalDomainQuality: {
+      highAuthority: highAuthorityDomains,
+      mediumAuthority: mediumAuthorityDomains,
+      lowAuthority: lowAuthorityDomains,
+      topDomains: topExternalDomains,
+    },
+    // Enhanced: Follow/Nofollow distribution
+    followDistribution: {
+      internalFollow,
+      internalNofollow,
+      externalFollow,
+      externalNofollow,
+    },
     issues,
     strengths,
   };
+}
+
+/**
+ * Helper: Determine link context (position in DOM)
+ */
+function determineLinkContext(link: Element): string {
+  let element: Element | null = link;
+  
+  // Traverse up the DOM to find semantic containers
+  while (element && element !== document.body) {
+    const tagName = element.tagName.toLowerCase();
+    const className = element.className.toLowerCase();
+    const id = element.id.toLowerCase();
+    
+    // Check for header
+    if (tagName === 'header' || className.includes('header') || id.includes('header')) {
+      return 'header';
+    }
+    
+    // Check for footer
+    if (tagName === 'footer' || className.includes('footer') || id.includes('footer')) {
+      return 'footer';
+    }
+    
+    // Check for navigation
+    if (tagName === 'nav' || className.includes('nav') || id.includes('nav') || 
+        className.includes('menu') || id.includes('menu')) {
+      return 'navigation';
+    }
+    
+    // Check for sidebar
+    if (className.includes('sidebar') || id.includes('sidebar') || 
+        className.includes('aside') || tagName === 'aside') {
+      return 'sidebar';
+    }
+    
+    // Check for main content
+    if (tagName === 'main' || tagName === 'article' || 
+        className.includes('content') || className.includes('article') ||
+        id.includes('content') || id.includes('article')) {
+      return 'mainContent';
+    }
+    
+    element = element.parentElement;
+  }
+  
+  return 'other';
+}
+
+/**
+ * Helper: Classify anchor text pattern
+ */
+function classifyAnchorText(
+  text: string, 
+  href: string, 
+  brandName: string, 
+  pageTitle: string,
+  isInternal: boolean
+): 'exact' | 'partial' | 'branded' | 'generic' | 'naked' {
+  const lowerText = text.toLowerCase();
+  const lowerBrand = brandName.toLowerCase();
+  
+  // Check for naked URL
+  if (lowerText.includes('http://') || lowerText.includes('https://') || 
+      lowerText.includes('www.')) {
+    return 'naked';
+  }
+  
+  // Check for branded anchor
+  if (lowerText.includes(lowerBrand)) {
+    return 'branded';
+  }
+  
+  // Check for generic anchors
+  const genericPhrases = [
+    'click here', 'read more', 'learn more', 'here', 'link', 'this', 
+    'more info', 'details', 'continue reading', 'view more', 'see more'
+  ];
+  if (genericPhrases.some(phrase => lowerText === phrase)) {
+    return 'generic';
+  }
+  
+  // For internal links, check against page title
+  if (isInternal && pageTitle) {
+    const titleWords = pageTitle.split(/\s+/).filter(w => w.length > 3);
+    const textWords = lowerText.split(/\s+/).filter(w => w.length > 3);
+    
+    // Exact match: anchor text matches page title closely
+    const matchingWords = titleWords.filter(word => textWords.includes(word));
+    if (matchingWords.length >= titleWords.length * 0.7) {
+      return 'exact';
+    }
+    
+    // Partial match: some words match
+    if (matchingWords.length >= 2) {
+      return 'partial';
+    }
+  }
+  
+  // Default to partial match for descriptive text
+  return 'partial';
+}
+
+/**
+ * Helper: Estimate domain authority based on TLD and domain characteristics
+ * This is a simplified heuristic estimation, not actual DA from Moz
+ */
+function estimateDomainAuthority(domain: string): number {
+  let score = 50; // Base score
+  
+  // High authority TLDs
+  const highAuthorityTLDs = ['.gov', '.edu', '.org'];
+  const mediumAuthorityTLDs = ['.com', '.net'];
+  
+  // Check TLD
+  if (highAuthorityTLDs.some(tld => domain.endsWith(tld))) {
+    score += 30;
+  } else if (mediumAuthorityTLDs.some(tld => domain.endsWith(tld))) {
+    score += 10;
+  } else {
+    score -= 10; // Country-specific or uncommon TLDs
+  }
+  
+  // Well-known high-authority domains
+  const highAuthorityDomains = [
+    'wikipedia.org', 'github.com', 'stackoverflow.com', 'medium.com',
+    'youtube.com', 'linkedin.com', 'twitter.com', 'facebook.com',
+    'google.com', 'microsoft.com', 'apple.com', 'amazon.com',
+    'nytimes.com', 'bbc.com', 'cnn.com', 'forbes.com', 'techcrunch.com',
+    'reddit.com', 'quora.com', 'w3.org', 'mozilla.org'
+  ];
+  
+  if (highAuthorityDomains.some(d => domain.includes(d))) {
+    score = 95;
+  }
+  
+  // Domain length (shorter domains tend to be older/more established)
+  const domainWithoutTLD = domain.split('.')[0];
+  if (domainWithoutTLD.length <= 6) {
+    score += 5;
+  } else if (domainWithoutTLD.length > 15) {
+    score -= 5;
+  }
+  
+  // Hyphens in domain (often lower quality)
+  if (domain.includes('-')) {
+    score -= 10;
+  }
+  
+  // Numbers in domain (often lower quality)
+  if (/\d/.test(domainWithoutTLD)) {
+    score -= 5;
+  }
+  
+  // Ensure score is within 0-100 range
+  return Math.max(0, Math.min(100, score));
 }
 
 async function auditTechnicalSEO(doc: Document, url: string): Promise<TechnicalSEODetails> {
