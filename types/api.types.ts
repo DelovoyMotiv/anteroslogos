@@ -69,7 +69,7 @@ export type OptionalValidatedApiHandler<T = JSONObject> = (
   req: VercelRequest,
   res: VercelResponse,
   validated?: T
-) => Promise<void> | void;
+) => Promise<void | VercelResponse> | void | VercelResponse;
 
 /**
  * Typed API handler (generic)
