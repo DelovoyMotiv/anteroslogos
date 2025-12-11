@@ -146,6 +146,40 @@ export interface CitationPotentialDetails {
   definitions: number;
   uniqueInsights: number;
   authorityIndicators: string[];
+  // Enhanced: Source Quality Analysis
+  sourceQuality: {
+    academicSources: number;      // .edu, .gov, research papers
+    newsSources: number;           // reputable news outlets
+    industrySources: number;       // industry-specific authorities
+    unknownSources: number;        // unverified sources
+    totalSources: number;
+    qualityScore: number;          // 0-100
+    topSources: Array<{ source: string; type: string; mentions: number }>;
+  };
+  // Enhanced: Temporal Relevance
+  temporalRelevance: {
+    recentData: number;            // Data from last 2 years
+    moderateData: number;          // Data from 2-5 years ago
+    outdatedData: number;          // Data older than 5 years
+    undatedClaims: number;         // Claims without dates
+    averageDataAge: number;        // Average age in years
+    freshnessScore: number;        // 0-100
+  };
+  // Enhanced: Claim Verifiability
+  claimVerifiability: {
+    verifiableClaims: number;      // Claims with sources
+    unverifiedClaims: number;      // Claims without sources
+    statisticalClaims: number;     // Claims with numbers/stats
+    qualitativeClaims: number;     // Opinion-based claims
+    verifiabilityScore: number;    // 0-100
+    claimTypes: {
+      factual: number;
+      statistical: number;
+      comparative: number;
+      causal: number;
+      predictive: number;
+    };
+  };
   issues: string[];
   strengths: string[];
 }
@@ -1089,7 +1123,26 @@ function auditCitationPotential(doc: Document, html: string): CitationPotentialD
   if (bodyText.match(/published|author of/i)) authorityIndicators.push('Publications referenced');
   if (bodyText.match(/expert in|specialist in/i)) authorityIndicators.push('Expertise claimed');
 
-  const score = calculateCitationScore(factualStatements, dataPoints, quotes, references, definitions, uniqueInsights);
+  // Enhanced: Source Quality Analysis
+  const sourceQuality = analyzeSourceQuality(doc, html, bodyText);
+  
+  // Enhanced: Temporal Relevance Analysis
+  const temporalRelevance = analyzeTemporalRelevance(bodyText, html);
+  
+  // Enhanced: Claim Verifiability Analysis
+  const claimVerifiability = analyzeClaimVerifiability(bodyText, html, references);
+
+  const score = calculateCitationScore(
+    factualStatements, 
+    dataPoints, 
+    quotes, 
+    references, 
+    definitions, 
+    uniqueInsights,
+    sourceQuality.qualityScore,
+    temporalRelevance.freshnessScore,
+    claimVerifiability.verifiabilityScore
+  );
 
   const issues: string[] = [];
   const strengths: string[] = [];
@@ -1112,6 +1165,39 @@ function auditCitationPotential(doc: Document, html: string): CitationPotentialD
   if (authorityIndicators.length === 0) issues.push('No authority indicators found');
   else strengths.push(`${authorityIndicators.length} authority signals detected`);
 
+  // Enhanced: Source quality insights
+  if (sourceQuality.qualityScore >= 80) {
+    strengths.push(`Excellent source quality - ${sourceQuality.academicSources} academic sources`);
+  } else if (sourceQuality.qualityScore < 40) {
+    issues.push('Low source quality - cite more authoritative sources');
+  }
+  
+  if (sourceQuality.unknownSources > sourceQuality.totalSources * 0.5) {
+    issues.push('Majority of sources are unverified - add credible citations');
+  }
+
+  // Enhanced: Temporal relevance insights
+  if (temporalRelevance.freshnessScore >= 80) {
+    strengths.push('Data is recent and relevant');
+  } else if (temporalRelevance.freshnessScore < 40) {
+    issues.push('Data appears outdated - update with recent statistics');
+  }
+  
+  if (temporalRelevance.undatedClaims > 10) {
+    issues.push(`${temporalRelevance.undatedClaims} claims lack temporal context - add dates`);
+  }
+
+  // Enhanced: Claim verifiability insights
+  if (claimVerifiability.verifiabilityScore >= 80) {
+    strengths.push('Claims are well-supported and verifiable');
+  } else if (claimVerifiability.verifiabilityScore < 40) {
+    issues.push('Many unverified claims - add sources and evidence');
+  }
+  
+  if (claimVerifiability.statisticalClaims > 0) {
+    strengths.push(`${claimVerifiability.statisticalClaims} statistical claims enhance credibility`);
+  }
+
   return {
     score,
     factualStatements,
@@ -1121,20 +1207,258 @@ function auditCitationPotential(doc: Document, html: string): CitationPotentialD
     definitions,
     uniqueInsights,
     authorityIndicators,
+    sourceQuality,
+    temporalRelevance,
+    claimVerifiability,
     issues,
     strengths,
   };
 }
 
-function calculateCitationScore(factual: number, data: number, quotes: number, refs: number, defs: number, insights: number): number {
+/**
+ * Helper: Analyze source quality
+ */
+function analyzeSourceQuality(doc: Document, html: string, bodyText: string): {
+  academicSources: number;
+  newsSources: number;
+  industrySources: number;
+  unknownSources: number;
+  totalSources: number;
+  qualityScore: number;
+  topSources: Array<{ source: string; type: string; mentions: number }>;
+} {
+  const links = Array.from(doc.querySelectorAll('a[href]'));
+  const sourceMap = new Map<string, { type: string; mentions: number }>();
+  
+  // Academic sources
+  const academicDomains = ['.edu', '.gov', 'scholar.google', 'researchgate', 'academia.edu', 'arxiv.org', 'pubmed', 'jstor'];
+  // News sources
+  const newsDomains = ['nytimes.com', 'bbc.com', 'reuters.com', 'ap.org', 'wsj.com', 'theguardian.com', 'cnn.com', 'bloomberg.com'];
+  // Industry sources
+  const industryDomains = ['gartner.com', 'forrester.com', 'mckinsey.com', 'deloitte.com', 'pwc.com', 'statista.com'];
+  
+  let academicSources = 0;
+  let newsSources = 0;
+  let industrySources = 0;
+  let unknownSources = 0;
+  
+  links.forEach(link => {
+    const href = link.getAttribute('href') || '';
+    const text = link.textContent?.trim() || '';
+    
+    // Skip internal links and non-citation links
+    if (!href.startsWith('http') || text.length < 3) return;
+    
+    try {
+      const url = new URL(href);
+      const domain = url.hostname.toLowerCase();
+      
+      let sourceType = 'unknown';
+      
+      if (academicDomains.some(d => domain.includes(d))) {
+        sourceType = 'academic';
+        academicSources++;
+      } else if (newsDomains.some(d => domain.includes(d))) {
+        sourceType = 'news';
+        newsSources++;
+      } else if (industryDomains.some(d => domain.includes(d))) {
+        sourceType = 'industry';
+        industrySources++;
+      } else {
+        unknownSources++;
+      }
+      
+      // Track source mentions
+      const existing = sourceMap.get(domain);
+      if (existing) {
+        existing.mentions++;
+      } else {
+        sourceMap.set(domain, { type: sourceType, mentions: 1 });
+      }
+    } catch {
+      // Invalid URL
+    }
+  });
+  
+  // Also check for inline citations in text
+  const inlineCitations = bodyText.match(/\(.*?20\d{2}.*?\)|\[.*?\]/g) || [];
+  const citationSources = inlineCitations.length;
+  
+  const totalSources = academicSources + newsSources + industrySources + unknownSources + citationSources;
+  
+  // Calculate quality score
+  let qualityScore = 0;
+  qualityScore += academicSources * 15;  // Academic sources are most valuable
+  qualityScore += newsSources * 10;      // News sources are credible
+  qualityScore += industrySources * 12;  // Industry sources are authoritative
+  qualityScore += citationSources * 8;   // Inline citations show rigor
+  qualityScore -= unknownSources * 2;    // Unknown sources reduce quality
+  qualityScore = Math.max(0, Math.min(100, qualityScore));
+  
+  // Get top sources
+  const topSources = Array.from(sourceMap.entries())
+    .map(([source, data]) => ({ source, type: data.type, mentions: data.mentions }))
+    .sort((a, b) => {
+      // Sort by type quality first, then by mentions
+      const typeScore = { academic: 3, industry: 2, news: 1, unknown: 0 };
+      const aScore = (typeScore[a.type as keyof typeof typeScore] || 0) * 100 + a.mentions;
+      const bScore = (typeScore[b.type as keyof typeof typeScore] || 0) * 100 + b.mentions;
+      return bScore - aScore;
+    })
+    .slice(0, 5);
+  
+  return {
+    academicSources,
+    newsSources,
+    industrySources,
+    unknownSources,
+    totalSources,
+    qualityScore,
+    topSources,
+  };
+}
+
+/**
+ * Helper: Analyze temporal relevance
+ */
+function analyzeTemporalRelevance(bodyText: string, html: string): {
+  recentData: number;
+  moderateData: number;
+  outdatedData: number;
+  undatedClaims: number;
+  averageDataAge: number;
+  freshnessScore: number;
+} {
+  const currentYear = new Date().getFullYear();
+  
+  // Extract all year mentions
+  const yearMatches = bodyText.match(/\b(19|20)\d{2}\b/g) || [];
+  const years = yearMatches.map(y => parseInt(y)).filter(y => y >= 1990 && y <= currentYear);
+  
+  let recentData = 0;      // Last 2 years
+  let moderateData = 0;    // 2-5 years ago
+  let outdatedData = 0;    // Older than 5 years
+  
+  years.forEach(year => {
+    const age = currentYear - year;
+    if (age <= 2) recentData++;
+    else if (age <= 5) moderateData++;
+    else outdatedData++;
+  });
+  
+  // Count claims without dates (factual statements without year context)
+  const factualStatements = (bodyText.match(/\d+%|\d+\s*(million|billion|thousand)|\$\d+/gi) || []).length;
+  const datedStatements = years.length;
+  const undatedClaims = Math.max(0, factualStatements - datedStatements);
+  
+  // Calculate average data age
+  const averageDataAge = years.length > 0 
+    ? years.reduce((sum, year) => sum + (currentYear - year), 0) / years.length 
+    : 0;
+  
+  // Calculate freshness score
+  let freshnessScore = 0;
+  freshnessScore += recentData * 15;      // Recent data is most valuable
+  freshnessScore += moderateData * 8;     // Moderate data is acceptable
+  freshnessScore -= outdatedData * 5;     // Outdated data reduces score
+  freshnessScore -= undatedClaims * 3;    // Undated claims reduce score
+  freshnessScore = Math.max(0, Math.min(100, freshnessScore));
+  
+  return {
+    recentData,
+    moderateData,
+    outdatedData,
+    undatedClaims,
+    averageDataAge: Math.round(averageDataAge * 10) / 10,
+    freshnessScore,
+  };
+}
+
+/**
+ * Helper: Analyze claim verifiability
+ */
+function analyzeClaimVerifiability(bodyText: string, html: string, references: number): {
+  verifiableClaims: number;
+  unverifiedClaims: number;
+  statisticalClaims: number;
+  qualitativeClaims: number;
+  verifiabilityScore: number;
+  claimTypes: {
+    factual: number;
+    statistical: number;
+    comparative: number;
+    causal: number;
+    predictive: number;
+  };
+} {
+  // Detect different types of claims
+  const factualClaims = (bodyText.match(/is|are|was|were|has|have|had/gi) || []).length;
+  const statisticalClaims = (bodyText.match(/\d+%|\d+\s*(million|billion|thousand)|\$\d+/gi) || []).length;
+  const comparativeClaims = (bodyText.match(/more than|less than|better than|worse than|compared to|versus/gi) || []).length;
+  const causalClaims = (bodyText.match(/because|due to|caused by|results in|leads to|therefore/gi) || []).length;
+  const predictiveClaims = (bodyText.match(/will|expect|forecast|predict|likely|probably/gi) || []).length;
+  
+  // Claims with sources are verifiable
+  const verifiableClaims = references + statisticalClaims;
+  
+  // Claims without sources
+  const totalClaims = factualClaims + statisticalClaims + comparativeClaims + causalClaims + predictiveClaims;
+  const unverifiedClaims = Math.max(0, totalClaims - verifiableClaims);
+  
+  // Qualitative vs quantitative
+  const qualitativeClaims = factualClaims - statisticalClaims;
+  
+  // Calculate verifiability score
+  let verifiabilityScore = 0;
+  verifiabilityScore += Math.min(verifiableClaims * 10, 50);  // Verifiable claims
+  verifiabilityScore += Math.min(statisticalClaims * 8, 30);  // Statistical claims
+  verifiabilityScore += Math.min(references * 5, 20);         // References
+  verifiabilityScore -= Math.min(unverifiedClaims * 2, 30);   // Unverified claims reduce score
+  verifiabilityScore = Math.max(0, Math.min(100, verifiabilityScore));
+  
+  return {
+    verifiableClaims,
+    unverifiedClaims,
+    statisticalClaims,
+    qualitativeClaims,
+    verifiabilityScore,
+    claimTypes: {
+      factual: factualClaims,
+      statistical: statisticalClaims,
+      comparative: comparativeClaims,
+      causal: causalClaims,
+      predictive: predictiveClaims,
+    },
+  };
+}
+
+function calculateCitationScore(
+  factual: number, 
+  data: number, 
+  quotes: number, 
+  refs: number, 
+  defs: number, 
+  insights: number,
+  sourceQuality: number = 50,
+  temporalRelevance: number = 50,
+  verifiability: number = 50
+): number {
   let score = 0;
-  score += Math.min(factual * 5, 25);
-  score += Math.min(data * 2, 20);
-  score += Math.min(quotes * 8, 20);
-  score += Math.min(refs * 7, 15);
-  score += Math.min(defs * 5, 10);
-  score += Math.min(insights * 10, 10);
-  return Math.min(100, score);
+  
+  // Base metrics (60% weight)
+  score += Math.min(factual * 3, 15);
+  score += Math.min(data * 2, 12);
+  score += Math.min(quotes * 5, 12);
+  score += Math.min(refs * 4, 10);
+  score += Math.min(defs * 3, 6);
+  score += Math.min(insights * 5, 5);
+  
+  // Enhanced metrics (40% weight)
+  score += sourceQuality * 0.15;        // 15% weight
+  score += temporalRelevance * 0.12;    // 12% weight
+  score += verifiability * 0.13;        // 13% weight
+  
+  return Math.min(100, Math.round(score));
 }
 
 function auditEnhancedEEAT(doc: Document, html: string): EnhancedEEATDetails {

@@ -381,7 +381,7 @@ function ContentQualityView({ details }: { details: any }) {
 }
 
 /**
- * Citation Potential View
+ * Citation Potential View - Enhanced with Source Quality, Temporal Relevance, and Claim Verifiability
  */
 function CitationPotentialView({ details }: { details: any }) {
   return (
@@ -395,6 +395,109 @@ function CitationPotentialView({ details }: { details: any }) {
         <MetricCard label="Definitions" value={details.definitions} />
         <MetricCard label="Unique Insights" value={details.uniqueInsights} />
       </div>
+
+      {/* Enhanced: Source Quality Analysis */}
+      {details.sourceQuality && (
+        <div className="bg-blue-500/5 border border-blue-500/20 p-4 rounded-lg">
+          <h4 className="text-xs font-mono text-blue-400 uppercase tracking-wider mb-3">
+            Source Quality Analysis
+          </h4>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+            <MetricCard label="Academic Sources" value={details.sourceQuality.academicSources} valueColor="text-emerald-400" />
+            <MetricCard label="News Sources" value={details.sourceQuality.newsSources} valueColor="text-blue-400" />
+            <MetricCard label="Industry Sources" value={details.sourceQuality.industrySources} valueColor="text-purple-400" />
+            <MetricCard label="Quality Score" value={`${details.sourceQuality.qualityScore}/100`} valueColor={
+              details.sourceQuality.qualityScore >= 70 ? 'text-emerald-400' :
+              details.sourceQuality.qualityScore >= 40 ? 'text-yellow-400' :
+              'text-red-400'
+            } />
+          </div>
+          
+          {/* Top Sources */}
+          {details.sourceQuality.topSources && details.sourceQuality.topSources.length > 0 && (
+            <div>
+              <h5 className="text-[10px] font-mono text-blue-300 uppercase tracking-wider mb-2">
+                Top Cited Sources
+              </h5>
+              <div className="space-y-2">
+                {details.sourceQuality.topSources.map((source: any, idx: number) => (
+                  <div key={idx} className="flex items-center justify-between text-sm bg-black/20 p-2 rounded">
+                    <span className="text-slate-400 truncate flex-1">{source.source}</span>
+                    <div className="flex items-center gap-2 ml-2">
+                      <span className={`text-xs font-mono px-2 py-0.5 rounded ${
+                        source.type === 'academic' ? 'bg-emerald-500/20 text-emerald-400' :
+                        source.type === 'industry' ? 'bg-purple-500/20 text-purple-400' :
+                        source.type === 'news' ? 'bg-blue-500/20 text-blue-400' :
+                        'bg-slate-500/20 text-slate-400'
+                      }`}>
+                        {source.type}
+                      </span>
+                      <span className="text-blue-400 font-mono text-xs">{source.mentions}×</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Enhanced: Temporal Relevance */}
+      {details.temporalRelevance && (
+        <div className="bg-cyan-500/5 border border-cyan-500/20 p-4 rounded-lg">
+          <h4 className="text-xs font-mono text-cyan-400 uppercase tracking-wider mb-3">
+            Temporal Relevance
+          </h4>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            <MetricCard label="Recent Data (≤2y)" value={details.temporalRelevance.recentData} valueColor="text-emerald-400" />
+            <MetricCard label="Moderate Data (2-5y)" value={details.temporalRelevance.moderateData} valueColor="text-yellow-400" />
+            <MetricCard label="Outdated Data (>5y)" value={details.temporalRelevance.outdatedData} valueColor="text-red-400" />
+            <MetricCard label="Undated Claims" value={details.temporalRelevance.undatedClaims} valueColor="text-orange-400" />
+            <MetricCard label="Avg Data Age" value={`${details.temporalRelevance.averageDataAge}y`} valueColor="text-cyan-400" />
+            <MetricCard label="Freshness Score" value={`${details.temporalRelevance.freshnessScore}/100`} valueColor={
+              details.temporalRelevance.freshnessScore >= 70 ? 'text-emerald-400' :
+              details.temporalRelevance.freshnessScore >= 40 ? 'text-yellow-400' :
+              'text-red-400'
+            } />
+          </div>
+        </div>
+      )}
+
+      {/* Enhanced: Claim Verifiability */}
+      {details.claimVerifiability && (
+        <div className="bg-purple-500/5 border border-purple-500/20 p-4 rounded-lg">
+          <h4 className="text-xs font-mono text-purple-400 uppercase tracking-wider mb-3">
+            Claim Verifiability
+          </h4>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
+            <MetricCard label="Verifiable Claims" value={details.claimVerifiability.verifiableClaims} valueColor="text-emerald-400" />
+            <MetricCard label="Unverified Claims" value={details.claimVerifiability.unverifiedClaims} valueColor="text-red-400" />
+            <MetricCard label="Statistical Claims" value={details.claimVerifiability.statisticalClaims} valueColor="text-blue-400" />
+            <MetricCard label="Qualitative Claims" value={details.claimVerifiability.qualitativeClaims} valueColor="text-slate-400" />
+            <MetricCard label="Verifiability Score" value={`${details.claimVerifiability.verifiabilityScore}/100`} valueColor={
+              details.claimVerifiability.verifiabilityScore >= 70 ? 'text-emerald-400' :
+              details.claimVerifiability.verifiabilityScore >= 40 ? 'text-yellow-400' :
+              'text-red-400'
+            } />
+          </div>
+          
+          {/* Claim Types Distribution */}
+          {details.claimVerifiability.claimTypes && (
+            <div>
+              <h5 className="text-[10px] font-mono text-purple-300 uppercase tracking-wider mb-2">
+                Claim Types Distribution
+              </h5>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                <MetricCard label="Factual" value={details.claimVerifiability.claimTypes.factual} valueColor="text-blue-400" />
+                <MetricCard label="Statistical" value={details.claimVerifiability.claimTypes.statistical} valueColor="text-emerald-400" />
+                <MetricCard label="Comparative" value={details.claimVerifiability.claimTypes.comparative} valueColor="text-yellow-400" />
+                <MetricCard label="Causal" value={details.claimVerifiability.claimTypes.causal} valueColor="text-orange-400" />
+                <MetricCard label="Predictive" value={details.claimVerifiability.claimTypes.predictive} valueColor="text-purple-400" />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Authority Indicators */}
       {details.authorityIndicators.length > 0 && (
