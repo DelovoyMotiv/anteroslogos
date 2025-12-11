@@ -189,6 +189,9 @@ function convertToDbFormat(result: AuditResult, userId: string | null): AuditIns
     
     // Metadata
     user_agent: navigator.userAgent,
+    
+    // Browser metadata (from ExtractionEngine)
+    browser_metadata: result.browserMetadata ? JSON.stringify(result.browserMetadata) as JSONValue : null,
   };
 }
 

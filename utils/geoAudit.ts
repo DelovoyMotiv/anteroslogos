@@ -27,6 +27,19 @@ export interface AuditResult {
     performance: PerformanceDetails;
   };
   recommendations: Recommendation[];
+  browserMetadata?: { // Browser execution metadata
+    usedBrowser: boolean;
+    userAgent?: string;
+    viewport?: { width: number; height: number };
+    finalUrl?: string;
+    redirectChain?: string[];
+    loadTime?: number;
+    resourceCounts?: {
+      scripts: number;
+      stylesheets: number;
+      images: number;
+    };
+  };
 }
 
 export interface SchemaAuditDetails {
@@ -107,17 +120,54 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
   const normalizedUrl = normalizeUrl(url);
   
   // Use new Extraction Engine for fetching and parsing
+  // Browser support is enabled by default via BROWSER_ENABLED environment variable
   let extractionResult: ExtractionResult;
+  let fallbackWarnings: string[] = [];
+  
   try {
-    const engine = createExtractionEngine();
+    const browserEnabled = process.env.BROWSER_ENABLED !== 'false';
+    const engine = createExtractionEngine({ enableBrowser: browserEnabled });
     extractionResult = await engine.extract(normalizedUrl, { mode: 'fast' });
-  } catch {
+    
+    // Check for fallback warnings
+    if ((extractionResult as any).warnings) {
+      fallbackWarnings = (extractionResult as any).warnings;
+    }
+    
+    // Cleanup browser resources
+    await engine.cleanup();
+  } catch (error) {
+    // Handle specific error codes from enhanced error handler
+    if (error instanceof Error) {
+      const errorMessage = error.message;
+      
+      // Check for specific error codes
+      if (errorMessage.includes('ERR_WAF_BLOCK')) {
+        throw new Error('Website is protected by a firewall and blocks automated access. Please try again later.');
+      } else if (errorMessage.includes('ERR_CSR_TIMEOUT')) {
+        throw new Error('Website took too long to load dynamic content. The site may be experiencing issues.');
+      } else if (errorMessage.includes('ERR_URL_UNREACHABLE')) {
+        throw new Error('Unable to reach the website. Please check the URL and your internet connection.');
+      } else if (errorMessage.includes('ERR_BOT_BLOCKED')) {
+        throw new Error('Website blocks automated access. Some features may not be available.');
+      }
+    }
+    
     throw new Error('Failed to fetch website. Please check the URL and try again.');
   }
 
   // Parse HTML for audit-specific analysis
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(extractionResult.html, 'text/html');
+  let doc: Document;
+  if (typeof DOMParser !== 'undefined') {
+    // Browser environment
+    const parser = new DOMParser();
+    doc = parser.parseFromString(extractionResult.html, 'text/html');
+  } else {
+    // Node.js environment - use jsdom
+    const { JSDOM } = await import('jsdom');
+    const dom = new JSDOM(extractionResult.html);
+    doc = dom.window.document;
+  }
 
   // Run all audits
   const schemaMarkup = auditSchemaMarkup(doc);
@@ -159,7 +209,7 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
     performance,
   });
 
-  return {
+  const result: AuditResult = {
     url: normalizedUrl,
     timestamp: new Date().toISOString(),
     overallScore,
@@ -174,6 +224,14 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
     },
     recommendations,
   };
+  
+  // Add fallback warnings if browser rendering failed
+  if (fallbackWarnings.length > 0) {
+    (result as any).warnings = fallbackWarnings;
+    (result as any).csrSupport = 'unavailable';
+  }
+  
+  return result;
 }
 
 /**
@@ -298,20 +356,12 @@ function auditMetaTags(doc: Document): MetaTagsDetails {
  * Audit AI crawler support via robots.txt
  */
 async function auditAICrawlers(baseUrl: string): Promise<AICrawlersDetails> {
-  const robotsUrl = new URL('/robots.txt', baseUrl).href;
+  // Use enhanced validation from ExtractionEngine
+  const engine = createExtractionEngine();
+  const robotsValidation = await engine.validateRobotsTxt(baseUrl);
   
-  let robotsTxt = '';
-  try {
-    const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(robotsUrl)}`);
-    if (response.ok) {
-      const data = await response.json();
-      robotsTxt = data.contents.toLowerCase();
-    }
-  } catch {
-    // robots.txt not accessible
-  }
-
-  const robotsTxtFound = robotsTxt.length > 0;
+  const robotsTxtFound = robotsValidation.found && !robotsValidation.isSoft404;
+  const robotsTxt = robotsValidation.content?.toLowerCase() || '';
   const allowsGPTBot = robotsTxt.includes('gptbot') && !robotsTxt.includes('user-agent: gptbot\ndisallow');
   const allowsClaude = robotsTxt.includes('claude') && !robotsTxt.includes('user-agent: claude-web\ndisallow');
   const allowsPerplexity = robotsTxt.includes('perplexity') && !robotsTxt.includes('user-agent: perplexitybot\ndisallow');

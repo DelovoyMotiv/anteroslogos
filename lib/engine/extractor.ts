@@ -14,6 +14,8 @@ import type {
 import { ErrorCode } from '../../types/agent-middleware.types';
 import { AgentMiddlewareError } from './errors';
 import { normalizeUrl } from './utils';
+import { BrowserService } from './BrowserService';
+import type { BrowserConfiguration } from './browser-config';
 
 /**
  * ExtractionEngine class
@@ -22,6 +24,18 @@ import { normalizeUrl } from './utils';
 export class ExtractionEngine {
   private readonly defaultTimeout: number = 15000; // 15 seconds
   private readonly defaultUserAgent: string = 'Mozilla/5.0 (compatible; AgentMiddleware/1.0)';
+  private readonly browserService: BrowserService | null;
+  private readonly useBrowser: boolean;
+  private fallbackWarnings: string[] = [];
+
+  /**
+   * Constructor
+   * @param options - Configuration options
+   */
+  constructor(options?: { enableBrowser?: boolean; browserConfig?: Partial<BrowserConfiguration> }) {
+    this.useBrowser = options?.enableBrowser ?? (process.env.BROWSER_ENABLED !== 'false');
+    this.browserService = this.useBrowser ? new BrowserService(options?.browserConfig) : null;
+  }
 
   /**
    * Main extraction method
@@ -41,9 +55,69 @@ export class ExtractionEngine {
     // Set timeout
     const timeout = options.timeout || this.defaultTimeout;
     
+    // Reset fallback warnings for this extraction
+    this.fallbackWarnings = [];
+    
     // Fetch HTML with timeout
     const fetchStart = Date.now();
-    const html = await this.fetchHTML(normalizedUrl, timeout, options.userAgent);
+    let html: string;
+    let usedBrowser = false;
+    let browserMetadata: ExtractionResult['browserMetadata'];
+    
+    // Try browser-based fetching first if enabled
+    if (this.useBrowser && this.browserService && options.useBrowser !== false) {
+      try {
+        const browserResult = await this.browserService.fetchPageWithRetry(normalizedUrl, {
+          timeout,
+          waitUntil: 'networkidle',
+          blockResources: true,
+        });
+        html = browserResult.html;
+        usedBrowser = true;
+        
+        // Capture browser metadata
+        browserMetadata = {
+          usedBrowser: true,
+          finalUrl: browserResult.finalUrl,
+          redirectChain: browserResult.redirectChain,
+          loadTime: browserResult.loadTime,
+          resourceCounts: browserResult.resourceCounts,
+        };
+      } catch (error) {
+        // Check if it's a non-retryable error (WAF block, CAPTCHA)
+        if (error instanceof AgentMiddlewareError && error.code === ErrorCode.ERR_WAF_BLOCK) {
+          // Don't fallback for WAF blocks - throw the error
+          throw error;
+        }
+        
+        // Log browser failure and fallback to static fetching
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.warn(`[ExtractionEngine] Browser fetch failed for ${normalizedUrl}: ${errorMessage}. Falling back to static fetching.`);
+        
+        // Add fallback warning
+        this.fallbackWarnings.push(
+          'Browser-based rendering failed. Falling back to static HTML fetching. ' +
+          'Client-side rendered (CSR) content may not be available.'
+        );
+        
+        // Fallback to static fetching
+        html = await this.fetchHTML(normalizedUrl, timeout, options.userAgent);
+        
+        // Mark as fallback
+        browserMetadata = {
+          usedBrowser: false,
+        };
+      }
+    } else {
+      // Use static fetching if browser disabled
+      html = await this.fetchHTML(normalizedUrl, timeout, options.userAgent);
+      
+      // Mark as static fetching
+      browserMetadata = {
+        usedBrowser: false,
+      };
+    }
+    
     const fetchTime = Date.now() - fetchStart;
     
     // Parse HTML
@@ -53,7 +127,8 @@ export class ExtractionEngine {
     
     const totalTime = Date.now() - startTime;
     
-    return {
+    // Build result with fallback warnings if applicable
+    const result: ExtractionResult = {
       url: normalizedUrl,
       timestamp: new Date().toISOString(),
       html,
@@ -79,7 +154,17 @@ export class ExtractionEngine {
           relationship_types: {},
         },
       } : undefined,
+      // Browser metadata
+      browserMetadata,
     };
+    
+    // Add fallback warnings to result if any
+    if (this.fallbackWarnings.length > 0) {
+      (result as any).warnings = this.fallbackWarnings;
+      (result as any).csrSupport = 'unavailable';
+    }
+    
+    return result;
   }
 
   /**
@@ -445,11 +530,182 @@ export class ExtractionEngine {
       imageCount: doc.querySelectorAll('img').length,
     };
   }
+
+  /**
+   * Validates robots.txt file
+   * Checks for soft 404s (200 status with HTML content instead of plain text)
+   * 
+   * @param baseUrl - Base URL of the website
+   * @returns Object with validation results
+   */
+  async validateRobotsTxt(baseUrl: string): Promise<{
+    found: boolean;
+    url: string;
+    finalUrl?: string;
+    redirectChain?: string[];
+    content?: string;
+    isSoft404: boolean;
+  }> {
+    const robotsUrl = new URL('/robots.txt', baseUrl).href;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    
+    try {
+      const response = await fetch(robotsUrl, {
+        method: 'GET',
+        redirect: 'follow',
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      
+      // Track redirect chain
+      const redirectChain: string[] = [];
+      let finalUrl = robotsUrl;
+      
+      // Note: fetch API doesn't expose redirect chain directly
+      // We can only get the final URL
+      if (response.url && response.url !== robotsUrl) {
+        finalUrl = response.url;
+        redirectChain.push(robotsUrl, finalUrl);
+      }
+      
+      if (!response.ok) {
+        return {
+          found: false,
+          url: robotsUrl,
+          finalUrl: finalUrl !== robotsUrl ? finalUrl : undefined,
+          redirectChain: redirectChain.length > 0 ? redirectChain : undefined,
+          isSoft404: false,
+        };
+      }
+      
+      // Get content
+      const content = await response.text();
+      
+      // Check for soft 404: 200 status but HTML content instead of plain text
+      // Robots.txt should be plain text, not HTML
+      const contentType = response.headers.get('content-type') || '';
+      const looksLikeHTML = content.trim().toLowerCase().startsWith('<!doctype html') ||
+                           content.trim().toLowerCase().startsWith('<html') ||
+                           /<html[\s>]/i.test(content.slice(0, 200));
+      
+      const isSoft404 = looksLikeHTML || contentType.includes('text/html');
+      
+      return {
+        found: !isSoft404,
+        url: robotsUrl,
+        finalUrl: finalUrl !== robotsUrl ? finalUrl : undefined,
+        redirectChain: redirectChain.length > 0 ? redirectChain : undefined,
+        content: !isSoft404 ? content : undefined,
+        isSoft404,
+      };
+    } catch (error) {
+      clearTimeout(timeoutId);
+      
+      // Timeout or network error
+      return {
+        found: false,
+        url: robotsUrl,
+        isSoft404: false,
+      };
+    }
+  }
+
+  /**
+   * Validates sitemap.xml file
+   * Verifies XML structure and follows redirects
+   * 
+   * @param baseUrl - Base URL of the website
+   * @returns Object with validation results
+   */
+  async validateSitemapXml(baseUrl: string): Promise<{
+    found: boolean;
+    url: string;
+    finalUrl?: string;
+    redirectChain?: string[];
+    isValidXml: boolean;
+    content?: string;
+  }> {
+    const sitemapUrl = new URL('/sitemap.xml', baseUrl).href;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    
+    try {
+      const response = await fetch(sitemapUrl, {
+        method: 'GET',
+        redirect: 'follow',
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      
+      // Track redirect chain
+      const redirectChain: string[] = [];
+      let finalUrl = sitemapUrl;
+      
+      if (response.url && response.url !== sitemapUrl) {
+        finalUrl = response.url;
+        redirectChain.push(sitemapUrl, finalUrl);
+      }
+      
+      if (!response.ok) {
+        return {
+          found: false,
+          url: sitemapUrl,
+          finalUrl: finalUrl !== sitemapUrl ? finalUrl : undefined,
+          redirectChain: redirectChain.length > 0 ? redirectChain : undefined,
+          isValidXml: false,
+        };
+      }
+      
+      // Get content
+      const content = await response.text();
+      
+      // Validate XML structure
+      // Check for XML declaration or root element
+      const hasXmlDeclaration = content.trim().startsWith('<?xml');
+      const hasUrlsetTag = /<urlset[\s>]/i.test(content);
+      const hasSitemapindexTag = /<sitemapindex[\s>]/i.test(content);
+      
+      const isValidXml = (hasXmlDeclaration || hasUrlsetTag || hasSitemapindexTag) &&
+                        !content.trim().toLowerCase().startsWith('<!doctype html') &&
+                        !content.trim().toLowerCase().startsWith('<html');
+      
+      return {
+        found: isValidXml,
+        url: sitemapUrl,
+        finalUrl: finalUrl !== sitemapUrl ? finalUrl : undefined,
+        redirectChain: redirectChain.length > 0 ? redirectChain : undefined,
+        isValidXml,
+        content: isValidXml ? content : undefined,
+      };
+    } catch (error) {
+      clearTimeout(timeoutId);
+      
+      // Timeout or network error
+      return {
+        found: false,
+        url: sitemapUrl,
+        isValidXml: false,
+      };
+    }
+  }
+
+  /**
+   * Cleanup resources (browser instances)
+   */
+  async cleanup(): Promise<void> {
+    if (this.browserService) {
+      await this.browserService.cleanup();
+    }
+  }
 }
 
 /**
  * Creates a new ExtractionEngine instance
+ * @param options - Configuration options
  */
-export function createExtractionEngine(): ExtractionEngine {
-  return new ExtractionEngine();
+export function createExtractionEngine(options?: { enableBrowser?: boolean; browserConfig?: Partial<BrowserConfiguration> }): ExtractionEngine {
+  return new ExtractionEngine(options);
 }

@@ -124,6 +124,20 @@ export interface ExtractionResult {
   entities?: Entity[];
   relationships?: Relationship[];
   knowledgeGraph?: KnowledgeGraph;
+  // Browser metadata (when browser mode is used):
+  browserMetadata?: {
+    usedBrowser: boolean;
+    userAgent?: string;
+    viewport?: { width: number; height: number };
+    finalUrl?: string;
+    redirectChain?: string[];
+    loadTime?: number;
+    resourceCounts?: {
+      scripts: number;
+      stylesheets: number;
+      images: number;
+    };
+  };
 }
 
 /**
@@ -224,6 +238,10 @@ export enum ErrorCode {
   ERR_BOT_BLOCKED = 'ERR_BOT_BLOCKED',
   ERR_DOM_UNREADABLE = 'ERR_DOM_UNREADABLE',
   ERR_TIMEOUT = 'ERR_TIMEOUT',
+  ERR_CSR_TIMEOUT = 'ERR_CSR_TIMEOUT',
+  ERR_WAF_BLOCK = 'ERR_WAF_BLOCK',
+  ERR_SCHEMA_NESTED = 'ERR_SCHEMA_NESTED',
+  ERR_REDIRECT_LOOP = 'ERR_REDIRECT_LOOP',
   ERR_INVALID_URL = 'ERR_INVALID_URL',
   ERR_AUTH_MISSING = 'ERR_AUTH_MISSING',
   ERR_AUTH_INVALID = 'ERR_AUTH_INVALID',

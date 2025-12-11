@@ -65,6 +65,19 @@ export interface AuditResult {
   recommendations: EnhancedRecommendation[];
   insights: string[];
   knowledgeGraph?: KnowledgeGraph; // Knowledge Graph extraction (optional)
+  browserMetadata?: { // Browser execution metadata
+    usedBrowser: boolean;
+    userAgent?: string;
+    viewport?: { width: number; height: number };
+    finalUrl?: string;
+    redirectChain?: string[];
+    loadTime?: number;
+    resourceCounts?: {
+      scripts: number;
+      stylesheets: number;
+      images: number;
+    };
+  };
 }
 
 export interface EnhancedSchemaDetails {
@@ -275,18 +288,55 @@ export async function auditWebsite(
   const normalizedUrl = normalizeUrl(url);
   
   // Use new Extraction Engine for fetching
+  // Browser support is enabled by default via BROWSER_ENABLED environment variable
   let extractionResult: ExtractionResult;
+  let fallbackWarnings: string[] = [];
+  
   try {
     onProgress?.('Fetching website content...');
-    const engine = createExtractionEngine();
+    const browserEnabled = process.env.BROWSER_ENABLED !== 'false';
+    const engine = createExtractionEngine({ enableBrowser: browserEnabled });
     extractionResult = await engine.extract(normalizedUrl, { mode: 'fast' });
-  } catch {
+    
+    // Check for fallback warnings
+    if ((extractionResult as any).warnings) {
+      fallbackWarnings = (extractionResult as any).warnings;
+    }
+    
+    // Cleanup browser resources
+    await engine.cleanup();
+  } catch (error) {
+    // Handle specific error codes from enhanced error handler
+    if (error instanceof Error) {
+      const errorMessage = error.message;
+      
+      // Check for specific error codes
+      if (errorMessage.includes('ERR_WAF_BLOCK')) {
+        throw new Error('Website is protected by a firewall and blocks automated access. Please try again later.');
+      } else if (errorMessage.includes('ERR_CSR_TIMEOUT')) {
+        throw new Error('Website took too long to load dynamic content. The site may be experiencing issues.');
+      } else if (errorMessage.includes('ERR_URL_UNREACHABLE')) {
+        throw new Error('Unable to reach the website. Please check the URL and your internet connection.');
+      } else if (errorMessage.includes('ERR_BOT_BLOCKED')) {
+        throw new Error('Website blocks automated access. Some features may not be available.');
+      }
+    }
+    
     throw new Error('Failed to fetch website. Please check the URL and try again.');
   }
 
   const htmlContent = extractionResult.html;
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(htmlContent, 'text/html');
+  let doc: Document;
+  if (typeof DOMParser !== 'undefined') {
+    // Browser environment
+    const parser = new DOMParser();
+    doc = parser.parseFromString(htmlContent, 'text/html');
+  } else {
+    // Node.js environment - use jsdom
+    const { JSDOM } = await import('jsdom');
+    const dom = new JSDOM(htmlContent);
+    doc = dom.window.document;
+  }
 
   // Run all audits with error handling
   let schemaMarkup, metaTags, structure, performance, eeat, technicalSEO, contentQuality, citationPotential, linkAnalysis, aiCrawlers, aidAgent;
@@ -457,6 +507,8 @@ export async function auditWebsite(
     },
     recommendations: defaultRecommendations,
     insights: defaultInsights,
+    // Pass through browser metadata from ExtractionEngine
+    browserMetadata: extractionResult.browserMetadata,
   };
 
   // === KNOWLEDGE GRAPH EXTRACTION ===
@@ -506,6 +558,12 @@ export async function auditWebsite(
   }
 
   onProgress?.('Analysis complete!');
+  
+  // Add fallback warnings if browser rendering failed
+  if (fallbackWarnings.length > 0) {
+    (baseResult as any).warnings = fallbackWarnings;
+    (baseResult as any).csrSupport = 'unavailable';
+  }
   
   return baseResult;
 }
@@ -1193,28 +1251,13 @@ function auditMetaTags(doc: Document): MetaTagsDetails {
 }
 
 async function auditAICrawlers(baseUrl: string): Promise<AICrawlersDetails> {
-  const robotsUrl = new URL('/robots.txt', baseUrl).href;
+  // Use enhanced validation from ExtractionEngine
+  const { createExtractionEngine } = await import('../lib/engine/extractor');
+  const engine = createExtractionEngine();
+  const robotsValidation = await engine.validateRobotsTxt(baseUrl);
   
-  let robotsTxt = '';
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-    
-    const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(robotsUrl)}`, {
-      signal: controller.signal
-    });
-    clearTimeout(timeoutId);
-    
-    if (response.ok) {
-      const data = await response.json();
-      robotsTxt = data.contents.toLowerCase();
-    }
-  } catch (error) {
-    // robots.txt not accessible - timeout or network error
-    console.log('Robots.txt fetch failed:', error instanceof Error ? error.message : 'Unknown error');
-  }
-
-  const robotsTxtFound = robotsTxt.length > 0;
+  const robotsTxtFound = robotsValidation.found && !robotsValidation.isSoft404;
+  const robotsTxt = robotsValidation.content?.toLowerCase() || '';
   
   // Check for specific AI crawlers
   const checkCrawler = (name: string) => robotsTxt.includes(name.toLowerCase()) && !robotsTxt.includes(`user-agent: ${name.toLowerCase()}\ndisallow: /`);
