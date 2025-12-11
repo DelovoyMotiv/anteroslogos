@@ -1,7 +1,7 @@
 import React, { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoadingSpinner from './components/LoadingSpinner';
-import { ErrorBoundary } from './components/ErrorBoundary';
+import ErrorBoundary from './components/ErrorBoundary';
 import { AuthErrorBoundary } from './src/components/auth/AuthErrorBoundary';
 import { IOSInstallPrompt } from './components/IOSInstallPrompt';
 import { logConfig, validateConfig } from './lib/config/env';
