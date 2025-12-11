@@ -93,15 +93,16 @@ export function BalanceDisplay({ userId, collapsed = false }: BalanceDisplayProp
         .from('user_balances')
         .select('balance')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (fetchError) {
-        // If no balance record exists, default to 0
-        if (fetchError.code === 'PGRST116') {
-          setBalance(0);
-          return;
-        }
         throw new Error(`Failed to fetch balance: ${fetchError.message}`);
+      }
+
+      // If no balance record exists, default to 0
+      if (!data) {
+        setBalance(0);
+        return;
       }
 
       setBalance(Number((data as { balance: number }).balance) || 0);
