@@ -49,11 +49,16 @@ const GeoAuditPage = () => {
     if (urlParam) {
       setUrl(urlParam);
       // Auto-trigger analysis if URL is provided
+      // Use a longer timeout to ensure form is mounted
       const form = document.querySelector('form');
       if (form) {
         setTimeout(() => {
-          form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-        }, 100);
+          try {
+            form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+          } catch (error) {
+            console.error('Failed to auto-trigger analysis:', error);
+          }
+        }, 300);
       }
     }
   }, [searchParams]);
@@ -718,16 +723,59 @@ const GeoAuditPage = () => {
             )}
 
             {/* Executive Summary Dashboard */}
+            {(() => {
+              console.log('=== RENDERING EXECUTIVE SUMMARY ===');
+              console.log('result exists:', !!result);
+              console.log('result.details exists:', !!result.details);
+              return null;
+            })()}
             <ExecutiveSummary result={result} />
+            {(() => {
+              console.log('=== EXECUTIVE SUMMARY RENDERED ===');
+              return null;
+            })()}
 
             {/* AI Visibility Index - Key Metric */}
+            {(() => {
+              console.log('=== RENDERING AI VISIBILITY SCORE ===');
+              return null;
+            })()}
             <AIVisibilityScore result={result} />
+            {(() => {
+              console.log('=== AI VISIBILITY SCORE RENDERED ===');
+              return null;
+            })()}
 
             {/* GEO Health Tracker - Daily Monitoring */}
-            <GEOHealthTracker 
-              url={result.url} 
-              currentScore={calculateAIVisibilityScore(result).overall} 
-            />
+            {(() => {
+              console.log('=== RENDERING GEO HEALTH TRACKER ===');
+              console.log('url:', result.url);
+              try {
+                const score = calculateAIVisibilityScore(result).overall;
+                console.log('currentScore:', score);
+              } catch (e) {
+                console.error('Error calculating AI visibility score:', e);
+              }
+              return null;
+            })()}
+            {(() => {
+              try {
+                const visibilityScore = calculateAIVisibilityScore(result);
+                return (
+                  <GEOHealthTracker 
+                    url={result.url} 
+                    currentScore={visibilityScore.overall} 
+                  />
+                );
+              } catch (e) {
+                console.error('Failed to render GEOHealthTracker:', e);
+                return null;
+              }
+            })()}
+            {(() => {
+              console.log('=== GEO HEALTH TRACKER RENDERED ===');
+              return null;
+            })()}
 
             {/* Insights */}
             {result.insights && result.insights.length > 0 && (

@@ -1,73 +1,53 @@
-import { Component, ReactNode } from 'react';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { AlertCircle } from 'lucide-react';
 
-interface ErrorBoundaryProps {
+interface Props {
   children: ReactNode;
+  fallback?: ReactNode;
 }
 
-interface ErrorBoundaryState {
+interface State {
   hasError: boolean;
   error: Error | null;
 }
 
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
-    this.state = {
-      hasError: false,
-      error: null,
-    };
-  }
-
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return {
-      hasError: true,
-      error,
-    };
-  }
-
-  componentDidCatch(error: Error, errorInfo: { componentStack: string }): void {
-    if (import.meta.env.MODE === 'production') {
-      console.error('ErrorBoundary caught:', error, errorInfo);
-    }
-  }
-
-  handleReload = (): void => {
-    window.location.reload();
+class ErrorBoundary extends Component<Props, State> {
+  public state: State = {
+    hasError: false,
+    error: null,
   };
 
-  render(): ReactNode {
+  public static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error };
+  }
+
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
+  }
+
+  public render() {
     if (this.state.hasError) {
+      if (this.props.fallback) {
+        return this.props.fallback;
+      }
+
       return (
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '100vh',
-          padding: '2rem',
-          textAlign: 'center',
-          fontFamily: 'system-ui, -apple-system, sans-serif',
-        }}>
-          <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>
-            Oops! Something went wrong
-          </h1>
-          <p style={{ color: '#666', marginBottom: '2rem' }}>
-            We apologize for the inconvenience. Please try refreshing the page.
-          </p>
-          <button
-            onClick={this.handleReload}
-            style={{
-              padding: '0.75rem 1.5rem',
-              fontSize: '1rem',
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            Reload Page
-          </button>
+        <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg mb-4">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <h3 className="text-red-400 font-bold mb-2">Component Error</h3>
+              <p className="text-white/70 text-sm mb-2">
+                {this.state.error?.message || 'An unexpected error occurred'}
+              </p>
+              <button
+                onClick={() => this.setState({ hasError: false, error: null })}
+                className="text-xs text-brand-accent hover:text-blue-400 underline"
+              >
+                Try again
+              </button>
+            </div>
+          </div>
         </div>
       );
     }
@@ -75,3 +55,5 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     return this.props.children;
   }
 }
+
+export default ErrorBoundary;
