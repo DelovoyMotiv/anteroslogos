@@ -1,23 +1,172 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Calendar, Clock, User, ArrowRight } from 'lucide-react';
+import { Calendar, Clock, User, ArrowRight, AlertCircle } from 'lucide-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import { getBlogCategories, getFeaturedPosts, getPostsByCategory } from '../data/blogPosts';
+
+interface BlogPost {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  author: {
+    name: string;
+    slug: string;
+  };
+  category?: {
+    name: string;
+    slug: string;
+  };
+  featured: boolean;
+  status: string;
+  published_date: string;
+  read_time: number;
+  tags?: string[];
+}
+
+interface BlogCategory {
+  id: string;
+  name: string;
+  slug: string;
+  post_count?: number;
+}
 
 export default function Blog() {
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [categories, setCategories] = useState<BlogCategory[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [retrying, setRetrying] = useState(false);
 
   useEffect(() => {
     // Set page title and meta
     document.title = 'Blog - GEO Insights & Strategies | Anóteros Lógos';
+    
+    // Set canonical URL
+    let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.rel = 'canonical';
+      document.head.appendChild(canonical);
+    }
+    canonical.href = 'https://anoteroslogos.com/blog';
   }, []);
 
-  const blogCategories = getBlogCategories();
-  const categories = ['all', ...blogCategories.map(c => c.name)];
-  const filteredPosts = getPostsByCategory(selectedCategory);
-  const featuredPosts = getFeaturedPosts();
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
+    setRetrying(false);
+
+    try {
+      // Fetch categories
+      const categoriesResponse = await fetch('/api/blog?action=categories');
+      if (!categoriesResponse.ok) {
+        throw new Error('Failed to fetch categories');
+      }
+      const categoriesData = await categoriesResponse.json();
+      setCategories(categoriesData);
+
+      // Fetch posts with optional category filter
+      const postsUrl = selectedCategory === 'all' 
+        ? '/api/blog?action=posts&limit=100'
+        : `/api/blog?action=posts&limit=100&category=${selectedCategory}`;
+      
+      const postsResponse = await fetch(postsUrl);
+      if (!postsResponse.ok) {
+        throw new Error('Failed to fetch posts');
+      }
+      const postsData = await postsResponse.json();
+      setPosts(postsData.posts || []);
+    } catch (err) {
+      console.error('Error fetching blog data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load blog content');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [selectedCategory]);
+
+  const handleRetry = () => {
+    setRetrying(true);
+    fetchData();
+  };
+
+  const categoryList = ['all', ...categories.map(c => c.slug)];
+  const filteredPosts = posts;
+  const featuredPosts = posts.filter(p => p.featured);
+
+  // Error state
+  if (error && !retrying) {
+    return (
+      <div className="min-h-screen bg-brand-bg">
+        <Header 
+          onMethodClick={() => navigate('/')} 
+          onClientsClick={() => navigate('/')} 
+          onContactClick={() => navigate('/')}
+        />
+        <div className="pb-16" style={{ paddingTop: 'calc(var(--header-height) + 4rem)' }}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+              <AlertCircle className="w-16 h-16 text-brand-accent mb-4" />
+              <h2 className="text-2xl font-bold text-brand-text mb-2">Unable to Load Blog Content</h2>
+              <p className="text-brand-text/60 mb-6 max-w-md">
+                {error}. Please check your connection and try again.
+              </p>
+              <button
+                onClick={handleRetry}
+                className="px-6 py-3 bg-brand-accent text-white rounded-lg font-semibold hover:bg-brand-accent/90 transition-colors"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        </div>
+        <Footer 
+          onPhilosophyClick={() => navigate('/')}
+          onMethodClick={() => navigate('/')}
+          onClientsClick={() => navigate('/')}
+          onFAQClick={() => navigate('/')}
+          onContactClick={() => navigate('/')}
+        />
+      </div>
+    );
+  }
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-brand-bg">
+        <Header 
+          onMethodClick={() => navigate('/')} 
+          onClientsClick={() => navigate('/')} 
+          onContactClick={() => navigate('/')}
+        />
+        <div className="pb-16" style={{ paddingTop: 'calc(var(--header-height) + 4rem)' }}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-center min-h-[400px]">
+              <div className="text-center">
+                <div className="w-16 h-16 border-4 border-brand-accent/20 border-t-brand-accent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-brand-text/60">Loading blog content...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <Footer 
+          onPhilosophyClick={() => navigate('/')}
+          onMethodClick={() => navigate('/')}
+          onClientsClick={() => navigate('/')}
+          onFAQClick={() => navigate('/')}
+          onContactClick={() => navigate('/')}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-brand-bg">
@@ -45,7 +194,7 @@ export default function Blog() {
 
           {/* Category Filter */}
           <div className="flex flex-wrap gap-2 sm:gap-3 mb-12 sm:mb-16">
-            {categories.map(category => (
+            {categoryList.map(category => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
@@ -78,7 +227,7 @@ export default function Blog() {
                       </div>
                       <div className="flex items-center gap-2 mb-4">
                         <span className="px-3 py-1 bg-brand-accent/10 text-brand-accent text-xs font-semibold rounded-full uppercase tracking-wider">
-                          {featuredPosts[0].category}
+                          {featuredPosts[0].category?.name || 'Uncategorized'}
                         </span>
                       </div>
                       <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-text mb-4 leading-tight group-hover:text-brand-accent transition-colors">
@@ -94,11 +243,11 @@ export default function Blog() {
                         </div>
                         <div className="flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
-                          <span>{new Date(featuredPosts[0].publishedDate).toLocaleDateString()}</span>
+                          <span>{new Date(featuredPosts[0].published_date).toLocaleDateString()}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <Clock className="w-3 h-3" />
-                          <span>{featuredPosts[0].readTime} min read</span>
+                          <span>{featuredPosts[0].read_time} min read</span>
                         </div>
                       </div>
                     </div>
@@ -131,11 +280,11 @@ export default function Blog() {
                             <div className="flex items-center gap-3 text-xs text-brand-text/60">
                               <span className="flex items-center gap-1">
                                 <Calendar className="w-3 h-3" />
-                                {new Date(post.publishedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                {new Date(post.published_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                               </span>
                               <span className="flex items-center gap-1">
                                 <Clock className="w-3 h-3" />
-                                {post.readTime} min
+                                {post.read_time} min
                               </span>
                             </div>
                           </div>
@@ -171,7 +320,7 @@ export default function Blog() {
                     <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-brand-accent/10 rounded-full mb-4">
                       <div className="w-1 h-1 rounded-full bg-brand-accent"></div>
                       <span className="text-xs font-semibold text-brand-accent uppercase tracking-wider">
-                        {post.category}
+                        {post.category?.name || 'Uncategorized'}
                       </span>
                     </div>
                     <h3 className="text-xl sm:text-2xl font-bold text-brand-text mb-3 leading-tight group-hover:text-brand-accent transition-colors">
@@ -188,15 +337,15 @@ export default function Blog() {
                       <div className="flex items-center gap-2.5 text-xs text-brand-text/60">
                         <span className="flex items-center gap-1">
                           <Calendar className="w-3 h-3" />
-                          {new Date(post.publishedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          {new Date(post.published_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                         </span>
                         <span className="flex items-center gap-1">
                           <Clock className="w-3 h-3" />
-                          {post.readTime} min
+                          {post.read_time} min
                         </span>
                       </div>
                     </div>
-                    {post.tags.length > 0 && (
+                    {post.tags && post.tags.length > 0 && (
                       <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-brand-accent/10">
                         {post.tags.slice(0, 3).map(tag => (
                           <span 

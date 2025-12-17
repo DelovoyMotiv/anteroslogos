@@ -1,15 +1,48 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Calendar, Clock, User, ArrowLeft, Share2, BookOpen, Sparkles } from 'lucide-react';
+import { Calendar, Clock, User, ArrowLeft, Share2, BookOpen, Sparkles, AlertCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { generateBlogPostingSchema, injectSchema } from '../utils/schemas';
-import { getPostBySlug, getRelatedPosts, NADEZHDA_AUTHOR } from '../data/blogPosts';
-import type { BlogPost } from '../data/blogPosts';
 
-// Content now comes from blogPosts.ts data structure
+interface BlogPost {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  author: {
+    id: string;
+    name: string;
+    slug: string;
+    bio?: string;
+    image_url?: string;
+    email?: string;
+    job_title?: string;
+    expertise?: string[];
+    knows_about?: string[];
+  };
+  category?: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+  tags?: Array<{
+    id: string;
+    name: string;
+    slug: string;
+  }>;
+  featured: boolean;
+  status: string;
+  published_date: string;
+  modified_date: string;
+  read_time: number;
+  meta_description?: string;
+  meta_keywords?: string[];
+  og_image_url?: string;
+}
 
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
@@ -18,58 +51,113 @@ export default function BlogPost() {
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
   const [readingProgress, setReadingProgress] = useState(0);
   const [showShareToast, setShowShareToast] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [statusCode, setStatusCode] = useState<number | null>(null);
 
   useEffect(() => {
     if (!slug) return;
     
-    const foundPost = getPostBySlug(slug);
-    if (foundPost) {
-      setPost(foundPost);
-      setRelatedPosts(getRelatedPosts(slug, 3));
-      
-      // Set page title
-      document.title = `${foundPost.title} | Anóteros Lógos Blog`;
-      
-      // Inject Article schema with Nadezhda as author
-      const articleSchema = generateBlogPostingSchema({
-        headline: foundPost.title,
-        description: foundPost.excerpt,
-        url: `https://anoteroslogos.com/blog/${foundPost.slug}`,
-        datePublished: foundPost.publishedDate,
-        dateModified: foundPost.modifiedDate,
-        author: {
-          name: NADEZHDA_AUTHOR.name,
-          url: `https://anoteroslogos.com/author/${NADEZHDA_AUTHOR.slug}`,
-          image: NADEZHDA_AUTHOR.image ? `https://anoteroslogos.com${NADEZHDA_AUTHOR.image}` : undefined,
-          jobTitle: 'Co-founder & CEO Marketing',
-          description: NADEZHDA_AUTHOR.bio,
-          email: 'Peitho@anoteroslogos.com',
-          expertise: ['Strategic Marketing', 'Brand Development', 'GEO Strategy', 'Digital Authority'],
-          knowsAbout: ['Generative Engine Optimization', 'Brand Architecture', 'AI Marketing', 'E-E-A-T Signals'],
-          affiliation: {
-            name: 'Anóteros Lógos',
-            url: 'https://anoteroslogos.com'
+    const fetchPost = async () => {
+      setLoading(true);
+      setError(null);
+      setStatusCode(null);
+
+      try {
+        const response = await fetch(`/api/blog?action=post&slug=${slug}`);
+        
+        if (response.status === 404) {
+          setStatusCode(404);
+          setError('Post not found');
+          setLoading(false);
+          return;
+        }
+
+        if (response.status === 410) {
+          setStatusCode(410);
+          setError('This post has been archived');
+          setLoading(false);
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch post');
+        }
+
+        const postData = await response.json();
+        setPost(postData);
+
+        // Set page title
+        document.title = `${postData.title} | Anóteros Lógos Blog`;
+
+        // Set canonical URL
+        let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+        if (!canonical) {
+          canonical = document.createElement('link');
+          canonical.rel = 'canonical';
+          document.head.appendChild(canonical);
+        }
+        canonical.href = `https://anoteroslogos.com/blog/${postData.slug}`;
+
+        // Inject Article schema with author data
+        const articleSchema = generateBlogPostingSchema({
+          headline: postData.title,
+          description: postData.excerpt,
+          url: `https://anoteroslogos.com/blog/${postData.slug}`,
+          datePublished: postData.published_date,
+          dateModified: postData.modified_date,
+          author: {
+            name: postData.author.name,
+            url: `https://anoteroslogos.com/author/${postData.author.slug}`,
+            image: postData.author.image_url,
+            jobTitle: postData.author.job_title || 'Co-founder & CEO Marketing',
+            description: postData.author.bio,
+            email: postData.author.email,
+            expertise: postData.author.expertise || ['Strategic Marketing', 'Brand Development', 'GEO Strategy', 'Digital Authority'],
+            knowsAbout: postData.author.knows_about || ['Generative Engine Optimization', 'Brand Architecture', 'AI Marketing', 'E-E-A-T Signals'],
+            affiliation: {
+              name: 'Anóteros Lógos',
+              url: 'https://anoteroslogos.com'
+            }
+          },
+          image: postData.og_image_url ? {
+            url: postData.og_image_url,
+            width: 1200,
+            height: 630
+          } : undefined,
+          keywords: postData.tags?.map((t: any) => t.name) || [],
+          articleSection: postData.category?.name,
+          wordCount: postData.content.split(/\s+/).length,
+          isAccessibleForFree: true,
+          speakable: {
+            cssSelector: ['h1', 'h2', 'p']
+          },
+          about: [
+            { type: 'Thing', name: 'Generative Engine Optimization' },
+            { type: 'Thing', name: postData.category?.name || 'Blog' }
+          ]
+        });
+        injectSchema(articleSchema);
+
+        // Fetch related posts (same category)
+        if (postData.category) {
+          const relatedResponse = await fetch(`/api/blog?action=posts&category=${postData.category.slug}&limit=4`);
+          if (relatedResponse.ok) {
+            const relatedData = await relatedResponse.json();
+            // Filter out current post
+            const filtered = relatedData.posts.filter((p: BlogPost) => p.slug !== slug).slice(0, 3);
+            setRelatedPosts(filtered);
           }
-        },
-        image: foundPost.image ? {
-          url: `https://anoteroslogos.com${foundPost.image}`,
-          width: 1200,
-          height: 630
-        } : undefined,
-        keywords: foundPost.tags,
-        articleSection: foundPost.category,
-        wordCount: foundPost.content.split(/\s+/).length,
-        isAccessibleForFree: true,
-        speakable: {
-          cssSelector: ['h1', 'h2', 'p']
-        },
-        about: [
-          { type: 'Thing', name: 'Generative Engine Optimization' },
-          { type: 'Thing', name: foundPost.category }
-        ]
-      });
-      injectSchema(articleSchema);
-    }
+        }
+      } catch (err) {
+        console.error('Error fetching post:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load post');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPost();
   }, [slug]);
 
   const handleShare = async () => {
@@ -109,15 +197,74 @@ export default function BlogPost() {
     return () => window.removeEventListener('scroll', updateReadingProgress);
   }, []);
 
-  if (!post) {
+  // Loading state
+  if (loading) {
     return (
-      <div className="min-h-screen bg-brand-bg flex items-center justify-center pt-28 sm:pt-32 md:pt-36 lg:pt-40">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-brand-text mb-4">Article Not Found</h1>
-          <Link to="/blog" className="text-brand-accent hover:underline">
-            ← Back to Blog
-          </Link>
+      <div className="min-h-screen bg-brand-bg">
+        <Header 
+          onMethodClick={() => navigate('/')} 
+          onClientsClick={() => navigate('/')} 
+          onContactClick={() => navigate('/')}
+        />
+        <div className="pb-16" style={{ paddingTop: 'calc(var(--header-height) + 3rem)' }}>
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-center min-h-[400px]">
+              <div className="text-center">
+                <div className="w-16 h-16 border-4 border-brand-accent/20 border-t-brand-accent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-brand-text/60">Loading article...</p>
+              </div>
+            </div>
+          </div>
         </div>
+        <Footer 
+          onPhilosophyClick={() => navigate('/')}
+          onMethodClick={() => navigate('/')}
+          onClientsClick={() => navigate('/')}
+          onFAQClick={() => navigate('/')}
+          onContactClick={() => navigate('/')}
+        />
+      </div>
+    );
+  }
+
+  // Error states (404, 410, or other errors)
+  if (error || !post) {
+    return (
+      <div className="min-h-screen bg-brand-bg">
+        <Header 
+          onMethodClick={() => navigate('/')} 
+          onClientsClick={() => navigate('/')} 
+          onContactClick={() => navigate('/')}
+        />
+        <div className="pb-16" style={{ paddingTop: 'calc(var(--header-height) + 3rem)' }}>
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+              <AlertCircle className="w-16 h-16 text-brand-accent mb-4" />
+              <h1 className="text-4xl font-bold text-brand-text mb-4">
+                {statusCode === 410 ? 'Article Archived' : 'Article Not Found'}
+              </h1>
+              <p className="text-brand-text/60 mb-6 max-w-md">
+                {statusCode === 410 
+                  ? 'This article has been archived and is no longer available.'
+                  : 'The article you\'re looking for doesn\'t exist or has been removed.'}
+              </p>
+              <Link 
+                to="/blog" 
+                className="inline-flex items-center gap-2 px-6 py-3 bg-brand-accent text-white rounded-lg font-semibold hover:bg-brand-accent/90 transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Blog
+              </Link>
+            </div>
+          </div>
+        </div>
+        <Footer 
+          onPhilosophyClick={() => navigate('/')}
+          onMethodClick={() => navigate('/')}
+          onClientsClick={() => navigate('/')}
+          onFAQClick={() => navigate('/')}
+          onContactClick={() => navigate('/')}
+        />
       </div>
     );
   }
@@ -160,11 +307,11 @@ export default function BlogPost() {
             <div className="flex items-center gap-3 mb-6">
               <div className="flex items-center gap-2 px-3 py-1.5 bg-brand-accent/10 border border-brand-accent/30 rounded-full">
                 <Sparkles className="w-3.5 h-3.5 text-brand-accent" />
-                <span className="text-xs font-semibold text-brand-accent uppercase tracking-wider">{post.category}</span>
+                <span className="text-xs font-semibold text-brand-accent uppercase tracking-wider">{post.category?.name || 'Uncategorized'}</span>
               </div>
               <div className="flex items-center gap-2 text-xs text-brand-text/60">
                 <BookOpen className="w-3.5 h-3.5" />
-                <span>{post.readTime} min read</span>
+                <span>{post.read_time} min read</span>
               </div>
             </div>
 
@@ -189,13 +336,13 @@ export default function BlogPost() {
                 </div>
                 <div className="flex flex-col">
                   <span className="font-semibold text-sm">{post.author.name}</span>
-                  <span className="text-xs text-brand-text/60">Co-founder & CEO Marketing</span>
+                  <span className="text-xs text-brand-text/60">{post.author.job_title || 'Co-founder & CEO Marketing'}</span>
                 </div>
               </Link>
               <div className="h-8 w-px bg-brand-accent/20 hidden sm:block" />
               <div className="flex items-center gap-1 text-sm">
                 <Calendar className="w-4 h-4" />
-                <span>{new Date(post.publishedDate).toLocaleDateString('en-US', { 
+                <span>{new Date(post.published_date).toLocaleDateString('en-US', { 
                   year: 'numeric', 
                   month: 'long', 
                   day: 'numeric' 
@@ -212,14 +359,14 @@ export default function BlogPost() {
           </header>
 
           {/* Tags */}
-          {post.tags.length > 0 && (
+          {post.tags && post.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-12 pb-12 border-b border-brand-accent/10">
               {post.tags.map(tag => (
                 <span 
-                  key={tag}
+                  key={tag.id}
                   className="px-4 py-2 bg-brand-secondary/30 hover:bg-brand-secondary/40 text-brand-text/80 text-sm rounded-lg border border-brand-accent/10 transition-colors cursor-pointer"
                 >
-                  #{tag}
+                  #{tag.name}
                 </span>
               ))}
             </div>
@@ -248,7 +395,7 @@ export default function BlogPost() {
                   >
                     <div className="flex items-center gap-2 mb-3">
                       <span className="px-2 py-1 bg-brand-accent/10 text-brand-accent text-xs font-semibold rounded-md uppercase tracking-wider">
-                        {relatedPost.category}
+                        {relatedPost.category?.name || 'Uncategorized'}
                       </span>
                     </div>
                     <h4 className="text-lg font-bold text-brand-text mb-2 line-clamp-2 group-hover:text-brand-accent transition-colors">
@@ -257,7 +404,7 @@ export default function BlogPost() {
                     <p className="text-brand-text/60 text-sm line-clamp-2 mb-3">{relatedPost.excerpt}</p>
                     <div className="flex items-center gap-2 text-xs text-brand-text/50">
                       <Clock className="w-3.5 h-3.5" />
-                      <span>{relatedPost.readTime} min read</span>
+                      <span>{relatedPost.read_time} min read</span>
                     </div>
                   </Link>
                 ))}

@@ -30,6 +30,13 @@ const DashboardBilling = lazy(() => import('./src/pages/dashboard/BillingPage'))
 const DashboardUsage = lazy(() => import('./src/pages/dashboard/UsagePage'));
 const DashboardSettings = lazy(() => import('./src/pages/dashboard/SettingsPage'));
 
+// Admin pages (protected)
+const BlogAdminPage = lazy(() => import('./pages/admin/BlogAdminPage'));
+const BlogNewPostPage = lazy(() => import('./pages/admin/BlogNewPostPage'));
+const BlogEditPostPage = lazy(() => import('./pages/admin/BlogEditPostPage'));
+const BlogAuthorsPage = lazy(() => import('./pages/admin/BlogAuthorsPage'));
+const BlogCategoriesPage = lazy(() => import('./pages/admin/BlogCategoriesPage'));
+
 // Auth pages
 const LoginPage = lazy(() => import('./src/pages/auth/LoginPage'));
 const SignupPage = lazy(() => import('./src/pages/auth/SignupPage'));
@@ -103,6 +110,13 @@ const App: React.FC = () => {
                             <Route path="usage" element={<DashboardUsage />} />
                             <Route path="settings" element={<DashboardSettings />} />
                         </Route>
+                        
+                        {/* Admin Routes (protected) */}
+                        <Route path="/admin/blog" element={<BlogAdminPage />} />
+                        <Route path="/admin/blog/new" element={<BlogNewPostPage />} />
+                        <Route path="/admin/blog/edit/:id" element={<BlogEditPostPage />} />
+                        <Route path="/admin/blog/authors" element={<BlogAuthorsPage />} />
+                        <Route path="/admin/blog/categories" element={<BlogCategoriesPage />} />
                         
                         <Route path="*" element={<NotFound />} />
                     </Routes>

@@ -328,3 +328,85 @@ export interface UsageStatsRow {
   unique_tools: number;
   avg_response_time_ms: number;
 }
+
+// =====================================================
+// BLOG CMS TYPES
+// =====================================================
+// Type definitions for the blog content management system
+
+/**
+ * Blog Post row from blog_posts table
+ */
+export interface BlogPost {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  author_id: string;
+  author?: BlogAuthor;
+  category_id?: string | null;
+  category?: BlogCategory;
+  tags?: BlogTag[];
+  featured: boolean;
+  status: 'draft' | 'published' | 'archived';
+  published_date?: string | null;
+  modified_date: string;
+  read_time: number;
+  meta_description?: string | null;
+  meta_keywords?: string[] | null;
+  og_image_url?: string | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at?: string | null;
+}
+
+/**
+ * Blog Author row from blog_authors table
+ */
+export interface BlogAuthor {
+  id: string;
+  slug: string;
+  name: string;
+  bio?: string | null;
+  image_url?: string | null;
+  email?: string | null;
+  job_title?: string | null;
+  expertise?: string[] | null;
+  knows_about?: string[] | null;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Blog Category row from blog_categories table
+ */
+export interface BlogCategory {
+  id: string;
+  slug: string;
+  name: string;
+  description?: string | null;
+  display_order: number;
+  post_count?: number;
+  created_at: string;
+  updated_at: string;
+}
+
+/**
+ * Blog Tag row from blog_tags table
+ */
+export interface BlogTag {
+  id: string;
+  name: string;
+  slug: string;
+  created_at: string;
+}
+
+/**
+ * Blog Post Tag junction row from blog_post_tags table
+ */
+export interface BlogPostTag {
+  post_id: string;
+  tag_id: string;
+  created_at: string;
+}

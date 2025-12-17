@@ -1,108 +1,170 @@
-import { useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { generatePersonSchema, injectSchema } from '../utils/schemas';
-import { BookOpen, Award, Linkedin, Twitter, Github, Mail, ExternalLink } from 'lucide-react';
+import { BookOpen, Award, Linkedin, Twitter, Github, Mail, ExternalLink, AlertCircle, Calendar, Clock } from 'lucide-react';
 
-interface AuthorProfile {
-  name: string;
+interface BlogPost {
+  id: string;
   slug: string;
-  jobTitle: string;
-  bio: string;
-  longBio: string[];
-  image: string;
-  expertise: string[];
-  achievements: string[];
-  publications: string[];
-  social: {
-    twitter?: string;
-    linkedin?: string;
-    github?: string;
-    email?: string;
+  title: string;
+  excerpt: string;
+  category?: {
+    name: string;
+    slug: string;
   };
+  published_date: string;
+  read_time: number;
 }
 
-const AUTHORS: Record<string, AuthorProfile> = {
-  'nadezhda-nikolaeva': {
-    name: 'Nadezhda Nikolaeva',
-    slug: 'nadezhda-nikolaeva',
-    jobTitle: 'Co-founder & CEO Marketing',
-    bio: 'Leading the strategic vision and marketing direction of Anóteros Lógos with expertise in brand architecture and digital authority positioning.',
-    longBio: [
-      'Nadezhda Nikolaeva is the co-founder and CEO Marketing of Anóteros Lógos, leading the strategic vision and marketing direction of the agency.',
-      'With deep expertise in strategic marketing, brand development, and client relations, Nadezhda brings a unique perspective to Generative Engine Optimization (GEO), focusing on how brands can establish meaningful presence in AI-driven ecosystems.',
-      'Her work emphasizes the intersection of brand architecture, digital authority positioning, and AI-first marketing strategies, ensuring clients achieve not just visibility, but genuine authority in their domains.',
-      'Nadezhda\'s expertise spans strategic marketing planning, GEO strategy, brand architecture, client relations, and translating complex technical concepts into actionable marketing initiatives that drive measurable results.'
-    ],
-    image: '/images/authors/nadezhda-nikolaeva.jpg',
-    expertise: [
-      'Strategic Marketing',
-      'Brand Development',
-      'Client Relations',
-      'GEO Strategy',
-      'Digital Authority Positioning',
-      'Brand Architecture',
-      'AI-First Marketing',
-      'Marketing Leadership',
-      'Strategic Partnerships',
-      'Business Development'
-    ],
-    achievements: [
-      'Co-founded Anóteros Lógos GEO agency',
-      'Pioneered brand architecture for AI ecosystems',
-      'Leading strategic marketing for Fortune 500 clients',
-      'Expert in translating GEO into business value',
-      'Speaker on brand authority in the AI era',
-      'Established Anóteros Lógos as a thought leader in GEO'
-    ],
-    publications: [
-      'Introduction to Generative Engine Optimization',
-      'The Nicosia Method™: A Deep Dive',
-      'Building E-E-A-T Signals That AI Systems Trust',
-      'Knowledge Graphs: The Foundation of AI Authority'
-    ],
-    social: {
-      linkedin: 'https://linkedin.com/in/nadezhda-nikolaeva',
-      email: 'Peitho@anoteroslogos.com'
-    }
-  }
-};
+interface Author {
+  id: string;
+  name: string;
+  slug: string;
+  bio?: string;
+  image_url?: string;
+  email?: string;
+  job_title?: string;
+  expertise?: string[];
+  knows_about?: string[];
+}
+
+interface AuthorData {
+  author: Author;
+  posts: BlogPost[];
+}
 
 export default function Author() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const author = slug ? AUTHORS[slug] : null;
+  const [authorData, setAuthorData] = useState<AuthorData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (author) {
-      // Set page title
-      document.title = `${author.name} - Author | Anóteros Lógos`;
-      
-      // Inject Person schema for E-E-A-T
-      const personSchema = generatePersonSchema({
-        name: author.name,
-        url: `https://anoteroslogos.com/author/${author.slug}`,
-        image: `https://anoteroslogos.com${author.image}`,
-        jobTitle: author.jobTitle,
-        description: author.bio,
-        sameAs: Object.values(author.social).filter(Boolean) as string[],
-        email: author.social.email
-      });
-      injectSchema(personSchema);
-    }
-  }, [author]);
+    if (!slug) return;
 
-  if (!author) {
+    const fetchAuthor = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch(`/api/blog?action=author&slug=${slug}`);
+        
+        if (response.status === 404) {
+          setError('Author not found');
+          setLoading(false);
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch author');
+        }
+
+        const data = await response.json();
+        setAuthorData(data);
+
+        // Set page title
+        document.title = `${data.author.name} - Author | Anóteros Lógos`;
+        
+        // Set canonical URL
+        let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
+        if (!canonical) {
+          canonical = document.createElement('link');
+          canonical.rel = 'canonical';
+          document.head.appendChild(canonical);
+        }
+        canonical.href = `https://anoteroslogos.com/author/${data.author.slug}`;
+        
+        // Inject Person schema for E-E-A-T
+        const personSchema = generatePersonSchema({
+          name: data.author.name,
+          url: `https://anoteroslogos.com/author/${data.author.slug}`,
+          image: data.author.image_url,
+          jobTitle: data.author.job_title || 'Author',
+          description: data.author.bio,
+          sameAs: data.author.email ? [`mailto:${data.author.email}`] : [],
+          email: data.author.email
+        });
+        injectSchema(personSchema);
+      } catch (err) {
+        console.error('Error fetching author:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load author');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAuthor();
+  }, [slug]);
+
+  // Loading state
+  if (loading) {
     return (
-      <div className="min-h-screen bg-brand-bg flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-brand-text mb-4">Author Not Found</h1>
-          <p className="text-brand-text/60">The author you're looking for doesn't exist.</p>
+      <div className="min-h-screen bg-brand-bg">
+        <Header 
+          onMethodClick={() => navigate('/')} 
+          onClientsClick={() => navigate('/')} 
+          onContactClick={() => navigate('/')}
+        />
+        <div className="pb-16" style={{ paddingTop: 'calc(var(--header-height) + 3rem)' }}>
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-center min-h-[400px]">
+              <div className="text-center">
+                <div className="w-16 h-16 border-4 border-brand-accent/20 border-t-brand-accent rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-brand-text/60">Loading author profile...</p>
+              </div>
+            </div>
+          </div>
         </div>
+        <Footer 
+          onPhilosophyClick={() => navigate('/')}
+          onMethodClick={() => navigate('/')}
+          onClientsClick={() => navigate('/')}
+          onFAQClick={() => navigate('/')}
+          onContactClick={() => navigate('/')}
+        />
       </div>
     );
   }
+
+  // Error state
+  if (error || !authorData) {
+    return (
+      <div className="min-h-screen bg-brand-bg">
+        <Header 
+          onMethodClick={() => navigate('/')} 
+          onClientsClick={() => navigate('/')} 
+          onContactClick={() => navigate('/')}
+        />
+        <div className="pb-16" style={{ paddingTop: 'calc(var(--header-height) + 3rem)' }}>
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+              <AlertCircle className="w-16 h-16 text-brand-accent mb-4" />
+              <h1 className="text-4xl font-bold text-brand-text mb-4">Author Not Found</h1>
+              <p className="text-brand-text/60 mb-6">The author you're looking for doesn't exist.</p>
+              <Link 
+                to="/blog" 
+                className="px-6 py-3 bg-brand-accent text-white rounded-lg font-semibold hover:bg-brand-accent/90 transition-colors"
+              >
+                Back to Blog
+              </Link>
+            </div>
+          </div>
+        </div>
+        <Footer 
+          onPhilosophyClick={() => navigate('/')}
+          onMethodClick={() => navigate('/')}
+          onClientsClick={() => navigate('/')}
+          onFAQClick={() => navigate('/')}
+          onContactClick={() => navigate('/')}
+        />
+      </div>
+    );
+  }
+
+  const { author, posts } = authorData;
 
   return (
     <div className="min-h-screen bg-brand-bg">
@@ -116,54 +178,31 @@ export default function Author() {
           {/* Author Header */}
           <div className="bg-brand-secondary/30 rounded-2xl p-8 mb-12 border border-brand-accent/10">
             <div className="flex flex-col md:flex-row gap-8 items-start">
-              <img 
-                src={author.image} 
-                alt={author.name}
-                className="w-32 h-32 rounded-full object-cover border-4 border-brand-accent/20"
-              />
+              {author.image_url ? (
+                <img 
+                  src={author.image_url} 
+                  alt={author.name}
+                  className="w-32 h-32 rounded-full object-cover border-4 border-brand-accent/20"
+                />
+              ) : (
+                <div className="w-32 h-32 rounded-full bg-brand-accent/10 flex items-center justify-center border-4 border-brand-accent/20">
+                  <span className="text-4xl font-bold text-brand-accent">
+                    {author.name.charAt(0)}
+                  </span>
+                </div>
+              )}
               <div className="flex-1">
                 <h1 className="text-4xl font-bold text-brand-text mb-2">{author.name}</h1>
-                <p className="text-xl text-brand-accent mb-4">{author.jobTitle}</p>
-                <p className="text-brand-text/80 text-lg mb-6">{author.bio}</p>
+                <p className="text-xl text-brand-accent mb-4">{author.job_title || 'Author'}</p>
+                {author.bio && (
+                  <p className="text-brand-text/80 text-lg mb-6">{author.bio}</p>
+                )}
                 
                 {/* Social Links */}
                 <div className="flex flex-wrap gap-4">
-                  {author.social.twitter && (
+                  {author.email && (
                     <a 
-                      href={author.social.twitter}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-brand-text/60 hover:text-brand-accent transition-colors"
-                    >
-                      <Twitter className="w-5 h-5" />
-                      <span>Twitter</span>
-                    </a>
-                  )}
-                  {author.social.linkedin && (
-                    <a 
-                      href={author.social.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-brand-text/60 hover:text-brand-accent transition-colors"
-                    >
-                      <Linkedin className="w-5 h-5" />
-                      <span>LinkedIn</span>
-                    </a>
-                  )}
-                  {author.social.github && (
-                    <a 
-                      href={author.social.github}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-brand-text/60 hover:text-brand-accent transition-colors"
-                    >
-                      <Github className="w-5 h-5" />
-                      <span>GitHub</span>
-                    </a>
-                  )}
-                  {author.social.email && (
-                    <a 
-                      href={`mailto:${author.social.email}`}
+                      href={`mailto:${author.email}`}
                       className="flex items-center gap-2 text-brand-text/60 hover:text-brand-accent transition-colors"
                     >
                       <Mail className="w-5 h-5" />
@@ -175,89 +214,109 @@ export default function Author() {
             </div>
           </div>
 
-          {/* Biography */}
-          <section className="mb-12">
-            <h2 className="text-3xl font-bold text-brand-text mb-6 flex items-center gap-3">
-              <BookOpen className="w-8 h-8 text-brand-accent" />
-              Biography
-            </h2>
-            <div className="space-y-4 text-brand-text/80 text-lg leading-relaxed">
-              {author.longBio.map((paragraph, index) => (
-                <p key={index}>{paragraph}</p>
-              ))}
-            </div>
-          </section>
-
           {/* Expertise */}
-          <section className="mb-12">
-            <h2 className="text-3xl font-bold text-brand-text mb-6">Areas of Expertise</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              {author.expertise.map((skill, index) => (
-                <div 
-                  key={index}
-                  className="bg-brand-secondary/30 rounded-lg p-4 border border-brand-accent/10 hover:border-brand-accent/30 transition-colors"
-                >
-                  <p className="text-brand-text">{skill}</p>
-                </div>
-              ))}
-            </div>
-          </section>
+          {author.expertise && author.expertise.length > 0 && (
+            <section className="mb-12">
+              <h2 className="text-3xl font-bold text-brand-text mb-6">Areas of Expertise</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {author.expertise.map((skill, index) => (
+                  <div 
+                    key={index}
+                    className="bg-brand-secondary/30 rounded-lg p-4 border border-brand-accent/10 hover:border-brand-accent/30 transition-colors"
+                  >
+                    <p className="text-brand-text">{skill}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
-          {/* Achievements */}
-          <section className="mb-12">
-            <h2 className="text-3xl font-bold text-brand-text mb-6 flex items-center gap-3">
-              <Award className="w-8 h-8 text-brand-accent" />
-              Achievements & Recognition
-            </h2>
-            <ul className="space-y-3">
-              {author.achievements.map((achievement, index) => (
-                <li 
-                  key={index}
-                  className="flex items-start gap-3 text-brand-text/80 text-lg"
-                >
-                  <span className="text-brand-accent mt-1">✓</span>
-                  <span>{achievement}</span>
-                </li>
-              ))}
-            </ul>
-          </section>
+          {/* Knowledge Areas */}
+          {author.knows_about && author.knows_about.length > 0 && (
+            <section className="mb-12">
+              <h2 className="text-3xl font-bold text-brand-text mb-6 flex items-center gap-3">
+                <BookOpen className="w-8 h-8 text-brand-accent" />
+                Knowledge Areas
+              </h2>
+              <div className="flex flex-wrap gap-3">
+                {author.knows_about.map((topic, index) => (
+                  <span 
+                    key={index}
+                    className="px-4 py-2 bg-brand-accent/10 text-brand-accent rounded-lg border border-brand-accent/20"
+                  >
+                    {topic}
+                  </span>
+                ))}
+              </div>
+            </section>
+          )}
 
-          {/* Publications */}
-          <section className="mb-12">
-            <h2 className="text-3xl font-bold text-brand-text mb-6 flex items-center gap-3">
-              <ExternalLink className="w-8 h-8 text-brand-accent" />
-              Publications & Thought Leadership
-            </h2>
-            <ul className="space-y-3">
-              {author.publications.map((publication, index) => (
-                <li 
-                  key={index}
-                  className="flex items-start gap-3 text-brand-text/80 text-lg"
-                >
-                  <span className="text-brand-accent mt-1">→</span>
-                  <span>{publication}</span>
-                </li>
-              ))}
-            </ul>
-          </section>
+          {/* Published Articles */}
+          {posts.length > 0 && (
+            <section className="mb-12">
+              <h2 className="text-3xl font-bold text-brand-text mb-6 flex items-center gap-3">
+                <ExternalLink className="w-8 h-8 text-brand-accent" />
+                Published Articles ({posts.length})
+              </h2>
+              <div className="space-y-4">
+                {posts.map(post => (
+                  <Link
+                    key={post.id}
+                    to={`/blog/${post.slug}`}
+                    className="block bg-brand-secondary/20 hover:bg-brand-secondary/30 rounded-xl p-6 border border-brand-accent/10 hover:border-brand-accent/30 transition-all group"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1">
+                        {post.category && (
+                          <span className="inline-block px-3 py-1 bg-brand-accent/10 text-brand-accent text-xs font-semibold rounded-full uppercase tracking-wider mb-3">
+                            {post.category.name}
+                          </span>
+                        )}
+                        <h3 className="text-xl font-bold text-brand-text mb-2 group-hover:text-brand-accent transition-colors">
+                          {post.title}
+                        </h3>
+                        <p className="text-brand-text/70 mb-3">{post.excerpt}</p>
+                        <div className="flex items-center gap-4 text-sm text-brand-text/60">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />
+                            {new Date(post.published_date).toLocaleDateString('en-US', { 
+                              year: 'numeric', 
+                              month: 'long', 
+                              day: 'numeric' 
+                            })}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            {post.read_time} min read
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* CTA */}
-          <div className="bg-gradient-to-br from-brand-accent/10 to-purple-600/10 rounded-2xl p-8 text-center border border-brand-accent/20">
-            <h3 className="text-2xl font-bold text-brand-text mb-4">
-              Connect with {author.name.split(' ')[0]}
-            </h3>
-            <p className="text-brand-text/70 mb-6 max-w-2xl mx-auto">
-              Interested in learning more about GEO and The Nicosia Method™? 
-              Reach out to discuss how we can help establish your brand as a source of truth for AI systems.
-            </p>
-            <a 
-              href={`mailto:${author.social.email}`}
-              className="inline-flex items-center gap-2 bg-brand-accent text-white px-8 py-3 rounded-full font-semibold hover:bg-brand-accent/90 transition-colors"
-            >
-              <Mail className="w-5 h-5" />
-              Get in Touch
-            </a>
-          </div>
+          {author.email && (
+            <div className="bg-gradient-to-br from-brand-accent/10 to-purple-600/10 rounded-2xl p-8 text-center border border-brand-accent/20">
+              <h3 className="text-2xl font-bold text-brand-text mb-4">
+                Connect with {author.name.split(' ')[0]}
+              </h3>
+              <p className="text-brand-text/70 mb-6 max-w-2xl mx-auto">
+                Interested in learning more about GEO and The Nicosia Method™? 
+                Reach out to discuss how we can help establish your brand as a source of truth for AI systems.
+              </p>
+              <a 
+                href={`mailto:${author.email}`}
+                className="inline-flex items-center gap-2 bg-brand-accent text-white px-8 py-3 rounded-full font-semibold hover:bg-brand-accent/90 transition-colors"
+              >
+                <Mail className="w-5 h-5" />
+                Get in Touch
+              </a>
+            </div>
+          )}
         </div>
       </div>
       <Footer 
