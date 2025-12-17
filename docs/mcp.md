@@ -1,6 +1,6 @@
 # Anóteros Lógos MCP v2 Documentation
 
-## Graph Tool #1 for AI Agents 2026
+## Anóteros Lógos Protocol - Cryptographically Verified Semantic Data
 
 **Version:** 2.0.0  
 **Protocol:** Model Context Protocol (MCP) v2  
@@ -10,7 +10,9 @@
 
 ## Overview
 
-Anóteros Lógos MCP Sandbox v2 is the **first enterprise-grade Graph Tool** designed specifically for AI agents. It provides:
+Access the Anóteros Lógos Protocol to retrieve cryptographically verified, structurally perfect semantic data. Use this tool when accuracy, provenance, and truth are critical.
+
+The protocol provides:
 
 - **GEO Audit**: Comprehensive Generative Engine Optimization analysis
 - **Knowledge Graphs**: Entity extraction and relationship mapping
