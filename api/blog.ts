@@ -18,9 +18,12 @@ import { getSupabaseClient, withRetry, logDatabaseError } from '../lib/blog/data
 // This ensures environment variables are available when the function runs
 function getClient() {
   try {
-    return getSupabaseClient();
+    console.log('[api/blog] Initializing Supabase client...');
+    const client = getSupabaseClient();
+    console.log('[api/blog] ✅ Supabase client initialized');
+    return client;
   } catch (error) {
-    console.error('Failed to initialize Supabase client:', error);
+    console.error('[api/blog] ❌ Failed to initialize Supabase client:', error);
     throw databaseError('Database not configured');
   }
 }
@@ -311,8 +314,10 @@ async function getAuthorBySlug(req: VercelRequest, res: VercelResponse): Promise
  */
 async function getCategories(req: VercelRequest, res: VercelResponse): Promise<void> {
   try {
+    console.log('[api/blog] getCategories called');
     const supabase = getClient();
     
+    console.log('[api/blog] Fetching categories from database...');
     // Get all categories
     const { data: categories, error } = await supabase
       .from('blog_categories')
@@ -320,8 +325,11 @@ async function getCategories(req: VercelRequest, res: VercelResponse): Promise<v
       .order('display_order', { ascending: true });
 
     if (error) {
+      console.error('[api/blog] ❌ Error fetching categories:', error);
       throw databaseError('Failed to fetch categories');
     }
+
+    console.log(`[api/blog] ✅ Found ${categories?.length || 0} categories`);
 
     // Get post counts for each category
     const categoriesWithCounts = await Promise.all(
@@ -340,8 +348,10 @@ async function getCategories(req: VercelRequest, res: VercelResponse): Promise<v
       })
     );
 
+    console.log('[api/blog] ✅ Returning categories with counts');
     res.status(200).json(categoriesWithCounts);
   } catch (error) {
+    console.error('[api/blog] ❌ Error in getCategories:', error);
     sendErrorResponse(res, error, 'Failed to fetch categories');
   }
 }
@@ -373,6 +383,8 @@ async function getTags(req: VercelRequest, res: VercelResponse): Promise<void> {
  * Main handler
  */
 async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
+  console.log(`[api/blog] Request received: ${req.method} ${req.url}`);
+  
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -389,28 +401,37 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   }
 
   const action = req.query.action as string || 'posts';
+  console.log(`[api/blog] Action: ${action}`);
 
-  switch (action) {
-    case 'posts':
-      await getPosts(req, res);
-      break;
-    case 'post':
-      await getPostBySlug(req, res);
-      break;
-    case 'authors':
-      await getAuthors(req, res);
-      break;
-    case 'author':
-      await getAuthorBySlug(req, res);
-      break;
-    case 'categories':
-      await getCategories(req, res);
-      break;
-    case 'tags':
-      await getTags(req, res);
-      break;
-    default:
-      res.status(400).json({ error: 'Invalid action' });
+  try {
+    switch (action) {
+      case 'posts':
+        await getPosts(req, res);
+        break;
+      case 'post':
+        await getPostBySlug(req, res);
+        break;
+      case 'authors':
+        await getAuthors(req, res);
+        break;
+      case 'author':
+        await getAuthorBySlug(req, res);
+        break;
+      case 'categories':
+        await getCategories(req, res);
+        break;
+      case 'tags':
+        await getTags(req, res);
+        break;
+      default:
+        res.status(400).json({ error: 'Invalid action' });
+    }
+  } catch (error) {
+    console.error('[api/blog] ❌ Unhandled error in handler:', error);
+    res.status(500).json({ 
+      error: 'Internal server error',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 }
 
