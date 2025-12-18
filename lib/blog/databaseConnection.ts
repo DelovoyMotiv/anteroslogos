@@ -5,11 +5,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '../../types/database.types';
 
-// For server-side (Vercel Functions), use non-VITE_ prefixed variables
-// For client-side, Vite will inject VITE_ prefixed variables
-const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
-
 export interface RetryOptions {
   maxRetries?: number;
   retryDelay?: number;
@@ -97,7 +92,18 @@ export async function withRetry<T>(
  * Get Supabase client with connection validation
  */
 export function getSupabaseClient(): SupabaseClient<Database> {
+  // For server-side (Vercel Functions), use non-VITE_ prefixed variables
+  // For client-side, Vite will inject VITE_ prefixed variables
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+  
   if (!supabaseUrl || !supabaseServiceKey) {
+    console.error('Missing Supabase configuration:', {
+      hasSupabaseUrl: !!process.env.SUPABASE_URL,
+      hasViteSupabaseUrl: !!process.env.VITE_SUPABASE_URL,
+      hasServiceRoleKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+      hasAnonKey: !!process.env.SUPABASE_ANON_KEY,
+    });
     throw new Error('Database configuration is missing. Please check environment variables.');
   }
 
