@@ -27,7 +27,8 @@
     "blog:verify-urls": "npx tsx scripts/verify-blog-urls.ts",
     "blog:test-api": "npx tsx scripts/test-blog-api-endpoints.ts",
     "blog:test-frontend": "npx tsx scripts/verify-blog-frontend.ts",
-    "blog:migrate": "npx tsx scripts/migrate-blog-data.ts"
+    "blog:migrate": "npx tsx scripts/migrate-blog-data.ts",
+    "blog:manage-admins": "npx tsx scripts/manage-blog-admins.ts"
   },
   "dependencies": {
     "@account-kit/core": "^4.79.0",
