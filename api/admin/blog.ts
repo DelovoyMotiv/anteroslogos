@@ -761,25 +761,13 @@ async function getPosts(req: VercelRequest, res: VercelResponse, userId: string)
     // Build query - admin can see all posts including drafts
     let query = supabase
       .from('blog_posts')
-      .select(`
-        *,
-        blog_authors!inner(*),
-        blog_categories(*)
-      `, { count: 'exact' })
+      .select('*', { count: 'exact' })
       .is('deleted_at', null)
       .order('created_at', { ascending: false });
 
     // Apply filters
     if (status && status !== 'all') {
       query = query.eq('status', status);
-    }
-
-    if (category && category !== 'all') {
-      query = query.eq('blog_categories.slug', category);
-    }
-
-    if (author && author !== 'all') {
-      query = query.eq('blog_authors.slug', author);
     }
 
     // Apply pagination
@@ -789,19 +777,52 @@ async function getPosts(req: VercelRequest, res: VercelResponse, userId: string)
 
     if (error) {
       console.error('Error fetching posts:', error);
-      res.status(500).json({ error: 'Failed to fetch posts' });
+      res.status(500).json({ error: 'Failed to fetch posts', details: error.message });
       return;
     }
 
-    // Transform data to include author and category as nested objects
-    const transformedPosts = posts?.map(post => ({
-      ...post,
-      author: post.blog_authors,
-      category: post.blog_categories,
-    })) || [];
+    // Fetch authors and categories separately for each post
+    const postsWithRelations = await Promise.all(
+      (posts || []).map(async (post: any) => {
+        // Fetch author
+        const { data: authorData } = await supabase
+          .from('blog_authors')
+          .select('*')
+          .eq('id', post.author_id)
+          .single();
+
+        // Fetch category if exists
+        let categoryData: any = null;
+        if (post.category_id) {
+          const { data: cat } = await supabase
+            .from('blog_categories')
+            .select('*')
+            .eq('id', post.category_id)
+            .single();
+          categoryData = cat;
+        }
+
+        return {
+          ...post,
+          author: authorData,
+          category: categoryData,
+        };
+      })
+    );
+
+    // Filter by category or author if needed
+    let filteredPosts: any[] = postsWithRelations;
+    
+    if (category && category !== 'all') {
+      filteredPosts = filteredPosts.filter((post: any) => post.category?.slug === category);
+    }
+    
+    if (author && author !== 'all') {
+      filteredPosts = filteredPosts.filter((post: any) => post.author?.slug === author);
+    }
 
     res.status(200).json({
-      posts: transformedPosts,
+      posts: filteredPosts,
       total: count || 0,
       page,
       limit,
