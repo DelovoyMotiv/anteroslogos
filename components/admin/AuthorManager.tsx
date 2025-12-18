@@ -136,8 +136,8 @@ export default function AuthorManager() {
       };
 
       const url = editingAuthor
-        ? `/api/admin/blog/authors/${editingAuthor.id}`
-        : '/api/admin/blog/authors';
+        ? `/api/admin/blog?action=update-author&id=${editingAuthor.id}`
+        : '/api/admin/blog?action=create-author';
       
       const method = editingAuthor ? 'PUT' : 'POST';
 
@@ -181,7 +181,7 @@ export default function AuthorManager() {
         throw new Error('Not authenticated');
       }
 
-      const response = await fetch(`/api/admin/blog/authors/${authorId}`, {
+      const response = await fetch(`/api/admin/blog?action=delete-author&id=${authorId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,

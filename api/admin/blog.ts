@@ -627,6 +627,71 @@ async function createAuthor(req: VercelRequest, res: VercelResponse, userId: str
 }
 
 /**
+ * DELETE /api/admin/blog?action=delete-author&id={id}
+ */
+async function deleteAuthor(req: VercelRequest, res: VercelResponse, userId: string): Promise<void> {
+  try {
+    const supabase = getAdminClient();
+    const authorId = req.query.id as string;
+
+    if (!authorId) {
+      res.status(400).json({ error: 'Author ID is required' });
+      return;
+    }
+
+    // Check if author exists
+    const { data: existingAuthor, error: fetchError } = await supabase
+      .from('blog_authors')
+      .select('id')
+      .eq('id', authorId)
+      .single();
+
+    if (fetchError || !existingAuthor) {
+      res.status(404).json({ error: 'Author not found' });
+      return;
+    }
+
+    // Check if author has posts
+    const { data: posts, error: postsError } = await supabase
+      .from('blog_posts')
+      .select('id')
+      .eq('author_id', authorId)
+      .limit(1);
+
+    if (postsError) {
+      console.error('Error checking author posts:', postsError);
+      res.status(500).json({ error: 'Failed to check author posts' });
+      return;
+    }
+
+    if (posts && posts.length > 0) {
+      res.status(400).json({ 
+        error: 'Cannot delete author with existing posts',
+        message: 'Please reassign or delete all posts by this author first'
+      });
+      return;
+    }
+
+    // Delete author
+    const { error } = await supabase
+      .from('blog_authors')
+      .delete()
+      .eq('id', authorId);
+
+    if (error) {
+      console.error('Error deleting author:', error);
+      res.status(500).json({ error: 'Failed to delete author' });
+      return;
+    }
+
+    res.status(200).json({ success: true, message: 'Author deleted successfully' });
+  } catch (error) {
+    console.error('Error in deleteAuthor:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+/**
  * POST /api/admin/blog?action=upload-image
  */
 async function uploadImage(req: VercelRequest, res: VercelResponse, userId: string): Promise<void> {
@@ -1099,6 +1164,14 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
         return;
       }
       await requireAdminAuth(req, res, updateAuthor);
+      break;
+
+    case 'delete-author':
+      if (req.method !== 'DELETE') {
+        res.status(405).json({ error: 'Method not allowed' });
+        return;
+      }
+      await requireAdminAuth(req, res, deleteAuthor);
       break;
 
     case 'create-category':
