@@ -25,10 +25,10 @@ const envSchema = z.object({
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
 
   // Site Configuration
-  VITE_SITE_URL: z.string().url('VITE_SITE_URL must be a valid URL'),
+  VITE_SITE_URL: z.string().url('VITE_SITE_URL must be a valid URL').optional().default('https://anoteroslogos.com'),
   VITE_SITE_NAME: z.string().default('Anóteros Lógos'),
   VITE_SITE_DESCRIPTION: z.string().default('Generative Engine Optimization Agency'),
-  VITE_AUTH_REDIRECT_URL: z.string().url('VITE_AUTH_REDIRECT_URL must be a valid URL').optional(),
+  VITE_AUTH_REDIRECT_URL: z.string().url('VITE_AUTH_REDIRECT_URL must be a valid URL').optional().default('https://anoteroslogos.com/auth/callback'),
 
   // Platform Wallet (Required for payments)
   PLATFORM_WALLET_ADDRESS: z.string().regex(/^0x[a-fA-F0-9]{40}$/, 'PLATFORM_WALLET_ADDRESS must be a valid Ethereum address').optional(),
