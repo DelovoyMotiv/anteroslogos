@@ -93,20 +93,29 @@ export async function withRetry<T>(
  */
 export function getSupabaseClient(): SupabaseClient<Database> {
   // For server-side (Vercel Functions), use non-VITE_ prefixed variables
-  // For client-side, Vite will inject VITE_ prefixed variables
-  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  // VITE_ variables are NOT available in Vercel Functions - they're only for browser
+  const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
   
   if (!supabaseUrl || !supabaseServiceKey) {
-    console.error('Missing Supabase configuration:', {
+    // Enhanced debug logging for Vercel Functions
+    const debugInfo = {
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'unknown',
       hasSupabaseUrl: !!process.env.SUPABASE_URL,
-      hasViteSupabaseUrl: !!process.env.VITE_SUPABASE_URL,
       hasServiceRoleKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
       hasAnonKey: !!process.env.SUPABASE_ANON_KEY,
-    });
-    throw new Error('Database configuration is missing. Please check environment variables.');
+      // Log first 10 chars of URL for debugging (safe)
+      urlPrefix: process.env.SUPABASE_URL?.substring(0, 10) || 'missing',
+      // Check all env vars available
+      availableEnvVars: Object.keys(process.env).filter(k => k.includes('SUPABASE')),
+    };
+    console.error('❌ Missing Supabase configuration in Vercel Function:', JSON.stringify(debugInfo, null, 2));
+    throw new Error('Database configuration is missing. Please check environment variables in Vercel Dashboard.');
   }
 
+  console.log('✅ Supabase client initialized successfully');
+  
   return createClient<Database>(supabaseUrl, supabaseServiceKey, {
     auth: {
       autoRefreshToken: true,
