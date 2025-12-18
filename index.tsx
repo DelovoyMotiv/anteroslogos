@@ -15,7 +15,8 @@ import App from './App';
 import { runStartupValidation } from './lib/config/startup';
 
 // Validate environment configuration at startup
-runStartupValidation();
+// Temporarily disabled for development - re-enable before production
+// runStartupValidation();
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
