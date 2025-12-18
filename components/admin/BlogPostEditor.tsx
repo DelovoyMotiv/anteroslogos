@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Upload, Image as ImageIcon } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { MarkdownRenderer } from '../MarkdownRenderer';
+import MarkdownRenderer from '../MarkdownRenderer';
 
 interface BlogPostEditorProps {
   content: string;
