@@ -21,6 +21,7 @@ jscpd-report.json
 
 # Exclude non-essential API endpoints to stay under Vercel limit
 api/__tests__
+api/lib/**
 
 # Exclude old endpoints replaced by unified endpoints
 # Use api/keys.ts instead
