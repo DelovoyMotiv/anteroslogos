@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Eye, EyeOff, Upload, Image as ImageIcon } from 'lucide-react';
-import type { BlogPost } from '../../types/database.types';
 import { supabase } from '../../lib/supabase';
+import MarkdownRenderer from '../MarkdownRenderer';
 
 interface BlogPostEditorProps {
   content: string;
@@ -67,46 +67,7 @@ export default function BlogPostEditor({ content, onChange, metadata }: BlogPost
     }
   };
 
-  // Simple markdown to HTML converter for preview
-  const renderMarkdown = (markdown: string): string => {
-    let html = markdown;
-    
-    // Headers
-    html = html.replace(/^### (.*$)/gim, '<h3 class="text-xl font-bold text-brand-text mt-6 mb-3">$1</h3>');
-    html = html.replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold text-brand-text mt-8 mb-4">$1</h2>');
-    html = html.replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold text-brand-text mt-10 mb-5">$1</h1>');
-    
-    // Bold
-    html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>');
-    
-    // Italic
-    html = html.replace(/\*(.*?)\*/g, '<em class="italic">$1</em>');
-    
-    // Links
-    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" class="text-brand-accent hover:underline">$1</a>');
-    
-    // Images
-    html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" class="max-w-full h-auto rounded-lg my-4" />');
-    
-    // Code blocks
-    html = html.replace(/```([^`]+)```/g, '<pre class="bg-brand-secondary/50 p-4 rounded-lg my-4 overflow-x-auto"><code>$1</code></pre>');
-    
-    // Inline code
-    html = html.replace(/`([^`]+)`/g, '<code class="bg-brand-secondary/50 px-2 py-1 rounded text-sm">$1</code>');
-    
-    // Lists
-    html = html.replace(/^\* (.*$)/gim, '<li class="ml-6 list-disc">$1</li>');
-    html = html.replace(/^\d+\. (.*$)/gim, '<li class="ml-6 list-decimal">$1</li>');
-    
-    // Paragraphs
-    html = html.replace(/\n\n/g, '</p><p class="text-brand-text/80 leading-relaxed mb-4">');
-    html = '<p class="text-brand-text/80 leading-relaxed mb-4">' + html + '</p>';
-    
-    // Line breaks
-    html = html.replace(/\n/g, '<br />');
-    
-    return html;
-  };
+
 
   return (
     <div className="space-y-4">
@@ -214,12 +175,12 @@ export default function BlogPostEditor({ content, onChange, metadata }: BlogPost
               )}
               
               {/* Preview Content */}
-              <div
-                className="prose prose-invert max-w-none"
-                dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
-              />
-              
-              {!content && (
+              {content ? (
+                <MarkdownRenderer 
+                  content={content}
+                  className="prose prose-invert max-w-none"
+                />
+              ) : (
                 <div className="flex items-center justify-center h-full text-brand-text/40">
                   <div className="text-center">
                     <ImageIcon className="w-12 h-12 mx-auto mb-3 opacity-50" />
