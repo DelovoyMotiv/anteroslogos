@@ -6,6 +6,9 @@ export default defineConfig(({ mode }) => {
     // Note: mode parameter kept for TypeScript type inference, but not used
     // because drop_console is temporarily disabled for debugging
     console.log('Build mode:', mode); // This will be removed by terser in production anyway
+    
+    const isTest = mode === 'test';
+    
     return {
       server: {
         port: 3000,
@@ -20,13 +23,17 @@ export default defineConfig(({ mode }) => {
       resolve: {
         alias: {
           '@': path.resolve(__dirname, '.'),
-          // Polyfill Node.js modules for browser
-          'node:path': 'path-browserify',
-          'node:url': 'url',
-          'node:process': 'process/browser',
+          // Polyfill Node.js modules ONLY for tests, not for production
+          ...(isTest ? {
+            'node:path': 'path-browserify',
+            'node:url': 'url',
+            'node:process': 'process/browser',
+          } : {}),
         },
-        // Fix @noble packages resolution for tests
-        conditions: ['node', 'import', 'module', 'browser', 'default'],
+        // Prioritize browser builds over node builds
+        conditions: isTest 
+          ? ['node', 'import', 'module', 'browser', 'default']
+          : ['browser', 'module', 'import', 'default'],
       },
       optimizeDeps: {
         include: [
@@ -35,9 +42,6 @@ export default defineConfig(({ mode }) => {
           '@noble/ed25519',
           'react-markdown',
           'remark-gfm',
-          'vfile',
-          'vfile-message',
-          'unist-util-stringify-position'
         ],
         exclude: [
           'puppeteer',
@@ -45,6 +49,10 @@ export default defineConfig(({ mode }) => {
           'playwright',
           'playwright-core',
           'chromium-bidi',
+          'jsdom',
+          'vfile',
+          'vfile-message',
+          'unist-util-stringify-position',
         ],
         esbuildOptions: {
           target: 'esnext',
@@ -57,15 +65,11 @@ export default defineConfig(({ mode }) => {
         chunkSizeWarningLimit: 100, // 100KB warning threshold
         rollupOptions: {
           external: [
-            'node:path', 
-            'node:url', 
-            'node:process', 
-            'module',
-            'jsdom', // Exclude jsdom from browser bundle
-            'vitest', // Exclude vitest from browser bundle
-            'puppeteer', // Exclude Puppeteer from browser bundle
+            'jsdom',
+            'vitest',
+            'puppeteer',
             'puppeteer-core',
-            'playwright', // Exclude Playwright from browser bundle
+            'playwright',
             'playwright-core',
             'chromium-bidi',
           ],
