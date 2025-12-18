@@ -29,9 +29,17 @@ export default defineConfig(({ mode }) => {
         conditions: ['node', 'import', 'module', 'browser', 'default'],
       },
       optimizeDeps: {
-        include: ['@noble/curves', '@noble/hashes', '@noble/ed25519'],
-        exclude: [
+        include: [
+          '@noble/curves', 
+          '@noble/hashes', 
+          '@noble/ed25519',
+          'react-markdown',
+          'remark-gfm',
           'vfile',
+          'vfile-message',
+          'unist-util-stringify-position'
+        ],
+        exclude: [
           'puppeteer',
           'puppeteer-core',
           'playwright',
@@ -49,7 +57,6 @@ export default defineConfig(({ mode }) => {
         chunkSizeWarningLimit: 100, // 100KB warning threshold
         rollupOptions: {
           external: [
-            'vfile', 
             'node:path', 
             'node:url', 
             'node:process', 
