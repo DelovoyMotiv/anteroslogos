@@ -1273,6 +1273,52 @@ async function deleteCategory(req: VercelRequest, res: VercelResponse, userId: s
 }
 
 /**
+ * GET /api/admin/blog?action=get-post&id={id}
+ * Get a single post by ID for editing
+ */
+async function getPost(req: VercelRequest, res: VercelResponse, userId: string): Promise<void> {
+  try {
+    const supabase = getAdminClient();
+    const postId = req.query.id as string;
+
+    if (!postId) {
+      res.status(400).json({ error: 'Post ID is required' });
+      return;
+    }
+
+    // Fetch post with author, category, and tags
+    const { data: post, error } = await supabase
+      .from('blog_posts')
+      .select(`
+        *,
+        author:blog_authors!blog_posts_author_id_fkey(*),
+        category:blog_categories!blog_posts_category_id_fkey(*),
+        tags:blog_post_tags(tag:blog_tags(*))
+      `)
+      .eq('id', postId)
+      .is('deleted_at', null)
+      .single();
+
+    if (error || !post) {
+      console.error('Error fetching post:', error);
+      res.status(404).json({ error: 'Post not found' });
+      return;
+    }
+
+    // Transform tags from nested structure to simple array
+    const transformedPost = {
+      ...post,
+      tags: post.tags?.map((t: any) => t.tag) || [],
+    };
+
+    res.status(200).json(transformedPost);
+  } catch (error) {
+    console.error('Error in getPost:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+/**
  * DELETE /api/admin/blog?action=delete-tag&id={id}
  */
 async function deleteTag(req: VercelRequest, res: VercelResponse, userId: string): Promise<void> {
@@ -1345,6 +1391,14 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
         return;
       }
       await requireAdminAuth(req, res, getPosts);
+      break;
+
+    case 'get-post':
+      if (req.method !== 'GET') {
+        res.status(405).json({ error: 'Method not allowed' });
+        return;
+      }
+      await requireAdminAuth(req, res, getPost);
       break;
 
     case 'authors':

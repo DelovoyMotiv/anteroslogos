@@ -35,7 +35,7 @@ export default function BlogPostEditor({ content, onChange, metadata }: BlogPost
       const formData = new FormData();
       formData.append('image', file);
 
-      const response = await fetch('/api/admin/blog/upload-image', {
+      const response = await fetch('/api/admin/blog?action=upload-image', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,

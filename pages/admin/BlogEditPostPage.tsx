@@ -35,7 +35,7 @@ export default function BlogEditPostPage() {
         throw new Error('Not authenticated');
       }
 
-      const response = await fetch(`/api/admin/blog/${id}`, {
+      const response = await fetch(`/api/admin/blog?action=get-post&id=${id}`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
         },

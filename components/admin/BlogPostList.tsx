@@ -124,7 +124,7 @@ export default function BlogPostList({ onEdit, onDelete }: BlogPostListProps) {
         throw new Error('Not authenticated');
       }
 
-      const response = await fetch(`/api/admin/blog/${postId}`, {
+      const response = await fetch(`/api/admin/blog?action=delete-post&id=${postId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
