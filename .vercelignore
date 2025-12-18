@@ -21,8 +21,6 @@ jscpd-report.json
 
 # Exclude non-essential API endpoints to stay under Vercel limit
 api/__tests__
-api/mcp
-api/tools
 
 # Exclude old endpoints replaced by unified endpoints
 # Use api/keys.ts instead
@@ -37,9 +35,6 @@ api/metrics.ts
 # Use api/auth.ts instead
 api/challenge.ts
 api/handshake.ts
-
-# Exclude AID registry (not used in production yet)
-api/aid-registry.ts
 
 # Exclude wrap-openapi (use wrap-with-billing instead)
 api/v1/agent/wrap-openapi.ts
