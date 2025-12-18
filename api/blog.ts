@@ -14,13 +14,15 @@ import type { BlogPost, BlogAuthor, BlogCategory, BlogTag } from '../types/datab
 import { sendErrorResponse, notFoundError, databaseError } from '../lib/blog/errorHandler';
 import { getSupabaseClient, withRetry, logDatabaseError } from '../lib/blog/databaseConnection';
 
-// Get Supabase client with proper configuration
-let supabase: ReturnType<typeof getSupabaseClient> | null = null;
-
-try {
-  supabase = getSupabaseClient();
-} catch (error) {
-  console.error('Failed to initialize Supabase client:', error);
+// Lazy initialization of Supabase client
+// This ensures environment variables are available when the function runs
+function getClient() {
+  try {
+    return getSupabaseClient();
+  } catch (error) {
+    console.error('Failed to initialize Supabase client:', error);
+    throw databaseError('Database not configured');
+  }
 }
 
 /**
@@ -29,9 +31,8 @@ try {
  */
 async function getPosts(req: VercelRequest, res: VercelResponse): Promise<void> {
   try {
-    if (!supabase) {
-      throw databaseError('Database not configured');
-    }
+    const supabase = getClient();
+    
     // Parse query parameters
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
@@ -136,10 +137,7 @@ async function getPosts(req: VercelRequest, res: VercelResponse): Promise<void> 
  */
 async function getPostBySlug(req: VercelRequest, res: VercelResponse): Promise<void> {
   try {
-    if (!supabase) {
-      throw databaseError('Database not configured');
-    }
-
+    const supabase = getClient();
     const slug = req.query.slug as string;
 
     if (!slug) {
@@ -204,9 +202,8 @@ async function getPostBySlug(req: VercelRequest, res: VercelResponse): Promise<v
  */
 async function getAuthors(req: VercelRequest, res: VercelResponse): Promise<void> {
   try {
-    if (!supabase) {
-      throw databaseError('Database not configured');
-    }
+    const supabase = getClient();
+    
     // Get all authors with post counts
     const { data: authors, error } = await supabase
       .from('blog_authors')
@@ -266,10 +263,7 @@ async function getAuthors(req: VercelRequest, res: VercelResponse): Promise<void
  */
 async function getAuthorBySlug(req: VercelRequest, res: VercelResponse): Promise<void> {
   try {
-    if (!supabase) {
-      throw databaseError('Database not configured');
-    }
-
+    const supabase = getClient();
     const slug = req.query.slug as string;
 
     if (!slug) {
@@ -317,9 +311,8 @@ async function getAuthorBySlug(req: VercelRequest, res: VercelResponse): Promise
  */
 async function getCategories(req: VercelRequest, res: VercelResponse): Promise<void> {
   try {
-    if (!supabase) {
-      throw databaseError('Database not configured');
-    }
+    const supabase = getClient();
+    
     // Get all categories
     const { data: categories, error } = await supabase
       .from('blog_categories')
@@ -358,10 +351,8 @@ async function getCategories(req: VercelRequest, res: VercelResponse): Promise<v
  */
 async function getTags(req: VercelRequest, res: VercelResponse): Promise<void> {
   try {
-    if (!supabase) {
-      throw databaseError('Database not configured');
-    }
-
+    const supabase = getClient();
+    
     // Get all tags
     const { data: tags, error } = await supabase
       .from('blog_tags')

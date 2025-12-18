@@ -23,17 +23,19 @@ import {
   validateEnum,
 } from '../../lib/blog/errorHandler';
 
-// Initialize Supabase client for server-side use
-const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+// Lazy initialization of Supabase client for server-side use
+// This ensures environment variables are available when the function runs
+function getAdminClient() {
+  const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseServiceKey) {
-  console.error('Missing Supabase configuration');
+  if (!supabaseUrl || !supabaseServiceKey) {
+    console.error('Missing Supabase configuration');
+    throw databaseError('Database not configured');
+  }
+
+  return createClient<Database>(supabaseUrl, supabaseServiceKey);
 }
-
-const supabase = supabaseUrl && supabaseServiceKey 
-  ? createClient<Database>(supabaseUrl, supabaseServiceKey)
-  : null;
 
 /**
  * Generate unique slug from title
@@ -51,9 +53,7 @@ function generateSlug(title: string): string {
  * Ensure slug is unique by appending number if needed
  */
 async function ensureUniqueSlug(baseSlug: string, excludeId?: string): Promise<string> {
-  if (!supabase) {
-    throw new Error('Database not configured');
-  }
+  const supabase = getAdminClient();
 
   let slug = baseSlug;
   let counter = 1;
@@ -100,9 +100,7 @@ function validatePostFields(body: any): void {
  */
 async function createPost(req: VercelRequest, res: VercelResponse, userId: string): Promise<void> {
   try {
-    if (!supabase) {
-      throw databaseError('Database not configured');
-    }
+    const supabase = getAdminClient();
 
     const body = req.body;
 
@@ -214,9 +212,7 @@ async function createPost(req: VercelRequest, res: VercelResponse, userId: strin
  */
 async function updatePost(req: VercelRequest, res: VercelResponse, userId: string): Promise<void> {
   try {
-    if (!supabase) {
-      throw databaseError('Database not configured');
-    }
+    const supabase = getAdminClient();
 
     const postId = req.query.id as string;
 
@@ -403,12 +399,8 @@ async function updatePost(req: VercelRequest, res: VercelResponse, userId: strin
  * PUT /api/admin/blog?action=update-author&id={id}
  */
 async function updateAuthor(req: VercelRequest, res: VercelResponse, userId: string): Promise<void> {
-  if (!supabase) {
-    res.status(500).json({ error: 'Database not configured' });
-    return;
-  }
-
   try {
+    const supabase = getAdminClient();
     const authorId = req.query.id as string;
 
     if (!authorId) {
@@ -555,12 +547,8 @@ async function updateAuthor(req: VercelRequest, res: VercelResponse, userId: str
  * POST /api/admin/blog?action=create-author
  */
 async function createAuthor(req: VercelRequest, res: VercelResponse, userId: string): Promise<void> {
-  if (!supabase) {
-    res.status(500).json({ error: 'Database not configured' });
-    return;
-  }
-
   try {
+    const supabase = getAdminClient();
     const body = req.body;
 
     // Validate required fields
@@ -632,9 +620,7 @@ async function createAuthor(req: VercelRequest, res: VercelResponse, userId: str
  */
 async function uploadImage(req: VercelRequest, res: VercelResponse, userId: string): Promise<void> {
   try {
-    if (!supabase) {
-      throw databaseError('Database not configured');
-    }
+    const supabase = getAdminClient();
 
     const body = req.body;
 
@@ -706,9 +692,7 @@ async function uploadImage(req: VercelRequest, res: VercelResponse, userId: stri
  */
 async function deletePost(req: VercelRequest, res: VercelResponse, userId: string): Promise<void> {
   try {
-    if (!supabase) {
-      throw databaseError('Database not configured');
-    }
+    const supabase = getAdminClient();
 
     const postId = req.query.id as string;
 
@@ -749,12 +733,9 @@ async function deletePost(req: VercelRequest, res: VercelResponse, userId: strin
  * Admin endpoint to get all posts (including drafts)
  */
 async function getPosts(req: VercelRequest, res: VercelResponse, userId: string): Promise<void> {
-  if (!supabase) {
-    res.status(500).json({ error: 'Database not configured' });
-    return;
-  }
-
   try {
+    const supabase = getAdminClient();
+    
     // Parse query parameters
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 20;
@@ -824,12 +805,8 @@ async function getPosts(req: VercelRequest, res: VercelResponse, userId: string)
  * POST /api/admin/blog?action=create-category
  */
 async function createCategory(req: VercelRequest, res: VercelResponse, userId: string): Promise<void> {
-  if (!supabase) {
-    res.status(500).json({ error: 'Database not configured' });
-    return;
-  }
-
   try {
+    const supabase = getAdminClient();
     const body = req.body;
 
     // Validate required fields
@@ -896,12 +873,8 @@ async function createCategory(req: VercelRequest, res: VercelResponse, userId: s
  * PUT /api/admin/blog?action=update-category&id={id}
  */
 async function updateCategory(req: VercelRequest, res: VercelResponse, userId: string): Promise<void> {
-  if (!supabase) {
-    res.status(500).json({ error: 'Database not configured' });
-    return;
-  }
-
   try {
+    const supabase = getAdminClient();
     const categoryId = req.query.id as string;
 
     if (!categoryId) {
@@ -997,12 +970,8 @@ async function updateCategory(req: VercelRequest, res: VercelResponse, userId: s
  * POST /api/admin/blog?action=create-tag
  */
 async function createTag(req: VercelRequest, res: VercelResponse, userId: string): Promise<void> {
-  if (!supabase) {
-    res.status(500).json({ error: 'Database not configured' });
-    return;
-  }
-
   try {
+    const supabase = getAdminClient();
     const body = req.body;
 
     // Validate required fields
