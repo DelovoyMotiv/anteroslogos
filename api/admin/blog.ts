@@ -1040,6 +1040,33 @@ async function updateCategory(req: VercelRequest, res: VercelResponse, userId: s
 }
 
 /**
+ * GET /api/admin/blog?action=authors
+ * Admin endpoint to get all authors (including those without posts)
+ */
+async function getAuthors(req: VercelRequest, res: VercelResponse, userId: string): Promise<void> {
+  try {
+    const supabase = getAdminClient();
+    
+    // Get all authors - admin can see all authors regardless of post count
+    const { data: authors, error } = await supabase
+      .from('blog_authors')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching authors:', error);
+      res.status(500).json({ error: 'Failed to fetch authors', details: error.message });
+      return;
+    }
+
+    res.status(200).json(authors || []);
+  } catch (error) {
+    console.error('Error in getAuthors:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+/**
  * POST /api/admin/blog?action=create-tag
  */
 async function createTag(req: VercelRequest, res: VercelResponse, userId: string): Promise<void> {
@@ -1116,6 +1143,14 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
         return;
       }
       await requireAdminAuth(req, res, getPosts);
+      break;
+
+    case 'authors':
+      if (req.method !== 'GET') {
+        res.status(405).json({ error: 'Method not allowed' });
+        return;
+      }
+      await requireAdminAuth(req, res, getAuthors);
       break;
 
     case 'create-post':

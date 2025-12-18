@@ -32,7 +32,22 @@ export default function AuthorManager() {
     setError(null);
 
     try {
-      const response = await fetch('/api/blog?action=authors');
+      if (!supabase) {
+        throw new Error('Supabase not configured');
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Not authenticated');
+      }
+
+      // Use admin API to get ALL authors (not just those with published posts)
+      const response = await fetch('/api/admin/blog?action=authors', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+
       if (!response.ok) {
         throw new Error('Failed to fetch authors');
       }
