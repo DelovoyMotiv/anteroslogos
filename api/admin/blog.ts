@@ -11,7 +11,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../../types/database.types';
-import { requireAdminAuth } from '../../lib/auth/blogAdminAuth';
+import { requireAdminAuth } from '../../lib/auth/blogAdminAuth.js';
 import {
   sendErrorResponse,
   validationError,
