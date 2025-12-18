@@ -303,18 +303,6 @@ export default function BlogPost() {
 
           {/* Header */}
           <header className="mb-16">
-            {/* Category Badge */}
-            <div className="flex items-center gap-3 mb-6">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-brand-accent/10 border border-brand-accent/30 rounded-full">
-                <Sparkles className="w-3.5 h-3.5 text-brand-accent" />
-                <span className="text-xs font-semibold text-brand-accent uppercase tracking-wider">{post.category?.name || 'Uncategorized'}</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-brand-text/60">
-                <BookOpen className="w-3.5 h-3.5" />
-                <span>{post.read_time} min read</span>
-              </div>
-            </div>
-
             {/* Title */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-brand-text mb-6 leading-tight">
               {post.title}
@@ -340,13 +328,17 @@ export default function BlogPost() {
                 </div>
               </Link>
               <div className="h-8 w-px bg-brand-accent/20 hidden sm:block" />
-              <div className="flex items-center gap-1 text-sm">
+              <div className="flex items-center gap-1 text-sm text-brand-text/60">
                 <Calendar className="w-4 h-4" />
                 <span>{new Date(post.published_date).toLocaleDateString('en-US', { 
                   year: 'numeric', 
                   month: 'long', 
                   day: 'numeric' 
                 })}</span>
+              </div>
+              <div className="flex items-center gap-1 text-sm text-brand-text/60">
+                <Clock className="w-4 h-4" />
+                <span>{post.read_time} min read</span>
               </div>
               <button 
                 onClick={handleShare}
@@ -358,26 +350,26 @@ export default function BlogPost() {
             </div>
           </header>
 
-          {/* Tags */}
+          {/* Content */}
+          <div className="prose prose-invert prose-lg prose-headings:text-brand-text prose-headings:font-bold prose-h1:text-4xl prose-h1:mt-0 prose-h1:mb-8 prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6 prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-4 prose-p:text-brand-text/80 prose-p:leading-relaxed prose-p:mb-6 prose-strong:text-brand-text prose-strong:font-semibold prose-a:text-brand-accent hover:prose-a:text-brand-accent/80 prose-ul:my-6 prose-ul:list-disc prose-ul:pl-6 prose-li:text-brand-text/80 prose-li:mb-2 prose-code:text-brand-accent prose-code:bg-brand-secondary/30 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-pre:bg-brand-secondary/20 prose-pre:border prose-pre:border-brand-accent/10 prose-pre:rounded-lg prose-pre:p-4 max-w-none mb-12">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {post.content}
+            </ReactMarkdown>
+          </div>
+
+          {/* Tags - moved to bottom, subtle styling */}
           {post.tags && post.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-12 pb-12 border-b border-brand-accent/10">
+            <div className="flex flex-wrap gap-2 mb-16 pb-12 border-b border-brand-accent/5">
               {post.tags.map(tag => (
                 <span 
                   key={tag.id}
-                  className="px-4 py-2 bg-brand-secondary/30 hover:bg-brand-secondary/40 text-brand-text/80 text-sm rounded-lg border border-brand-accent/10 transition-colors cursor-pointer"
+                  className="px-2.5 py-1 text-xs text-brand-text/40 hover:text-brand-text/60 transition-colors"
                 >
                   #{tag.name}
                 </span>
               ))}
             </div>
           )}
-
-          {/* Content */}
-          <div className="prose prose-invert prose-lg prose-headings:text-brand-text prose-headings:font-bold prose-h1:text-4xl prose-h1:mt-0 prose-h1:mb-8 prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6 prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-4 prose-p:text-brand-text/80 prose-p:leading-relaxed prose-p:mb-6 prose-strong:text-brand-text prose-strong:font-semibold prose-a:text-brand-accent hover:prose-a:text-brand-accent/80 prose-ul:my-6 prose-ul:list-disc prose-ul:pl-6 prose-li:text-brand-text/80 prose-li:mb-2 prose-code:text-brand-accent prose-code:bg-brand-secondary/30 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-pre:bg-brand-secondary/20 prose-pre:border prose-pre:border-brand-accent/10 prose-pre:rounded-lg prose-pre:p-4 max-w-none mb-16">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {post.content}
-            </ReactMarkdown>
-          </div>
 
           {/* Related Posts */}
           {relatedPosts.length > 0 && (
