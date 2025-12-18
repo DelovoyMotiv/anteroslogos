@@ -110,17 +110,17 @@ export default function Blog() {
           onClientsClick={() => navigate('/')} 
           onContactClick={() => navigate('/')}
         />
-        <div className="pb-16" style={{ paddingTop: 'calc(var(--header-height) + 4rem)' }}>
+        <div className="pb-16" style={{ paddingTop: 'calc(var(--header-height) + 2rem)' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
-              <AlertCircle className="w-16 h-16 text-brand-accent mb-4" />
-              <h2 className="text-2xl font-bold text-brand-text mb-2">Unable to Load Blog Content</h2>
-              <p className="text-brand-text/60 mb-6 max-w-md">
-                {error}. Please check your connection and try again.
+              <AlertCircle className="w-12 h-12 text-brand-accent mb-3" />
+              <h2 className="text-xl font-bold text-brand-text mb-2">Unable to Load Content</h2>
+              <p className="text-sm text-brand-text/60 mb-4 max-w-md">
+                {error}
               </p>
               <button
                 onClick={handleRetry}
-                className="px-6 py-3 bg-brand-accent text-white rounded-lg font-semibold hover:bg-brand-accent/90 transition-colors"
+                className="px-5 py-2 bg-brand-accent text-white text-sm rounded-lg font-medium hover:bg-brand-accent/90 transition-colors"
               >
                 Retry
               </button>
@@ -147,12 +147,12 @@ export default function Blog() {
           onClientsClick={() => navigate('/')} 
           onContactClick={() => navigate('/')}
         />
-        <div className="pb-16" style={{ paddingTop: 'calc(var(--header-height) + 4rem)' }}>
+        <div className="pb-16" style={{ paddingTop: 'calc(var(--header-height) + 2rem)' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-center min-h-[400px]">
               <div className="text-center">
-                <div className="w-16 h-16 border-4 border-brand-accent/20 border-t-brand-accent rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-brand-text/60">Loading blog content...</p>
+                <div className="w-12 h-12 border-3 border-brand-accent/20 border-t-brand-accent rounded-full animate-spin mx-auto mb-3"></div>
+                <p className="text-sm text-brand-text/60">Loading...</p>
               </div>
             </div>
           </div>
@@ -176,190 +176,124 @@ export default function Blog() {
         onContactClick={() => navigate('/')}
       />
       {/* Main Content */}
-      <div className="pb-16" style={{ paddingTop: 'calc(var(--header-height) + 4rem)' }}>
+      <div className="pb-16" style={{ paddingTop: 'calc(var(--header-height) + 2rem)' }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Page Header */}
-          <div className="mb-12 sm:mb-14">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-brand-accent/5 border border-brand-accent/20 rounded-full mb-6">
-              <div className="w-1.5 h-1.5 rounded-full bg-brand-accent animate-pulse"></div>
-              <span className="text-xs font-semibold text-brand-accent uppercase tracking-wider">Blog</span>
-            </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-brand-text mb-5 leading-tight">
+          {/* Compact Page Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl sm:text-4xl font-bold text-brand-text mb-3 leading-tight">
               GEO Insights & Strategies
             </h1>
-            <p className="text-lg sm:text-xl text-brand-text/60 max-w-3xl leading-relaxed">
-              Expert perspectives on Generative Engine Optimization, AI authority, and the future of digital presence
+            <p className="text-base text-brand-text/60 max-w-2xl">
+              Expert perspectives on Generative Engine Optimization, AI authority, and digital presence
             </p>
           </div>
 
-          {/* Category Filter */}
-          <div className="flex flex-wrap gap-2 sm:gap-3 mb-12 sm:mb-16">
-            {categoryList.map(category => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-4 sm:px-6 py-1.5 sm:py-2 text-sm sm:text-base rounded-full font-medium transition-colors ${
-                  selectedCategory === category
-                    ? 'bg-brand-accent text-white'
-                    : 'bg-brand-secondary/30 text-brand-text/70 hover:bg-brand-secondary/50'
-                }`}
-              >
-                {category.charAt(0).toUpperCase() + category.slice(1)}
-              </button>
-            ))}
+          {/* Minimalist Category Filter */}
+          <div className="flex items-center gap-2 mb-10 pb-6 border-b border-brand-accent/10">
+            <span className="text-sm text-brand-text/50 mr-2">Filter:</span>
+            {categoryList.map(category => {
+              const categoryName = category === 'all' ? 'All' : categories.find(c => c.slug === category)?.name || category;
+              const postCount = category === 'all' 
+                ? posts.length 
+                : categories.find(c => c.slug === category)?.post_count || posts.filter(p => p.category?.slug === category).length;
+              
+              return (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`group relative px-3 py-1.5 text-sm font-medium transition-all ${
+                    selectedCategory === category
+                      ? 'text-brand-accent'
+                      : 'text-brand-text/60 hover:text-brand-text'
+                  }`}
+                >
+                  <span>{categoryName}</span>
+                  <span className="ml-1.5 text-xs opacity-60">({postCount})</span>
+                  {selectedCategory === category && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-accent"></div>
+                  )}
+                </button>
+              );
+            })}
           </div>
 
-          {/* Hero Section - Featured Post + Recent Posts Sidebar */}
+          {/* Featured Post - Compact Design */}
           {selectedCategory === 'all' && featuredPosts.length > 0 && (
-            <div className="mb-16 sm:mb-20">
-              <div className="grid lg:grid-cols-3 gap-8">
-                {/* Main Featured Post */}
-                <div className="lg:col-span-2">
-                  <Link
-                    to={`/blog/${featuredPosts[0].slug}`}
-                    className="group relative bg-gradient-to-br from-brand-secondary/40 to-brand-secondary/20 rounded-2xl overflow-hidden border border-brand-accent/20 hover:border-brand-accent/40 transition-all duration-300 hover:shadow-2xl hover:shadow-brand-accent/10"
-                  >
-                    <div className="p-6 sm:p-8">
-                      {/* Featured Badge */}
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-brand-accent/10 rounded-full mb-5">
-                        <div className="w-1 h-1 rounded-full bg-brand-accent"></div>
-                        <span className="text-xs font-bold text-brand-accent uppercase tracking-wider">Featured</span>
-                      </div>
-                      <div className="flex items-center gap-2 mb-4">
-                        <span className="px-3 py-1 bg-brand-accent/10 text-brand-accent text-xs font-semibold rounded-full uppercase tracking-wider">
-                          {featuredPosts[0].category?.name || 'Uncategorized'}
-                        </span>
-                      </div>
-                      <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-brand-text mb-4 leading-tight group-hover:text-brand-accent transition-colors">
-                        {featuredPosts[0].title}
-                      </h2>
-                      <p className="text-brand-text/70 text-base sm:text-lg mb-6 line-clamp-3">
-                        {featuredPosts[0].excerpt}
-                      </p>
-                      <div className="flex flex-wrap items-center gap-3 pt-4 mt-4 border-t border-brand-accent/10 text-xs text-brand-text/60">
-                        <div className="flex items-center gap-1.5">
-                          <User className="w-3 h-3" />
-                          <span>{featuredPosts[0].author.name}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          <span>{new Date(featuredPosts[0].published_date).toLocaleDateString()}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          <span>{featuredPosts[0].read_time} min read</span>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                </div>
-
-                {/* Sidebar - Recent Posts */}
-                <div className="lg:col-span-1">
-                  <div className="flex items-center gap-2 mb-6">
-                    <div className="w-1 h-6 bg-brand-accent rounded-full"></div>
-                    <h3 className="text-xl font-bold text-brand-text">
-                      Latest Articles
-                    </h3>
+            <div className="mb-12">
+              <Link
+                to={`/blog/${featuredPosts[0].slug}`}
+                className="group block bg-gradient-to-br from-brand-secondary/30 to-brand-secondary/10 rounded-xl border border-brand-accent/20 hover:border-brand-accent/40 transition-all duration-300 hover:shadow-lg hover:shadow-brand-accent/5"
+              >
+                <div className="p-6 sm:p-7">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="px-2.5 py-0.5 bg-brand-accent/10 text-brand-accent text-xs font-semibold rounded uppercase tracking-wide">
+                      Featured
+                    </span>
+                    <span className="text-xs text-brand-text/50">
+                      {featuredPosts[0].category?.name || 'Uncategorized'}
+                    </span>
                   </div>
-                  <div className="space-y-4">
-                    {filteredPosts.slice(0, 4).map((post, idx) => (
-                      <Link
-                        key={post.slug}
-                        to={`/blog/${post.slug}`}
-                        className="group block p-4 bg-brand-secondary/20 hover:bg-brand-secondary/30 rounded-xl border border-brand-accent/10 hover:border-brand-accent/30 transition-all"
-                      >
-                        <div className="flex items-start gap-3">
-                          <span className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-brand-accent/10 text-brand-accent font-bold text-sm rounded-lg">
-                            {idx + 1}
-                          </span>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-brand-text text-sm mb-1 line-clamp-2 group-hover:text-brand-accent transition-colors">
-                              {post.title}
-                            </h4>
-                            <div className="flex items-center gap-3 text-xs text-brand-text/60">
-                              <span className="flex items-center gap-1">
-                                <Calendar className="w-3 h-3" />
-                                {new Date(post.published_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <Clock className="w-3 h-3" />
-                                {post.read_time} min
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
+                  <h2 className="text-2xl sm:text-3xl font-bold text-brand-text mb-3 leading-tight group-hover:text-brand-accent transition-colors">
+                    {featuredPosts[0].title}
+                  </h2>
+                  <p className="text-brand-text/70 text-base mb-4 line-clamp-2">
+                    {featuredPosts[0].excerpt}
+                  </p>
+                  <div className="flex items-center gap-4 text-xs text-brand-text/50">
+                    <span>{featuredPosts[0].author.name}</span>
+                    <span>•</span>
+                    <span>{new Date(featuredPosts[0].published_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                    <span>•</span>
+                    <span>{featuredPosts[0].read_time} min read</span>
                   </div>
                 </div>
-              </div>
+              </Link>
             </div>
           )}
 
-          {/* All Posts Grid */}
+          {/* Articles List - Clean & Minimal */}
           <div>
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl sm:text-3xl font-bold text-brand-text flex items-center gap-3">
-                <span className="w-1 h-8 bg-brand-accent rounded-full"></span>
-                {selectedCategory === 'all' ? 'All Articles' : selectedCategory}
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-brand-text">
+                {selectedCategory === 'all' ? 'All Articles' : categories.find(c => c.slug === selectedCategory)?.name || selectedCategory}
               </h2>
-              <span className="text-sm text-brand-text/60">
+              <span className="text-xs text-brand-text/50">
                 {filteredPosts.length} {filteredPosts.length === 1 ? 'article' : 'articles'}
               </span>
             </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            
+            <div className="space-y-6">
               {filteredPosts.map(post => (
                 <Link
                   key={post.slug}
                   to={`/blog/${post.slug}`}
-                  className="group relative bg-gradient-to-br from-brand-secondary/30 to-brand-secondary/10 rounded-xl overflow-hidden border border-brand-accent/10 hover:border-brand-accent/30 hover:shadow-xl hover:shadow-brand-accent/5 transition-all duration-300"
+                  className="group block border-b border-brand-accent/10 pb-6 hover:border-brand-accent/30 transition-all"
                 >
-                  <div className="p-5 sm:p-6">
-                    {/* Category Indicator */}
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-brand-accent/10 rounded-full mb-4">
-                      <div className="w-1 h-1 rounded-full bg-brand-accent"></div>
-                      <span className="text-xs font-semibold text-brand-accent uppercase tracking-wider">
-                        {post.category?.name || 'Uncategorized'}
-                      </span>
-                    </div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-brand-text mb-3 leading-tight group-hover:text-brand-accent transition-colors">
-                      {post.title}
-                    </h3>
-                    <p className="text-brand-text/70 text-sm sm:text-base mb-4 line-clamp-2">
-                      {post.excerpt}
-                    </p>
-                    <div className="flex items-center justify-between pt-3 border-t border-brand-accent/5">
-                      <div className="flex items-center gap-1.5 text-xs text-brand-text/60">
-                        <User className="w-3 h-3" />
+                  <div className="flex items-start justify-between gap-6">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-xs text-brand-accent font-medium">
+                          {post.category?.name || 'Uncategorized'}
+                        </span>
+                        <span className="text-xs text-brand-text/40">
+                          {new Date(post.published_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </span>
+                      </div>
+                      <h3 className="text-xl font-bold text-brand-text mb-2 leading-tight group-hover:text-brand-accent transition-colors">
+                        {post.title}
+                      </h3>
+                      <p className="text-brand-text/60 text-sm mb-3 line-clamp-2">
+                        {post.excerpt}
+                      </p>
+                      <div className="flex items-center gap-4 text-xs text-brand-text/50">
                         <span>{post.author.name}</span>
-                      </div>
-                      <div className="flex items-center gap-2.5 text-xs text-brand-text/60">
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {new Date(post.published_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {post.read_time} min
-                        </span>
+                        <span>•</span>
+                        <span>{post.read_time} min read</span>
                       </div>
                     </div>
-                    {post.tags && post.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-brand-accent/10">
-                        {post.tags.slice(0, 3).map(tag => (
-                          <span 
-                            key={tag}
-                            className="text-xs bg-brand-accent/5 text-brand-accent/80 px-2 py-1 rounded-md font-medium"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <ArrowRight className="w-4 h-4 text-brand-accent" />
+                    <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <ArrowRight className="w-5 h-5 text-brand-accent" />
+                    </div>
                   </div>
                 </Link>
               ))}
