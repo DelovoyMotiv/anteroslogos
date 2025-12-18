@@ -759,9 +759,14 @@ async function getPosts(req: VercelRequest, res: VercelResponse, userId: string)
     const to = from + limit - 1;
 
     // Build query - admin can see all posts including drafts
+    // Use proper foreign key syntax for Supabase joins
     let query = supabase
       .from('blog_posts')
-      .select('*', { count: 'exact' })
+      .select(`
+        *,
+        author:blog_authors!blog_posts_author_id_fkey(*),
+        category:blog_categories!blog_posts_category_id_fkey(*)
+      `, { count: 'exact' })
       .is('deleted_at', null)
       .order('created_at', { ascending: false });
 
@@ -781,37 +786,8 @@ async function getPosts(req: VercelRequest, res: VercelResponse, userId: string)
       return;
     }
 
-    // Fetch authors and categories separately for each post
-    const postsWithRelations = await Promise.all(
-      (posts || []).map(async (post: any) => {
-        // Fetch author
-        const { data: authorData } = await supabase
-          .from('blog_authors')
-          .select('*')
-          .eq('id', post.author_id)
-          .single();
-
-        // Fetch category if exists
-        let categoryData: any = null;
-        if (post.category_id) {
-          const { data: cat } = await supabase
-            .from('blog_categories')
-            .select('*')
-            .eq('id', post.category_id)
-            .single();
-          categoryData = cat;
-        }
-
-        return {
-          ...post,
-          author: authorData,
-          category: categoryData,
-        };
-      })
-    );
-
-    // Filter by category or author if needed
-    let filteredPosts: any[] = postsWithRelations;
+    // Filter by category or author if needed (in-memory filtering)
+    let filteredPosts: any[] = posts || [];
     
     if (category && category !== 'all') {
       filteredPosts = filteredPosts.filter((post: any) => post.category?.slug === category);
