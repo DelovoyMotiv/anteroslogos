@@ -26,15 +26,26 @@ import {
 // Lazy initialization of Supabase client for server-side use
 // This ensures environment variables are available when the function runs
 function getAdminClient() {
-  const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+  // IMPORTANT: VITE_ prefixed variables are NOT available in Vercel Functions
+  // They are only for browser builds. Use non-VITE_ prefixed variables for server-side
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseServiceKey) {
-    console.error('Missing Supabase configuration');
+    console.error('❌ Missing Supabase configuration in admin API:', {
+      hasSupabaseUrl: !!process.env.SUPABASE_URL,
+      hasServiceRoleKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+      hasAnonKey: !!process.env.SUPABASE_ANON_KEY,
+    });
     throw databaseError('Database not configured');
   }
 
-  return createClient<Database>(supabaseUrl, supabaseServiceKey);
+  return createClient<Database>(supabaseUrl, supabaseServiceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
 }
 
 /**
