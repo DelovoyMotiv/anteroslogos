@@ -21,7 +21,7 @@ import {
   validateUrl,
   validateSlug,
   validateEnum,
-} from '../lib/blog/errorHandler';
+} from '../_lib/blog/errorHandler';
 
 // Lazy initialization of Supabase client for server-side use
 // This ensures environment variables are available when the function runs

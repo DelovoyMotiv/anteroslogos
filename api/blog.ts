@@ -11,8 +11,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import type { Database } from '../types/database.types';
 import type { BlogPost, BlogAuthor, BlogCategory, BlogTag } from '../types/database.types';
-import { sendErrorResponse, notFoundError, databaseError } from './lib/blog/errorHandler';
-import { getSupabaseClient, withRetry, logDatabaseError } from './lib/blog/databaseConnection';
+import { sendErrorResponse, notFoundError, databaseError } from './_lib/blog/errorHandler';
+import { getSupabaseClient, withRetry, logDatabaseError } from './_lib/blog/databaseConnection';
 
 // Lazy initialization of Supabase client
 // This ensures environment variables are available when the function runs
