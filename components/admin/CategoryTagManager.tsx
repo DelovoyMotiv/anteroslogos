@@ -156,8 +156,8 @@ export default function CategoryTagManager() {
       };
 
       const url = editingItem
-        ? `/api/admin/blog/categories/${(editingItem as BlogCategory).id}`
-        : '/api/admin/blog/categories';
+        ? `/api/admin/blog?action=update-category&id=${(editingItem as BlogCategory).id}`
+        : '/api/admin/blog?action=create-category';
       
       const method = editingItem ? 'PUT' : 'POST';
 
@@ -172,7 +172,7 @@ export default function CategoryTagManager() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to save category');
+        throw new Error(errorData.error || errorData.message || 'Failed to save category');
       }
 
       await fetchData();
@@ -207,8 +207,8 @@ export default function CategoryTagManager() {
       };
 
       const url = editingItem
-        ? `/api/admin/blog/tags/${(editingItem as BlogTag).id}`
-        : '/api/admin/blog/tags';
+        ? `/api/admin/blog?action=update-tag&id=${(editingItem as BlogTag).id}`
+        : '/api/admin/blog?action=create-tag';
       
       const method = editingItem ? 'PUT' : 'POST';
 
@@ -223,7 +223,7 @@ export default function CategoryTagManager() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to save tag');
+        throw new Error(errorData.error || errorData.message || 'Failed to save tag');
       }
 
       await fetchData();
@@ -251,7 +251,7 @@ export default function CategoryTagManager() {
         throw new Error('Not authenticated');
       }
 
-      const response = await fetch(`/api/admin/blog/categories/${categoryId}`, {
+      const response = await fetch(`/api/admin/blog?action=delete-category&id=${categoryId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
@@ -259,13 +259,14 @@ export default function CategoryTagManager() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete category');
+        const errorData = await response.json();
+        throw new Error(errorData.error || errorData.message || 'Failed to delete category');
       }
 
       fetchData();
     } catch (err) {
       console.error('Error deleting category:', err);
-      alert('Failed to delete category');
+      alert(err instanceof Error ? err.message : 'Failed to delete category');
     }
   };
 
@@ -284,7 +285,7 @@ export default function CategoryTagManager() {
         throw new Error('Not authenticated');
       }
 
-      const response = await fetch(`/api/admin/blog/tags/${tagId}`, {
+      const response = await fetch(`/api/admin/blog?action=delete-tag&id=${tagId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
@@ -292,13 +293,14 @@ export default function CategoryTagManager() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete tag');
+        const errorData = await response.json();
+        throw new Error(errorData.error || errorData.message || 'Failed to delete tag');
       }
 
       fetchData();
     } catch (err) {
       console.error('Error deleting tag:', err);
-      alert('Failed to delete tag');
+      alert(err instanceof Error ? err.message : 'Failed to delete tag');
     }
   };
 

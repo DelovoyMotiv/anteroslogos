@@ -1085,7 +1085,7 @@ async function createTag(req: VercelRequest, res: VercelResponse, userId: string
 
     // Normalize tag name
     const normalizedName = body.name.toLowerCase().trim();
-    const tagSlug = generateSlug(normalizedName);
+    const tagSlug = body.slug || generateSlug(normalizedName);
 
     // Check if tag already exists
     const { data: existingTag, error: checkError } = await supabase
@@ -1116,6 +1116,208 @@ async function createTag(req: VercelRequest, res: VercelResponse, userId: string
     res.status(201).json(tag);
   } catch (error) {
     console.error('Error in createTag:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+/**
+ * PUT /api/admin/blog?action=update-tag&id={id}
+ */
+async function updateTag(req: VercelRequest, res: VercelResponse, userId: string): Promise<void> {
+  try {
+    const supabase = getAdminClient();
+    const tagId = req.query.id as string;
+
+    if (!tagId) {
+      res.status(400).json({ error: 'Tag ID is required' });
+      return;
+    }
+
+    // Load existing tag
+    const { data: existingTag, error: fetchError } = await supabase
+      .from('blog_tags')
+      .select('*')
+      .eq('id', tagId)
+      .single();
+
+    if (fetchError || !existingTag) {
+      res.status(404).json({ error: 'Tag not found' });
+      return;
+    }
+
+    const body = req.body;
+    const updateData: any = {};
+
+    if (body.name !== undefined) {
+      if (typeof body.name !== 'string' || body.name.trim().length === 0) {
+        res.status(400).json({
+          error: 'Validation failed',
+          details: ['name must be a non-empty string'],
+        });
+        return;
+      }
+      updateData.name = body.name.toLowerCase().trim();
+    }
+
+    if (body.slug !== undefined) {
+      // Ensure slug is unique
+      let slug = body.slug;
+      let counter = 1;
+
+      while (true) {
+        const { data, error } = await supabase
+          .from('blog_tags')
+          .select('id')
+          .eq('slug', slug)
+          .neq('id', tagId);
+
+        if (error) {
+          throw error;
+        }
+
+        if (!data || data.length === 0) {
+          break;
+        }
+
+        slug = `${body.slug}-${counter}`;
+        counter++;
+      }
+
+      updateData.slug = slug;
+    }
+
+    // Update tag
+    const { data: tag, error } = await supabase
+      .from('blog_tags')
+      .update(updateData)
+      .eq('id', tagId)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error updating tag:', error);
+      res.status(500).json({ error: 'Failed to update tag' });
+      return;
+    }
+
+    res.status(200).json(tag);
+  } catch (error) {
+    console.error('Error in updateTag:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+/**
+ * DELETE /api/admin/blog?action=delete-category&id={id}
+ */
+async function deleteCategory(req: VercelRequest, res: VercelResponse, userId: string): Promise<void> {
+  try {
+    const supabase = getAdminClient();
+    const categoryId = req.query.id as string;
+
+    if (!categoryId) {
+      res.status(400).json({ error: 'Category ID is required' });
+      return;
+    }
+
+    // Check if category exists
+    const { data: existingCategory, error: fetchError } = await supabase
+      .from('blog_categories')
+      .select('id')
+      .eq('id', categoryId)
+      .single();
+
+    if (fetchError || !existingCategory) {
+      res.status(404).json({ error: 'Category not found' });
+      return;
+    }
+
+    // Check if category has posts
+    const { data: posts, error: postsError } = await supabase
+      .from('blog_posts')
+      .select('id')
+      .eq('category_id', categoryId)
+      .limit(1);
+
+    if (postsError) {
+      console.error('Error checking category posts:', postsError);
+      res.status(500).json({ error: 'Failed to check category posts' });
+      return;
+    }
+
+    if (posts && posts.length > 0) {
+      res.status(400).json({ 
+        error: 'Cannot delete category with existing posts',
+        message: 'Please reassign or delete all posts in this category first'
+      });
+      return;
+    }
+
+    // Delete category
+    const { error } = await supabase
+      .from('blog_categories')
+      .delete()
+      .eq('id', categoryId);
+
+    if (error) {
+      console.error('Error deleting category:', error);
+      res.status(500).json({ error: 'Failed to delete category' });
+      return;
+    }
+
+    res.status(200).json({ success: true, message: 'Category deleted successfully' });
+  } catch (error) {
+    console.error('Error in deleteCategory:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
+/**
+ * DELETE /api/admin/blog?action=delete-tag&id={id}
+ */
+async function deleteTag(req: VercelRequest, res: VercelResponse, userId: string): Promise<void> {
+  try {
+    const supabase = getAdminClient();
+    const tagId = req.query.id as string;
+
+    if (!tagId) {
+      res.status(400).json({ error: 'Tag ID is required' });
+      return;
+    }
+
+    // Check if tag exists
+    const { data: existingTag, error: fetchError } = await supabase
+      .from('blog_tags')
+      .select('id')
+      .eq('id', tagId)
+      .single();
+
+    if (fetchError || !existingTag) {
+      res.status(404).json({ error: 'Tag not found' });
+      return;
+    }
+
+    // Delete tag associations first
+    await supabase
+      .from('blog_post_tags')
+      .delete()
+      .eq('tag_id', tagId);
+
+    // Delete tag
+    const { error } = await supabase
+      .from('blog_tags')
+      .delete()
+      .eq('id', tagId);
+
+    if (error) {
+      console.error('Error deleting tag:', error);
+      res.status(500).json({ error: 'Failed to delete tag' });
+      return;
+    }
+
+    res.status(200).json({ success: true, message: 'Tag deleted successfully' });
+  } catch (error) {
+    console.error('Error in deleteTag:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 }
@@ -1231,6 +1433,30 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
         return;
       }
       await requireAdminAuth(req, res, createTag);
+      break;
+
+    case 'update-tag':
+      if (req.method !== 'PUT') {
+        res.status(405).json({ error: 'Method not allowed' });
+        return;
+      }
+      await requireAdminAuth(req, res, updateTag);
+      break;
+
+    case 'delete-category':
+      if (req.method !== 'DELETE') {
+        res.status(405).json({ error: 'Method not allowed' });
+        return;
+      }
+      await requireAdminAuth(req, res, deleteCategory);
+      break;
+
+    case 'delete-tag':
+      if (req.method !== 'DELETE') {
+        res.status(405).json({ error: 'Method not allowed' });
+        return;
+      }
+      await requireAdminAuth(req, res, deleteTag);
       break;
 
     default:
