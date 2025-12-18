@@ -70,6 +70,10 @@ export default defineConfig(({ mode }) => {
             'chromium-bidi',
           ],
           output: {
+            // Explicit file naming to ensure proper cache busting
+            chunkFileNames: 'assets/[name]-[hash].js',
+            entryFileNames: 'assets/[name]-[hash].js',
+            assetFileNames: 'assets/[name]-[hash].[ext]',
             manualChunks: {
               'react-vendor': ['react', 'react-dom'],
               'router': ['react-router-dom'],
