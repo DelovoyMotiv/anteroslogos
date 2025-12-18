@@ -31,7 +31,8 @@ export default function BlogPostForm({ post, mode }: BlogPostFormProps) {
   const [metaDescription, setMetaDescription] = useState(post?.meta_description || '');
   const [metaKeywords, setMetaKeywords] = useState(post?.meta_keywords?.join(', ') || '');
   const [ogImageUrl, setOgImageUrl] = useState(post?.og_image_url || '');
-  const [selectedTags, setSelectedTags] = useState<string[]>(post?.tags?.map(t => t.id) || []);
+  const [selectedTags, setSelectedTags] = useState<string[]>(post?.tags?.map(t => t.name) || []);
+  const [tagInput, setTagInput] = useState('');
 
   // Data for dropdowns
   const [authors, setAuthors] = useState<BlogAuthor[]>([]);
@@ -72,8 +73,22 @@ export default function BlogPostForm({ post, mode }: BlogPostFormProps) {
 
   const fetchDropdownData = async () => {
     try {
+      if (!supabase) {
+        throw new Error('Supabase not configured');
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Not authenticated');
+      }
+
+      // Use admin API to get ALL authors (including those without posts)
       const [authorsRes, categoriesRes, tagsRes] = await Promise.all([
-        fetch('/api/blog?action=authors'),
+        fetch('/api/admin/blog?action=authors', {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+        }),
         fetch('/api/blog?action=categories'),
         fetch('/api/blog?action=tags'),
       ]);
@@ -158,12 +173,12 @@ export default function BlogPostForm({ post, mode }: BlogPostFormProps) {
         meta_description: metaDescription || null,
         meta_keywords: metaKeywords ? metaKeywords.split(',').map(k => k.trim()) : null,
         og_image_url: ogImageUrl || null,
-        tag_ids: selectedTags,
+        tags: selectedTags, // API expects 'tags' array, not 'tag_ids'
       };
 
       const url = mode === 'create' 
-        ? '/api/admin/blog'
-        : `/api/admin/blog/${post!.id}`;
+        ? '/api/admin/blog?action=create-post'
+        : `/api/admin/blog?action=update-post&id=${post!.id}`;
       
       const method = mode === 'create' ? 'POST' : 'PUT';
 
@@ -435,6 +450,54 @@ export default function BlogPostForm({ post, mode }: BlogPostFormProps) {
                 <p className="text-xs text-brand-text/60 mt-1">
                   Auto-calculated from content
                 </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-brand-text/70 mb-2">
+                  Tags
+                </label>
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && tagInput.trim()) {
+                        e.preventDefault();
+                        const newTag = tagInput.trim().toLowerCase();
+                        if (!selectedTags.includes(newTag)) {
+                          setSelectedTags([...selectedTags, newTag]);
+                        }
+                        setTagInput('');
+                      }
+                    }}
+                    placeholder="Type tag and press Enter..."
+                    className="w-full px-3 py-2 bg-brand-bg border border-brand-accent/20 rounded-lg text-brand-text text-sm focus:outline-none focus:border-brand-accent"
+                  />
+                  {selectedTags.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {selectedTags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className="inline-flex items-center gap-1 px-2 py-1 bg-brand-accent/10 text-brand-accent rounded text-xs"
+                        >
+                          {tag}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedTags(selectedTags.filter((_, i) => i !== index));
+                            }}
+                            className="hover:text-brand-accent/70"
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <p className="text-xs text-brand-text/60">
+                    Press Enter to add tags
+                  </p>
+                </div>
               </div>
             </div>
           </div>
