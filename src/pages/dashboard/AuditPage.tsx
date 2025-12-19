@@ -42,6 +42,22 @@ interface SavedAudit {
   score_ai_crawlers: number;
   score_eeat: number;
   score_content_quality: number;
+  score_structure: number;
+  score_performance: number;
+  score_citation_potential: number;
+  score_technical_seo: number;
+  score_link_analysis: number;
+  schema_findings: any;
+  meta_findings: any;
+  crawler_findings: any;
+  eeat_findings: any;
+  structure_findings: any;
+  performance_findings: any;
+  content_findings: any;
+  citation_findings: any;
+  technical_findings: any;
+  link_findings: any;
+  ai_recommendations: any[];
 }
 
 export function AuditPage() {
@@ -53,6 +69,7 @@ export function AuditPage() {
   const [error, setError] = useState('');
   const [savedAudits, setSavedAudits] = useState<SavedAudit[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
+  const [loadingAudit, setLoadingAudit] = useState(false);
 
   // Define tab order for swipe navigation
   const tabOrder: TabId[] = ['overview', 'analysis', 'insights', 'technical'];
@@ -152,7 +169,23 @@ export function AuditPage() {
           score_meta_tags,
           score_ai_crawlers,
           score_eeat,
-          score_content_quality
+          score_content_quality,
+          score_structure,
+          score_performance,
+          score_citation_potential,
+          score_technical_seo,
+          score_link_analysis,
+          schema_findings,
+          meta_findings,
+          crawler_findings,
+          eeat_findings,
+          structure_findings,
+          performance_findings,
+          content_findings,
+          citation_findings,
+          technical_findings,
+          link_findings,
+          ai_recommendations
         `)
         .eq('user_id', user.id)
         .is('deleted_at', null)
@@ -182,6 +215,107 @@ export function AuditPage() {
       setLoadingHistory(false);
       console.log('=== LOAD AUDIT HISTORY END ===');
     }
+  };
+
+  const loadSavedAudit = async (auditId: string) => {
+    console.log('=== LOAD SAVED AUDIT START ===');
+    console.log('Audit ID:', auditId);
+    
+    if (!user || !supabase) {
+      toast.error('Cannot load audit: Not authenticated');
+      return;
+    }
+
+    setLoadingAudit(true);
+    setError('');
+
+    try {
+      const { data, error } = await supabase
+        .from('audits')
+        .select('*')
+        .eq('id', auditId)
+        .eq('user_id', user.id)
+        .single();
+
+      if (error) {
+        console.error('Failed to load audit:', error);
+        toast.error('Failed to load saved audit');
+        return;
+      }
+
+      if (!data) {
+        toast.error('Audit not found');
+        return;
+      }
+
+      console.log('Loaded audit data:', data);
+
+      // Convert saved audit to AuditResult format
+      const auditResult: AuditResult = {
+        url: data.url,
+        timestamp: data.timestamp,
+        overallScore: data.overall_score,
+        preciseScore: data.overall_score,
+        grade: mapGradeToAuditGrade(data.grade),
+        scores: {
+          schemaMarkup: data.score_schema_markup || 0,
+          metaTags: data.score_meta_tags || 0,
+          aiCrawlers: data.score_ai_crawlers || 0,
+          eeat: data.score_eeat || 0,
+          structure: data.score_structure || 0,
+          performance: data.score_performance || 0,
+          contentQuality: data.score_content_quality || 0,
+          citationPotential: data.score_citation_potential || 0,
+          technicalSEO: data.score_technical_seo || 0,
+          linkAnalysis: data.score_link_analysis || 0,
+          aidAgent: 0, // Not stored in DB
+        },
+        details: {
+          schemaMarkup: data.schema_findings || {},
+          metaTags: data.meta_findings || {},
+          aiCrawlers: data.crawler_findings || {},
+          eeat: data.eeat_findings || {},
+          structure: data.structure_findings || {},
+          performance: data.performance_findings || {},
+          contentQuality: data.content_findings || {},
+          citationPotential: data.citation_findings || {},
+          technicalSEO: data.technical_findings || {},
+          linkAnalysis: data.link_findings || {},
+          aidAgent: {
+            detected: false,
+            discoveryMethod: 'none',
+            errors: [],
+            warnings: [],
+          },
+        },
+        recommendations: data.ai_recommendations || [],
+        insights: [],
+      };
+
+      setResult(auditResult);
+      setUrl(data.url);
+      toast.success('Loaded saved audit report');
+      console.log('✅ Audit loaded successfully');
+    } catch (err) {
+      console.error('Error loading audit:', err);
+      toast.error('Failed to load audit');
+    } finally {
+      setLoadingAudit(false);
+      console.log('=== LOAD SAVED AUDIT END ===');
+    }
+  };
+
+  // Helper function to map database grade to AuditResult grade
+  const mapGradeToAuditGrade = (grade: string): 'Authority' | 'Expert' | 'Advanced' | 'Intermediate' | 'Beginner' => {
+    const gradeMap: Record<string, 'Authority' | 'Expert' | 'Advanced' | 'Intermediate' | 'Beginner'> = {
+      'A+': 'Authority',
+      'A': 'Expert',
+      'B': 'Advanced',
+      'C': 'Intermediate',
+      'D': 'Beginner',
+      'F': 'Beginner',
+    };
+    return gradeMap[grade] || 'Beginner';
   };
 
   const handleAnalyze = async (e: React.FormEvent) => {
@@ -456,11 +590,11 @@ export function AuditPage() {
                 hover:border-slate-600/50
               "
               required
-              disabled={isAnalyzing}
+              disabled={isAnalyzing || loadingAudit}
             />
             <button
               type="submit"
-              disabled={isAnalyzing || !url}
+              disabled={isAnalyzing || loadingAudit || !url}
               className="
                 px-6 py-2.5 
                 bg-blue-600 hover:bg-blue-500 
@@ -473,10 +607,10 @@ export function AuditPage() {
                 transform
               "
             >
-              {isAnalyzing ? (
+              {isAnalyzing || loadingAudit ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Analyzing...</span>
+                  <span>{loadingAudit ? 'Loading...' : 'Analyzing...'}</span>
                 </>
               ) : (
                 <>
@@ -631,8 +765,7 @@ export function AuditPage() {
                 "
                 style={{ animationDelay: `${idx * 50}ms` }}
                 onClick={() => {
-                  setUrl(audit.url);
-                  toast.info('URL loaded. Click Analyze to re-audit.');
+                  loadSavedAudit(audit.id);
                 }}
               >
                 <div className="flex-1 min-w-0">
