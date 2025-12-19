@@ -1,180 +1,84 @@
 /**
  * Additional Export Formats for GEO Audit Reports
- * CSV, Markdown, HTML formats for different use cases
+ * JSON, CSV, Markdown, HTML formats for different use cases
  */
 
 import { AuditResult } from './geoAuditEnhanced';
+import { ExportManager } from './export/ExportManager';
+import { JSONExporter, CSVExporter, MarkdownExporter } from './export/exporters';
+import { ExportFormat } from './export/types';
+
+// Initialize export manager with exporters
+const exportManager = new ExportManager();
+exportManager.registerExporter(new JSONExporter());
+exportManager.registerExporter(new CSVExporter());
+exportManager.registerExporter(new MarkdownExporter());
+
+// =============== JSON EXPORT ===============
+/**
+ * Export audit result to JSON format using the new ExportManager architecture
+ * Includes complete data validation, error handling, and filename sanitization
+ */
+export async function exportToJSON(result: AuditResult): Promise<void> {
+  try {
+    const exportResult = await exportManager.exportToFormat(result, ExportFormat.JSON);
+    
+    if (!exportResult.success) {
+      console.error('JSON export failed:', exportResult.error);
+      throw new Error(exportResult.error?.userMessage || 'Failed to export JSON');
+    }
+  } catch (error) {
+    console.error('Failed to export JSON:', error);
+    throw error;
+  }
+}
 
 // =============== CSV EXPORT ===============
-export function exportToCSV(result: AuditResult): void {
-  const hostname = new URL(result.url).hostname;
-  
-  const rows = [
-    ['GEO Audit Report - CSV Export'],
-    ['Website', hostname],
-    ['Analysis Date', new Date(result.timestamp).toLocaleString()],
-    ['Overall Score', result.overallScore.toString()],
-    ['Grade', result.grade],
-    [''],
-    ['Score Breakdown'],
-    ['Category', 'Score', 'Status'],
-  ];
-
-  Object.entries(result.scores).forEach(([category, score]) => {
-    const categoryName = category.replace(/([A-Z])/g, ' $1').trim();
-    const status = score >= 80 ? 'Excellent' : score >= 60 ? 'Good' : score >= 40 ? 'Fair' : 'Poor';
-    rows.push([categoryName, score.toString(), status]);
-  });
-
-  rows.push(['']);
-  rows.push(['Quick Statistics']);
-  rows.push(['Metric', 'Value']);
-  rows.push(['Valid Schemas', (result.details?.schemaMarkup?.validSchemas || 0).toString()]);
-  rows.push(['AI Crawlers Allowed', (result.details?.aiCrawlers?.totalAICrawlers || 0).toString()]);
-  rows.push(['Word Count', (result.details?.contentQuality?.wordCount || 0).toString()]);
-  rows.push(['Total Links', (result.details?.linkAnalysis?.totalLinks || 0).toString()]);
-  rows.push(['Images', (result.details?.contentQuality?.imageCount || 0).toString()]);
-
-  rows.push(['']);
-  rows.push(['Recommendations']);
-  rows.push(['Priority', 'Title', 'Category', 'Effort', 'Impact']);
-
-  result.recommendations.forEach((rec) => {
-    rows.push([
-      rec.priority,
-      rec.title.replace(/,/g, ';'),
-      rec.category,
-      rec.effort || 'N/A',
-      rec.impact?.replace(/,/g, ';') || 'N/A'
-    ]);
-  });
-
-  const csvContent = rows.map(row => row.join(',')).join('\n');
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  const url = URL.createObjectURL(blob);
-  link.setAttribute('href', url);
-  link.setAttribute('download', `GEO-Audit-${hostname}-${Date.now()}.csv`);
-  link.click();
-  URL.revokeObjectURL(url);
+/**
+ * Export audit result to CSV format using the new ExportManager architecture
+ * Includes complete data validation, RFC 4180 compliance, and proper escaping
+ */
+export async function exportToCSV(result: AuditResult): Promise<void> {
+  try {
+    const exportResult = await exportManager.exportToFormat(result, ExportFormat.CSV);
+    
+    if (!exportResult.success) {
+      console.error('CSV export failed:', exportResult.error);
+      throw new Error(exportResult.error?.userMessage || 'Failed to export CSV');
+    }
+  } catch (error) {
+    console.error('Failed to export CSV:', error);
+    throw error;
+  }
 }
 
 // =============== MARKDOWN EXPORT ===============
-export function exportToMarkdown(result: AuditResult): void {
-  const hostname = new URL(result.url).hostname;
-  const date = new Date(result.timestamp).toLocaleString();
-
-  let md = `# GEO Audit Report\n\n`;
-  md += `**Website:** ${hostname}  \n`;
-  md += `**Analysis Date:** ${date}  \n`;
-  md += `**Overall Score:** ${result.overallScore}/100  \n`;
-  md += `**Grade:** ${result.grade}  \n\n`;
-
-  md += `---\n\n`;
-
-  md += `## Executive Summary\n\n`;
-  md += `This comprehensive GEO (Generative Engine Optimization) audit evaluates your website's readiness for AI-powered search engines including ChatGPT, Gemini, and Perplexity.\n\n`;
-
-  md += `### Overall Performance\n\n`;
-  md += `| Metric | Score | Status |\n`;
-  md += `|--------|-------|--------|\n`;
-  md += `| **Overall Score** | **${result.overallScore}/100** | **${result.grade}** |\n\n`;
-
-  md += `## Score Breakdown\n\n`;
-  md += `| Category | Score | Status |\n`;
-  md += `|----------|-------|--------|\n`;
-
-  Object.entries(result.scores).forEach(([category, score]) => {
-    const categoryName = category.replace(/([A-Z])/g, ' $1').trim();
-    const status = score >= 80 ? '✅ Excellent' : score >= 60 ? '🟢 Good' : score >= 40 ? '🟡 Fair' : '🔴 Poor';
-    md += `| ${categoryName} | ${score} | ${status} |\n`;
-  });
-
-  md += `\n## Quick Statistics\n\n`;
-  md += `- **Schemas Found:** ${result.details?.schemaMarkup?.validSchemas || 0}\n`;
-  md += `- **AI Crawlers Allowed:** ${result.details?.aiCrawlers?.totalAICrawlers || 0}\n`;
-  md += `- **Word Count:** ${result.details?.contentQuality?.wordCount || 0}\n`;
-  md += `- **Total Links:** ${result.details?.linkAnalysis?.totalLinks || 0}\n`;
-  md += `- **Images:** ${result.details?.contentQuality?.imageCount || 0}\n\n`;
-
-  if (result.insights && result.insights.length > 0) {
-    md += `## Key Insights\n\n`;
-    result.insights.forEach((insight, idx) => {
-      md += `${idx + 1}. ${insight}\n`;
-    });
-    md += `\n`;
+/**
+ * Export audit result to Markdown format using the new ExportManager architecture
+ * Includes proper heading hierarchy, tables, lists, and complete data coverage
+ */
+export async function exportToMarkdown(result: AuditResult): Promise<void> {
+  try {
+    await exportManager.exportToFormat(result, ExportFormat.MARKDOWN);
+  } catch (error) {
+    console.error('Failed to export Markdown:', error);
+    throw error;
   }
-
-  md += `## Detailed Category Analysis\n\n`;
-  if (result.details) {
-    Object.entries(result.details)
-      .filter(([category]) => category !== 'aidAgent') // AID has its own section
-      .forEach(([category, details]: [string, any]) => {
-        const categoryName = category.replace(/([A-Z])/g, ' $1').trim();
-        const score = result.scores[category as keyof typeof result.scores];
-        
-        md += `### ${categoryName} (Score: ${score || 0}/100)\n\n`;
-        
-        if (details?.strengths && details.strengths.length > 0) {
-          md += `**✅ Strengths:**\n\n`;
-          details.strengths.forEach((strength: string) => {
-            md += `- ${strength}\n`;
-          });
-          md += `\n`;
-        }
-
-        if (details?.issues && details.issues.length > 0) {
-          md += `**⚠️ Issues:**\n\n`;
-          details.issues.forEach((issue: string) => {
-            md += `- ${issue}\n`;
-          });
-          md += `\n`;
-        }
-      });
-  }
-
-  md += `## Recommendations & Action Plan\n\n`;
-
-  const priorityGroups = {
-    critical: result.recommendations.filter(r => r.priority === 'critical'),
-    high: result.recommendations.filter(r => r.priority === 'high'),
-    medium: result.recommendations.filter(r => r.priority === 'medium'),
-  };
-
-  Object.entries(priorityGroups).forEach(([priority, recs]) => {
-    if (recs.length === 0) return;
-    
-    const emoji = priority === 'critical' ? '🔴' : priority === 'high' ? '🟠' : '🟡';
-    md += `### ${emoji} ${priority.charAt(0).toUpperCase() + priority.slice(1)} Priority\n\n`;
-
-    recs.forEach((rec, idx) => {
-      md += `#### ${idx + 1}. ${rec.title}\n\n`;
-      md += `**Category:** ${rec.category}  \n`;
-      if (rec.effort) md += `**Effort:** ${rec.effort}  \n`;
-      if (rec.estimatedTime) md += `**Time:** ${rec.estimatedTime}  \n\n`;
-      md += `${rec.description}\n\n`;
-      if (rec.impact) md += `💡 **Impact:** ${rec.impact}\n\n`;
-      if (rec.implementation) md += `🔧 **Implementation:** ${rec.implementation}\n\n`;
-    });
-  });
-
-  md += `---\n\n`;
-  md += `*Generated by Anóteros Lógos GEO Audit Tool*  \n`;
-  md += `*Visit https://anoteroslogos.com for expert GEO implementation support*\n`;
-
-  const blob = new Blob([md], { type: 'text/markdown;charset=utf-8;' });
-  const link = document.createElement('a');
-  const url = URL.createObjectURL(blob);
-  link.setAttribute('href', url);
-  link.setAttribute('download', `GEO-Audit-${hostname}-${Date.now()}.md`);
-  link.click();
-  URL.revokeObjectURL(url);
 }
 
 // =============== HTML EXPORT ===============
+/**
+ * Export audit result to HTML format
+ * Requirements: 6.1-6.4 (Metadata and compliance features)
+ */
 export function exportToHTML(result: AuditResult): void {
   const hostname = new URL(result.url).hostname;
   const date = new Date(result.timestamp).toLocaleString();
+  
+  // Get standardized metadata (Requirements 6.1, 6.2, 6.4)
+  const { getExportMetadata, formatMetadataAsHTMLMeta } = require('./export/metadata');
+  const { ExportFormat } = require('./export/types');
+  const metadata = getExportMetadata(ExportFormat.HTML);
 
   const getScoreColor = (score: number): string => {
     if (score >= 80) return '#10B981';
@@ -189,6 +93,7 @@ export function exportToHTML(result: AuditResult): void {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GEO Audit Report - ${hostname}</title>
+${formatMetadataAsHTMLMeta(metadata)}
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -374,6 +279,11 @@ export function exportToHTML(result: AuditResult): void {
             <h3>Need Expert Implementation Support?</h3>
             <p style="margin: 15px 0;">Our GEO specialists can implement these recommendations and<br>maximize your visibility in AI-powered search platforms.</p>
             <p><strong>Peitho@anoteroslogos.com</strong> | <strong>https://anoteroslogos.com</strong></p>
+            <p style="margin-top: 20px; font-size: 0.9em; opacity: 0.8;">
+                Generated by ${metadata.generatedBy} v${metadata.toolVersion}<br>
+                Report Generated: ${new Date(metadata.generatedAt).toLocaleString()}<br>
+                Analyzed URL: ${result.url}
+            </p>
         </div>
     </div>
 </body>
@@ -389,9 +299,18 @@ export function exportToHTML(result: AuditResult): void {
 }
 
 // =============== XML EXPORT (for LLM analysis) ===============
+/**
+ * Export audit result to XML format
+ * Requirements: 6.1, 6.2, 6.3, 6.5 (Metadata and schema version)
+ */
 export function exportToXML(result: AuditResult): void {
   const hostname = new URL(result.url).hostname;
   const date = new Date(result.timestamp).toISOString();
+  
+  // Get standardized metadata (Requirements 6.1, 6.2, 6.5)
+  const { getExportMetadata, formatMetadataAsXML } = require('./export/metadata');
+  const { ExportFormat } = require('./export/types');
+  const metadata = getExportMetadata(ExportFormat.XML);
 
   const escapeXML = (str: string): string => {
     return str
@@ -403,13 +322,14 @@ export function exportToXML(result: AuditResult): void {
   };
 
   let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
-  xml += `<GEOAuditReport>\n`;
-  xml += `  <Metadata>\n`;
+  xml += `<GEOAuditReport xmlns="https://anoteroslogos.com/schema/geo-audit" version="${metadata.schemaVersion}">\n`;
+  xml += formatMetadataAsXML(metadata);
+  xml += `  <AuditData>\n`;
   xml += `    <Website>${escapeXML(hostname)}</Website>\n`;
   xml += `    <URL>${escapeXML(result.url)}</URL>\n`;
   xml += `    <AnalysisDate>${date}</AnalysisDate>\n`;
   xml += `    <Timestamp>${result.timestamp}</Timestamp>\n`;
-  xml += `  </Metadata>\n\n`;
+  xml += `  </AuditData>\n\n`;
 
   xml += `  <OverallScore>\n`;
   xml += `    <Score>${result.overallScore}</Score>\n`;
@@ -496,9 +416,18 @@ export function exportToXML(result: AuditResult): void {
 }
 
 // =============== PLAIN TEXT EXPORT (token-efficient for LLM) ===============
+/**
+ * Export audit result to Plain Text format
+ * Requirements: 6.1, 6.2, 6.3 (Metadata)
+ */
 export function exportToPlainText(result: AuditResult): void {
   const hostname = new URL(result.url).hostname;
   const date = new Date(result.timestamp).toLocaleString();
+  
+  // Get standardized metadata (Requirements 6.1, 6.2, 6.3)
+  const { getExportMetadata } = require('./export/metadata');
+  const { ExportFormat } = require('./export/types');
+  const metadata = getExportMetadata(ExportFormat.PLAIN_TEXT);
 
   let text = `GEO AUDIT REPORT\n`;
   text += `${'='.repeat(80)}\n\n`;
@@ -597,7 +526,14 @@ export function exportToPlainText(result: AuditResult): void {
   });
 
   text += `${'='.repeat(80)}\n`;
-  text += `Generated by Anóteros Lógos GEO Audit Tool\n`;
+  text += `EXPORT INFORMATION\n`;
+  text += `${'='.repeat(80)}\n`;
+  text += `Generated by: ${metadata.generatedBy}\n`;
+  text += `Tool Version: ${metadata.toolVersion}\n`;
+  text += `Export Format: ${metadata.exportFormat}\n`;
+  text += `Export Version: ${metadata.exportVersion}\n`;
+  text += `Generated At: ${metadata.generatedAt}\n`;
+  text += `Analyzed URL: ${result.url}\n\n`;
   text += `Visit https://anoteroslogos.com for expert GEO implementation support\n`;
   text += `${'='.repeat(80)}\n`;
 
@@ -611,9 +547,18 @@ export function exportToPlainText(result: AuditResult): void {
 }
 
 // =============== YAML EXPORT (for configuration analysis) ===============
+/**
+ * Export audit result to YAML format
+ * Requirements: 6.1, 6.2, 6.3, 6.5 (Metadata and schema version)
+ */
 export function exportToYAML(result: AuditResult): void {
   const hostname = new URL(result.url).hostname;
   const date = new Date(result.timestamp).toISOString();
+  
+  // Get standardized metadata (Requirements 6.1, 6.2, 6.5)
+  const { getExportMetadata, formatMetadataAsYAML } = require('./export/metadata');
+  const { ExportFormat } = require('./export/types');
+  const metadata = getExportMetadata(ExportFormat.YAML);
 
   const escapeYAML = (str: string): string => {
     if (str.includes(':') || str.includes('#') || str.includes('\n')) {
@@ -624,7 +569,8 @@ export function exportToYAML(result: AuditResult): void {
 
   let yaml = `---\n`;
   yaml += `geo_audit_report:\n`;
-  yaml += `  metadata:\n`;
+  yaml += formatMetadataAsYAML(metadata);
+  yaml += `\n  audit_data:\n`;
   yaml += `    website: ${escapeYAML(hostname)}\n`;
   yaml += `    url: ${escapeYAML(result.url)}\n`;
   yaml += `    analysis_date: ${date}\n`;
@@ -693,10 +639,9 @@ export function exportToYAML(result: AuditResult): void {
     if (rec.implementation) yaml += `      implementation: ${escapeYAML(rec.implementation)}\n`;
   });
 
-  yaml += `\n  generated_by:\n`;
-  yaml += `    tool: "Anóteros Lógos GEO Audit Tool"\n`;
+  yaml += `\n  contact_info:\n`;
   yaml += `    website: "https://anoteroslogos.com"\n`;
-  yaml += `    contact: "Peitho@anoteroslogos.com"\n`;
+  yaml += `    email: "Peitho@anoteroslogos.com"\n`;
 
   const blob = new Blob([yaml], { type: 'application/x-yaml;charset=utf-8;' });
   const link = document.createElement('a');

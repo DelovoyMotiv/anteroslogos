@@ -1,12 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { auditWebsite, type AuditResult } from '../utils/geoAuditEnhanced';
-import { AlertCircle, CheckCircle, TrendingUp, Download, Share2, ExternalLink, Award, Target, Zap, TrendingDown, Minus, History, Shield, FileText } from 'lucide-react';
+import { AlertCircle, CheckCircle, TrendingUp, Download, Share2, ExternalLink, Award, Target, Zap, TrendingDown, Minus, History, Shield, FileText, Loader2 } from 'lucide-react';
 import { saveAuditToHistory, compareWithPrevious, checkScoreDrop } from '../utils/auditHistory';
 import { validateAndSanitizeUrl, checkRateLimit, validateAuditResult } from '../utils/urlValidator';
-// Dynamic imports for heavy libraries
-// import { generatePDFReport } from '../utils/pdfReportGenerator';
-// import { exportToCSV, exportToMarkdown, exportToHTML } from '../utils/exportFormats';
 import { analyzeAndGenerateAlerts, type Alert } from '../utils/monitoringAlerts';
 import { analyzeTrend, generatePerformanceInsights, type TrendAnalysis, type PerformanceInsights } from '../utils/advancedAnalytics';
 import { generateCompetitiveComparison, updateCompetitorData, type CompetitiveComparison } from '../utils/competitiveIntelligence';
@@ -25,6 +22,11 @@ import SEOHead from '../components/SEOHead';
 import GeoAnalysisForm from '../components/GeoAnalysisForm';
 import KnowledgeGraphDashboard from '../components/KnowledgeGraphDashboard';
 import TracerViz from '../components/TracerViz';
+import { ExportManager } from '../utils/export/ExportManager';
+import { ExportFormat, type ExportError as ExportErrorType } from '../utils/export/types';
+import { JSONExporter } from '../utils/export/exporters/JSONExporter';
+import { CSVExporter } from '../utils/export/exporters/CSVExporter';
+import { MarkdownExporter } from '../utils/export/exporters/MarkdownExporter';
 // Removed: RealtimeMonitorPanel (bundle optimization)
 
 const GeoAuditPage = () => {
@@ -42,6 +44,20 @@ const GeoAuditPage = () => {
   const [competitive, setCompetitive] = useState<CompetitiveComparison | null>(null);
   const [causalTrace, setCausalTrace] = useState<any | null>(null);
   const [isLoadingTrace, setIsLoadingTrace] = useState(false);
+  
+  // Export state management
+  const [exportingFormat, setExportingFormat] = useState<ExportFormat | null>(null);
+  const [exportError, setExportError] = useState<string>('');
+  const [lastExportAttempt, setLastExportAttempt] = useState<{ format: ExportFormat; timestamp: number } | null>(null);
+  
+  // Initialize export manager (lazy initialization)
+  const [exportManager] = useState(() => {
+    const manager = new ExportManager();
+    manager.registerExporter(new JSONExporter());
+    manager.registerExporter(new CSVExporter());
+    manager.registerExporter(new MarkdownExporter());
+    return manager;
+  });
 
   // Check for URL in query parameters on mount
   useEffect(() => {
@@ -196,99 +212,92 @@ const GeoAuditPage = () => {
     return 'from-red-500 to-red-700';
   };
 
-  const downloadReport = () => {
+  /**
+   * Generic export handler using ExportManager
+   * Handles loading states, error display, and retry functionality
+   */
+  const handleExport = async (format: ExportFormat) => {
     if (!result) return;
-    const dataStr = JSON.stringify(result, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    const exportFileDefaultName = `geo-audit-${new URL(result.url).hostname}-${Date.now()}.json`;
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-  };
-
-  const downloadCSVReport = async () => {
-    if (!result) return;
+    
+    // Clear previous export error
+    setExportError('');
+    setExportingFormat(format);
+    
     try {
-      const { exportToCSV } = await import('../utils/exportFormats');
-      exportToCSV(result);
+      // Dynamically load exporters for formats not yet registered
+      if (format === ExportFormat.HTML) {
+        const { HTMLExporter } = await import('../utils/export/exporters/HTMLExporter');
+        if (!exportManager.getSupportedFormats().includes(ExportFormat.HTML)) {
+          exportManager.registerExporter(new HTMLExporter());
+        }
+      } else if (format === ExportFormat.XML) {
+        const { XMLExporter } = await import('../utils/export/exporters/XMLExporter');
+        if (!exportManager.getSupportedFormats().includes(ExportFormat.XML)) {
+          exportManager.registerExporter(new XMLExporter());
+        }
+      } else if (format === ExportFormat.PLAIN_TEXT) {
+        const { PlainTextExporter } = await import('../utils/export/exporters/PlainTextExporter');
+        if (!exportManager.getSupportedFormats().includes(ExportFormat.PLAIN_TEXT)) {
+          exportManager.registerExporter(new PlainTextExporter());
+        }
+      } else if (format === ExportFormat.YAML) {
+        const { YAMLExporter } = await import('../utils/export/exporters/YAMLExporter');
+        if (!exportManager.getSupportedFormats().includes(ExportFormat.YAML)) {
+          exportManager.registerExporter(new YAMLExporter());
+        }
+      } else if (format === ExportFormat.PDF) {
+        const { PDFExporter } = await import('../utils/export/exporters/PDFExporter');
+        if (!exportManager.getSupportedFormats().includes(ExportFormat.PDF)) {
+          exportManager.registerExporter(new PDFExporter());
+        }
+      }
+      
+      // Export using ExportManager
+      const exportResult = await exportManager.exportToFormat(result, format);
+      
+      if (!exportResult.success) {
+        throw exportResult.error || new Error('Export failed');
+      }
+      
+      // Track successful export
+      setLastExportAttempt({ format, timestamp: Date.now() });
+      
     } catch (error) {
-      console.error('Failed to export CSV:', error);
-      alert('Failed to export CSV report. Please try again.');
+      console.error(`Failed to export ${format}:`, error);
+      
+      // Extract user-friendly error message
+      let errorMessage = 'Failed to export report. Please try again.';
+      if (error && typeof error === 'object' && 'userMessage' in error) {
+        errorMessage = (error as ExportErrorType).userMessage;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      setExportError(errorMessage);
+      setLastExportAttempt({ format, timestamp: Date.now() });
+    } finally {
+      setExportingFormat(null);
     }
   };
-
-  const downloadMarkdownReport = async () => {
-    if (!result) return;
-    try {
-      const { exportToMarkdown } = await import('../utils/exportFormats');
-      exportToMarkdown(result);
-    } catch (error) {
-      console.error('Failed to export Markdown:', error);
-      alert('Failed to export Markdown report. Please try again.');
+  
+  /**
+   * Retry last failed export
+   */
+  const retryExport = () => {
+    if (lastExportAttempt) {
+      handleExport(lastExportAttempt.format);
     }
   };
-
-  const downloadXMLReport = async () => {
-    if (!result) return;
-    try {
-      const { exportToXML } = await import('../utils/exportFormats');
-      exportToXML(result);
-    } catch (error) {
-      console.error('Failed to export XML:', error);
-      alert('Failed to export XML report. Please try again.');
-    }
-  };
-
-  const downloadPlainTextReport = async () => {
-    if (!result) return;
-    try {
-      const { exportToPlainText } = await import('../utils/exportFormats');
-      exportToPlainText(result);
-    } catch (error) {
-      console.error('Failed to export Plain Text:', error);
-      alert('Failed to export Plain Text report. Please try again.');
-    }
-  };
-
-  const downloadYAMLReport = async () => {
-    if (!result) return;
-    try {
-      const { exportToYAML } = await import('../utils/exportFormats');
-      exportToYAML(result);
-    } catch (error) {
-      console.error('Failed to export YAML:', error);
-      alert('Failed to export YAML report. Please try again.');
-    }
-  };
-
-  const downloadHTMLReport = async () => {
-    if (!result) return;
-    try {
-      const { exportToHTML } = await import('../utils/exportFormats');
-      exportToHTML(result);
-    } catch (error) {
-      console.error('Failed to export HTML:', error);
-      alert('Failed to export HTML report. Please try again.');
-    }
-  };
-
-  const downloadPDFReport = async () => {
-    if (!result) return;
-    try {
-      const { generatePDFReport } = await import('../utils/pdfReportGenerator');
-      await generatePDFReport(result, {
-        includeCharts: true,
-        includeRecommendations: true,
-        includeDetails: true,
-        companyName: 'Anóteros Lógos',
-        reportDate: new Date().toLocaleDateString(),
-      });
-    } catch (error) {
-      console.error('Failed to generate PDF:', error);
-      alert('Failed to generate PDF report. Please try again.');
-    }
-  };
+  
+  // Individual export handlers for backward compatibility
+  const downloadReport = () => handleExport(ExportFormat.JSON);
+  const downloadCSVReport = () => handleExport(ExportFormat.CSV);
+  const downloadMarkdownReport = () => handleExport(ExportFormat.MARKDOWN);
+  const downloadXMLReport = () => handleExport(ExportFormat.XML);
+  const downloadPlainTextReport = () => handleExport(ExportFormat.PLAIN_TEXT);
+  const downloadYAMLReport = () => handleExport(ExportFormat.YAML);
+  const downloadHTMLReport = () => handleExport(ExportFormat.HTML);
+  const downloadPDFReport = () => handleExport(ExportFormat.PDF);
 
   const shareResults = () => {
     if (!result) return;
@@ -626,79 +635,142 @@ const GeoAuditPage = () => {
                 </div>
                 
                 {/* Right: Export & Share Buttons - 9 formats available */}
-                <div className="flex gap-2 flex-shrink-0 flex-wrap justify-center lg:justify-end">
-                  <button
-                    onClick={downloadPDFReport}
-                    className="p-2.5 hover:bg-white/5 rounded-lg transition-all group"
-                    title="Download PDF Report"
-                    aria-label="Download professional PDF report"
-                  >
-                    <FileText className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" />
-                  </button>
-                  <button
-                    onClick={downloadHTMLReport}
-                    className="p-2.5 hover:bg-white/5 rounded-lg transition-all group"
-                    title="Download HTML Report"
-                    aria-label="Download standalone HTML report"
-                  >
-                    <FileText className="w-4 h-4 text-orange-400 group-hover:scale-110 transition-transform" />
-                  </button>
-                  <button
-                    onClick={downloadMarkdownReport}
-                    className="p-2.5 hover:bg-white/5 rounded-lg transition-all group"
-                    title="Download Markdown Report (LLM-friendly)"
-                    aria-label="Download markdown report for GitHub/docs/LLM"
-                  >
-                    <FileText className="w-4 h-4 text-green-400 group-hover:scale-110 transition-transform" />
-                  </button>
-                  <button
-                    onClick={downloadXMLReport}
-                    className="p-2.5 hover:bg-white/5 rounded-lg transition-all group"
-                    title="Download XML Report (LLM-friendly)"
-                    aria-label="Download XML report for structured LLM analysis"
-                  >
-                    <FileText className="w-4 h-4 text-red-400 group-hover:scale-110 transition-transform" />
-                  </button>
-                  <button
-                    onClick={downloadPlainTextReport}
-                    className="p-2.5 hover:bg-white/5 rounded-lg transition-all group"
-                    title="Download Plain Text Report (Token-efficient for LLM)"
-                    aria-label="Download plain text report for token-efficient LLM analysis"
-                  >
-                    <FileText className="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform" />
-                  </button>
-                  <button
-                    onClick={downloadYAMLReport}
-                    className="p-2.5 hover:bg-white/5 rounded-lg transition-all group"
-                    title="Download YAML Report (LLM-friendly)"
-                    aria-label="Download YAML report for configuration analysis"
-                  >
-                    <FileText className="w-4 h-4 text-yellow-400 group-hover:scale-110 transition-transform" />
-                  </button>
-                  <button
-                    onClick={downloadCSVReport}
-                    className="p-2.5 hover:bg-white/5 rounded-lg transition-all group"
-                    title="Download CSV Report"
-                    aria-label="Download CSV report for data analysis"
-                  >
-                    <Download className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
-                  </button>
-                  <button
-                    onClick={downloadReport}
-                    className="p-2.5 hover:bg-white/5 rounded-lg transition-all group"
-                    title="Download JSON"
-                    aria-label="Download JSON report"
-                  >
-                    <Download className="w-4 h-4 text-white/60 group-hover:text-white/90 transition-colors" />
-                  </button>
-                  <button
-                    onClick={shareResults}
-                    className="p-2.5 hover:bg-white/5 rounded-lg transition-all group"
-                    title="Share on Twitter"
-                    aria-label="Share results on Twitter"
-                  >
-                    <Share2 className="w-4 h-4 text-white/60 group-hover:text-white/90 transition-colors" />
-                  </button>
+                <div className="flex flex-col gap-3">
+                  <div className="flex gap-2 flex-shrink-0 flex-wrap justify-center lg:justify-end">
+                    <button
+                      onClick={downloadPDFReport}
+                      disabled={exportingFormat === ExportFormat.PDF}
+                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Download PDF Report"
+                      aria-label="Download professional PDF report"
+                    >
+                      {exportingFormat === ExportFormat.PDF ? (
+                        <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />
+                      ) : (
+                        <FileText className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform" />
+                      )}
+                    </button>
+                    <button
+                      onClick={downloadHTMLReport}
+                      disabled={exportingFormat === ExportFormat.HTML}
+                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Download HTML Report"
+                      aria-label="Download standalone HTML report"
+                    >
+                      {exportingFormat === ExportFormat.HTML ? (
+                        <Loader2 className="w-4 h-4 text-orange-400 animate-spin" />
+                      ) : (
+                        <FileText className="w-4 h-4 text-orange-400 group-hover:scale-110 transition-transform" />
+                      )}
+                    </button>
+                    <button
+                      onClick={downloadMarkdownReport}
+                      disabled={exportingFormat === ExportFormat.MARKDOWN}
+                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Download Markdown Report (LLM-friendly)"
+                      aria-label="Download markdown report for GitHub/docs/LLM"
+                    >
+                      {exportingFormat === ExportFormat.MARKDOWN ? (
+                        <Loader2 className="w-4 h-4 text-green-400 animate-spin" />
+                      ) : (
+                        <FileText className="w-4 h-4 text-green-400 group-hover:scale-110 transition-transform" />
+                      )}
+                    </button>
+                    <button
+                      onClick={downloadXMLReport}
+                      disabled={exportingFormat === ExportFormat.XML}
+                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Download XML Report (LLM-friendly)"
+                      aria-label="Download XML report for structured LLM analysis"
+                    >
+                      {exportingFormat === ExportFormat.XML ? (
+                        <Loader2 className="w-4 h-4 text-red-400 animate-spin" />
+                      ) : (
+                        <FileText className="w-4 h-4 text-red-400 group-hover:scale-110 transition-transform" />
+                      )}
+                    </button>
+                    <button
+                      onClick={downloadPlainTextReport}
+                      disabled={exportingFormat === ExportFormat.PLAIN_TEXT}
+                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Download Plain Text Report (Token-efficient for LLM)"
+                      aria-label="Download plain text report for token-efficient LLM analysis"
+                    >
+                      {exportingFormat === ExportFormat.PLAIN_TEXT ? (
+                        <Loader2 className="w-4 h-4 text-cyan-400 animate-spin" />
+                      ) : (
+                        <FileText className="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform" />
+                      )}
+                    </button>
+                    <button
+                      onClick={downloadYAMLReport}
+                      disabled={exportingFormat === ExportFormat.YAML}
+                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Download YAML Report (LLM-friendly)"
+                      aria-label="Download YAML report for configuration analysis"
+                    >
+                      {exportingFormat === ExportFormat.YAML ? (
+                        <Loader2 className="w-4 h-4 text-yellow-400 animate-spin" />
+                      ) : (
+                        <FileText className="w-4 h-4 text-yellow-400 group-hover:scale-110 transition-transform" />
+                      )}
+                    </button>
+                    <button
+                      onClick={downloadCSVReport}
+                      disabled={exportingFormat === ExportFormat.CSV}
+                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Download CSV Report"
+                      aria-label="Download CSV report for data analysis"
+                    >
+                      {exportingFormat === ExportFormat.CSV ? (
+                        <Loader2 className="w-4 h-4 text-purple-400 animate-spin" />
+                      ) : (
+                        <Download className="w-4 h-4 text-purple-400 group-hover:scale-110 transition-transform" />
+                      )}
+                    </button>
+                    <button
+                      onClick={downloadReport}
+                      disabled={exportingFormat === ExportFormat.JSON}
+                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Download JSON"
+                      aria-label="Download JSON report"
+                    >
+                      {exportingFormat === ExportFormat.JSON ? (
+                        <Loader2 className="w-4 h-4 text-white/60 animate-spin" />
+                      ) : (
+                        <Download className="w-4 h-4 text-white/60 group-hover:text-white/90 transition-colors" />
+                      )}
+                    </button>
+                    <button
+                      onClick={shareResults}
+                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group"
+                      title="Share on Twitter"
+                      aria-label="Share results on Twitter"
+                    >
+                      <Share2 className="w-4 h-4 text-white/60 group-hover:text-white/90 transition-colors" />
+                    </button>
+                  </div>
+                  
+                  {/* Export Error Display */}
+                  {exportError && (
+                    <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
+                      <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                      <span className="flex-1">{exportError}</span>
+                      <button
+                        onClick={retryExport}
+                        className="px-3 py-1 bg-red-500/20 hover:bg-red-500/30 rounded text-xs font-semibold transition-colors"
+                      >
+                        Retry
+                      </button>
+                      <button
+                        onClick={() => setExportError('')}
+                        className="text-red-400/60 hover:text-red-400 transition-colors"
+                        aria-label="Dismiss error"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

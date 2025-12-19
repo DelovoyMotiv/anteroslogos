@@ -21,6 +21,218 @@ export default {
         display: ['Space Grotesk', 'DM Sans', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
       },
+      typography: (theme) => ({
+        DEFAULT: {
+          css: {
+            // Base text color
+            color: theme('colors.brand-text'),
+            maxWidth: 'none',
+            
+            // Headings
+            'h1, h2, h3, h4, h5, h6': {
+              color: theme('colors.brand-text'),
+              fontWeight: '700',
+              fontFamily: theme('fontFamily.display').join(', '),
+            },
+            h1: {
+              fontSize: '2.25rem',
+              lineHeight: '2.5rem',
+              marginTop: '0',
+              marginBottom: '1rem',
+            },
+            h2: {
+              fontSize: '1.875rem',
+              lineHeight: '2.25rem',
+              marginTop: '2rem',
+              marginBottom: '1rem',
+            },
+            h3: {
+              fontSize: '1.5rem',
+              lineHeight: '2rem',
+              marginTop: '1.5rem',
+              marginBottom: '0.75rem',
+            },
+            
+            // Paragraphs
+            p: {
+              marginTop: '1.25rem',
+              marginBottom: '1.25rem',
+              lineHeight: '1.75',
+            },
+            
+            // Links
+            a: {
+              color: theme('colors.brand-accent'),
+              textDecoration: 'underline',
+              textDecorationColor: theme('colors.brand-accent') + '40',
+              fontWeight: '500',
+              transition: 'all 0.2s ease',
+              '&:hover': {
+                color: theme('colors.brand-accent'),
+                textDecorationColor: theme('colors.brand-accent'),
+                textDecorationThickness: '2px',
+              },
+            },
+            
+            // Strong and emphasis
+            strong: {
+              color: theme('colors.brand-text'),
+              fontWeight: '700',
+            },
+            em: {
+              color: theme('colors.brand-text'),
+              fontStyle: 'italic',
+            },
+            
+            // Code
+            code: {
+              color: theme('colors.brand-accent'),
+              backgroundColor: theme('colors.brand-secondary') + '30',
+              padding: '0.125rem 0.375rem',
+              borderRadius: '0.25rem',
+              fontWeight: '500',
+              fontSize: '0.875em',
+              fontFamily: theme('fontFamily.mono').join(', '),
+            },
+            'code::before': {
+              content: '""',
+            },
+            'code::after': {
+              content: '""',
+            },
+            
+            // Code blocks
+            pre: {
+              backgroundColor: theme('colors.brand-secondary'),
+              color: theme('colors.brand-text'),
+              padding: '1rem',
+              borderRadius: '0.5rem',
+              overflowX: 'auto',
+              fontSize: '0.875rem',
+              lineHeight: '1.7',
+              marginTop: '1.5rem',
+              marginBottom: '1.5rem',
+            },
+            'pre code': {
+              backgroundColor: 'transparent',
+              padding: '0',
+              color: 'inherit',
+              fontSize: 'inherit',
+              fontWeight: '400',
+            },
+            
+            // Blockquotes
+            blockquote: {
+              color: theme('colors.brand-text'),
+              borderLeftColor: theme('colors.brand-accent'),
+              borderLeftWidth: '4px',
+              paddingLeft: '1rem',
+              fontStyle: 'italic',
+              marginTop: '1.5rem',
+              marginBottom: '1.5rem',
+              backgroundColor: theme('colors.brand-secondary') + '20',
+              padding: '1rem',
+              borderRadius: '0.25rem',
+            },
+            'blockquote p:first-of-type::before': {
+              content: '""',
+            },
+            'blockquote p:last-of-type::after': {
+              content: '""',
+            },
+            
+            // Lists
+            ul: {
+              listStyleType: 'disc',
+              paddingLeft: '1.5rem',
+              marginTop: '1.25rem',
+              marginBottom: '1.25rem',
+            },
+            ol: {
+              listStyleType: 'decimal',
+              paddingLeft: '1.5rem',
+              marginTop: '1.25rem',
+              marginBottom: '1.25rem',
+            },
+            li: {
+              marginTop: '0.5rem',
+              marginBottom: '0.5rem',
+              paddingLeft: '0.25rem',
+            },
+            'ul > li': {
+              paddingLeft: '0.25rem',
+            },
+            'ol > li': {
+              paddingLeft: '0.25rem',
+            },
+            
+            // Nested lists
+            'ul ul, ul ol, ol ul, ol ol': {
+              marginTop: '0.5rem',
+              marginBottom: '0.5rem',
+            },
+            
+            // Tables
+            table: {
+              width: '100%',
+              marginTop: '1.5rem',
+              marginBottom: '1.5rem',
+              fontSize: '0.875rem',
+              lineHeight: '1.5',
+            },
+            thead: {
+              borderBottomWidth: '2px',
+              borderBottomColor: theme('colors.brand-accent'),
+            },
+            'thead th': {
+              color: theme('colors.brand-text'),
+              fontWeight: '700',
+              paddingTop: '0.75rem',
+              paddingBottom: '0.75rem',
+              paddingLeft: '0.75rem',
+              paddingRight: '0.75rem',
+              textAlign: 'left',
+            },
+            'tbody tr': {
+              borderBottomWidth: '1px',
+              borderBottomColor: theme('colors.brand-secondary'),
+            },
+            'tbody td': {
+              paddingTop: '0.75rem',
+              paddingBottom: '0.75rem',
+              paddingLeft: '0.75rem',
+              paddingRight: '0.75rem',
+            },
+            
+            // Horizontal rules
+            hr: {
+              borderColor: theme('colors.brand-secondary'),
+              borderTopWidth: '1px',
+              marginTop: '2rem',
+              marginBottom: '2rem',
+            },
+            
+            // Images
+            img: {
+              marginTop: '1.5rem',
+              marginBottom: '1.5rem',
+              borderRadius: '0.5rem',
+            },
+            
+            // Figure and figcaption
+            figure: {
+              marginTop: '1.5rem',
+              marginBottom: '1.5rem',
+            },
+            figcaption: {
+              color: theme('colors.brand-text') + 'CC',
+              fontSize: '0.875rem',
+              marginTop: '0.75rem',
+              textAlign: 'center',
+            },
+          },
+        },
+      }),
       animation: {
         'gradient-pan': 'gradient-pan 3s ease infinite',
         'fade-in-up': 'fade-in-up 0.5s ease-out forwards',
@@ -80,5 +292,7 @@ export default {
       }
     }
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'),
+  ],
 }
