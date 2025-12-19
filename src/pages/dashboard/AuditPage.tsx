@@ -9,6 +9,8 @@ import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../lib/dashboard/auth-guard';
 import { auditWebsite, type AuditResult } from '../../../utils/geoAuditEnhanced';
 import { validateAndSanitizeUrl, checkRateLimit } from '../../../utils/urlValidator';
+import { prepareAuditData, validatePreparedData } from '../../../utils/auditDataPreparation';
+import { retryWithBackoff } from '../../../utils/retryWithBackoff';
 import { 
   Search, 
   Loader2, 
@@ -109,14 +111,26 @@ export function AuditPage() {
   }, [user]);
 
   const loadAuditHistory = async () => {
+    console.log('=== LOAD AUDIT HISTORY START ===');
+    console.log('User:', user ? { id: user.id, email: user.email } : 'null');
+    console.log('Supabase configured:', !!supabase);
+    
     if (!user || !supabase) {
+      console.log('Cannot load history: user or supabase is null');
       setLoadingHistory(false);
       return;
     }
 
     try {
       // Verify session before making request
+      console.log('Checking session...');
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      console.log('Session check result:', {
+        hasSession: !!session,
+        sessionError: sessionError?.message,
+        userId: session?.user?.id,
+      });
       
       if (sessionError || !session) {
         console.warn('No active session for audit history');
@@ -124,6 +138,7 @@ export function AuditPage() {
         return;
       }
 
+      console.log('Querying audits table...');
       const { data, error } = await supabase
         .from('audits')
         .select(`
@@ -144,16 +159,28 @@ export function AuditPage() {
         .order('timestamp', { ascending: false })
         .limit(10);
 
+      console.log('Query result:', {
+        success: !error,
+        error: error?.message,
+        count: data?.length || 0,
+      });
+
       if (error) {
         console.error('Failed to load audit history:', error);
         // Don't throw - just log and continue
       } else {
+        console.log('✅ Loaded audits:', data);
         setSavedAudits(data || []);
       }
     } catch (err) {
       console.error('Failed to load audit history:', err);
+      console.error('Error details:', {
+        message: err instanceof Error ? err.message : 'Unknown error',
+        stack: err instanceof Error ? err.stack : undefined,
+      });
     } finally {
       setLoadingHistory(false);
+      console.log('=== LOAD AUDIT HISTORY END ===');
     }
   };
 
@@ -206,64 +233,177 @@ export function AuditPage() {
   };
 
   const saveAuditToSupabase = async (auditResult: AuditResult) => {
-    if (!user || !supabase) return;
+    console.log('=== SAVE AUDIT TO SUPABASE START ===');
+    console.log('User:', user ? { id: user.id, email: user.email } : 'null');
+    console.log('Supabase configured:', !!supabase);
+    
+    // Early validation - don't block UI, just log and notify
+    if (!user) {
+      console.error('Cannot save audit: user is null');
+      toast.warning('Audit completed but not saved (not authenticated)');
+      return;
+    }
+
+    if (!supabase) {
+      console.error('Cannot save audit: supabase client is not configured');
+      toast.error('Audit completed but database connection unavailable');
+      return;
+    }
 
     try {
-      // Verify session before making request
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      // Session verification with fallback
+      console.log('Checking session...');
       
-      if (sessionError || !session) {
-        console.warn('No active session for saving audit');
-        toast.warning('Audit completed but not saved (no active session)');
+      try {
+        const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
+        
+        console.log('Session check result:', {
+          hasSession: !!currentSession,
+          sessionError: sessionError?.message,
+          userId: currentSession?.user?.id,
+        });
+        
+        if (sessionError) {
+          console.warn('Session check error:', sessionError.message);
+          // Fallback: try to continue anyway - RLS might still work
+          toast.warning('Session verification failed, attempting to save anyway...');
+        } else if (!currentSession) {
+          console.warn('No active session for saving audit');
+          toast.warning('Audit completed but not saved (no active session)');
+          return;
+        }
+      } catch (sessionCheckError) {
+        // Fallback for session check failures - don't block the save attempt
+        console.error('Session check threw exception:', sessionCheckError);
+        toast.warning('Session check failed, attempting to save anyway...');
+      }
+
+      // Data preparation with validation
+      console.log('Preparing audit data...');
+      let auditData: ReturnType<typeof prepareAuditData>;
+      
+      try {
+        auditData = prepareAuditData(auditResult, user.id);
+        
+        console.log('Prepared audit data:', {
+          user_id: auditData.user_id,
+          url: auditData.url,
+          normalized_url: auditData.normalized_url,
+          domain: auditData.domain,
+          overall_score: auditData.overall_score,
+          grade: auditData.grade,
+        });
+      } catch (prepError) {
+        console.error('Data preparation failed:', prepError);
+        const errorMsg = prepError instanceof Error ? prepError.message : 'Unknown preparation error';
+        toast.error(`Failed to prepare audit data: ${errorMsg}`);
         return;
       }
 
-      const urlObj = new URL(auditResult.url);
-      const normalizedUrl = urlObj.hostname + urlObj.pathname;
-      const domain = urlObj.hostname;
+      // Validate the prepared data
+      const validation = validatePreparedData(auditData);
+      if (!validation.isValid) {
+        console.error('Data validation failed:', validation.errors);
+        const errorDetails = validation.errors?.join(', ') || 'Invalid data structure';
+        toast.error(`Failed to save audit: ${errorDetails}`);
+        return;
+      }
 
-      const { error } = await supabase.from('audits').insert([{
-        user_id: user.id,
-        url: auditResult.url,
-        normalized_url: normalizedUrl,
-        domain: domain,
-        timestamp: auditResult.timestamp,
-        overall_score: auditResult.overallScore,
-        grade: auditResult.grade,
-        score_schema_markup: auditResult.scores.schemaMarkup,
-        score_meta_tags: auditResult.scores.metaTags,
-        score_ai_crawlers: auditResult.scores.aiCrawlers,
-        score_eeat: auditResult.scores.eeat,
-        score_structure: auditResult.scores.structure,
-        score_performance: auditResult.scores.performance,
-        score_content_quality: auditResult.scores.contentQuality,
-        score_citation_potential: auditResult.scores.citationPotential,
-        score_technical_seo: auditResult.scores.technicalSEO,
-        score_link_analysis: auditResult.scores.linkAnalysis,
-        schema_findings: auditResult.details.schemaMarkup,
-        meta_findings: auditResult.details.metaTags,
-        crawler_findings: auditResult.details.aiCrawlers,
-        eeat_findings: auditResult.details.eeat,
-        structure_findings: auditResult.details.structure,
-        performance_findings: auditResult.details.performance,
-        content_findings: auditResult.details.contentQuality,
-        citation_findings: auditResult.details.citationPotential,
-        technical_findings: auditResult.details.technicalSEO,
-        link_findings: auditResult.details.linkAnalysis,
-        ai_recommendations: auditResult.recommendations,
-        has_organization_schema: auditResult.details.schemaMarkup.schemas.Organization,
-        has_person_schema: auditResult.details.schemaMarkup.schemas.Person,
-        has_article_schema: auditResult.details.schemaMarkup.schemas.Article,
-        has_breadcrumb_schema: auditResult.details.schemaMarkup.schemas.BreadcrumbList,
-        has_author_markup: auditResult.details.eeat.hasAuthorInfo,
-        has_eeat_signals: auditResult.details.eeat.authorityScore > 50,
-        robots_txt_allows_ai: auditResult.details.aiCrawlers.allowsGPTBot,
-      }]);
+      // Database insert with retry logic for transient failures
+      console.log('Inserting audit into database with retry logic...');
+      
+      const retryResult = await retryWithBackoff(
+        async () => {
+          const { data, error } = await supabase.from('audits').insert([auditData]).select();
+          
+          if (error) {
+            throw error;
+          }
+          
+          return data;
+        },
+        {
+          maxRetries: 3,
+          initialDelayMs: 1000,
+          maxDelayMs: 5000,
+          backoffMultiplier: 2,
+        }
+      );
 
-      if (error) throw error;
+      console.log('Insert result:', {
+        success: retryResult.success,
+        attempts: retryResult.attempts,
+        error: retryResult.error,
+      });
+
+      if (!retryResult.success) {
+        const error = retryResult.error;
+        console.error('Database insert error after retries:', error);
+        
+        // Provide specific error messages based on error type
+        if (typeof error === 'object' && error !== null) {
+          const err = error as { code?: string; message?: string };
+          
+          if (err.code === '23505') {
+            // Unique constraint violation
+            toast.error('Audit already exists in history');
+          } else if (err.code === '23503') {
+            // Foreign key violation
+            toast.error('Failed to save audit: User reference invalid');
+          } else if (err.code === '42501') {
+            // Insufficient privilege (RLS policy)
+            toast.error('Failed to save audit: Permission denied. Please try logging in again.');
+          } else if (err.code === '23502') {
+            // Not null violation
+            toast.error('Failed to save audit: Missing required data');
+          } else if (err.message?.includes('JWT')) {
+            // JWT/Auth related errors
+            toast.error('Failed to save audit: Authentication expired. Please refresh the page.');
+          } else if (err.message?.includes('network') || err.message?.includes('fetch')) {
+            // Network errors (after retries)
+            toast.error(`Failed to save audit after ${retryResult.attempts} attempts: Network error. Please check your connection.`);
+          } else {
+            // Generic database error
+            toast.error(`Failed to save audit: ${err.message || 'Database error'}`);
+          }
+        } else {
+          toast.error('Failed to save audit: Unknown error');
+        }
+        
+        return;
+      }
+
+      console.log(`✅ Audit saved successfully after ${retryResult.attempts} attempt(s)!`);
+      if (retryResult.attempts > 1) {
+        toast.success(`Audit saved to history after ${retryResult.attempts} attempts!`);
+      } else {
+        toast.success('Audit saved to history!');
+      }
+      
     } catch (err) {
-      console.error('Failed to save audit to Supabase:', err);
-      toast.error('Audit completed but failed to save to history');
+      // Catch-all for unexpected errors - ensure UI is never blocked
+      console.error('Unexpected error in saveAuditToSupabase:', err);
+      console.error('Error details:', {
+        message: err instanceof Error ? err.message : 'Unknown error',
+        name: err instanceof Error ? err.name : undefined,
+        stack: err instanceof Error ? err.stack : undefined,
+      });
+      
+      // Provide user-friendly error message
+      if (err instanceof TypeError) {
+        toast.error('Audit completed but failed to save: Data type error');
+      } else if (err instanceof Error && err.message.includes('fetch')) {
+        toast.error('Audit completed but failed to save: Network error');
+      } else if (err instanceof Error && err.message.includes('timeout')) {
+        toast.error('Audit completed but failed to save: Request timeout');
+      } else {
+        const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+        toast.error(`Audit completed but failed to save: ${errorMsg}`);
+      }
+      
+    } finally {
+      console.log('=== SAVE AUDIT TO SUPABASE END ===');
+      // Ensure UI is never blocked - no throw, no re-throw
     }
   };
 
