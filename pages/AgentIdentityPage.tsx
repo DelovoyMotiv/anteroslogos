@@ -420,7 +420,7 @@ console.log(agentCard.extensions.payment); // USDC on Base L2`
                   <h3 className="text-base font-semibold text-white">Public AIP Generation</h3>
                 </div>
                 <p className="text-sm text-white/60 mb-2">Ed25519 keypair generation</p>
-                <code className="text-xs text-brand-accent font-mono">POST /api/public-aid</code>
+                <code className="text-xs text-brand-accent font-mono">POST /api/public-aip</code>
                 <p className="text-xs text-white/50 mt-2">10 req/min per IP</p>
               </div>
 
@@ -454,11 +454,11 @@ console.log(agentCard.extensions.payment); // USDC on Base L2`
                 </p>
 
                 <CodeSample
-                  title="POST /api/public-aid"
+                  title="POST /api/public-aip"
                   samples={[
                     {
                       language: 'bash',
-                      code: `curl -X POST https://anoteroslogos.com/api/public-aid \\
+                      code: `curl -X POST https://anoteroslogos.com/api/public-aip \\
   -H "Content-Type: application/json" \\
   -d '{
     "name": "MyAgent",
@@ -468,7 +468,7 @@ console.log(agentCard.extensions.payment); // USDC on Base L2`
                     },
                     {
                       language: 'typescript',
-                      code: `const aip = await fetch('https://anoteroslogos.com/api/public-aid', {
+                      code: `const aip = await fetch('https://anoteroslogos.com/api/public-aip', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
@@ -486,7 +486,7 @@ console.log(aip.privateKey); // 64-char hex (store securely!)`
                       code: `import requests
 
 res = requests.post(
-    'https://anoteroslogos.com/api/public-aid',
+    'https://anoteroslogos.com/api/public-aip',
     json={
         'name': 'MyAgent',
         'capabilities': ['geo.audit']
@@ -501,7 +501,7 @@ print(aip['publicKey'])`
 
                 <div className="mt-4 flex items-center gap-3">
                   <CopyButton 
-                    text="https://anoteroslogos.com/api/public-aid" 
+                    text="https://anoteroslogos.com/api/public-aip" 
                     label="Copy Endpoint" 
                   />
                 </div>
@@ -568,7 +568,7 @@ console.log(caps.components.schemas); // Parameter schemas`
                   </li>
                   <li className="flex gap-3">
                     <span className="text-brand-accent font-mono">3.</span>
-                    <span><strong className="text-white">Generate AIP:</strong> POST <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">/api/public-aid</code></span>
+                    <span><strong className="text-white">Generate AIP:</strong> POST <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">/api/public-aip</code></span>
                   </li>
                   <li className="flex gap-3">
                     <span className="text-brand-accent font-mono">4.</span>

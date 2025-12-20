@@ -57,7 +57,7 @@ const AIDAgentStatus = ({ aidInfo, score }: AIDAgentStatusProps) => {
         <div className="flex items-center gap-2">
           <Bot className="w-5 h-5 text-brand-accent" />
           <div>
-            <h3 className="text-sm font-bold text-white">AI Agent Discovery (AID)</h3>
+            <h3 className="text-sm font-bold text-white">AI Agent Discovery (AIP)</h3>
             <p className="text-[10px] text-white/50">Protocol v1.1</p>
           </div>
         </div>
@@ -236,7 +236,7 @@ const AIDAgentStatus = ({ aidInfo, score }: AIDAgentStatusProps) => {
       {/* Info Section - Compact */}
       <div className="bg-blue-500/10 border border-blue-500/30 rounded p-2">
         <div className="text-[10px] text-white/70">
-          <strong className="text-blue-400">AID Protocol:</strong> Makes your services discoverable 
+          <strong className="text-blue-400">AIP Protocol:</strong> Makes your services discoverable 
           by AI agents (ChatGPT, Claude, Perplexity). One TXT record = visibility to 5,000+ domains.
         </div>
         {!aidInfo.detected && (
@@ -247,7 +247,7 @@ const AIDAgentStatus = ({ aidInfo, score }: AIDAgentStatusProps) => {
               rel="noopener noreferrer"
               className="text-[10px] font-medium text-brand-accent hover:text-blue-400 underline"
             >
-              Implement AID →
+              Implement AIP →
             </a>
           </div>
         )}
