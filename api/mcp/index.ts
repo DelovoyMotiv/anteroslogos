@@ -188,8 +188,8 @@ let meshRouter: MeshNetworkRouter | null = null;
 
 function getMeshRouter(): MeshNetworkRouter {
   if (!meshRouter) {
-    const localAid = process.env.AGENT_AID || 'aid://anoteroslogos.com/geo-audit';
-    meshRouter = new MeshNetworkRouter(localAid, { useLibp2p: true });
+    const localAip = process.env.AGENT_AIP || 'aip://anoteroslogos.com/geo-audit';
+    meshRouter = new MeshNetworkRouter(localAip, { useLibp2p: true });
   }
   return meshRouter;
 }
@@ -200,7 +200,7 @@ function getMeshRouter(): MeshNetworkRouter {
 async function broadcastUCPTCascade(
   ucpt: SerializedUCPT,
   toolName: string,
-  sourceAid: string
+  sourceAip: string
 ): Promise<void> {
   const router = getMeshRouter();
 
@@ -217,7 +217,7 @@ async function broadcastUCPTCascade(
   const cascadeMsg: UCPTCascadeMessage = {
     type: 'ucpt-cascade',
     ucpt: ucpt.token,
-    sourceAid,
+    sourceAip,
     tool: toolName,
     ttl: 7,
     timestamp: Date.now(),
@@ -288,8 +288,8 @@ async function executeToolCall(
         
         // Provenance Cascade: broadcast UCPT if x-mesh-broadcast header is true
         if (ucpt && request?.headers['x-mesh-broadcast'] === 'true') {
-          const sourceAid = process.env.AGENT_AID || 'aid://anoteroslogos.com/geo-audit';
-          await broadcastUCPTCascade(ucpt, name, sourceAid);
+          const sourceAip = process.env.AGENT_AIP || 'aip://anoteroslogos.com/geo-audit';
+          await broadcastUCPTCascade(ucpt, name, sourceAip);
         }
         break;
       }

@@ -1,10 +1,10 @@
 /**
- * AID (Agent Identity & Discovery) Protocol Detection
+ * AIP (Anóteros Identity Protocol) Detection
  * Checks domains for AI agent support via DNS TXT records and HTTPS well-known endpoints
  * 
  * Enhanced with:
  * - Tenant isolation validation
- * - AID registry integration for cryptographic ownership verification
+ * - AIP registry integration for cryptographic ownership verification
  * - Cross-tenant federation checks
  */
 
@@ -28,7 +28,7 @@ interface WellKnownResponse {
   [key: string]: unknown;
 }
 
-export interface AIDAgentInfo {
+export interface AIPAgentInfo {
   detected: boolean;
   discoveryMethod: 'dns' | 'https' | 'both' | 'none';
   version?: string;
@@ -84,11 +84,11 @@ interface DNSResponse {
 // WellKnownResponse type moved to types/utils-extended.types.ts
 
 /**
- * Parse AID TXT record value
+ * Parse AIP TXT record value
  * Format: v=1.1;p=a2a,http;u=https://example.com/api;s=service;d=example.com
  */
-function parseAIDTxtRecord(txtValue: string): Partial<AIDAgentInfo> {
-  const result: Partial<AIDAgentInfo> = {
+function parseAIPTxtRecord(txtValue: string): Partial<AIPAgentInfo> {
+  const result: Partial<AIPAgentInfo> = {
     errors: [],
     warnings: []
   };
@@ -108,7 +108,7 @@ function parseAIDTxtRecord(txtValue: string): Partial<AIDAgentInfo> {
     if (params.v) {
       result.version = params.v;
       if (params.v !== '1.1' && params.v !== '1.0') {
-        result.warnings!.push(`Unknown AID version: ${params.v}`);
+        result.warnings!.push(`Unknown AIP version: ${params.v}`);
       }
     } else {
       result.errors!.push('Missing version field (v)');
@@ -152,7 +152,7 @@ function parseAIDTxtRecord(txtValue: string): Partial<AIDAgentInfo> {
 }
 
 /**
- * Check DNS TXT record for AID protocol
+ * Check DNS TXT record for AIP protocol
  * Uses DNS-over-HTTPS (DoH) via Google Public DNS
  */
 async function checkDNSTxtRecord(domain: string): Promise<DNSResponse> {
@@ -188,7 +188,7 @@ async function checkDNSTxtRecord(domain: string): Promise<DNSResponse> {
         // Remove quotes from DNS response
         const txtValue = txtRecord.data.replace(/^"(.*)"$/, '$1');
         
-        // Validate it looks like AID format
+        // Validate it looks like AIP format
         if (txtValue.includes('v=') && txtValue.includes('p=')) {
           return {
             found: true,
@@ -197,7 +197,7 @@ async function checkDNSTxtRecord(domain: string): Promise<DNSResponse> {
         } else {
           return {
             found: false,
-            error: 'TXT record found but does not match AID format'
+            error: 'TXT record found but does not match AIP format'
           };
         }
       }
@@ -251,7 +251,7 @@ async function checkWellKnownEndpoint(domain: string): Promise<WellKnownResponse
 
     const data = await response.json();
 
-    // Validate basic AID structure
+    // Validate basic AIP structure
     if (data.v && (data.p || data.protocols)) {
       return {
         found: true,
@@ -260,7 +260,7 @@ async function checkWellKnownEndpoint(domain: string): Promise<WellKnownResponse
     } else {
       return {
         found: false,
-        error: 'JSON found but does not match AID schema'
+        error: 'JSON found but does not match AIP schema'
       };
     }
 
@@ -275,8 +275,8 @@ async function checkWellKnownEndpoint(domain: string): Promise<WellKnownResponse
 /**
  * Validate and extract agent metadata from well-known JSON
  */
-function extractAgentMetadata(data: JSONObject): Partial<AIDAgentInfo> {
-  const result: Partial<AIDAgentInfo> = {
+function extractAgentMetadata(data: JSONObject): Partial<AIPAgentInfo> {
+  const result: Partial<AIPAgentInfo> = {
     errors: [],
     warnings: []
   };
@@ -329,23 +329,23 @@ function extractAgentMetadata(data: JSONObject): Partial<AIDAgentInfo> {
 }
 
 /**
- * Verify AID ownership via AID registry
- * Checks if AID URI is registered and owned by claimed tenant
+ * Verify AIP ownership via AIP registry
+ * Checks if AIP URI is registered and owned by claimed tenant
  */
-export async function verifyAIDOwnership(
-  aidUri: string,
+export async function verifyAIPOwnership(
+  aipUri: string,
   claimedTenantId: string
 ): Promise<{ verified: boolean; error?: string; tenantId?: string }> {
   try {
     // Dynamic import to avoid circular dependency
     const { lookupAgent } = await import('../lib/tenancy/aidRegistry');
 
-    const result = await lookupAgent(aidUri);
+    const result = await lookupAgent(aipUri);
 
     if (!result.found) {
       return {
         verified: false,
-        error: 'AID URI not found in registry',
+        error: 'AIP URI not found in registry',
       };
     }
 
@@ -360,7 +360,7 @@ export async function verifyAIDOwnership(
     if (result.registration.tenantId !== claimedTenantId) {
       return {
         verified: false,
-        error: 'AID URI ownership mismatch - possible spoofing',
+        error: 'AIP URI ownership mismatch - possible spoofing',
         tenantId: result.registration.tenantId,
       };
     }
@@ -369,7 +369,7 @@ export async function verifyAIDOwnership(
     if (!result.registration.verified) {
       return {
         verified: false,
-        error: 'AID URI not verified in registry',
+        error: 'AIP URI not verified in registry',
         tenantId: result.registration.tenantId,
       };
     }
@@ -387,11 +387,11 @@ export async function verifyAIDOwnership(
 }
 
 /**
- * Main function: Discover AID agent for a domain
+ * Main function: Discover AIP agent for a domain
  * Enhanced with tenant isolation and registry verification
  */
-export async function discoverAIDAgent(url: string): Promise<AIDAgentInfo> {
-  const result: AIDAgentInfo = {
+export async function discoverAIPAgent(url: string): Promise<AIPAgentInfo> {
+  const result: AIPAgentInfo = {
     detected: false,
     discoveryMethod: 'none',
     errors: [],
@@ -415,7 +415,7 @@ export async function discoverAIDAgent(url: string): Promise<AIDAgentInfo> {
     // Process DNS result
     if (dnsResult.status === 'fulfilled' && dnsResult.value.found) {
       dnsFound = true;
-      const parsed = parseAIDTxtRecord(dnsResult.value.value!);
+      const parsed = parseAIPTxtRecord(dnsResult.value.value!);
       Object.assign(result, parsed);
       result.errors.push(...(parsed.errors || []));
       result.warnings.push(...(parsed.warnings || []));
@@ -455,13 +455,13 @@ export async function discoverAIDAgent(url: string): Promise<AIDAgentInfo> {
     } else {
       result.detected = false;
       result.discoveryMethod = 'none';
-      result.errors.push('No AID agent detected via DNS or HTTPS');
+      result.errors.push('No AIP agent detected via DNS or HTTPS');
     }
 
     // Validate required fields for detected agents
     if (result.detected) {
       if (!result.version) {
-        result.errors.push('AID version missing');
+        result.errors.push('AIP version missing');
       }
       if (!result.protocols || result.protocols.length === 0) {
         result.errors.push('Supported protocols missing');
@@ -470,16 +470,16 @@ export async function discoverAIDAgent(url: string): Promise<AIDAgentInfo> {
         result.errors.push('Agent endpoint missing');
       }
 
-      // Check if agent is registered in AID registry
-      // Extract potential AID URI from domain
-      const potentialAidUri = result.agentName 
-        ? `aid://${domain}/agent/${result.agentName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+      // Check if agent is registered in AIP registry
+      // Extract potential AIP URI from domain
+      const potentialAipUri = result.agentName 
+        ? `aip://${domain}/agent/${result.agentName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
         : null;
 
-      if (potentialAidUri) {
+      if (potentialAipUri) {
         try {
           const { lookupAgent } = await import('../lib/tenancy/aidRegistry');
-          const registryLookup = await lookupAgent(potentialAidUri);
+          const registryLookup = await lookupAgent(potentialAipUri);
 
           if (registryLookup.found && registryLookup.registration) {
             result.registeredInRegistry = true;
@@ -492,10 +492,10 @@ export async function discoverAIDAgent(url: string): Promise<AIDAgentInfo> {
             }
           } else {
             result.registeredInRegistry = false;
-            result.warnings.push('Agent not registered in AID registry - ownership cannot be verified');
+            result.warnings.push('Agent not registered in AIP registry - ownership cannot be verified');
           }
         } catch {
-          result.warnings.push('Failed to check AID registry');
+          result.warnings.push('Failed to check AIP registry');
         }
       }
     }
@@ -508,10 +508,10 @@ export async function discoverAIDAgent(url: string): Promise<AIDAgentInfo> {
 }
 
 /**
- * Calculate AID score contribution (0-100)
+ * Calculate AIP score contribution (0-100)
  */
-export function calculateAIDScore(aidInfo: AIDAgentInfo): number {
-  if (!aidInfo.detected) {
+export function calculateAIPScore(aipInfo: AIPAgentInfo): number {
+  if (!aipInfo.detected) {
     return 0;
   }
 
@@ -521,33 +521,33 @@ export function calculateAIDScore(aidInfo: AIDAgentInfo): number {
   score += 40;
 
   // Discovery method bonus (20 points)
-  if (aidInfo.discoveryMethod === 'both') {
+  if (aipInfo.discoveryMethod === 'both') {
     score += 20; // Full implementation
-  } else if (aidInfo.discoveryMethod === 'dns') {
+  } else if (aipInfo.discoveryMethod === 'dns') {
     score += 15; // DNS is primary
-  } else if (aidInfo.discoveryMethod === 'https') {
+  } else if (aipInfo.discoveryMethod === 'https') {
     score += 10; // HTTPS fallback only
   }
 
   // Protocol support (15 points)
-  if (aidInfo.protocols) {
-    const protocolScore = Math.min(aidInfo.protocols.length * 5, 15);
+  if (aipInfo.protocols) {
+    const protocolScore = Math.min(aipInfo.protocols.length * 5, 15);
     score += protocolScore;
   }
 
   // Agent metadata completeness (15 points)
   let metadataScore = 0;
-  if (aidInfo.agentName) metadataScore += 3;
-  if (aidInfo.agentDescription) metadataScore += 3;
-  if (aidInfo.capabilities && aidInfo.capabilities.length > 0) metadataScore += 4;
-  if (aidInfo.vendor) metadataScore += 2;
-  if (aidInfo.documentation) metadataScore += 3;
+  if (aipInfo.agentName) metadataScore += 3;
+  if (aipInfo.agentDescription) metadataScore += 3;
+  if (aipInfo.capabilities && aipInfo.capabilities.length > 0) metadataScore += 4;
+  if (aipInfo.vendor) metadataScore += 2;
+  if (aipInfo.documentation) metadataScore += 3;
   score += Math.min(metadataScore, 15);
 
   // Valid endpoint (10 points)
-  if (aidInfo.endpoint) {
+  if (aipInfo.endpoint) {
     try {
-      new URL(aidInfo.endpoint);
+      new URL(aipInfo.endpoint);
       score += 10;
     } catch {
       score += 5; // Partial credit if endpoint exists but invalid
@@ -555,16 +555,16 @@ export function calculateAIDScore(aidInfo: AIDAgentInfo): number {
   }
 
   // Deduct for errors
-  const errorPenalty = Math.min(aidInfo.errors.length * 5, 20);
+  const errorPenalty = Math.min(aipInfo.errors.length * 5, 20);
   score -= errorPenalty;
 
   return Math.max(0, Math.min(100, score));
 }
 
 /**
- * Generate AID recommendations
+ * Generate AIP recommendations
  */
-export function generateAIDRecommendations(aidInfo: AIDAgentInfo, domain: string): Array<{
+export function generateAIPRecommendations(aipInfo: AIPAgentInfo, domain: string): Array<{
   category: string;
   priority: 'critical' | 'high' | 'medium' | 'low';
   effort: 'quick-win' | 'strategic' | 'long-term';
@@ -577,14 +577,14 @@ export function generateAIDRecommendations(aidInfo: AIDAgentInfo, domain: string
 }> {
   const recommendations = [];
 
-  if (!aidInfo.detected) {
-    // No AID support - critical recommendation
+  if (!aipInfo.detected) {
+    // No AIP support - critical recommendation
     recommendations.push({
       category: 'AI Agent Discovery',
       priority: 'high' as const,
       effort: 'strategic' as const,
-      title: 'Implement AID (Agent Identity & Discovery) Protocol',
-      description: 'Your domain is not discoverable by AI agents. AID protocol makes your services visible to the agentic web ecosystem (Perplexity, ChatGPT, Claude, Gemini agents).',
+      title: 'Implement AIP (Anóteros Identity Protocol)',
+      description: 'Your domain is not discoverable by AI agents. AIP protocol makes your services visible to the agentic web ecosystem (Perplexity, ChatGPT, Claude, Gemini agents).',
       impact: 'Enables AI agent discovery, increases visibility in agentic marketplaces, and positions your domain for the future of AI-driven web.',
       implementation: `1. Create /.well-known/agent.json file with agent metadata\n2. Add DNS TXT record: _agent.${domain}\n3. Configure protocol support (A2A, MCP, HTTP)\n4. Document agent capabilities and endpoints`,
       estimatedTime: '2-4 hours',
@@ -606,13 +606,13 @@ HTTPS Well-Known (/.well-known/agent.json):
 }`
     });
   } else {
-    // Has AID but with issues
-    if (aidInfo.discoveryMethod === 'dns' && !aidInfo.agentName) {
+    // Has AIP but with issues
+    if (aipInfo.discoveryMethod === 'dns' && !aipInfo.agentName) {
       recommendations.push({
         category: 'AI Agent Discovery',
         priority: 'medium' as const,
         effort: 'quick-win' as const,
-        title: 'Add HTTPS Well-Known Endpoint for Complete AID Support',
+        title: 'Add HTTPS Well-Known Endpoint for Complete AIP Support',
         description: 'You have DNS TXT record but missing HTTPS well-known endpoint. Add /.well-known/agent.json for fallback discovery and richer metadata.',
         impact: 'Improves agent discoverability with fallback mechanism, enables detailed metadata exposure.',
         implementation: 'Create /.well-known/agent.json file with complete agent information including capabilities, pricing, and documentation links.',
@@ -620,20 +620,20 @@ HTTPS Well-Known (/.well-known/agent.json):
       });
     }
 
-    if (aidInfo.discoveryMethod === 'https' && aidInfo.warnings.some(w => w.includes('DNS'))) {
+    if (aipInfo.discoveryMethod === 'https' && aipInfo.warnings.some(w => w.includes('DNS'))) {
       recommendations.push({
         category: 'AI Agent Discovery',
         priority: 'medium' as const,
         effort: 'quick-win' as const,
-        title: 'Add DNS TXT Record for Primary AID Discovery',
+        title: 'Add DNS TXT Record for Primary AIP Discovery',
         description: 'You have HTTPS well-known but missing DNS TXT record. DNS is the primary discovery method and faster than HTTPS.',
         impact: 'Enables faster agent discovery (DNS < 50ms vs HTTPS ~200ms), improves reliability.',
-        implementation: `Add DNS TXT record at your domain registrar:\n_agent.${domain} TXT "${aidInfo.version || '1.1'};p=${(aidInfo.protocols || []).join(',')};u=${aidInfo.endpoint || `https://${domain}/api`};s=${aidInfo.serviceId || 'service'};d=${domain}"`,
+        implementation: `Add DNS TXT record at your domain registrar:\n_agent.${domain} TXT "${aipInfo.version || '1.1'};p=${(aipInfo.protocols || []).join(',')};u=${aipInfo.endpoint || `https://${domain}/api`};s=${aipInfo.serviceId || 'service'};d=${domain}"`,
         estimatedTime: '15 minutes'
       });
     }
 
-    if (!aidInfo.capabilities || aidInfo.capabilities.length === 0) {
+    if (!aipInfo.capabilities || aipInfo.capabilities.length === 0) {
       recommendations.push({
         category: 'AI Agent Discovery',
         priority: 'low' as const,
@@ -646,7 +646,7 @@ HTTPS Well-Known (/.well-known/agent.json):
       });
     }
 
-    if (!aidInfo.documentation) {
+    if (!aipInfo.documentation) {
       recommendations.push({
         category: 'AI Agent Discovery',
         priority: 'low' as const,
@@ -659,15 +659,15 @@ HTTPS Well-Known (/.well-known/agent.json):
       });
     }
 
-    if (aidInfo.errors.length > 0) {
+    if (aipInfo.errors.length > 0) {
       recommendations.push({
         category: 'AI Agent Discovery',
         priority: 'high' as const,
         effort: 'quick-win' as const,
-        title: 'Fix AID Configuration Errors',
-        description: `Your AID implementation has errors: ${aidInfo.errors.slice(0, 2).join(', ')}${aidInfo.errors.length > 2 ? '...' : ''}`,
+        title: 'Fix AIP Configuration Errors',
+        description: `Your AIP implementation has errors: ${aipInfo.errors.slice(0, 2).join(', ')}${aipInfo.errors.length > 2 ? '...' : ''}`,
         impact: 'Ensures proper agent discovery, prevents integration failures.',
-        implementation: 'Review and fix reported errors in your AID configuration.',
+        implementation: 'Review and fix reported errors in your AIP configuration.',
         estimatedTime: '30 minutes'
       });
     }
@@ -677,13 +677,13 @@ HTTPS Well-Known (/.well-known/agent.json):
 }
 
 /**
- * Get default AID agent info for fallback when discovery fails
+ * Get default AIP agent info for fallback when discovery fails
  */
-export function getDefaultAIDAgent(): AIDAgentInfo {
+export function getDefaultAIPAgent(): AIPAgentInfo {
   return {
     detected: false,
     discoveryMethod: 'none',
-    errors: ['AID agent discovery failed - unable to check protocol support'],
+    errors: ['AIP agent discovery failed - unable to check protocol support'],
     warnings: [],
   };
 }

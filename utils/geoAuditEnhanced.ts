@@ -6,7 +6,7 @@
 // Note: ExtractionEngine with Puppeteer is server-side only
 // For browser, we use simple fetch() to get HTML
 import type { ExtractionResult } from '../types/agent-middleware.types';
-import type { AIDAgentInfo } from './aidDiscovery';
+import type { AIPAgentInfo } from './aipDiscovery';
 import type { KnowledgeGraph } from './knowledgeGraph/builder';
 import {
   getDefaultSchemaDetails,
@@ -34,7 +34,7 @@ export interface AuditResultDetails {
   citationPotential: CitationPotentialDetails;
   technicalSEO: TechnicalSEODetails;
   linkAnalysis: LinkAnalysisDetails;
-  aidAgent: AIDAgentInfo; // AID protocol detection details
+  aidAgent: AIPAgentInfo; // AIP protocol detection details
 }
 
 export interface AuditResult {
@@ -519,17 +519,17 @@ export async function auditWebsite(
   }
   
   try {
-    onProgress?.('Detecting AI agent support (AID protocol)...');
-    const { discoverAIDAgent } = await import('./aidDiscovery');
-    aidAgent = await discoverAIDAgent(normalizedUrl);
+    onProgress?.('Detecting AI agent support (AIP protocol)...');
+    const { discoverAIPAgent } = await import('./aipDiscovery');
+    aidAgent = await discoverAIPAgent(normalizedUrl);
   } catch (error) {
-    console.error('AID agent discovery failed:', error);
-    const { getDefaultAIDAgent } = await import('./aidDiscovery');
-    aidAgent = getDefaultAIDAgent();
+    console.error('AIP agent discovery failed:', error);
+    const { getDefaultAIPAgent } = await import('./aipDiscovery');
+    aidAgent = getDefaultAIPAgent();
   }
   
-  // Import calculateAIDScore separately
-  const { calculateAIDScore } = await import('./aidDiscovery');
+  // Import calculateAIPScore separately
+  const { calculateAIPScore } = await import('./aipDiscovery');
 
   // Calculate category scores
   const scores = {
@@ -543,7 +543,7 @@ export async function auditWebsite(
     citationPotential: calculateCitationPotentialScore(citationPotential),
     technicalSEO: calculateTechnicalSEOScore(technicalSEO),
     linkAnalysis: calculateLinkAnalysisScore(linkAnalysis),
-    aidAgent: calculateAIDScore(aidAgent),
+    aidAgent: calculateAIPScore(aidAgent),
   };
 
   // Advanced weighted scoring with dynamic weights based on content type
@@ -551,8 +551,8 @@ export async function auditWebsite(
   const grade = getGrade(scoreCalc.overall);
 
   // Generate default recommendations
-  const { generateAIDRecommendations } = await import('./aidDiscovery');
-  const aidRecommendations = generateAIDRecommendations(aidAgent, new URL(normalizedUrl).hostname);
+  const { generateAIPRecommendations } = await import('./aipDiscovery');
+  const aidRecommendations = generateAIPRecommendations(aidAgent, new URL(normalizedUrl).hostname);
   
   const defaultRecommendations = [
     ...generateEnhancedRecommendations({

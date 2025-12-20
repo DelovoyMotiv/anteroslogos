@@ -119,7 +119,7 @@ function bytesToHex(bytes: Uint8Array): string {
 }
 
 export const ChallengeTester = ({ enableAutoKeygen = true }: ChallengeTesterProps) => {
-  const [aid, setAid] = useState('');
+  const [aip, setAip] = useState('');
   const [challenge, setChallenge] = useState('');
   const [publicKey, setPublicKey] = useState('');
   const [privateKey, setPrivateKey] = useState('');
@@ -147,14 +147,14 @@ export const ChallengeTester = ({ enableAutoKeygen = true }: ChallengeTesterProp
       const data = await res.json();
 
       if (res.ok) {
-        setAid(data.aid);
+        setAip(data.aip);
         setPublicKey(data.publicKey);
         setPrivateKey(data.privateKey);
         setChallenge('');
         setSignature('');
         setResult({
           status: 'success',
-          message: `Identity created: ${data.aid}`,
+          message: `Identity created: ${data.aip}`,
         });
       } else {
         setResult({ status: 'error', message: data.error || 'Failed to generate identity' });
@@ -167,18 +167,18 @@ export const ChallengeTester = ({ enableAutoKeygen = true }: ChallengeTesterProp
   }, []);
 
   /**
-   * Generate challenge for current AID
+   * Generate challenge for current AIP
    */
   const generateChallenge = async () => {
-    if (!aid.trim()) {
-      setResult({ status: 'error', message: 'Please enter an AID or generate a new identity' });
+    if (!aip.trim()) {
+      setResult({ status: 'error', message: 'Please enter an AIP or generate a new identity' });
       return;
     }
 
     setResult({ status: 'loading', message: 'Generating challenge...' });
 
     try {
-      const res = await fetch(`/api/challenge?aid=${encodeURIComponent(aid)}`);
+      const res = await fetch(`/api/challenge?aip=${encodeURIComponent(aip)}`);
       const data = await res.json();
 
       if (res.ok) {
@@ -237,7 +237,7 @@ export const ChallengeTester = ({ enableAutoKeygen = true }: ChallengeTesterProp
    * Verify signature with server
    */
   const verifySignature = async () => {
-    if (!aid.trim() || !challenge.trim() || !publicKey.trim() || !signature.trim()) {
+    if (!aip.trim() || !challenge.trim() || !publicKey.trim() || !signature.trim()) {
       setResult({ status: 'error', message: 'All fields are required' });
       return;
     }
@@ -248,7 +248,7 @@ export const ChallengeTester = ({ enableAutoKeygen = true }: ChallengeTesterProp
       const res = await fetch('/api/challenge', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ aid, challenge, publicKey, signature }),
+        body: JSON.stringify({ aip, challenge, publicKey, signature }),
       });
       const data = await res.json();
 
@@ -283,12 +283,12 @@ export const ChallengeTester = ({ enableAutoKeygen = true }: ChallengeTesterProp
       const identity = await identityRes.json();
       if (!identityRes.ok) throw new Error(identity.error || 'Identity generation failed');
       
-      setAid(identity.aid);
+      setAip(identity.aip);
       setPublicKey(identity.publicKey);
       setPrivateKey(identity.privateKey);
 
       // Step 2: Get challenge
-      const challengeRes = await fetch(`/api/challenge?aid=${encodeURIComponent(identity.aid)}`);
+      const challengeRes = await fetch(`/api/challenge?aip=${encodeURIComponent(identity.aip)}`);
       const challengeData = await challengeRes.json();
       if (!challengeRes.ok) throw new Error(challengeData.error || 'Challenge generation failed');
       
@@ -308,7 +308,7 @@ export const ChallengeTester = ({ enableAutoKeygen = true }: ChallengeTesterProp
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          aid: identity.aid,
+          aip: identity.aip,
           challenge: challengeData.challenge,
           publicKey: identity.publicKey,
           signature: signatureHex,
@@ -319,7 +319,7 @@ export const ChallengeTester = ({ enableAutoKeygen = true }: ChallengeTesterProp
       if (verifyRes.ok && verifyData.verified) {
         setResult({
           status: 'success',
-          message: `✓ Full flow completed! Agent ${identity.aid} authenticated.`,
+          message: `✓ Full flow completed! Agent ${identity.aip} authenticated.`,
         });
       } else {
         throw new Error(verifyData.error || 'Verification failed');
@@ -355,14 +355,14 @@ export const ChallengeTester = ({ enableAutoKeygen = true }: ChallengeTesterProp
           <div className="space-y-2">
             <div>
               <label className="block text-xs font-medium text-white/70 mb-1">
-                Agent ID (AID)
+                Agent ID (AIP)
               </label>
               <div className="flex gap-2">
                 <input
                   type="text"
-                  value={aid}
-                  onChange={(e) => setAid(e.target.value)}
-                  placeholder="aid://myagent/..."
+                  value={aip}
+                  onChange={(e) => setAip(e.target.value)}
+                  placeholder="aip://myagent/..."
                   className="flex-1 px-3 py-2 bg-zinc-950 border border-zinc-700 rounded text-sm text-white focus:outline-none focus:border-brand-accent font-mono text-xs"
                 />
                 {enableAutoKeygen && (
@@ -417,7 +417,7 @@ export const ChallengeTester = ({ enableAutoKeygen = true }: ChallengeTesterProp
 
           <button
             onClick={generateChallenge}
-            disabled={result.status === 'loading' || !aid}
+            disabled={result.status === 'loading' || !aip}
             className="w-full px-4 py-2 bg-brand-accent hover:bg-blue-500 disabled:bg-zinc-700 disabled:text-zinc-400 text-white rounded transition-colors text-sm font-medium mb-2"
           >
             Get Challenge from Server

@@ -1,8 +1,8 @@
 import { Bot, CheckCircle, XCircle, AlertTriangle, Globe, Network, FileJson, Zap } from 'lucide-react';
-import type { AIDAgentInfo } from '../utils/aidDiscovery';
+import type { AIPAgentInfo } from '../utils/aipDiscovery';
 
 interface AIDAgentStatusProps {
-  aidInfo: AIDAgentInfo;
+  aidInfo: AIPAgentInfo;
   score: number;
 }
 

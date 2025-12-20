@@ -67,9 +67,9 @@ export class MarkdownExporter implements FormatExporter {
       md += this.generateBrowserMetadata(result);
     }
     
-    // H2: AID Agent Information (if present)
+    // H2: AIP Agent Information (if present)
     if (result.details?.aidAgent) {
-      md += this.generateAIDAgentInfo(result);
+      md += this.generateAIPAgentInfo(result);
     }
     
     // Footer
@@ -463,16 +463,16 @@ export class MarkdownExporter implements FormatExporter {
   }
   
   /**
-   * Generate AID Agent information section (H2)
+   * Generate AIP Agent information section (H2)
    */
-  private generateAIDAgentInfo(result: AuditResult): string {
+  private generateAIPAgentInfo(result: AuditResult): string {
     if (!result.details?.aidAgent) return '';
     
-    let md = `## AID Agent Information\n\n`;
+    let md = `## AIP Agent Information\n\n`;
     
     const aid = result.details.aidAgent;
     
-    md += `- **AID Protocol Detected:** ${aid.detected ? 'Yes' : 'No'}\n`;
+    md += `- **AIP Protocol Detected:** ${aid.detected ? 'Yes' : 'No'}\n`;
     md += `- **Discovery Method:** ${aid.discoveryMethod}\n`;
     
     if (aid.detected) {

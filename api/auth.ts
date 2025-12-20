@@ -56,10 +56,10 @@ function verifySignature(challenge: string, publicKey: string, signature: string
   }
 }
 
-function generateToken(aid: string, publicKey: string): { token: string; expiresAt: string } {
+function generateToken(aip: string, publicKey: string): { token: string; expiresAt: string } {
   const expiresAt = new Date(Date.now() + JWT_TTL_MS);
   const payload = {
-    aid,
+    aip,
     publicKey,
     iat: Math.floor(Date.now() / 1000),
     exp: Math.floor(expiresAt.getTime() / 1000),
@@ -82,10 +82,10 @@ function generateKeyPair(): { publicKey: string; privateKey: string } {
   };
 }
 
-function generateAidUri(name: string, publicKey: string): string {
+function generateAipUri(name: string, publicKey: string): string {
   const normalizedName = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').substring(0, 32) || 'agent';
   const suffix = createHash('sha256').update(publicKey).digest('hex').substring(0, 12);
-  return `aid://${normalizedName}/${suffix}`;
+  return `aip://${normalizedName}/${suffix}`;
 }
 
 export default async function handler(
@@ -116,17 +116,17 @@ export default async function handler(
     if (flowType === 'challenge') {
       // Challenge-response flow
       if (req.method === 'GET') {
-        const { aid } = req.query;
-        if (!aid || typeof aid !== 'string') {
-          return res.status(400).json({ error: 'Missing aid parameter' });
+        const { aip } = req.query;
+        if (!aip || typeof aip !== 'string') {
+          return res.status(400).json({ error: 'Missing aip parameter' });
         }
         
         const challenge = generateChallenge();
         const expiresAt = Date.now() + CHALLENGE_TTL_MS;
-        challengeStore.set(aid, { challenge, expiresAt });
+        challengeStore.set(aip, { challenge, expiresAt });
         
         return res.status(200).json({
-          aid,
+          aip,
           challenge,
           expiresIn: Math.floor(CHALLENGE_TTL_MS / 1000),
           expiresAt: new Date(expiresAt).toISOString(),
@@ -136,13 +136,13 @@ export default async function handler(
       }
 
       if (req.method === 'POST') {
-        const { aid, challenge, publicKey, signature } = req.body || {};
+        const { aip, challenge, publicKey, signature } = req.body || {};
         
-        if (!aid || !challenge || !publicKey || !signature) {
+        if (!aip || !challenge || !publicKey || !signature) {
           return res.status(400).json({ error: 'Missing required fields' });
         }
         
-        const stored = challengeStore.get(aid);
+        const stored = challengeStore.get(aip);
         if (!stored || stored.expiresAt < Date.now()) {
           return res.status(401).json({ error: 'Challenge expired or not found' });
         }
@@ -155,12 +155,12 @@ export default async function handler(
           return res.status(401).json({ error: 'Invalid signature' });
         }
         
-        challengeStore.delete(aid);
-        const { token, expiresAt } = generateToken(aid, publicKey);
+        challengeStore.delete(aip);
+        const { token, expiresAt } = generateToken(aip, publicKey);
         
         return res.status(200).json({
           verified: true,
-          aid,
+          aip,
           jwt: token,
           expiresAt,
         });
@@ -174,10 +174,10 @@ export default async function handler(
           flows: {
             newAgent: { 
               request: { name: 'my-agent' }, 
-              response: ['aid', 'publicKey', 'privateKey', 'challenge'] 
+              response: ['aip', 'publicKey', 'privateKey', 'challenge'] 
             },
             authenticate: { 
-              request: { aid: '...', publicKey: '...', challenge: '...', signature: '...' }, 
+              request: { aip: '...', publicKey: '...', challenge: '...', signature: '...' }, 
               response: ['token'] 
             }
           }
@@ -185,36 +185,36 @@ export default async function handler(
       }
 
       if (req.method === 'POST') {
-        const { aid, publicKey, challenge, signature, name } = req.body || {};
+        const { aip, publicKey, challenge, signature, name } = req.body || {};
         const now = Date.now();
 
         // Case 1: Verify signature
-        if (aid && publicKey && challenge && signature) {
-          const stored = challengeStore.get(aid);
+        if (aip && publicKey && challenge && signature) {
+          const stored = challengeStore.get(aip);
           if (!stored || stored.expiresAt < now || stored.challenge !== challenge) {
             return res.status(401).json({ error: 'Challenge expired or invalid' });
           }
           if (!verifySignature(challenge, publicKey, signature)) {
             return res.status(401).json({ error: 'Invalid signature' });
           }
-          challengeStore.delete(aid);
-          const { token, expiresAt } = generateToken(aid, publicKey);
+          challengeStore.delete(aip);
+          const { token, expiresAt } = generateToken(aip, publicKey);
           return res.status(200).json({ 
             status: 'authenticated', 
-            aid, 
+            aip, 
             token, 
             tokenType: 'Bearer', 
             expiresAt 
           });
         }
 
-        // Case 2: Get challenge for existing AID
-        if (aid && !signature) {
+        // Case 2: Get challenge for existing AIP
+        if (aip && !signature) {
           const ch = generateChallenge();
-          challengeStore.set(aid, { challenge: ch, expiresAt: now + CHALLENGE_TTL_MS });
+          challengeStore.set(aip, { challenge: ch, expiresAt: now + CHALLENGE_TTL_MS });
           return res.status(200).json({ 
             status: 'challenge_issued', 
-            aid, 
+            aip, 
             challenge: ch, 
             expiresIn: 300, 
             algorithm: 'Ed25519' 
@@ -223,13 +223,13 @@ export default async function handler(
 
         // Case 3: Generate new identity
         const { publicKey: pk, privateKey: sk } = generateKeyPair();
-        const newAid = generateAidUri(name || 'agent', pk);
+        const newAip = generateAipUri(name || 'agent', pk);
         const ch = generateChallenge();
-        challengeStore.set(newAid, { challenge: ch, expiresAt: now + CHALLENGE_TTL_MS });
+        challengeStore.set(newAip, { challenge: ch, expiresAt: now + CHALLENGE_TTL_MS });
 
         return res.status(201).json({
           status: 'identity_created',
-          aid: newAid,
+          aip: newAip,
           publicKey: pk,
           privateKey: sk,
           challenge: ch,

@@ -63,8 +63,8 @@ CREATE TABLE IF NOT EXISTS public.agent_keys (
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
   name TEXT NOT NULL CHECK (length(name) >= 3 AND length(name) <= 100),
   
-  -- AID Protocol
-  aid_uri TEXT NOT NULL UNIQUE CHECK (aid_uri LIKE 'aid://%'),
+  -- AIP Protocol (Anóteros Identity Protocol)
+  aip_uri TEXT NOT NULL UNIQUE CHECK (aip_uri LIKE 'aip://%'),
   
   -- Ed25519 Key (32 bytes = 44 chars base64)
   public_key TEXT NOT NULL CHECK (length(public_key) = 44),
@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS public.agent_keys (
 
 -- Indexes
 CREATE INDEX idx_agent_keys_user_id ON public.agent_keys(user_id) WHERE revoked = FALSE;
-CREATE INDEX idx_agent_keys_aid ON public.agent_keys(aid_uri) WHERE revoked = FALSE;
+CREATE INDEX idx_agent_keys_aip ON public.agent_keys(aip_uri) WHERE revoked = FALSE;
 CREATE INDEX idx_agent_keys_public_key ON public.agent_keys(public_key) WHERE revoked = FALSE;
 
 -- =====================================================
@@ -486,7 +486,7 @@ $$ LANGUAGE plpgsql IMMUTABLE;
 -- COMMENTS
 -- =====================================================
 COMMENT ON TABLE public.api_keys IS 'API keys for programmatic access to MCP/A2A tools';
-COMMENT ON TABLE public.agent_keys IS 'Ed25519 public keys for AI agent authentication (AID protocol)';
+COMMENT ON TABLE public.agent_keys IS 'Ed25519 public keys for AI agent authentication (AIP protocol - Anóteros Identity Protocol)';
 COMMENT ON TABLE public.subscriptions IS 'Stripe subscription tracking with plan limits';
 COMMENT ON TABLE public.usage_events IS 'Immutable log of all API/tool usage for analytics and billing';
 COMMENT ON TABLE public.audit_log IS 'Security audit trail for compliance';
@@ -495,7 +495,7 @@ COMMENT ON COLUMN public.api_keys.key_hash IS 'scrypt hash (N=16384, r=8, p=1) o
 COMMENT ON COLUMN public.api_keys.key_prefix IS 'First 11 chars of key for display: sk_xxx_abc...';
 COMMENT ON COLUMN public.api_keys.scoped_tools IS 'NULL = all tools, else array of allowed tool names';
 
-COMMENT ON COLUMN public.agent_keys.aid_uri IS 'AID protocol URI: aid://domain/agent/name';
+COMMENT ON COLUMN public.agent_keys.aip_uri IS 'AIP protocol URI: aip://domain/agent/name';
 COMMENT ON COLUMN public.agent_keys.public_key IS 'Base64-encoded Ed25519 public key (32 bytes)';
 COMMENT ON COLUMN public.agent_keys.permissions IS 'JSON array: ["mcp:execute", "a2a:query", "ucpt:verify"]';
 

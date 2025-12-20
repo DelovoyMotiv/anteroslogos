@@ -3,7 +3,7 @@
 ## Unit Tests
 
 Unit tests cover all three Agent Gateway API endpoints:
-- `/api/public-aid` - Public AID generation
+- `/api/public-aip` - Public AIP generation
 - `/api/capabilities` - Tool capabilities spec
 - `/api/challenge` - Challenge-response authentication
 
@@ -21,8 +21,8 @@ TEST_URL=https://anoteroslogos.com npm run test:agent-gateway
 
 ### Test Coverage
 
-1. **POST /api/public-aid**
-   - ✓ Generate AID successfully
+1. **POST /api/public-aip**
+   - ✓ Generate AIP successfully
    - ✓ Missing name validation
 
 2. **GET /api/capabilities**
@@ -33,7 +33,7 @@ TEST_URL=https://anoteroslogos.com npm run test:agent-gateway
 
 3. **GET /api/challenge**
    - ✓ Generate challenge successfully
-   - ✓ Missing AID validation
+   - ✓ Missing AIP validation
 
 4. **POST /api/challenge**
    - ✓ Verify valid Ed25519 signature
@@ -48,7 +48,7 @@ TEST_URL=https://anoteroslogos.com npm run test:agent-gateway
 
 ## 1-Step Handshake Tests
 
-Tests for pre-signed challenge in AID generation response.
+Tests for pre-signed challenge in AIP generation response.
 
 ### Running Tests
 
@@ -64,7 +64,7 @@ TEST_URL=https://anoteroslogos.com npm run test:1step-handshake
 
 ### Test Coverage
 
-1. **POST /api/public-aid**
+1. **POST /api/public-aip**
    - ✓ Response includes challenge, challengeSignature, challengeExpiresAt
    - ✓ Field formats are correct (64-char hex, 128-char hex, timestamp)
    - ✓ challengeExpiresAt is ~5 minutes from now
@@ -73,14 +73,14 @@ TEST_URL=https://anoteroslogos.com npm run test:1step-handshake
    - ✓ Signature is valid for challenge and publicKey
    - ✓ Modified challenge fails verification
    - ✓ Wrong public key fails verification
-   - ✓ Multiple AIDs produce unique challenges
+   - ✓ Multiple AIPs produce unique challenges
 
 3. **Agent Self-Verification**
    - ✓ Agent can sign/verify its own challenge
    - ✓ Server pre-signed challenge is valid
 
 4. **Backward Compatibility**
-   - ✓ All existing fields present (aid, publicKey, privateKey, manifest, expiresIn)
+   - ✓ All existing fields present (aip, publicKey, privateKey, manifest, expiresIn)
    - ✓ New fields added without breaking changes
 
 **Total: 8 unit tests**
@@ -98,7 +98,7 @@ Since there is no Playwright setup, E2E tests should be run manually:
    - JSON-LD script with SoftwareApplication schema
 3. Click QR Code button → QR code displays
 4. Test Challenge Simulator:
-   - Enter AID: `aid://test/123`
+   - Enter AIP: `aip://test/123`
    - Click "Generate Challenge" → Challenge appears
    - Enter public key and signature
    - Click "Verify Signature" → Result shown
@@ -108,14 +108,14 @@ Since there is no Playwright setup, E2E tests should be run manually:
 1. Fetch `https://anoteroslogos.com/.well-known/agent.json`
 2. Extract `capabilitiesUrl` from response
 3. Fetch `https://anoteroslogos.com/api/capabilities`
-4. Generate AID via POST `/api/public-aid`
-5. Get challenge via GET `/api/challenge?aid=...`
+4. Generate AIP via POST `/api/public-aip`
+5. Get challenge via GET `/api/challenge?aip=...`
 6. Sign challenge with private key
 7. Verify signature via POST `/api/challenge`
 
 ### E2E Test 3: Rate Limiting
 
-1. Make 11 requests to `/api/public-aid` within 1 minute
+1. Make 11 requests to `/api/public-aip` within 1 minute
 2. 11th request should return 429 Too Many Requests
 3. Make 21 requests to `/api/challenge` within 1 minute
 4. 21st request should return 429 Too Many Requests

@@ -7,9 +7,9 @@
 import { performGeoAudit } from '../../utils/geoAuditEnhanced';
 import { KnowledgeGraphBuilder } from '../../utils/knowledgeGraph/builder';
 import { detectCitations, calculateCitationROI } from '../../utils/citationProof/tracker';
-import { discoverAIDAgent } from '../../utils/aidDiscovery';
+import { discoverAIPAgent } from '../../utils/aipDiscovery';
 import { getAuditHistory } from '../../utils/auditHistory';
-import type { AIDAgentInfo } from '../../utils/aidDiscovery';
+import type { AIPAgentInfo } from '../../utils/aipDiscovery';
 import type { JSONValue, ToolCallParams, ToolCallResult } from '../../types/a2a.types';
 
 // =====================================================
@@ -64,8 +64,8 @@ async function routeToolCall(method: string, params: ToolCallParams): Promise<JS
     case 'citation-tracking':
       return handleCitationTrackingTools(tool, params);
     
-    case 'aidiscovery':
-      return handleAIDTools(tool, params);
+    case 'aipdiscovery':
+      return handleAIPTools(tool, params);
     
     default:
       throw new Error(`Unknown MCP server: ${server}`);
@@ -222,40 +222,40 @@ async function handleCitationTrackingTools(tool: string, params: ToolCallParams)
 }
 
 // =====================================================
-// AID DISCOVERY TOOLS
+// AIP DISCOVERY TOOLS
 // =====================================================
 
-async function handleAIDTools(tool: string, params: ToolCallParams): Promise<JSONValue> {
+async function handleAIPTools(tool: string, params: ToolCallParams): Promise<JSONValue> {
   switch (tool) {
-    case 'discoverAIDAgent': {
+    case 'discoverAIPAgent': {
       const { url } = params;
       if (!url || typeof url !== 'string') {
         throw new Error('Missing required parameter: url (must be string)');
       }
       
-      const aidInfo = await discoverAIDAgent(url);
+      const aipInfo = await discoverAIPAgent(url);
       
-      return aidInfo as unknown as JSONValue;
+      return aipInfo as unknown as JSONValue;
     }
     
-    case 'validateAIDConfig': {
-      const { aidInfo } = params;
-      if (!aidInfo) throw new Error('Missing required parameter: aidInfo');
+    case 'validateAIPConfig': {
+      const { aipInfo } = params;
+      if (!aipInfo) throw new Error('Missing required parameter: aipInfo');
       
-      const validation = validateAIDConfiguration(aidInfo as unknown as AIDAgentInfo);
+      const validation = validateAIPConfiguration(aipInfo as unknown as AIPAgentInfo);
       
       return validation as unknown as JSONValue;
     }
     
     default:
-      throw new Error(`Unknown aidiscovery tool: ${tool}`);
+      throw new Error(`Unknown aipdiscovery tool: ${tool}`);
   }
 }
 
 /**
- * Validate AID configuration completeness
+ * Validate AIP configuration completeness
  */
-function validateAIDConfiguration(aidInfo: AIDAgentInfo): {
+function validateAIPConfiguration(aipInfo: AIPAgentInfo): {
   valid: boolean;
   score: number;
   issues: string[];
@@ -265,53 +265,53 @@ function validateAIDConfiguration(aidInfo: AIDAgentInfo): {
   const recommendations: string[] = [];
   let score = 100;
   
-  if (!aidInfo.detected) {
-    issues.push('AID protocol not detected');
+  if (!aipInfo.detected) {
+    issues.push('AIP protocol not detected');
     score -= 100;
-    recommendations.push('Implement AID protocol with DNS TXT and HTTPS well-known');
+    recommendations.push('Implement AIP protocol with DNS TXT and HTTPS well-known');
     
     return { valid: false, score: 0, issues, recommendations };
   }
   
-  if (aidInfo.discoveryMethod === 'none') {
+  if (aipInfo.discoveryMethod === 'none') {
     issues.push('No discovery method available');
     score -= 50;
-  } else if (aidInfo.discoveryMethod !== 'both') {
-    issues.push(`Only ${aidInfo.discoveryMethod} discovery available`);
+  } else if (aipInfo.discoveryMethod !== 'both') {
+    issues.push(`Only ${aipInfo.discoveryMethod} discovery available`);
     score -= 20;
     recommendations.push('Implement both DNS and HTTPS discovery for redundancy');
   }
   
-  if (!aidInfo.version || aidInfo.version !== '1.1') {
-    issues.push('Missing or outdated AID version');
+  if (!aipInfo.version || aipInfo.version !== '1.1') {
+    issues.push('Missing or outdated AIP version');
     score -= 10;
   }
   
-  if (!aidInfo.protocols || aidInfo.protocols.length === 0) {
+  if (!aipInfo.protocols || aipInfo.protocols.length === 0) {
     issues.push('No protocols specified');
     score -= 15;
   }
   
-  if (!aidInfo.endpoint) {
+  if (!aipInfo.endpoint) {
     issues.push('Missing agent endpoint');
     score -= 15;
   }
   
-  if (!aidInfo.agentName) {
+  if (!aipInfo.agentName) {
     issues.push('Missing agent name');
     score -= 10;
     recommendations.push('Add agent name to metadata');
   }
   
-  if (!aidInfo.capabilities || aidInfo.capabilities.length === 0) {
+  if (!aipInfo.capabilities || aipInfo.capabilities.length === 0) {
     issues.push('No capabilities defined');
     score -= 10;
     recommendations.push('Document agent capabilities in metadata');
   }
   
-  if (aidInfo.errors && aidInfo.errors.length > 0) {
-    issues.push(`${aidInfo.errors.length} configuration errors`);
-    score -= aidInfo.errors.length * 5;
+  if (aipInfo.errors && aipInfo.errors.length > 0) {
+    issues.push(`${aipInfo.errors.length} configuration errors`);
+    score -= aipInfo.errors.length * 5;
     recommendations.push('Fix configuration errors');
   }
   

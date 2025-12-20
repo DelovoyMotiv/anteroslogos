@@ -30,7 +30,7 @@ COSE_Sign1 = [
 
 ```cbor
 {
-  1: "aid://...",                        // iss - Issuer AID URI
+  1: "aip://...",                        // iss - Issuer AIP URI
   4: 1732435200,                         // nbf - Not before (unix timestamp)
   6: 1732435200,                         // iat - Issued at (unix timestamp)
   7: 1732438800,                         // exp - Expiration (unix timestamp)
@@ -59,7 +59,7 @@ The watermark is added as a field `_w` in the payload before signing:
 
 ```cbor
 {
-  1: "aid://...",
+  1: "aip://...",
   4: 1732435200,
   6: 1732435200,
   7: 1732438800,
@@ -164,7 +164,7 @@ Content-Type: application/cose; cose-type="cose-sign1"
 ### Example Token
 
 ```
-eyJhbGciOiJFZERTQSIsImtpZCI6IjEyMzQ1Njc4OTBhYmNkZWYifQ.eyJpc3MiOiJhaWQ6Ly9leGFtcGxlLmNvbS9hZ2VudC8xMjMiLCJpYXQiOjE3MzI0MzUyMDAsImV4cCI6MTczMjQzODgwMCwidG9vbCI6ImNhdXNhbC1jaXRhdGlvbi10cmFjZSJ9.signature_bytes_base64url
+eyJhbGciOiJFZERTQSIsImtpZCI6IjEyMzQ1Njc4OTBhYmNkZWYifQ.eyJpc3MiOiJhaXA6Ly9leGFtcGxlLmNvbS9hZ2VudC8xMjMiLCJpYXQiOjE3MzI0MzUyMDAsImV4cCI6MTczMjQzODgwMCwidG9vbCI6ImNhdXNhbC1jaXRhdGlvbi10cmFjZSJ9.signature_bytes_base64url
 ```
 
 ## Security Considerations
@@ -201,7 +201,7 @@ Protected Header (hex):
 a2 01 38 1f 04 58 20 ...
 
 Payload (hex):
-a8 01 78 1f 61 69 64 3a 2f 2f ...
+a8 01 78 1f 61 69 70 3a 2f 2f ...
 
 Signature (hex):
 3d 4c 8b 2f 7a 9e ...
@@ -214,7 +214,7 @@ Protected Header (hex):
 a2 01 38 1f 04 58 20 ...
 
 Payload (hex):
-a9 01 78 1f 61 69 64 3a 2f 2f 5f 77 d9 02 9a 78 32 ...
+a9 01 78 1f 61 69 70 3a 2f 2f 5f 77 d9 02 9a 78 32 ...
     ^^                                ^^^^^^^^^^^
     |                                 |
     9 fields (was 8)                  Tag 666 + UTF-8 string

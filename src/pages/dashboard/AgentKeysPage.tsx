@@ -1,6 +1,6 @@
 /**
  * Agent Keys Management Page
- * Generate, list, revoke Ed25519 agent keypairs with AID protocol support
+ * Generate, list, revoke Ed25519 agent keypairs with AIP protocol support
  */
 
 import { useEffect, useState } from 'react';
@@ -97,9 +97,9 @@ export function AgentKeysPage() {
     }
   };
 
-  const handleCopyAID = (aidUri: string) => {
-    navigator.clipboard.writeText(aidUri);
-    toast.success('AID URI copied');
+  const handleCopyAIP = (aipUri: string) => {
+    navigator.clipboard.writeText(aipUri);
+    toast.success('AIP URI copied');
   };
 
   const handleCopyPublicKey = (publicKey: string) => {
@@ -117,7 +117,7 @@ export function AgentKeysPage() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Agent Keys</h1>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-            Manage Ed25519 keypairs for autonomous AI agents (AID protocol)
+            Manage Ed25519 keypairs for autonomous AI agents (AIP protocol)
           </p>
         </div>
         <button
@@ -135,11 +135,11 @@ export function AgentKeysPage() {
           <Shield className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" />
           <div>
             <h3 className="text-sm font-semibold text-blue-900 dark:text-blue-100">
-              AID Protocol (Agent Identity Declaration)
+              AIP Protocol (Anóteros Identity Protocol)
             </h3>
             <p className="mt-1 text-sm text-blue-800 dark:text-blue-300">
               Ed25519 keypairs enable cryptographic agent authentication. Private keys are downloaded once.
-              Use AID URIs (aid://domain/agent/name) to reference agents in multi-agent systems.
+              Use AIP URIs (aip://domain/agent/name) to reference agents in multi-agent systems.
             </p>
           </div>
         </div>
@@ -157,7 +157,7 @@ export function AgentKeysPage() {
                   Agent Name
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  AID URI
+                  AIP URI
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Public Key
@@ -187,7 +187,7 @@ export function AgentKeysPage() {
                         {key.aid_uri.length > 40 ? `${key.aid_uri.slice(0, 40)}...` : key.aid_uri}
                       </code>
                       <button
-                        onClick={() => handleCopyAID(key.aid_uri)}
+                        onClick={() => handleCopyAIP(key.aid_uri)}
                         className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded"
                       >
                         <Copy className="w-4 h-4 text-gray-500" />
@@ -317,7 +317,7 @@ function CreateKeyModal({
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              AID URI will be: aid://{domain || 'domain'}/agent/{agentName || 'name'}
+              AIP URI will be: aip://{domain || 'domain'}/agent/{agentName || 'name'}
             </p>
           </div>
           <div className="flex justify-end space-x-3">

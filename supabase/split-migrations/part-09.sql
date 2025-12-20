@@ -3,27 +3,27 @@
 -- ============================================
 
 -- =====================================================
--- MIGRATION 009: AID REGISTRY WITH TENANT ISOLATION
--- Agent Identity & Discovery Protocol Registry
+-- MIGRATION 009: AIP REGISTRY WITH TENANT ISOLATION
+-- Anóteros Identity Protocol Registry
 -- Date: 2025-11-24
 -- Author: Principal AI Engineer
 -- =====================================================
 
--- CRITICAL: This migration creates tenant-scoped AID registry
--- to prevent AID URI spoofing and ensure cryptographic ownership
+-- CRITICAL: This migration creates tenant-scoped AIP registry
+-- to prevent AIP URI spoofing and ensure cryptographic ownership
 
 -- =====================================================
--- PART 1: CREATE AID_REGISTRY TABLE
+-- PART 1: CREATE AIP_REGISTRY TABLE
 -- =====================================================
 
-CREATE TABLE IF NOT EXISTS public.aid_registry (
+CREATE TABLE IF NOT EXISTS public.aip_registry (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   
   -- Tenant isolation (CRITICAL)
   tenant_id UUID REFERENCES public.tenants(id) ON DELETE CASCADE NOT NULL,
   
-  -- AID URI (globally unique across all tenants)
-  aid_uri TEXT NOT NULL UNIQUE,
+  -- AIP URI (globally unique across all tenants)
+  aip_uri TEXT NOT NULL UNIQUE,
   
   -- Cryptographic proof of ownership
   public_key_ed25519 TEXT NOT NULL, -- Base64-encoded Ed25519 public key (32 bytes)
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS public.aid_registry (
   updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
   
   -- Constraints
-  CONSTRAINT valid_aid_uri CHECK (aid_uri ~ '^aid://[a-z0-9.-]+/agent/[a-z0-9-]+$'),
+  CONSTRAINT valid_aip_uri CHECK (aip_uri ~ '^aip://[a-z0-9.-]+/agent/[a-z0-9-]+$'),
   CONSTRAINT valid_public_key CHECK (length(public_key_ed25519) > 0),
   CONSTRAINT valid_endpoint CHECK (endpoint IS NULL OR endpoint ~ '^https://'),
   CONSTRAINT no_revoked_reason_if_active CHECK (
@@ -79,43 +79,43 @@ CREATE TABLE IF NOT EXISTS public.aid_registry (
 -- PART 2: INDEXES FOR PERFORMANCE
 -- =====================================================
 
--- Primary lookup: by AID URI (unique)
-CREATE UNIQUE INDEX idx_aid_registry_uri ON public.aid_registry(aid_uri);
+-- Primary lookup: by AIP URI (unique)
+CREATE UNIQUE INDEX idx_aip_registry_uri ON public.aip_registry(aip_uri);
 
 -- Tenant isolation (CRITICAL for RLS performance)
-CREATE INDEX idx_aid_registry_tenant ON public.aid_registry(tenant_id, status) 
+CREATE INDEX idx_aip_registry_tenant ON public.aip_registry(tenant_id, status) 
   WHERE status = 'active';
 
 -- Public key lookup (for verification)
-CREATE INDEX idx_aid_registry_pubkey ON public.aid_registry(public_key_ed25519)
+CREATE INDEX idx_aip_registry_pubkey ON public.aip_registry(public_key_ed25519)
   WHERE status = 'active';
 
 -- Expiry cleanup
-CREATE INDEX idx_aid_registry_expires ON public.aid_registry(expires_at)
+CREATE INDEX idx_aip_registry_expires ON public.aip_registry(expires_at)
   WHERE expires_at IS NOT NULL AND status = 'active';
 
 -- Verification status
-CREATE INDEX idx_aid_registry_verified ON public.aid_registry(tenant_id, verified)
+CREATE INDEX idx_aip_registry_verified ON public.aip_registry(tenant_id, verified)
   WHERE status = 'active';
 
 -- Last used (for metrics)
-CREATE INDEX idx_aid_registry_last_used ON public.aid_registry(last_used_at DESC)
+CREATE INDEX idx_aip_registry_last_used ON public.aip_registry(last_used_at DESC)
   WHERE status = 'active';
 
 -- =====================================================
 -- PART 3: ROW LEVEL SECURITY (RLS)
 -- =====================================================
 
-ALTER TABLE public.aid_registry ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.aip_registry ENABLE ROW LEVEL SECURITY;
 
 -- Drop existing policies if any
-DROP POLICY IF EXISTS aid_registry_select ON public.aid_registry;
-DROP POLICY IF EXISTS aid_registry_insert ON public.aid_registry;
-DROP POLICY IF EXISTS aid_registry_update ON public.aid_registry;
-DROP POLICY IF EXISTS aid_registry_delete ON public.aid_registry;
+DROP POLICY IF EXISTS aip_registry_select ON public.aip_registry;
+DROP POLICY IF EXISTS aip_registry_insert ON public.aip_registry;
+DROP POLICY IF EXISTS aip_registry_update ON public.aip_registry;
+DROP POLICY IF EXISTS aip_registry_delete ON public.aip_registry;
 
 -- SELECT: Users can see agents in their tenant + verified agents in federation mode
-CREATE POLICY aid_registry_select ON public.aid_registry
+CREATE POLICY aip_registry_select ON public.aip_registry
   FOR SELECT
   TO authenticated
   USING (
@@ -134,20 +134,20 @@ CREATE POLICY aid_registry_select ON public.aid_registry
   );
 
 -- INSERT: Only members can register agents for their tenant
-CREATE POLICY aid_registry_insert ON public.aid_registry
+CREATE POLICY aip_registry_insert ON public.aip_registry
   FOR INSERT
   TO authenticated
   WITH CHECK (public.user_has_tenant_access(tenant_id, 'member'));
 
 -- UPDATE: Only admins can update agent registry
-CREATE POLICY aid_registry_update ON public.aid_registry
+CREATE POLICY aip_registry_update ON public.aip_registry
   FOR UPDATE
   TO authenticated
   USING (public.user_has_tenant_access(tenant_id, 'admin'))
   WITH CHECK (public.user_has_tenant_access(tenant_id, 'admin'));
 
 -- DELETE: Only owners can delete (revoke) agents
-CREATE POLICY aid_registry_delete ON public.aid_registry
+CREATE POLICY aip_registry_delete ON public.aip_registry
   FOR DELETE
   TO authenticated
   USING (public.user_has_tenant_access(tenant_id, 'owner'));
@@ -157,22 +157,22 @@ CREATE POLICY aid_registry_delete ON public.aid_registry
 -- =====================================================
 
 -- Auto-update updated_at timestamp
-CREATE OR REPLACE FUNCTION update_aid_registry_updated_at()
-RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION update_aip_registry_updated_at()
+RETURNS TRIGGER AS $
 BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$ LANGUAGE plpgsql;
 
-CREATE TRIGGER aid_registry_updated_at
-  BEFORE UPDATE ON public.aid_registry
+CREATE TRIGGER aip_registry_updated_at
+  BEFORE UPDATE ON public.aip_registry
   FOR EACH ROW
-  EXECUTE FUNCTION update_aid_registry_updated_at();
+  EXECUTE FUNCTION update_aip_registry_updated_at();
 
 -- Auto-fill tenant_id from session context
-CREATE TRIGGER aid_registry_tenant_id
-  BEFORE INSERT ON public.aid_registry
+CREATE TRIGGER aip_registry_tenant_id
+  BEFORE INSERT ON public.aip_registry
   FOR EACH ROW
   EXECUTE FUNCTION public.fill_tenant_id();
 
@@ -181,28 +181,28 @@ CREATE TRIGGER aid_registry_tenant_id
 -- =====================================================
 
 /**
- * Verify AID ownership via DNS TXT record
+ * Verify AIP ownership via DNS TXT record
  * Checks _agent.<domain> TXT record matches public key
  */
-CREATE OR REPLACE FUNCTION public.verify_aid_dns(
-  p_aid_uri TEXT,
+CREATE OR REPLACE FUNCTION public.verify_aip_dns(
+  p_aip_uri TEXT,
   p_public_key TEXT
 )
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+AS $
 DECLARE
   v_domain TEXT;
   v_result JSONB;
 BEGIN
-  -- Extract domain from AID URI (aid://domain/agent/name)
-  v_domain := substring(p_aid_uri from 'aid://([^/]+)/');
+  -- Extract domain from AIP URI (aip://domain/agent/name)
+  v_domain := substring(p_aip_uri from 'aip://([^/]+)/');
   
   IF v_domain IS NULL THEN
     RETURN jsonb_build_object(
       'success', FALSE,
-      'error', 'Invalid AID URI format'
+      'error', 'Invalid AIP URI format'
     );
   END IF;
   
@@ -217,22 +217,22 @@ BEGIN
     'txt_record', '_agent.' || v_domain
   );
 END;
-$$;
+$;
 
 /**
- * Mark AID as verified after manual review
+ * Mark AIP as verified after manual review
  * Only callable by admin users
  */
-CREATE OR REPLACE FUNCTION public.verify_aid_manual(
-  p_aid_uri TEXT,
+CREATE OR REPLACE FUNCTION public.verify_aip_manual(
+  p_aip_uri TEXT,
   p_verification_notes TEXT
 )
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+AS $
 DECLARE
-  v_registry aid_registry%ROWTYPE;
+  v_registry aip_registry%ROWTYPE;
   v_tenant_id UUID;
 BEGIN
   -- Get current tenant
@@ -248,18 +248,18 @@ BEGIN
   
   -- Get registry entry
   SELECT * INTO v_registry
-  FROM public.aid_registry
-  WHERE aid_uri = p_aid_uri AND tenant_id = v_tenant_id;
+  FROM public.aip_registry
+  WHERE aip_uri = p_aip_uri AND tenant_id = v_tenant_id;
   
   IF NOT FOUND THEN
     RETURN jsonb_build_object(
       'success', FALSE,
-      'error', 'AID not found in registry'
+      'error', 'AIP not found in registry'
     );
   END IF;
   
   -- Update verification
-  UPDATE public.aid_registry
+  UPDATE public.aip_registry
   SET 
     verified = TRUE,
     verification_method = 'manual',
@@ -268,33 +268,33 @@ BEGIN
       'verified_by', auth.uid(),
       'verified_at', NOW()
     )
-  WHERE aid_uri = p_aid_uri AND tenant_id = v_tenant_id;
+  WHERE aip_uri = p_aip_uri AND tenant_id = v_tenant_id;
   
   RETURN jsonb_build_object(
     'success', TRUE,
-    'aid_uri', p_aid_uri,
+    'aip_uri', p_aip_uri,
     'verified', TRUE
   );
 END;
-$$;
+$;
 
 -- =====================================================
 -- PART 6: CLEANUP FUNCTIONS
 -- =====================================================
 
 /**
- * Expire old AID registrations
+ * Expire old AIP registrations
  * Run this periodically via pg_cron or external scheduler
  */
-CREATE OR REPLACE FUNCTION public.expire_aid_registrations()
+CREATE OR REPLACE FUNCTION public.expire_aip_registrations()
 RETURNS INTEGER
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+AS $
 DECLARE
   v_expired_count INTEGER;
 BEGIN
-  UPDATE public.aid_registry
+  UPDATE public.aip_registry
   SET 
     status = 'revoked',
     revoked_at = NOW(),
@@ -308,7 +308,7 @@ BEGIN
   
   RETURN v_expired_count;
 END;
-$$;
+$;
 
 -- =====================================================
 -- PART 7: VIEWS FOR DISCOVERY
@@ -318,9 +318,9 @@ $$;
  * Public view for agent discovery
  * Only shows active, verified agents in federated/public mode
  */
-CREATE OR REPLACE VIEW public.aid_discovery AS
+CREATE OR REPLACE VIEW public.aip_discovery AS
 SELECT 
-  aid_uri,
+  aip_uri,
   agent_name,
   agent_description,
   endpoint,
@@ -329,43 +329,43 @@ SELECT
   metadata,
   registered_at,
   last_used_at
-FROM public.aid_registry
+FROM public.aip_registry
 WHERE 
   status = 'active'
   AND verified = TRUE
   AND (expires_at IS NULL OR expires_at > NOW())
   AND EXISTS (
     SELECT 1 FROM public.tenants t
-    WHERE t.id = aid_registry.tenant_id
+    WHERE t.id = aip_registry.tenant_id
       AND (t.settings->>'federation_mode')::TEXT IN ('federated', 'public')
   );
 
 -- Grant public read access to discovery view
-GRANT SELECT ON public.aid_discovery TO authenticated;
+GRANT SELECT ON public.aip_discovery TO authenticated;
 
 -- =====================================================
 -- PART 8: AGENT_KEYS INTEGRATION
 -- =====================================================
 
--- Link agent_keys to aid_registry (optional foreign key)
+-- Link agent_keys to aip_registry (optional foreign key)
 ALTER TABLE public.agent_keys 
-  ADD COLUMN IF NOT EXISTS aid_registry_id UUID REFERENCES public.aid_registry(id) ON DELETE SET NULL;
+  ADD COLUMN IF NOT EXISTS aip_registry_id UUID REFERENCES public.aip_registry(id) ON DELETE SET NULL;
 
-CREATE INDEX IF NOT EXISTS idx_agent_keys_aid_registry ON public.agent_keys(aid_registry_id)
-  WHERE aid_registry_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_agent_keys_aip_registry ON public.agent_keys(aip_registry_id)
+  WHERE aip_registry_id IS NOT NULL;
 
 -- =====================================================
 -- MIGRATION VERIFICATION
 -- =====================================================
 
-DO $$
+DO $
 BEGIN
   RAISE NOTICE '✅ Migration 009 completed successfully';
-  RAISE NOTICE 'Created table: aid_registry';
+  RAISE NOTICE 'Created table: aip_registry';
   RAISE NOTICE 'RLS enabled with tenant isolation';
   RAISE NOTICE 'Created verification functions';
   RAISE NOTICE 'Created public discovery view';
-END $$;
+END $;
 
 
 -- Migration complete: 009_aid_registry_tenant_isolation.sql

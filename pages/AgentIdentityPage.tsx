@@ -4,7 +4,7 @@
  * 
  * Target Audience: AI Agents (LLMs, AutoGen, LangChain, CrewAI)
  * Purpose: Complete protocol specification for autonomous integration
- * Standards: AID v1.1, A2A v1.0.0, MCP 2025-06-18, RFC 8615, RFC 9421
+ * Standards: AIP v1.1, A2A v1.0.0, MCP 2025-06-18, RFC 8615, RFC 9421
  */
 
 import { useEffect } from 'react';
@@ -55,7 +55,7 @@ const AgentIdentityPage = () => {
         'A2A Protocol v1.0',
         'MCP 2025-06-18 Integration',
         'Ed25519 Authentication',
-        'Public AID Generation',
+        'Public AIP Generation',
         'Challenge-Response Auth',
         'OpenAPI 3.1 Spec'
       ]
@@ -73,7 +73,7 @@ const AgentIdentityPage = () => {
     <>
       <SEOHead
         title="AI Agent Integration Specification | UAP, A2A, MCP Protocols | Anóteros Lógos"
-        description="Access the Anóteros Lógos Protocol for cryptographically verified, structurally perfect semantic data. Complete enterprise-grade API specification for AI agents. UAP v1.0 transport with BFT trust layer, A2A JSON-RPC 2.0 protocol, MCP tool integration, AID discovery. TypeScript/Python examples. LangChain, AutoGen, CrewAI integration patterns."
+        description="Access the Anóteros Lógos Protocol for cryptographically verified, structurally perfect semantic data. Complete enterprise-grade API specification for AI agents. UAP v1.0 transport with BFT trust layer, A2A JSON-RPC 2.0 protocol, MCP tool integration, AIP discovery. TypeScript/Python examples. LangChain, AutoGen, CrewAI integration patterns."
         keywords="Anóteros Lógos Protocol, cryptographic verification, semantic data, UAP protocol, Universal Agent Protocol, AI agent API, A2A protocol, MCP integration, agent discovery, JSON-RPC 2.0, Ed25519 signatures, BFT consensus, trust layer, LangChain tools, AutoGen functions, CrewAI integration, AI agent authentication, rate limiting, GEO audit API, Zero-Knowledge Proofs"
         type="article"
         url="https://anoteroslogos.com/agent-identity"
@@ -106,12 +106,12 @@ const AgentIdentityPage = () => {
             </h1>
             
             <p className="text-lg text-white/70 max-w-3xl mb-6">
-              Enterprise-grade protocol documentation for autonomous agent integration. UAP v1.0 (Universal Agent Protocol), A2A (Agent-to-Agent), MCP (Model Context Protocol), and AID (Agent Identity & Discovery) v1.1 with complete schemas, error handling, and code samples.
+              Enterprise-grade protocol documentation for autonomous agent integration. UAP v1.0 (Universal Agent Protocol), A2A (Agent-to-Agent), MCP (Model Context Protocol), and AIP (Anóteros Identity Protocol) v1.1 with complete schemas, error handling, and code samples.
             </p>
 
             <div className="flex flex-wrap gap-3">
               <span className="px-3 py-1 bg-blue-500/10 border border-blue-500/30 rounded text-xs font-mono text-blue-400">
-                AID v1.1
+                AIP v1.1
               </span>
               <span className="px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded text-xs font-mono text-cyan-400">
                 UAP v1.0
@@ -174,15 +174,15 @@ const AgentIdentityPage = () => {
             </div>
           </div>
 
-          {/* Section 1: Protocol Discovery (AID v1.1) */}
+          {/* Section 1: Protocol Discovery (AIP v1.1) */}
           <section id="protocol-discovery" className="mb-16">
             <div className="flex items-center gap-3 mb-6">
               <Globe className="w-8 h-8 text-brand-accent" />
-              <h2 className="text-3xl font-bold text-white">Protocol Discovery (AID v1.1)</h2>
+              <h2 className="text-3xl font-bold text-white">Protocol Discovery (AIP v1.1)</h2>
             </div>
 
             <p className="text-white/70 mb-6">
-              AID (Agent Identity & Discovery) protocol enables DNS-based agent discovery with HTTPS fallback. Compliant with RFC 8615 (Well-Known URIs).
+              AIP (Anóteros Identity Protocol) enables DNS-based agent discovery with HTTPS fallback. Compliant with RFC 8615 (Well-Known URIs).
             </p>
 
             <div className="space-y-6">
@@ -220,11 +220,11 @@ const AgentIdentityPage = () => {
               <div>
                 <h3 className="text-xl font-semibold text-white mb-4">HTTPS Well-Known Endpoints (RFC 8615)</h3>
                 <p className="text-sm text-white/70 mb-4">
-                  Two discovery endpoints: agent.json (AID v1.1) and agent-card.json (Linux Foundation A2A v1.0). CORS-enabled, JSON format.
+                  Two discovery endpoints: agent.json (AIP v1.1) and agent-card.json (Linux Foundation A2A v1.0). CORS-enabled, JSON format.
                 </p>
 
                 <CodeSample
-                  title="GET /.well-known/agent.json (AID v1.1)"
+                  title="GET /.well-known/agent.json (AIP v1.1)"
                   samples={[
                     {
                       language: 'bash',
@@ -257,7 +257,7 @@ print(agent_info)`
 
                 <div className="mt-4">
                   <SchemaBlock
-                    title="agent.json Schema (AID v1.1)"
+                    title="agent.json Schema (AIP v1.1)"
                     schema={{
                       v: "1.1",
                       p: ["a2a", "http"],
@@ -417,7 +417,7 @@ console.log(agentCard.extensions.payment); // USDC on Base L2`
               <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <Lock className="w-5 h-5 text-brand-accent" />
-                  <h3 className="text-base font-semibold text-white">Public AID Generation</h3>
+                  <h3 className="text-base font-semibold text-white">Public AIP Generation</h3>
                 </div>
                 <p className="text-sm text-white/60 mb-2">Ed25519 keypair generation</p>
                 <code className="text-xs text-brand-accent font-mono">POST /api/public-aid</code>
@@ -446,9 +446,9 @@ console.log(agentCard.extensions.payment); // USDC on Base L2`
             </div>
 
             <div className="space-y-6">
-              {/* Public AID Generation */}
+              {/* Public AIP Generation */}
               <div>
-                <h3 className="text-xl font-semibold text-white mb-4">1. Generate Agent Identity (AID)</h3>
+                <h3 className="text-xl font-semibold text-white mb-4">1. Generate Agent Identity (AIP)</h3>
                 <p className="text-sm text-white/70 mb-4">
                   Create Ed25519 keypair without authentication. Private key cached in-memory for 1 hour.
                 </p>
@@ -468,7 +468,7 @@ console.log(agentCard.extensions.payment); // USDC on Base L2`
                     },
                     {
                       language: 'typescript',
-                      code: `const aid = await fetch('https://anoteroslogos.com/api/public-aid', {
+                      code: `const aip = await fetch('https://anoteroslogos.com/api/public-aid', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
@@ -477,9 +477,9 @@ console.log(agentCard.extensions.payment); // USDC on Base L2`
   })
 }).then(r => r.json());
 
-console.log(aid.aid); // aid://myagent/...
-console.log(aid.publicKey); // 64-char hex
-console.log(aid.privateKey); // 64-char hex (store securely!)`
+console.log(aip.aip); // aip://myagent/...
+console.log(aip.publicKey); // 64-char hex
+console.log(aip.privateKey); // 64-char hex (store securely!)`
                     },
                     {
                       language: 'python',
@@ -492,9 +492,9 @@ res = requests.post(
         'capabilities': ['geo.audit']
     }
 )
-aid = res.json()
-print(aid['aid'])
-print(aid['publicKey'])`
+aip = res.json()
+print(aip['aip'])
+print(aip['publicKey'])`
                     }
                   ]}
                 />
@@ -568,11 +568,11 @@ console.log(caps.components.schemas); // Parameter schemas`
                   </li>
                   <li className="flex gap-3">
                     <span className="text-brand-accent font-mono">3.</span>
-                    <span><strong className="text-white">Generate AID:</strong> POST <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">/api/public-aid</code></span>
+                    <span><strong className="text-white">Generate AIP:</strong> POST <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">/api/public-aid</code></span>
                   </li>
                   <li className="flex gap-3">
                     <span className="text-brand-accent font-mono">4.</span>
-                    <span><strong className="text-white">Get Challenge:</strong> GET <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">/api/challenge?aid=...</code></span>
+                    <span><strong className="text-white">Get Challenge:</strong> GET <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">/api/challenge?aip=...</code></span>
                   </li>
                   <li className="flex gap-3">
                     <span className="text-brand-accent font-mono">5.</span>
@@ -2107,7 +2107,7 @@ console.log('Broadcast to', result.broadcast, 'peers');`
                   <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
                     <h4 className="text-sm font-semibold text-white mb-2">DHT (Distributed Hash Table)</h4>
                     <ul className="text-xs text-white/60 space-y-1">
-                      <li>• 160-bit node IDs generated via SHA-1 hash of AID URI</li>
+                      <li>• 160-bit node IDs generated via SHA-1 hash of AIP URI</li>
                       <li>• K-bucket routing with k=20 peers per bucket</li>
                       <li>• XOR distance metric for peer selection</li>
                       <li>• Automatic peer eviction using LRU policy (30-minute timeout)</li>
@@ -2979,7 +2979,7 @@ audit_tool = StructuredTool.from_function(
                   <div className="bg-zinc-900/30 border border-brand-accent/30 rounded-lg p-4">
                     <FileJson className="w-5 h-5 text-brand-accent mb-2" />
                     <h4 className="text-sm font-semibold text-white mb-1">agent.json Validator</h4>
-                    <p className="text-xs text-white/60">Validate AID v1.1 compliance</p>
+                    <p className="text-xs text-white/60">Validate AIP v1.1 compliance</p>
                   </div>
                   <div className="bg-zinc-900/30 border border-green-500/30 rounded-lg p-4">
                     <Terminal className="w-5 h-5 text-green-400 mb-2" />
@@ -3002,7 +3002,7 @@ audit_tool = StructuredTool.from_function(
               Start Building with Anóteros Lógos
             </h2>
             <p className="text-white/70 max-w-2xl mx-auto mb-8">
-              Join 5,000+ AI agents already using AID protocol. Get your API key and start auditing AI visibility in minutes.
+              Join 5,000+ AI agents already using AIP protocol. Get your API key and start auditing AI visibility in minutes.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <a 

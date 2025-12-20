@@ -12,9 +12,9 @@ import { z } from 'zod';
 // COMMON SCHEMAS
 // =====================================================
 
-export const AidSchema = z.string()
-  .regex(/^aid:\/\/[a-z0-9-]+\/[a-f0-9]{12}$/, 'Invalid AID format')
-  .describe('Agent Identity URI');
+export const AipSchema = z.string()
+  .regex(/^aip:\/\/[a-z0-9-]+\/[a-f0-9]{12}$/, 'Invalid AIP format')
+  .describe('Agent Identity Protocol URI');
 
 export const Ed25519PublicKeySchema = z.string()
   .length(64)
@@ -73,7 +73,7 @@ export const JsonRpcResponseSchema = z.object({
 export const UCPTCascadeMessageSchema = z.object({
   type: z.literal('ucpt-cascade'),
   ucpt: z.string().min(1).max(10000),
-  sourceAid: AidSchema,
+  sourceAip: AipSchema,
   tool: z.string().min(1).max(128),
   ttl: z.number().int().min(0).max(7),
   timestamp: z.number().int().positive(),
@@ -151,11 +151,11 @@ export const HandshakeNewAgentSchema = z.object({
 });
 
 export const HandshakeGetChallengeSchema = z.object({
-  aid: AidSchema,
+  aip: AipSchema,
 });
 
 export const HandshakeVerifySignatureSchema = z.object({
-  aid: AidSchema,
+  aip: AipSchema,
   publicKey: Ed25519PublicKeySchema,
   challenge: ChallengeSchema,
   signature: Ed25519SignatureSchema,
@@ -172,11 +172,11 @@ export const HandshakeRequestSchema = z.union([
 // =====================================================
 
 export const ChallengeGetSchema = z.object({
-  aid: AidSchema,
+  aip: AipSchema,
 });
 
 export const ChallengeVerifySchema = z.object({
-  aid: AidSchema,
+  aip: AipSchema,
   challenge: ChallengeSchema,
   publicKey: Ed25519PublicKeySchema,
   signature: Ed25519SignatureSchema,
@@ -186,7 +186,7 @@ export const ChallengeVerifySchema = z.object({
 // PUBLIC-AID SCHEMAS
 // =====================================================
 
-export const PublicAidCreateSchema = z.object({
+export const PublicAipCreateSchema = z.object({
   name: z.string().min(1).max(64).optional().default('agent'),
   description: z.string().max(512).optional().default(''),
 });
