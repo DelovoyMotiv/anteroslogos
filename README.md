@@ -1,7 +1,7 @@
 # Anóteros Lógos - Enterprise AI Knowledge Infrastructure
 
 ![License](https://img.shields.io/badge/License-Proprietary-red)
-![Version](https://img.shields.io/badge/version-4.2.6-blue)
+![Version](https://img.shields.io/badge/version-4.3.1-blue)
 ![Node](https://img.shields.io/badge/node-20.x-green)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)
 ![React](https://img.shields.io/badge/React-19.2-cyan)
@@ -11,7 +11,7 @@ AI knowledge infrastructure platform providing cryptographically verifiable prov
 
 Production URL: https://anoteroslogos.com
 
-Codebase: 1,183 files | 362,793 lines
+Codebase: 848 files | 247,297 lines
 
 ---
 
@@ -494,7 +494,7 @@ getGraph               Knowledge graph extraction
 predictCitation        ML-based probability
 trackCitation          Citation monitoring
 learnFromCitations     Feedback loop
-discoverAgent          AID protocol detection
+discoverAgent          AIP protocol detection
 syncPlatforms          Real-time syndication
 execute_code           Sandbox execution with tool bindings
 ```
@@ -823,7 +823,7 @@ React 19 SPA with route-based code splitting and production-grade UI components.
 **Pages:**
 - HomePage - Platform positioning with GEO knowledge base
 - GeoAuditPage - Advanced tabbed audit interface with mobile optimization
-- AgentIdentityPage - AID protocol documentation
+- AgentIdentityPage - AIP protocol documentation
 - InvestorRelationsPage - Infrastructure thesis
 - KnowledgeBasePage - GEO terminology and concepts
 - Dashboard - User portal (API keys, billing, usage, settings)
@@ -834,7 +834,7 @@ React 19 SPA with route-based code splitting and production-grade UI components.
 - Overview tab with precise scoring, quick summary, and category grid
 - Analysis tab with 11-category sidebar navigation and detailed metrics
 - Insights tab with AI recommendations, filtering, and quick wins calculator
-- Technical tab with raw data viewer, AID protocol details, and schema validation
+- Technical tab with raw data viewer, AIP protocol details, and schema validation
 - Mobile-responsive with dropdown navigation and swipe gesture support
 - Correlation analysis identifying metric relationships
 - ROI calculator for recommendation prioritization
@@ -1030,7 +1030,7 @@ src/
         hooks/
           useAuditNavigation.ts  # State management with URL sync
           useSwipeGesture.ts     # Touch gesture support
-    AgentIdentityPage.tsx        # AID protocol docs
+    AgentIdentityPage.tsx        # AIP protocol docs
   components/                    # Production-grade UI
     PaymentModal.tsx             # USDC payment UI
     BillingPage.tsx              # Subscription management
@@ -1153,7 +1153,7 @@ components/
 pages/
   HomePage.tsx                   # Platform homepage
   GeoAuditPage.tsx              # Audit interface
-  AgentIdentityPage.tsx         # AID protocol
+  AgentIdentityPage.tsx         # AIP protocol
   InvestorRelationsPage.tsx     # Infrastructure thesis
   KnowledgeBasePage.tsx         # GEO knowledge base
   Dashboard/                    # User portal
@@ -1245,8 +1245,8 @@ tests/
 ## Statistics
 
 **Codebase:**
-- Total files: 1,183
-- Total lines: 362,793
+- Total files: 848
+- Total lines: 247,297
 - TypeScript: 94.2%
 - PLpgSQL: 5.0%
 - CSS: 0.8%
@@ -1288,5 +1288,5 @@ Proprietary - All rights reserved
 
 ---
 
-Last Updated: December 11, 2025
-Version: 4.2.6
+Last Updated: December 20, 2025
+Version: 4.3.1
