@@ -36,19 +36,11 @@ export interface OpenRouterError {
 }
 
 /**
- * Safely get environment variable from import.meta.env or process.env
+ * Safely get environment variable from process.env
+ * For serverless functions, only process.env is available
  */
 function getEnvVar(key: string): string | undefined {
-  try {
-    // Try import.meta.env first (browser/Vite)
-    if (typeof import.meta !== 'undefined' && (import.meta as any)?.env) {
-      return (import.meta as any).env[key];
-    }
-  } catch {
-    // import.meta not available, fall through to process.env
-  }
-  
-  // Fallback to process.env (Node.js/Vercel)
+  // In serverless functions (Vercel), use process.env
   if (typeof process !== 'undefined' && process.env) {
     return process.env[key];
   }
@@ -123,9 +115,10 @@ export class SimpleOpenRouterClient {
 
 /**
  * Create OpenRouter client from environment variables
+ * For serverless functions, reads from process.env.OPENROUTER_API_KEY
  */
 export function createSimpleOpenRouterClient(): SimpleOpenRouterClient | null {
-  const apiKey = getEnvVar('OPENROUTER_API_KEY') || getEnvVar('VITE_OPENROUTER_API_KEY');
+  const apiKey = getEnvVar('OPENROUTER_API_KEY');
   
   if (!apiKey) {
     console.warn('OpenRouter API key not found. AI service will be disabled.');
