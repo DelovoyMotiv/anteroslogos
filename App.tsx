@@ -29,6 +29,7 @@ const DashboardAgentKeys = lazy(() => import('./src/pages/dashboard/AgentKeysPag
 const DashboardBilling = lazy(() => import('./src/pages/dashboard/BillingPage'));
 const DashboardUsage = lazy(() => import('./src/pages/dashboard/UsagePage'));
 const DashboardSettings = lazy(() => import('./src/pages/dashboard/SettingsPage'));
+const AgentManifestPage = lazy(() => import('./pages/AgentManifestPage'));
 
 // Admin pages (protected)
 const BlogAdminPage = lazy(() => import('./pages/admin/BlogAdminPage'));
@@ -106,6 +107,7 @@ const App: React.FC = () => {
                             <Route path="audit" element={<DashboardAudit />} />
                             <Route path="api-keys" element={<DashboardAPIKeys />} />
                             <Route path="agent-keys" element={<DashboardAgentKeys />} />
+                            <Route path="agent-manifest" element={<AgentManifestPage />} />
                             <Route path="billing" element={<DashboardBilling />} />
                             <Route path="usage" element={<DashboardUsage />} />
                             <Route path="settings" element={<DashboardSettings />} />
