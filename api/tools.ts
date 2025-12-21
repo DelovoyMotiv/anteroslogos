@@ -2,19 +2,13 @@
  * Unified Tools API Endpoint
  * POST /api/tools
  * 
- * Handles multiple tool operations through a single endpoint
- * Reduces the number of serverless functions for Vercel deployment
- * 
- * Supported tools:
- * - agent-manifest: Generate logos.json semantic topology files
+ * Minimal version for debugging - all logic inline
  * 
  * @module api/tools
  * @version 1.0.0
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { generateManifest, ManifestGenerationError, InvalidJSONError, SchemaValidationError } from '../lib/agentManifest/generator';
-import { validateManifestUrl, normalizeManifestUrl } from '../lib/agentManifest/urlUtils';
 
 /**
  * Base request interface
@@ -33,157 +27,109 @@ interface AgentManifestRequest extends ToolsRequest {
 }
 
 /**
- * Success response interface
- */
-interface ToolsSuccessResponse {
-  success: true;
-  data: unknown;
-}
-
-/**
- * Error response interface
- */
-interface ToolsErrorResponse {
-  success: false;
-  error: string;
-  details?: unknown;
-}
-
-/**
- * Combined response type
- */
-type ToolsResponse = ToolsSuccessResponse | ToolsErrorResponse;
-
-/**
  * Handle agent manifest generation
  */
 async function handleAgentManifest(
   req: AgentManifestRequest,
   res: VercelResponse
 ): Promise<void> {
-  console.log('[handleAgentManifest] Starting manifest generation');
-  const { url } = req;
-
-  // Validate URL is provided and is a string
-  if (url === undefined || url === null || typeof url !== 'string') {
-    console.error('[handleAgentManifest] Invalid URL:', url);
-    res.status(400).json({
-      success: false,
-      error: 'URL is required. Please provide a valid website URL.',
-    });
-    return;
-  }
-
-  // Validate URL is not empty
-  if (url.trim().length === 0) {
-    console.error('[handleAgentManifest] Empty URL');
-    res.status(400).json({
-      success: false,
-      error: 'Please enter a website URL',
-    });
-    return;
-  }
-
-  console.log('[handleAgentManifest] Validating URL:', url);
-
-  // Validate and sanitize URL
-  const validationResult = validateManifestUrl(url);
+  console.log('[handleAgentManifest] Starting');
   
-  if (!validationResult.isValid) {
-    console.error('[handleAgentManifest] URL validation failed:', validationResult.error);
-    res.status(400).json({
-      success: false,
-      error: validationResult.error || 'Invalid URL format. Please enter a valid website URL.',
-    });
-    return;
-  }
-
-  // Normalize URL for consistent processing
-  const sanitizedUrl = normalizeManifestUrl(validationResult.sanitizedUrl!);
-  console.log('[handleAgentManifest] Sanitized URL:', sanitizedUrl);
-
   try {
-    console.log('[handleAgentManifest] Calling generateManifest');
-    // Generate manifest using LLM
-    const manifest = await generateManifest(sanitizedUrl);
+    const { url } = req;
 
-    console.log('[handleAgentManifest] Manifest generated successfully');
-    // Return success response
+    // Basic URL validation
+    if (!url || typeof url !== 'string' || url.trim().length === 0) {
+      res.status(400).json({
+        success: false,
+        error: 'URL is required',
+      });
+      return;
+    }
+
+    // Check if API key exists
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey) {
+      console.error('[handleAgentManifest] No API key');
+      res.status(503).json({
+        success: false,
+        error: 'AI service is not configured',
+      });
+      return;
+    }
+
+    console.log('[handleAgentManifest] API key found, calling OpenRouter');
+
+    // Call OpenRouter API directly
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://anoteroslogos.com',
+        'X-Title': 'Anóteros Lógos Agent Manifest Generator',
+      },
+      body: JSON.stringify({
+        model: 'anthropic/claude-sonnet-4.5',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an expert in Semantic Topology. Generate a logos.json file for the given domain. Return ONLY valid JSON, no markdown.'
+          },
+          {
+            role: 'user',
+            content: `Generate a logos.json semantic topology file for: ${url}`
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 2000,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('[handleAgentManifest] OpenRouter error:', errorData);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to generate manifest',
+      });
+      return;
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content;
+
+    if (!content) {
+      res.status(500).json({
+        success: false,
+        error: 'No response from AI',
+      });
+      return;
+    }
+
+    // Parse JSON from response
+    let jsonString = content.trim();
+    if (jsonString.startsWith('```')) {
+      const match = jsonString.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/);
+      if (match && match[1]) {
+        jsonString = match[1].trim();
+      }
+    }
+
+    const manifest = JSON.parse(jsonString);
+
+    console.log('[handleAgentManifest] Success');
     res.status(200).json({
       success: true,
       data: { manifest },
     });
 
   } catch (error) {
-    // Log error for debugging
-    console.error('[api/tools/agent-manifest] Error generating manifest:', error);
-    console.error('[api/tools/agent-manifest] Error type:', error instanceof Error ? error.constructor.name : typeof error);
-    console.error('[api/tools/agent-manifest] Error message:', error instanceof Error ? error.message : String(error));
-    console.error('[api/tools/agent-manifest] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
-
-    // Handle specific error types
-    if (error instanceof SchemaValidationError) {
-      res.status(500).json({
-        success: false,
-        error: 'Failed to generate valid manifest. Please try again.',
-        details: error.validationErrors,
-      });
-      return;
-    }
-
-    if (error instanceof InvalidJSONError) {
-      res.status(500).json({
-        success: false,
-        error: 'Failed to generate valid manifest. Please try again.',
-      });
-      return;
-    }
-
-    if (error instanceof ManifestGenerationError) {
-      const errorMessage = error.message;
-
-      if (errorMessage.includes('not configured') || errorMessage.includes('API key')) {
-        res.status(503).json({
-          success: false,
-          error: 'AI service is not configured. Please contact support.',
-        });
-        return;
-      }
-
-      if (errorMessage.includes('rate limit')) {
-        res.status(429).json({
-          success: false,
-          error: 'Rate limit exceeded. Please try again later.',
-        });
-        return;
-      }
-
-      if (errorMessage.includes('timeout')) {
-        res.status(504).json({
-          success: false,
-          error: 'Request timed out. Please try again.',
-        });
-        return;
-      }
-
-      res.status(500).json({
-        success: false,
-        error: 'Failed to generate manifest. Please try again.',
-      });
-      return;
-    }
-
-    if (error instanceof Error && error.message.includes('network')) {
-      res.status(503).json({
-        success: false,
-        error: 'Network error occurred. Please check your connection and try again.',
-      });
-      return;
-    }
-
+    console.error('[handleAgentManifest] Error:', error);
     res.status(500).json({
       success: false,
-      error: 'An unexpected error occurred. Please try again.',
+      error: 'Failed to generate manifest',
+      details: error instanceof Error ? error.message : String(error),
     });
   }
 }
@@ -195,14 +141,13 @@ export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ): Promise<void> {
-  try {
-    // Log incoming request
-    console.log('[api/tools] Incoming request:', {
-      method: req.method,
-      url: req.url,
-      headers: req.headers,
-      body: req.body,
-    });
+  // Log incoming request
+  console.log('[api/tools] Incoming request:', {
+    method: req.method,
+    url: req.url,
+    headers: req.headers,
+    body: req.body,
+  });
 
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
