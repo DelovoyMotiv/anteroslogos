@@ -6,8 +6,7 @@
  * @version 1.0.0
  */
 
-import { createEnhancedOpenRouterClient } from '../citationIntelligence/llm/enhancedClient';
-import type { ChatMessage } from '../citationIntelligence/types/llm.types';
+import { createOpenRouterClient, type ChatMessage } from '../../utils/ai/openrouter';
 import { buildSystemPrompt, buildUserPrompt } from './prompts';
 import { validateManifest, formatValidationError, type ValidationResult } from './validator';
 import type { LogosJSON } from './types';
@@ -86,17 +85,11 @@ function parseManifestResponse(response: string): unknown {
  * Generates a logos.json manifest for a given URL using LLM
  * 
  * This function:
- * 1. Creates an enhanced OpenRouter client
+ * 1. Creates a simple OpenRouter client
  * 2. Builds system and user prompts
  * 3. Calls the LLM (Claude Sonnet 4.5)
  * 4. Parses and validates the JSON response
  * 5. Returns the validated manifest
- * 
- * The function uses the existing EnhancedOpenRouterClient which provides:
- * - Rate limiting
- * - Cost tracking
- * - Retry logic with exponential backoff
- * - Circuit breaker for fault tolerance
  * 
  * @param url - The website URL to generate manifest for
  * @returns Promise resolving to validated LogosJSON manifest
@@ -119,12 +112,12 @@ function parseManifestResponse(response: string): unknown {
  * ```
  */
 export async function generateManifest(url: string): Promise<LogosJSON> {
-  // Create LLM client
-  const client = createEnhancedOpenRouterClient();
+  // Create simple LLM client
+  const client = createOpenRouterClient();
   
   if (!client) {
     throw new ManifestGenerationError(
-      'AI service is not configured. Please ensure VITE_OPENROUTER_API_KEY is set.'
+      'AI service is not configured. Please ensure OPENROUTER_API_KEY is set.'
     );
   }
   
@@ -140,16 +133,10 @@ export async function generateManifest(url: string): Promise<LogosJSON> {
     ];
     
     // Call LLM with Claude Sonnet 4.5
-    // Using content_opt task type for content generation
-    const response = await client.chatWithModel(
-      'anthropic/claude-sonnet-4.5',
-      messages,
-      {
-        temperature: 0.7,
-        maxTokens: 2000,
-        taskType: 'content_opt'
-      }
-    );
+    const response = await client.chat(messages, {
+      temperature: 0.7,
+      max_tokens: 2000,
+    });
     
     // Parse JSON response
     const parsedResponse = parseManifestResponse(response);
