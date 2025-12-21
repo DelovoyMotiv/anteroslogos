@@ -1,6 +1,6 @@
 /**
  * Agent Manifest API Integration Tests
- * Tests the /api/agent-manifest endpoint
+ * Tests the /api/tools endpoint with agent-manifest tool
  * 
  * **Validates: Requirements 4.1, 4.7, 7.1, 7.2, 7.3, 7.4**
  * 
@@ -10,7 +10,7 @@
 import './setup';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createMockRequest, createMockResponse } from './helpers';
-import handler from '../agent-manifest';
+import handler from '../tools';
 import * as generator from '../../lib/agentManifest/generator';
 import type { LogosJSON } from '../../lib/agentManifest/types';
 
@@ -59,7 +59,7 @@ describe('Agent Manifest API Endpoint', () => {
     it('should accept POST requests', async () => {
       const req = createMockRequest({
         method: 'POST',
-        body: { url: 'https://example.com' },
+        body: { tool: 'agent-manifest', url: 'https://example.com' },
       });
       const res = createMockResponse();
 
@@ -88,7 +88,7 @@ describe('Agent Manifest API Endpoint', () => {
     it('should reject PUT requests', async () => {
       const req = createMockRequest({
         method: 'PUT',
-        body: { url: 'https://example.com' },
+        body: { tool: 'agent-manifest', url: 'https://example.com' },
       });
       const res = createMockResponse();
 
@@ -124,10 +124,26 @@ describe('Agent Manifest API Endpoint', () => {
   });
 
   describe('URL Parameter Validation', () => {
+    it('should reject requests without tool parameter', async () => {
+      const req = createMockRequest({
+        method: 'POST',
+        body: { url: 'https://example.com' },
+      });
+      const res = createMockResponse();
+
+      await handler(req, res);
+
+      expect(res.statusCode).toBe(400);
+      expect(res.jsonData).toMatchObject({
+        success: false,
+        error: expect.stringContaining('Tool parameter'),
+      });
+    });
+
     it('should reject requests without URL', async () => {
       const req = createMockRequest({
         method: 'POST',
-        body: {},
+        body: { tool: 'agent-manifest' },
       });
       const res = createMockResponse();
 
@@ -143,7 +159,7 @@ describe('Agent Manifest API Endpoint', () => {
     it('should reject requests with empty URL', async () => {
       const req = createMockRequest({
         method: 'POST',
-        body: { url: '' },
+        body: { tool: 'agent-manifest', url: '' },
       });
       const res = createMockResponse();
 
@@ -159,7 +175,7 @@ describe('Agent Manifest API Endpoint', () => {
     it('should reject requests with whitespace-only URL', async () => {
       const req = createMockRequest({
         method: 'POST',
-        body: { url: '   ' },
+        body: { tool: 'agent-manifest', url: '   ' },
       });
       const res = createMockResponse();
 
@@ -172,7 +188,7 @@ describe('Agent Manifest API Endpoint', () => {
     it('should reject requests with non-string URL', async () => {
       const req = createMockRequest({
         method: 'POST',
-        body: { url: 123 },
+        body: { tool: 'agent-manifest', url: 123 },
       });
       const res = createMockResponse();
 
@@ -185,7 +201,7 @@ describe('Agent Manifest API Endpoint', () => {
     it('should reject invalid URL formats', async () => {
       const req = createMockRequest({
         method: 'POST',
-        body: { url: 'not-a-valid-url' },
+        body: { tool: 'agent-manifest', url: 'not-a-valid-url' },
       });
       const res = createMockResponse();
 
@@ -201,7 +217,7 @@ describe('Agent Manifest API Endpoint', () => {
     it('should accept valid HTTP URLs', async () => {
       const req = createMockRequest({
         method: 'POST',
-        body: { url: 'http://example.com' },
+        body: { tool: 'agent-manifest', url: 'http://example.com' },
       });
       const res = createMockResponse();
 
@@ -216,7 +232,7 @@ describe('Agent Manifest API Endpoint', () => {
     it('should accept valid HTTPS URLs', async () => {
       const req = createMockRequest({
         method: 'POST',
-        body: { url: 'https://example.com' },
+        body: { tool: 'agent-manifest', url: 'https://example.com' },
       });
       const res = createMockResponse();
 
@@ -233,7 +249,7 @@ describe('Agent Manifest API Endpoint', () => {
     it('should return manifest on successful generation', async () => {
       const req = createMockRequest({
         method: 'POST',
-        body: { url: 'https://example.com' },
+        body: { tool: 'agent-manifest', url: 'https://example.com' },
       });
       const res = createMockResponse();
 
@@ -244,14 +260,16 @@ describe('Agent Manifest API Endpoint', () => {
       expect(res.statusCode).toBe(200);
       expect(res.jsonData).toMatchObject({
         success: true,
-        manifest: mockManifest,
+        data: {
+          manifest: mockManifest,
+        },
       });
     });
 
     it('should call generateManifest with normalized URL', async () => {
       const req = createMockRequest({
         method: 'POST',
-        body: { url: 'https://example.com/' },
+        body: { tool: 'agent-manifest', url: 'https://example.com/' },
       });
       const res = createMockResponse();
 
@@ -267,7 +285,7 @@ describe('Agent Manifest API Endpoint', () => {
     it('should return valid LogosJSON structure', async () => {
       const req = createMockRequest({
         method: 'POST',
-        body: { url: 'https://example.com' },
+        body: { tool: 'agent-manifest', url: 'https://example.com' },
       });
       const res = createMockResponse();
 
@@ -275,7 +293,7 @@ describe('Agent Manifest API Endpoint', () => {
 
       await handler(req, res);
 
-      expect(res.jsonData.manifest).toMatchObject({
+      expect(res.jsonData.data.manifest).toMatchObject({
         $schema: expect.any(String),
         meta: expect.objectContaining({
           version: expect.any(String),
@@ -302,7 +320,7 @@ describe('Agent Manifest API Endpoint', () => {
     it('should handle schema validation errors', async () => {
       const req = createMockRequest({
         method: 'POST',
-        body: { url: 'https://example.com' },
+        body: { tool: 'agent-manifest', url: 'https://example.com' },
       });
       const res = createMockResponse();
 
@@ -324,7 +342,7 @@ describe('Agent Manifest API Endpoint', () => {
     it('should handle invalid JSON errors', async () => {
       const req = createMockRequest({
         method: 'POST',
-        body: { url: 'https://example.com' },
+        body: { tool: 'agent-manifest', url: 'https://example.com' },
       });
       const res = createMockResponse();
 
@@ -346,7 +364,7 @@ describe('Agent Manifest API Endpoint', () => {
     it('should handle AI service not configured error', async () => {
       const req = createMockRequest({
         method: 'POST',
-        body: { url: 'https://example.com' },
+        body: { tool: 'agent-manifest', url: 'https://example.com' },
       });
       const res = createMockResponse();
 
@@ -367,7 +385,7 @@ describe('Agent Manifest API Endpoint', () => {
     it('should handle rate limit errors', async () => {
       const req = createMockRequest({
         method: 'POST',
-        body: { url: 'https://example.com' },
+        body: { tool: 'agent-manifest', url: 'https://example.com' },
       });
       const res = createMockResponse();
 
@@ -388,7 +406,7 @@ describe('Agent Manifest API Endpoint', () => {
     it('should handle timeout errors', async () => {
       const req = createMockRequest({
         method: 'POST',
-        body: { url: 'https://example.com' },
+        body: { tool: 'agent-manifest', url: 'https://example.com' },
       });
       const res = createMockResponse();
 
@@ -409,7 +427,7 @@ describe('Agent Manifest API Endpoint', () => {
     it('should handle generic errors', async () => {
       const req = createMockRequest({
         method: 'POST',
-        body: { url: 'https://example.com' },
+        body: { tool: 'agent-manifest', url: 'https://example.com' },
       });
       const res = createMockResponse();
 
@@ -431,7 +449,7 @@ describe('Agent Manifest API Endpoint', () => {
     it('should include CORS headers in response', async () => {
       const req = createMockRequest({
         method: 'POST',
-        body: { url: 'https://example.com' },
+        body: { tool: 'agent-manifest', url: 'https://example.com' },
       });
       const res = createMockResponse();
 
@@ -459,7 +477,7 @@ describe('Agent Manifest API Endpoint', () => {
     it('should return consistent success response format', async () => {
       const req = createMockRequest({
         method: 'POST',
-        body: { url: 'https://example.com' },
+        body: { tool: 'agent-manifest', url: 'https://example.com' },
       });
       const res = createMockResponse();
 
@@ -468,14 +486,14 @@ describe('Agent Manifest API Endpoint', () => {
       await handler(req, res);
 
       expect(res.jsonData).toHaveProperty('success');
-      expect(res.jsonData).toHaveProperty('manifest');
+      expect(res.jsonData).toHaveProperty('data');
       expect(res.jsonData.success).toBe(true);
     });
 
     it('should return consistent error response format', async () => {
       const req = createMockRequest({
         method: 'POST',
-        body: {},
+        body: { tool: 'agent-manifest' },
       });
       const res = createMockResponse();
 

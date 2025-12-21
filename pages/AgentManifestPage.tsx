@@ -114,12 +114,15 @@ const AgentManifestPage = () => {
     setIsGenerating(true);
 
     try {
-      const response = await fetch('/api/agent-manifest', {
+      const response = await fetch('/api/tools', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ url: normalizedUrl }),
+        body: JSON.stringify({ 
+          tool: 'agent-manifest',
+          url: normalizedUrl 
+        }),
       });
 
       const data = await response.json();
@@ -128,7 +131,7 @@ const AgentManifestPage = () => {
         throw new Error(data.error || 'Failed to generate manifest');
       }
 
-      setResult(data.manifest);
+      setResult(data.data.manifest);
       setError('');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to generate manifest';
