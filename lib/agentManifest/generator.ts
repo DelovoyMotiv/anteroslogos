@@ -6,7 +6,7 @@
  * @version 1.0.0
  */
 
-import { createOpenRouterClient, type ChatMessage } from '../../utils/ai/openrouter';
+import { createSimpleOpenRouterClient, type ChatMessage } from './openRouterClient';
 import { buildSystemPrompt, buildUserPrompt } from './prompts';
 import { validateManifest, formatValidationError, type ValidationResult } from './validator';
 import type { LogosJSON } from './types';
@@ -113,7 +113,7 @@ function parseManifestResponse(response: string): unknown {
  */
 export async function generateManifest(url: string): Promise<LogosJSON> {
   // Create simple LLM client
-  const client = createOpenRouterClient();
+  const client = createSimpleOpenRouterClient();
   
   if (!client) {
     throw new ManifestGenerationError(
