@@ -1,59 +1,123 @@
 /**
  * URL validation and sanitization utilities for Agent Manifest Generator
- * Reuses existing URL validation infrastructure with manifest-specific enhancements
+ * Minimal implementation for serverless functions
  * 
  * @module lib/agentManifest/urlUtils
  * @version 1.0.0
  */
 
-import { validateAndSanitizeUrl, type ValidationResult } from '../../utils/urlValidator';
+export interface ValidationResult {
+  isValid: boolean;
+  sanitizedUrl?: string;
+  error?: string;
+}
 
 /**
  * Validates and sanitizes a URL for manifest generation
- * Wraps the existing URL validator with manifest-specific requirements
+ * Minimal implementation to reduce bundle size for serverless functions
  * 
  * @param url - The URL to validate and sanitize
  * @returns Validation result with sanitized URL or error
  */
 export function validateManifestUrl(url: string): ValidationResult {
-  // Use existing comprehensive URL validation
-  const result = validateAndSanitizeUrl(url);
-  
-  if (!result.isValid) {
-    return result;
+  // Basic input validation
+  if (!url || typeof url !== 'string') {
+    return {
+      isValid: false,
+      error: 'Please enter a valid URL',
+    };
   }
-  
-  // Additional manifest-specific validation
+
+  let sanitized = url.trim();
+
+  if (sanitized.length === 0) {
+    return {
+      isValid: false,
+      error: 'URL cannot be empty',
+    };
+  }
+
+  if (sanitized.length > 2048) {
+    return {
+      isValid: false,
+      error: 'URL is too long (max 2048 characters)',
+    };
+  }
+
+  // Add protocol if missing
+  if (!sanitized.startsWith('http://') && !sanitized.startsWith('https://')) {
+    sanitized = 'https://' + sanitized;
+  }
+
+  // Validate URL format
+  let urlObject: URL;
   try {
-    const urlObject = new URL(result.sanitizedUrl!);
-    
-    // Ensure URL has a valid hostname (not just IP)
-    const hostname = urlObject.hostname;
-    
-    // Check if hostname is an IP address (basic check)
-    const isIpAddress = /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname);
-    if (isIpAddress) {
-      return {
-        isValid: false,
-        error: 'Please provide a domain name, not an IP address',
-      };
-    }
-    
-    // Ensure URL doesn't have authentication credentials
-    if (urlObject.username || urlObject.password) {
-      return {
-        isValid: false,
-        error: 'URLs with authentication credentials are not allowed',
-      };
-    }
-    
-    return result;
-  } catch (error) {
+    urlObject = new URL(sanitized);
+  } catch {
     return {
       isValid: false,
       error: 'Invalid URL format',
     };
   }
+
+  // Protocol must be HTTP or HTTPS
+  if (urlObject.protocol !== 'http:' && urlObject.protocol !== 'https:') {
+    return {
+      isValid: false,
+      error: 'Only HTTP and HTTPS protocols are allowed',
+    };
+  }
+
+  const hostname = urlObject.hostname;
+
+  // Block localhost and internal IPs
+  const internalPatterns = [
+    /^localhost$/i,
+    /^127\./,
+    /^10\./,
+    /^172\.(1[6-9]|2[0-9]|3[0-1])\./,
+    /^192\.168\./,
+    /^0\.0\.0\.0$/,
+  ];
+
+  for (const pattern of internalPatterns) {
+    if (pattern.test(hostname)) {
+      return {
+        isValid: false,
+        error: 'Internal/private IP addresses are not allowed',
+      };
+    }
+  }
+
+  // Check if hostname is an IP address
+  const isIpAddress = /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname);
+  if (isIpAddress) {
+    return {
+      isValid: false,
+      error: 'Please provide a domain name, not an IP address',
+    };
+  }
+
+  // Ensure URL doesn't have authentication credentials
+  if (urlObject.username || urlObject.password) {
+    return {
+      isValid: false,
+      error: 'URLs with authentication credentials are not allowed',
+    };
+  }
+
+  // Hostname must contain at least one dot
+  if (!hostname.includes('.')) {
+    return {
+      isValid: false,
+      error: 'Invalid domain name format',
+    };
+  }
+
+  return {
+    isValid: true,
+    sanitizedUrl: urlObject.toString(),
+  };
 }
 
 /**
