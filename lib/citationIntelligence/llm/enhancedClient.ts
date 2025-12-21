@@ -668,8 +668,18 @@ export function createEnhancedOpenRouterClient(
   // Check both VITE_ prefixed and non-prefixed versions
   // VITE_ prefix works in client-side (import.meta.env)
   // Non-prefixed works in Vercel Serverless Functions (process.env)
+  
+  // Safely access import.meta.env (only available in browser/Vite)
+  const getImportMetaEnv = (key: string): string | undefined => {
+    try {
+      return (import.meta as any)?.env?.[key];
+    } catch {
+      return undefined;
+    }
+  };
+  
   const apiKey = 
-    import.meta.env?.VITE_OPENROUTER_API_KEY || 
+    getImportMetaEnv('VITE_OPENROUTER_API_KEY') || 
     process.env.VITE_OPENROUTER_API_KEY ||
     process.env.OPENROUTER_API_KEY;
   
@@ -679,21 +689,21 @@ export function createEnhancedOpenRouterClient(
   }
   
   const budgetLimit = parseFloat(
-    import.meta.env?.VITE_OPENROUTER_BUDGET_LIMIT || 
+    getImportMetaEnv('VITE_OPENROUTER_BUDGET_LIMIT') || 
     process.env.VITE_OPENROUTER_BUDGET_LIMIT ||
     process.env.OPENROUTER_BUDGET_LIMIT ||
     '100'
   );
   
   const alertThreshold = parseFloat(
-    import.meta.env?.VITE_OPENROUTER_ALERT_THRESHOLD || 
+    getImportMetaEnv('VITE_OPENROUTER_ALERT_THRESHOLD') || 
     process.env.VITE_OPENROUTER_ALERT_THRESHOLD ||
     process.env.OPENROUTER_ALERT_THRESHOLD ||
     '0.8'
   );
   
   const rateLimitRpm = parseFloat(
-    import.meta.env?.VITE_OPENROUTER_RATE_LIMIT_RPM || 
+    getImportMetaEnv('VITE_OPENROUTER_RATE_LIMIT_RPM') || 
     process.env.VITE_OPENROUTER_RATE_LIMIT_RPM ||
     process.env.OPENROUTER_RATE_LIMIT_RPM ||
     '10'
@@ -701,7 +711,7 @@ export function createEnhancedOpenRouterClient(
   
   return new EnhancedOpenRouterClient({
     apiKey,
-    httpReferer: import.meta.env?.VITE_APP_URL || process.env.VITE_APP_URL || 'https://anoteros-logos.com',
+    httpReferer: getImportMetaEnv('VITE_APP_URL') || process.env.VITE_APP_URL || 'https://anoteros-logos.com',
     appName: 'Anóteros Lógos GEO Audit',
     rateLimiter: {
       capacity: rateLimitRpm,
