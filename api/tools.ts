@@ -13,9 +13,31 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { generateManifest, ManifestGenerationError, InvalidJSONError, SchemaValidationError } from '../lib/agentManifest/generator';
-import { validateManifestUrl, normalizeManifestUrl } from '../lib/agentManifest/urlUtils';
-import type { LogosJSON } from '../lib/agentManifest/types';
+
+// Wrap imports in try-catch to catch any import errors
+let generateManifest: any;
+let ManifestGenerationError: any;
+let InvalidJSONError: any;
+let SchemaValidationError: any;
+let validateManifestUrl: any;
+let normalizeManifestUrl: any;
+
+try {
+  const generatorModule = require('../lib/agentManifest/generator');
+  generateManifest = generatorModule.generateManifest;
+  ManifestGenerationError = generatorModule.ManifestGenerationError;
+  InvalidJSONError = generatorModule.InvalidJSONError;
+  SchemaValidationError = generatorModule.SchemaValidationError;
+  
+  const urlUtilsModule = require('../lib/agentManifest/urlUtils');
+  validateManifestUrl = urlUtilsModule.validateManifestUrl;
+  normalizeManifestUrl = urlUtilsModule.normalizeManifestUrl;
+  
+  console.log('[api/tools] All modules imported successfully');
+} catch (error) {
+  console.error('[api/tools] FATAL: Failed to import modules:', error);
+  console.error('[api/tools] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+}
 
 /**
  * Base request interface
@@ -63,6 +85,17 @@ async function handleAgentManifest(
   res: VercelResponse
 ): Promise<void> {
   console.log('[handleAgentManifest] Starting manifest generation');
+  
+  // Check if modules are loaded
+  if (!generateManifest || !validateManifestUrl || !normalizeManifestUrl) {
+    console.error('[handleAgentManifest] Modules not loaded');
+    res.status(500).json({
+      success: false,
+      error: 'Server configuration error. Modules failed to load.',
+    });
+    return;
+  }
+  
   const { url } = req;
 
   // Validate URL is provided and is a string
@@ -196,13 +229,14 @@ export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ): Promise<void> {
-  // Log incoming request
-  console.log('[api/tools] Incoming request:', {
-    method: req.method,
-    url: req.url,
-    headers: req.headers,
-    body: req.body,
-  });
+  try {
+    // Log incoming request
+    console.log('[api/tools] Incoming request:', {
+      method: req.method,
+      url: req.url,
+      headers: req.headers,
+      body: req.body,
+    });
 
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
