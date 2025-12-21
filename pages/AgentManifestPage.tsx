@@ -114,6 +114,9 @@ const AgentManifestPage = () => {
     setIsGenerating(true);
 
     try {
+      console.log('[AgentManifest] Starting request to /api/tools');
+      console.log('[AgentManifest] Request payload:', { tool: 'agent-manifest', url: normalizedUrl });
+      
       const response = await fetch('/api/tools', {
         method: 'POST',
         headers: {
@@ -125,13 +128,18 @@ const AgentManifestPage = () => {
         }),
       });
 
+      console.log('[AgentManifest] Response status:', response.status);
+      console.log('[AgentManifest] Response headers:', Object.fromEntries(response.headers.entries()));
+
       // Check if response is JSON
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
+        console.error('[AgentManifest] Invalid content-type:', contentType);
         throw new Error('AI service is currently unavailable. Please try again later.');
       }
 
       const data = await response.json();
+      console.log('[AgentManifest] Response data:', data);
 
       if (!response.ok || !data.success) {
         throw new Error(data.error || 'Failed to generate manifest');
@@ -140,7 +148,19 @@ const AgentManifestPage = () => {
       setResult(data.data.manifest);
       setError('');
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to generate manifest';
+      console.error('[AgentManifest] Error:', err);
+      console.error('[AgentManifest] Error type:', err instanceof Error ? err.constructor.name : typeof err);
+      console.error('[AgentManifest] Error message:', err instanceof Error ? err.message : String(err));
+      
+      let errorMessage = 'Failed to generate manifest';
+      
+      if (err instanceof TypeError) {
+        // Network errors are typically TypeErrors
+        errorMessage = 'Network error: Unable to connect to the server. Please check your internet connection and try again.';
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      
       setError(errorMessage);
       setResult(null);
     } finally {
