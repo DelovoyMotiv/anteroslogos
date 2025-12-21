@@ -62,10 +62,12 @@ async function handleAgentManifest(
   req: AgentManifestRequest,
   res: VercelResponse
 ): Promise<void> {
+  console.log('[handleAgentManifest] Starting manifest generation');
   const { url } = req;
 
   // Validate URL is provided and is a string
   if (url === undefined || url === null || typeof url !== 'string') {
+    console.error('[handleAgentManifest] Invalid URL:', url);
     res.status(400).json({
       success: false,
       error: 'URL is required. Please provide a valid website URL.',
@@ -75,6 +77,7 @@ async function handleAgentManifest(
 
   // Validate URL is not empty
   if (url.trim().length === 0) {
+    console.error('[handleAgentManifest] Empty URL');
     res.status(400).json({
       success: false,
       error: 'Please enter a website URL',
@@ -82,10 +85,13 @@ async function handleAgentManifest(
     return;
   }
 
+  console.log('[handleAgentManifest] Validating URL:', url);
+
   // Validate and sanitize URL
   const validationResult = validateManifestUrl(url);
   
   if (!validationResult.isValid) {
+    console.error('[handleAgentManifest] URL validation failed:', validationResult.error);
     res.status(400).json({
       success: false,
       error: validationResult.error || 'Invalid URL format. Please enter a valid website URL.',
@@ -95,11 +101,14 @@ async function handleAgentManifest(
 
   // Normalize URL for consistent processing
   const sanitizedUrl = normalizeManifestUrl(validationResult.sanitizedUrl!);
+  console.log('[handleAgentManifest] Sanitized URL:', sanitizedUrl);
 
   try {
+    console.log('[handleAgentManifest] Calling generateManifest');
     // Generate manifest using LLM
     const manifest = await generateManifest(sanitizedUrl);
 
+    console.log('[handleAgentManifest] Manifest generated successfully');
     // Return success response
     res.status(200).json({
       success: true,
@@ -109,6 +118,9 @@ async function handleAgentManifest(
   } catch (error) {
     // Log error for debugging
     console.error('[api/tools/agent-manifest] Error generating manifest:', error);
+    console.error('[api/tools/agent-manifest] Error type:', error instanceof Error ? error.constructor.name : typeof error);
+    console.error('[api/tools/agent-manifest] Error message:', error instanceof Error ? error.message : String(error));
+    console.error('[api/tools/agent-manifest] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
 
     // Handle specific error types
     if (error instanceof SchemaValidationError) {
@@ -184,6 +196,14 @@ export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ): Promise<void> {
+  // Log incoming request
+  console.log('[api/tools] Incoming request:', {
+    method: req.method,
+    url: req.url,
+    headers: req.headers,
+    body: req.body,
+  });
+
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -209,6 +229,8 @@ export default async function handler(
     const body = req.body as ToolsRequest;
     const { tool } = body;
 
+    console.log('[api/tools] Processing tool:', tool);
+
     // Validate tool parameter
     if (!tool || typeof tool !== 'string') {
       res.status(400).json({
@@ -221,6 +243,7 @@ export default async function handler(
     // Route to appropriate handler
     switch (tool) {
       case 'agent-manifest':
+        console.log('[api/tools] Routing to agent-manifest handler');
         await handleAgentManifest(body as AgentManifestRequest, res);
         break;
 
@@ -233,9 +256,11 @@ export default async function handler(
 
   } catch (error) {
     console.error('[api/tools] Unexpected error:', error);
+    console.error('[api/tools] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     res.status(500).json({
       success: false,
       error: 'An unexpected error occurred.',
+      details: error instanceof Error ? error.message : String(error),
     });
   }
 }

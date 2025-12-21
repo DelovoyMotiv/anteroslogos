@@ -135,7 +135,12 @@ const AgentManifestPage = () => {
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
         console.error('[AgentManifest] Invalid content-type:', contentType);
-        throw new Error('AI service is currently unavailable. Please try again later.');
+        
+        // Try to read the response as text to see the actual error
+        const errorText = await response.text();
+        console.error('[AgentManifest] Server error response:', errorText);
+        
+        throw new Error(`Server error: ${errorText.substring(0, 200)}`);
       }
 
       const data = await response.json();
