@@ -125,6 +125,12 @@ const AgentManifestPage = () => {
         }),
       });
 
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('AI service is currently unavailable. Please try again later.');
+      }
+
       const data = await response.json();
 
       if (!response.ok || !data.success) {
