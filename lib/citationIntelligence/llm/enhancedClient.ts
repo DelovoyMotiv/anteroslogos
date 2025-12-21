@@ -665,9 +665,13 @@ export class EnhancedOpenRouterClient extends OpenRouterClient {
 export function createEnhancedOpenRouterClient(
   overrides?: Partial<EnhancedClientConfig>
 ): EnhancedOpenRouterClient | null {
+  // Check both VITE_ prefixed and non-prefixed versions
+  // VITE_ prefix works in client-side (import.meta.env)
+  // Non-prefixed works in Vercel Serverless Functions (process.env)
   const apiKey = 
     import.meta.env?.VITE_OPENROUTER_API_KEY || 
-    process.env.VITE_OPENROUTER_API_KEY;
+    process.env.VITE_OPENROUTER_API_KEY ||
+    process.env.OPENROUTER_API_KEY;
   
   if (!apiKey) {
     console.warn('OpenRouter API key not found. Enhanced client will not be created.');
@@ -676,19 +680,22 @@ export function createEnhancedOpenRouterClient(
   
   const budgetLimit = parseFloat(
     import.meta.env?.VITE_OPENROUTER_BUDGET_LIMIT || 
-    process.env.VITE_OPENROUTER_BUDGET_LIMIT || 
+    process.env.VITE_OPENROUTER_BUDGET_LIMIT ||
+    process.env.OPENROUTER_BUDGET_LIMIT ||
     '100'
   );
   
   const alertThreshold = parseFloat(
     import.meta.env?.VITE_OPENROUTER_ALERT_THRESHOLD || 
-    process.env.VITE_OPENROUTER_ALERT_THRESHOLD || 
+    process.env.VITE_OPENROUTER_ALERT_THRESHOLD ||
+    process.env.OPENROUTER_ALERT_THRESHOLD ||
     '0.8'
   );
   
   const rateLimitRpm = parseFloat(
     import.meta.env?.VITE_OPENROUTER_RATE_LIMIT_RPM || 
-    process.env.VITE_OPENROUTER_RATE_LIMIT_RPM || 
+    process.env.VITE_OPENROUTER_RATE_LIMIT_RPM ||
+    process.env.OPENROUTER_RATE_LIMIT_RPM ||
     '10'
   );
   
