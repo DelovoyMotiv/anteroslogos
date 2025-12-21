@@ -621,6 +621,27 @@ export class CostTracker {
 // ============================================================================
 
 /**
+ * Safely get environment variable from import.meta.env or process.env
+ */
+function getEnvVar(key: string): string | undefined {
+  try {
+    // Try import.meta.env first (browser/Vite)
+    if (typeof import.meta !== 'undefined' && (import.meta as any)?.env) {
+      return (import.meta as any).env[key];
+    }
+  } catch {
+    // import.meta not available, fall through to process.env
+  }
+  
+  // Fallback to process.env (Node.js/Vercel)
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env[key];
+  }
+  
+  return undefined;
+}
+
+/**
  * Create a new CostTracker instance with default configuration
  * 
  * @param config - Optional configuration overrides
@@ -637,14 +658,14 @@ export class CostTracker {
 export function createCostTracker(config?: Partial<CostTrackerConfig>): CostTracker {
   // Get defaults from environment variables
   const budgetLimit = parseFloat(
-    import.meta.env?.VITE_OPENROUTER_BUDGET_LIMIT || 
-    process.env.VITE_OPENROUTER_BUDGET_LIMIT || 
+    getEnvVar('VITE_OPENROUTER_BUDGET_LIMIT') || 
+    getEnvVar('OPENROUTER_BUDGET_LIMIT') || 
     '100'
   );
   
   const alertThreshold = parseFloat(
-    import.meta.env?.VITE_OPENROUTER_ALERT_THRESHOLD || 
-    process.env.VITE_OPENROUTER_ALERT_THRESHOLD || 
+    getEnvVar('VITE_OPENROUTER_ALERT_THRESHOLD') || 
+    getEnvVar('OPENROUTER_ALERT_THRESHOLD') || 
     '0.8'
   );
   

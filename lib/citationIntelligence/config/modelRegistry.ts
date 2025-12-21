@@ -393,6 +393,27 @@ export function calculateEstimatedCost(
 // ============================================================================
 
 /**
+ * Safely get environment variable from import.meta.env or process.env
+ */
+function getEnvVar(key: string): string | undefined {
+  try {
+    // Try import.meta.env first (browser/Vite)
+    if (typeof import.meta !== 'undefined' && (import.meta as any)?.env) {
+      return (import.meta as any).env[key];
+    }
+  } catch {
+    // import.meta not available, fall through to process.env
+  }
+  
+  // Fallback to process.env (Node.js/Vercel)
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env[key];
+  }
+  
+  return undefined;
+}
+
+/**
  * Get model from environment variable or use default from registry
  * 
  * @param taskType - The type of task to perform
@@ -413,7 +434,7 @@ export function getModelFromEnv(taskType: TaskType): string {
   };
   
   const envVar = envVarMap[taskType];
-  const envValue = import.meta.env?.[envVar] || process.env[envVar];
+  const envValue = getEnvVar(envVar);
   
   // Return environment value if set, otherwise use registry default
   return envValue || getModelForTask(taskType);
@@ -439,6 +460,7 @@ export function validateEnvironmentConfig(): {
 } {
   const required = [
     'VITE_OPENROUTER_API_KEY',
+    'OPENROUTER_API_KEY', // Also check non-prefixed version
   ];
   
   const optional = [
@@ -454,17 +476,19 @@ export function validateEnvironmentConfig(): {
   const missing: string[] = [];
   const warnings: string[] = [];
   
-  // Check required variables
-  for (const varName of required) {
-    const value = import.meta.env?.[varName] || process.env[varName];
-    if (!value) {
-      missing.push(varName);
-    }
+  // Check required variables (at least one must be set)
+  const hasApiKey = required.some(varName => {
+    const value = getEnvVar(varName);
+    return !!value;
+  });
+  
+  if (!hasApiKey) {
+    missing.push('VITE_OPENROUTER_API_KEY or OPENROUTER_API_KEY');
   }
   
   // Check optional variables (warnings only)
   for (const varName of optional) {
-    const value = import.meta.env?.[varName] || process.env[varName];
+    const value = getEnvVar(varName);
     if (!value) {
       warnings.push(`${varName} not set, using default value`);
     }

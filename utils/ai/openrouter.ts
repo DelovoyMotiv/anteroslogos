@@ -438,11 +438,32 @@ OUTPUT REQUIREMENTS:
 // ==================== FACTORY ====================
 
 /**
+ * Safely get environment variable from import.meta.env or process.env
+ */
+function getEnvVar(key: string): string | undefined {
+  try {
+    // Try import.meta.env first (browser/Vite)
+    if (typeof import.meta !== 'undefined' && (import.meta as any)?.env) {
+      return (import.meta as any).env[key];
+    }
+  } catch {
+    // import.meta not available, fall through to process.env
+  }
+  
+  // Fallback to process.env (Node.js/Vercel)
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env[key] || process.env[`VITE_${key}`] || process.env[key.replace('VITE_', '')];
+  }
+  
+  return undefined;
+}
+
+/**
  * Create OpenRouter client from environment variables
  */
 export function createOpenRouterClient(): OpenRouterClient | null {
-  const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
-  const model = import.meta.env.VITE_OPENROUTER_MODEL || 'meta-llama/llama-3.2-3b-instruct:free';
+  const apiKey = getEnvVar('VITE_OPENROUTER_API_KEY') || getEnvVar('OPENROUTER_API_KEY');
+  const model = getEnvVar('VITE_OPENROUTER_MODEL') || 'meta-llama/llama-3.2-3b-instruct:free';
 
   if (!apiKey) {
     console.warn('OpenRouter API key not found. AI recommendations will be disabled.');
@@ -452,7 +473,7 @@ export function createOpenRouterClient(): OpenRouterClient | null {
   return new OpenRouterClient({
     apiKey,
     model,
-    httpReferer: import.meta.env.VITE_APP_URL || 'https://anoteros-logos.com',
+    httpReferer: getEnvVar('VITE_APP_URL') || 'https://anoteros-logos.com',
     appName: 'Anóteros Lógos GEO Audit',
   });
 }
@@ -463,12 +484,12 @@ export function createOpenRouterClient(): OpenRouterClient | null {
  * Check if OpenRouter is configured
  */
 export function isOpenRouterConfigured(): boolean {
-  return !!import.meta.env.VITE_OPENROUTER_API_KEY;
+  return !!(getEnvVar('VITE_OPENROUTER_API_KEY') || getEnvVar('OPENROUTER_API_KEY'));
 }
 
 /**
  * Get current OpenRouter model
  */
 export function getOpenRouterModel(): string {
-  return import.meta.env.VITE_OPENROUTER_MODEL || 'meta-llama/llama-3.2-3b-instruct:free';
+  return getEnvVar('VITE_OPENROUTER_MODEL') || 'meta-llama/llama-3.2-3b-instruct:free';
 }
