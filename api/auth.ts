@@ -5,12 +5,14 @@
  * Routes:
  * - /api/auth?flow=challenge - Challenge-response flow
  * - /api/auth?flow=handshake - One-step handshake flow
+ * - /api/auth?action=user-role - Get user role
  * - /api/auth - Default handshake flow
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { ed25519 } from '@noble/curves/ed25519.js';
 import { randomBytes, createHash } from 'crypto';
+import { createClient } from '@supabase/supabase-js';
 
 // In-memory stores (production: use Redis/KV)
 const challengeStore = new Map<string, { challenge: string; expiresAt: number; publicKey?: string }>();
@@ -88,6 +90,58 @@ function generateAipUri(name: string, publicKey: string): string {
   return `aip://${normalizedName}/${suffix}`;
 }
 
+async function handleUserRole(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  try {
+    // Get authorization header
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const token = authHeader.substring(7);
+
+    // Initialize Supabase client
+    const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+    const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseKey) {
+      return res.status(500).json({ error: 'Server configuration error' });
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey, {
+      global: {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      },
+    });
+
+    // Get user from token
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return res.status(401).json({ error: 'Invalid token' });
+    }
+
+    // Get user role from user_metadata or app_metadata
+    // Default role is 'user'
+    const role = user.app_metadata?.role || user.user_metadata?.role || 'user';
+
+    return res.status(200).json({
+      userId: user.id,
+      email: user.email,
+      role,
+    });
+  } catch (error) {
+    console.error('[User Role] Error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+}
+
 export default async function handler(
   req: VercelRequest,
   res: VercelResponse
@@ -99,6 +153,12 @@ export default async function handler(
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
+  }
+
+  // Check if this is a user-role request
+  const { action } = req.query;
+  if (action === 'user-role') {
+    return handleUserRole(req, res);
   }
 
   // Rate limiting
