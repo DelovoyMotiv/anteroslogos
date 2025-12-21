@@ -8,7 +8,7 @@
 
 import { createSimpleOpenRouterClient, type ChatMessage } from './openRouterClient';
 import { buildSystemPrompt, buildUserPrompt } from './prompts';
-import { validateManifest, formatValidationError, type ValidationResult } from './validator';
+import { validateManifest, formatValidationError, type ValidationResult } from './simpleValidator';
 import type { LogosJSON } from './types';
 
 /**
