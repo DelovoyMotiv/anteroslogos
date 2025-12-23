@@ -184,7 +184,7 @@ const AgentManifestPage = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'logos.json';
+    link.download = 'logos.json'; // Changed from logos-v1.json
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

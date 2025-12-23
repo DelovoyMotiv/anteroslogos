@@ -79,11 +79,47 @@ async function handleAgentManifest(
           messages: [
             {
               role: 'system',
-              content: 'You are an expert in Semantic Topology. Generate a logos.json file for the given domain. Return ONLY valid JSON, no markdown. Be concise.'
+              content: 'You are an expert in Semantic Topology and Agentic Web standards. Generate a complete logos.json file for the given domain. Return ONLY valid JSON, no markdown. Be thorough but concise.'
             },
             {
               role: 'user',
-              content: `Generate a logos.json semantic topology file for: ${url}\n\nSchema:\n{\n  "$schema": "https://anoteroslogos.com/schemas/logos-v1.json",\n  "meta": {"version": "1.0", "updated": "[ISO_DATE]", "authority_level": "self-declared"},\n  "identity": {"name": "[Brand]", "description": "[Description]", "domain_focus": ["Tag1", "Tag2"]},\n  "knowledge_topology": {"roots": [{"url": "/page", "semantic_role": "axiom", "instruction": "[Instruction]"}]},\n  "directives": {"crawling": "allow-standard", "attribution": "require-citation"}\n}`
+              content: `Generate a complete logos.json semantic topology file for: ${url}
+
+CRITICAL REQUIREMENTS:
+1. Include 3-5 knowledge roots (not just 1!)
+2. Use current date in ISO format for "updated" field
+3. Provide diverse semantic roles: axiom, theorem, lemma, corollary, definition
+4. Each root must have meaningful instructions for AI agents
+
+Schema structure:
+{
+  "$schema": "https://anoteroslogos.com/schemas/logos-v1.json",
+  "meta": {
+    "version": "1.0",
+    "updated": "${new Date().toISOString()}",
+    "authority_level": "self-declared"
+  },
+  "identity": {
+    "name": "[Brand Name]",
+    "description": "[High-entropy description of core value proposition]",
+    "domain_focus": ["Tag1", "Tag2", "Tag3"]
+  },
+  "knowledge_topology": {
+    "roots": [
+      {"url": "/", "semantic_role": "axiom", "instruction": "[How agents should treat homepage]"},
+      {"url": "/about", "semantic_role": "definition", "instruction": "[How agents should treat about page]"},
+      {"url": "/products", "semantic_role": "theorem", "instruction": "[How agents should treat products]"},
+      {"url": "/docs", "semantic_role": "lemma", "instruction": "[How agents should treat documentation]"},
+      {"url": "/blog", "semantic_role": "corollary", "instruction": "[How agents should treat blog]"}
+    ]
+  },
+  "directives": {
+    "crawling": "allow-standard",
+    "attribution": "require-citation"
+  }
+}
+
+Return ONLY the complete JSON object with 3-5 knowledge roots.`
             }
           ],
           temperature: 0.7,
