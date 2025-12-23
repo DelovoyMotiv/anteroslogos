@@ -75,7 +75,7 @@ async function handleAgentManifest(
           'X-Title': 'Anóteros Lógos Agent Manifest Generator',
         },
         body: JSON.stringify({
-          model: 'anthropic/claude-3.5-haiku', // Faster model
+          model: 'kwaipilot/kat-coder-pro:free', // Free model for JSON generation
           messages: [
             {
               role: 'system',
