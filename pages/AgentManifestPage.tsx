@@ -212,41 +212,36 @@ const AgentManifestPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black/40">
+    <div className="min-h-screen bg-brand-bg text-brand-text">
       {/* SEO Metadata */}
       <SEOHead {...seoMetadata} />
       
       {/* Hero Section */}
-      <section className="relative pb-12 md:pb-16 overflow-hidden pt-8">
+      <section className="relative pb-20 md:pb-32 overflow-hidden" style={{ paddingTop: 'calc(var(--header-height) + 3rem)' }}>
         <div className="absolute inset-0 bg-gradient-to-br from-brand-accent/10 via-transparent to-transparent"></div>
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(59,130,246,0.1),transparent)]"></div>
         
-        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6">
-          {/* Badge */}
-          <div className="flex justify-start mb-6">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-brand-accent/10 border border-brand-accent/20 rounded-full">
-              <FileJson className="w-4 h-4 text-brand-accent" />
-              <span className="font-mono text-xs tracking-wider uppercase text-brand-accent">
-                Identity Layer
-              </span>
-            </div>
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 bg-brand-accent/10 border border-brand-accent/20 rounded-full">
+            <FileJson className="w-4 h-4 text-brand-accent" />
+            <span className="font-mono text-xs tracking-wider uppercase text-brand-accent">
+              Free Manifest Generator
+            </span>
           </div>
 
-          {/* Title */}
-          <h1 className="font-display text-3xl md:text-5xl font-bold mb-4 leading-tight">
+          <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
             <span className="bg-gradient-to-r from-white via-brand-accent to-white bg-clip-text text-transparent">
               Generate Agent Manifest
             </span>
           </h1>
 
-          {/* Subtitle */}
-          <p className="text-base md:text-lg text-white/70 mb-8 max-w-2xl">
+          <p className="text-lg md:text-xl text-white/70 mb-12 max-w-2xl mx-auto">
             Create a logos.json semantic topology file for your domain
           </p>
 
           {/* Input Form */}
-          <form onSubmit={handleGenerate} className="mb-6">
-            <div className="flex flex-col sm:flex-row gap-4 max-w-2xl">
+          <form onSubmit={handleGenerate} className="mb-8">
+            <div className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto">
               <input
                 type="text"
                 value={url}
@@ -282,7 +277,7 @@ const AgentManifestPage = () => {
           {error && (
             <div 
               id="url-error"
-              className="max-w-2xl p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 flex items-center gap-3"
+              className="max-w-2xl mx-auto p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 flex items-center gap-3"
               role="alert"
               aria-live="assertive"
               aria-atomic="true"
@@ -294,7 +289,7 @@ const AgentManifestPage = () => {
 
           {/* Loading State */}
           {isGenerating && (
-            <div className="max-w-2xl text-left" role="status" aria-live="polite" aria-atomic="true">
+            <div className="max-w-2xl mx-auto text-center" role="status" aria-live="polite" aria-atomic="true">
               <p className="text-white/60 animate-pulse">
                 <span className="sr-only">Loading: </span>
                 Generating your semantic topology...
@@ -306,8 +301,8 @@ const AgentManifestPage = () => {
 
       {/* Results Section */}
       {result && (
-        <section className="py-8 px-4 sm:px-6">
-          <div className="max-w-4xl mx-auto">
+        <section className="py-8 px-4 lg:px-6">
+          <div className="max-w-[1800px] mx-auto">
             {/* Screen reader announcement for successful generation */}
             <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
               Manifest generated successfully. You can now download or copy the manifest.
@@ -322,7 +317,7 @@ const AgentManifestPage = () => {
                 <button
                   onClick={handleDownload}
                   aria-label="Download logos.json file"
-                  className="px-4 py-2 bg-brand-accent/10 hover:bg-brand-accent/20 text-brand-accent border border-brand-accent/30 rounded-lg text-sm font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-brand-accent/20 focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-2 focus:ring-offset-black"
+                  className="px-4 py-2 bg-brand-accent/10 hover:bg-brand-accent/20 text-brand-accent border border-brand-accent/30 rounded-lg text-sm font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-brand-accent/20 focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-2 focus:ring-offset-brand-bg"
                 >
                   Download logos.json
                 </button>
@@ -330,7 +325,7 @@ const AgentManifestPage = () => {
                   onClick={handleCopy}
                   aria-label={copySuccess ? "Copied to clipboard" : "Copy manifest to clipboard"}
                   aria-live="polite"
-                  className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-lg text-sm font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-black"
+                  className="px-4 py-2 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-lg text-sm font-semibold transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-brand-bg"
                 >
                   {copySuccess ? 'Copied!' : 'Copy to Clipboard'}
                 </button>
