@@ -217,31 +217,26 @@ const AgentManifestPage = () => {
       <SEOHead {...seoMetadata} />
       
       {/* Hero Section */}
-      <section className="relative pb-20 md:pb-32 overflow-hidden" style={{ paddingTop: 'calc(var(--header-height) + 3rem)' }}>
-        <div className="absolute inset-0 bg-gradient-to-br from-brand-accent/10 via-transparent to-transparent"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(59,130,246,0.1),transparent)]"></div>
-        
+      <section className="relative pb-12 md:pb-16 overflow-hidden" style={{ paddingTop: 'calc(var(--header-height) + 3rem)' }}>
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-            <span className="bg-gradient-to-r from-white via-brand-accent to-white bg-clip-text text-transparent">
-              Generate Agent Manifest
-            </span>
+          <h1 className="text-3xl md:text-5xl font-bold mb-4 text-white">
+            Generate Agent Manifest
           </h1>
 
-          <p className="text-lg md:text-xl text-white/70 mb-12 max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-white/60 mb-8 max-w-2xl mx-auto">
             Create a logos.json semantic topology file for your domain
           </p>
 
           {/* Input Form */}
-          <form onSubmit={handleGenerate} className="mb-8">
-            <div className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto">
+          <form onSubmit={handleGenerate} className="mb-6">
+            <div className="flex flex-col sm:flex-row gap-3 max-w-2xl mx-auto">
               <input
                 type="text"
                 value={url}
                 onChange={handleUrlChange}
                 placeholder="https://example.com"
                 disabled={isGenerating}
-                className="flex-1 bg-brand-secondary/20 border border-brand-secondary/40 focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/50 rounded-xl px-6 py-4 text-base outline-none transition-colors placeholder:text-brand-text/40 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:outline-2 focus:outline-offset-2 focus:outline-brand-accent"
+                className="flex-1 bg-brand-secondary/20 border border-brand-secondary/40 focus:border-brand-accent focus:ring-2 focus:ring-brand-accent/50 rounded-lg px-4 py-3 text-sm outline-none transition-colors placeholder:text-brand-text/40 disabled:opacity-50 disabled:cursor-not-allowed"
                 aria-label="Website URL input field"
                 aria-required="true"
                 aria-invalid={!!error}
@@ -252,11 +247,11 @@ const AgentManifestPage = () => {
                 disabled={isGenerating}
                 aria-label={isGenerating ? "Generating manifest, please wait" : "Generate agent manifest"}
                 aria-busy={isGenerating}
-                className="bg-brand-accent hover:bg-blue-500 text-white px-8 py-4 rounded-xl text-base font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-brand-accent/30 hover:-translate-y-0.5 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-2 focus:ring-offset-black/40"
+                className="bg-brand-accent hover:bg-blue-500 text-white px-6 py-3 rounded-lg text-sm font-semibold transition-all duration-200 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {isGenerating ? (
                   <>
-                    <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
+                    <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
                     <span>Generating...</span>
                   </>
                 ) : (
@@ -270,12 +265,12 @@ const AgentManifestPage = () => {
           {error && (
             <div 
               id="url-error"
-              className="max-w-2xl mx-auto p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 flex items-center gap-3"
+              className="max-w-2xl mx-auto p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm flex items-center gap-2"
               role="alert"
               aria-live="assertive"
               aria-atomic="true"
             >
-              <AlertCircle className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+              <AlertCircle className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
               <span>{error}</span>
             </div>
           )}
@@ -283,7 +278,7 @@ const AgentManifestPage = () => {
           {/* Loading State */}
           {isGenerating && (
             <div className="max-w-2xl mx-auto text-center" role="status" aria-live="polite" aria-atomic="true">
-              <p className="text-white/60 animate-pulse">
+              <p className="text-white/50 text-sm animate-pulse">
                 <span className="sr-only">Loading: </span>
                 Generating your semantic topology...
               </p>
