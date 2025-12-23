@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FileJson, AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import JSONDisplay from '../components/JSONDisplay';
 import SEOHead from '../components/SEOHead';
 import { LogosJSON } from '../lib/agentManifest/types';
@@ -222,13 +222,6 @@ const AgentManifestPage = () => {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(59,130,246,0.1),transparent)]"></div>
         
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 bg-brand-accent/10 border border-brand-accent/20 rounded-full">
-            <FileJson className="w-4 h-4 text-brand-accent" />
-            <span className="font-mono text-xs tracking-wider uppercase text-brand-accent">
-              Free Manifest Generator
-            </span>
-          </div>
-
           <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
             <span className="bg-gradient-to-r from-white via-brand-accent to-white bg-clip-text text-transparent">
               Generate Agent Manifest
