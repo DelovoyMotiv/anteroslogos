@@ -347,20 +347,6 @@ export function Sidebar() {
           </div>
         )}
 
-        {/* System Status - ASI Control Style */}
-        {!collapsed && (
-          <div className="pt-2 border-t border-slate-800/50">
-            <div className="flex items-center justify-between px-2 py-1">
-              <span className="text-[9px] text-slate-600 font-mono">System Status:</span>
-              <span className="text-[9px] text-emerald-500 font-mono">Operational</span>
-            </div>
-            <div className="flex items-center gap-1 px-2 py-0.5">
-              <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[9px] text-slate-600 font-mono">All systems nominal</span>
-            </div>
-          </div>
-        )}
-
         {/* Version */}
         {!collapsed && (
           <div className="flex items-center justify-between px-2 py-1">
