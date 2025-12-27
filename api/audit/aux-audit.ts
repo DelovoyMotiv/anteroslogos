@@ -556,8 +556,10 @@ Format as JSON:
         });
       }
       
+      // FIXED: Only recommend protocols if they're actually missing
       const availableProtocols = protocols.filter(p => p.available).length;
-      if (availableProtocols === 0) {
+      const totalProtocols = protocols.length;
+      if (availableProtocols < totalProtocols / 2) {
         recommendations.push({
           title: 'Implement Agent Discovery Protocols',
           description: 'Add agents.json, ai-plugin.json, or AGENTS.md files to enable AI agents to discover your API capabilities and interaction patterns.',
@@ -688,6 +690,12 @@ Format as JSON:
     // BUILD RESPONSE
     // ========================================================================
     
+    // DEBUGGING: Log counts before sending response
+    console.log('[AUX Audit] Interactive elements count:', interactiveElements.length);
+    console.log('[AUX Audit] Intent triggers count:', intentTriggers.length);
+    console.log('[AUX Audit] Recommendations count:', recommendations.length);
+    console.log('[AUX Audit] Protocols available:', protocols.filter(p => p.available).length, '/', protocols.length);
+    
     const summary = llmSummary || 
       `Analysis complete. ARIA score: ${ariaScore.toFixed(1)}%, found ${interactiveElements.length} interactive elements, ${frictionPoints.length} friction points detected, ${protocols.filter(p => p.available).length} protocols available.`;
     
@@ -705,7 +713,7 @@ Format as JSON:
       analyzedAt: new Date().toISOString()
     };
     
-    console.log('[AUX Audit] Sending response');
+    console.log('[AUX Audit] Sending response with', results.interactiveElements.length, 'interactive elements');
     res.status(200).json(results);
     
   } catch (error) {
