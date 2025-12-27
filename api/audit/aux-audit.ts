@@ -252,6 +252,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     // ========================================================================
     // FALLBACK: Use Playwright if Cheerio found nothing (JS-rendered sites)
     // ========================================================================
+    // TEMPORARILY DISABLED: Playwright has issues in Vercel serverless
+    // Will re-enable after testing with proper configuration
+    /*
     if (interactiveElements.length === 0) {
       console.log('[AUX Audit] No elements found with Cheerio, trying Playwright for JS-rendered content...');
       
@@ -421,6 +424,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
         // Continue with empty array - will show in recommendations
       }
     }
+    */
+    
+    console.log('[AUX Audit] Note: Playwright fallback temporarily disabled for serverless compatibility');
     
     console.log('[AUX Audit] Final interactive elements count:', interactiveElements.length);
     
