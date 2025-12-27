@@ -1,11 +1,21 @@
 /**
- * Public Blog API Endpoints
+ * Unified Blog API Endpoints
+ * 
+ * Public endpoints:
  * GET /api/blog?action=posts
  * GET /api/blog?action=post&slug={slug}
  * GET /api/blog?action=authors
  * GET /api/blog?action=author&slug={slug}
  * GET /api/blog?action=categories
  * GET /api/blog?action=tags
+ * 
+ * Admin endpoints (require authentication):
+ * POST /api/blog?action=admin-create-post
+ * PUT /api/blog?action=admin-update-post&id={id}
+ * DELETE /api/blog?action=admin-delete-post&id={id}
+ * POST /api/blog?action=admin-upload-image
+ * POST /api/blog?action=admin-create-author
+ * PUT /api/blog?action=admin-update-author&id={id}
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
@@ -13,6 +23,9 @@ import type { Database } from '../types/database.types';
 import type { BlogPost, BlogAuthor, BlogCategory, BlogTag } from '../types/database.types';
 import { sendErrorResponse, notFoundError, databaseError } from './_lib/blog/errorHandler.js';
 import { getSupabaseClient, withRetry, logDatabaseError } from './_lib/blog/databaseConnection.js';
+
+// Import admin handler for admin actions
+import adminBlogHandler from './admin/blog';
 
 // Lazy initialization of Supabase client
 // This ensures environment variables are available when the function runs
@@ -373,6 +386,17 @@ async function getTags(req: VercelRequest, res: VercelResponse): Promise<void> {
  * Main handler
  */
 async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
+  const action = req.query.action as string || 'posts';
+
+  // Check if this is an admin action (starts with 'admin-')
+  if (action.startsWith('admin-')) {
+    // Strip 'admin-' prefix and route to admin handler
+    const adminAction = action.substring(6); // Remove 'admin-' prefix
+    req.query.action = adminAction;
+    return adminBlogHandler(req, res);
+  }
+
+  // Public endpoints - only allow GET
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -387,8 +411,6 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
-
-  const action = req.query.action as string || 'posts';
 
   try {
     switch (action) {
