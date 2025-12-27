@@ -1,13 +1,23 @@
 /**
- * AUX Audit API Endpoint - Testing Cheerio
+ * AUX Audit API Endpoint - With SemanticAffordanceAnalyzer
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-// Dynamic import to avoid build-time issues
+// Dynamic imports to avoid build-time issues
 async function loadCheerio() {
   const cheerio = await import('cheerio');
   return cheerio;
+}
+
+async function loadSemanticAnalyzer() {
+  const { SemanticAffordanceAnalyzer } = await import('../../lib/auxAudit/SemanticAffordanceAnalyzer');
+  return SemanticAffordanceAnalyzer;
+}
+
+async function loadFrictionAnalyzer() {
+  const { FrictionAnalyzer } = await import('../../lib/auxAudit/FrictionAnalyzer');
+  return FrictionAnalyzer;
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
@@ -66,7 +76,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     const html = await htmlResponse.text();
     console.log('[AUX Audit] HTML fetched, length:', html.length);
     
-    // Load and use Cheerio
+    // Load Cheerio
     console.log('[AUX Audit] Loading Cheerio...');
     const cheerio = await loadCheerio();
     const $ = cheerio.load(html);
@@ -75,20 +85,42 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     const linkCount = $('a').length;
     const inputCount = $('input').length;
     
-    console.log('[AUX Audit] Cheerio analysis complete');
-    console.log('[AUX Audit] Buttons:', buttonCount, 'Links:', linkCount, 'Inputs:', inputCount);
+    console.log('[AUX Audit] Cheerio counts - Buttons:', buttonCount, 'Links:', linkCount, 'Inputs:', inputCount);
+    
+    // Load and use SemanticAffordanceAnalyzer
+    console.log('[AUX Audit] Loading SemanticAffordanceAnalyzer...');
+    const SemanticAffordanceAnalyzer = await loadSemanticAnalyzer();
+    const analyzer = new SemanticAffordanceAnalyzer();
+    
+    console.log('[AUX Audit] Running semantic analysis...');
+    const semanticAnalysis = await analyzer.analyzeHTML(html);
+    
+    console.log('[AUX Audit] Semantic analysis complete');
+    console.log('[AUX Audit] ARIA Score:', semanticAnalysis.ariaScore);
+    console.log('[AUX Audit] Interactive elements:', semanticAnalysis.interactiveElements.length);
+    
+    // Load and use FrictionAnalyzer
+    console.log('[AUX Audit] Loading FrictionAnalyzer...');
+    const FrictionAnalyzer = await loadFrictionAnalyzer();
+    const frictionAnalyzer = new FrictionAnalyzer();
+    
+    console.log('[AUX Audit] Running friction analysis...');
+    const frictionPoints = await frictionAnalyzer.detectFriction(html, $);
+    
+    console.log('[AUX Audit] Friction analysis complete');
+    console.log('[AUX Audit] Friction points found:', frictionPoints.length);
     
     // Response
     const results = {
       score: 75,
       classification: 'Agent-Capable' as const,
       protocols: [],
-      ariaScore: 0,
-      interactiveElements: [],
-      frictionPoints: [],
+      ariaScore: semanticAnalysis.ariaScore,
+      interactiveElements: semanticAnalysis.interactiveElements,
+      frictionPoints,
       recommendations: [],
       intentTriggers: [],
-      summary: `Cheerio test: Found ${buttonCount} buttons, ${linkCount} links, ${inputCount} inputs`,
+      summary: `Analysis complete. ARIA score: ${semanticAnalysis.ariaScore.toFixed(1)}%, found ${semanticAnalysis.interactiveElements.length} interactive elements, ${frictionPoints.length} friction points detected`,
       riskLevel: 'medium' as const,
       analyzedAt: new Date().toISOString()
     };
