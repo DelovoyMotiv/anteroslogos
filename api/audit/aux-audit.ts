@@ -92,8 +92,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     // Semantic HTML tags
     const interactiveSelectors = ['button', 'a', 'input', 'select', 'textarea'];
     
+    console.log('[AUX Audit] Starting interactive elements parsing...');
+    console.log('[AUX Audit] HTML length:', html.length);
+    console.log('[AUX Audit] HTML preview:', html.substring(0, 500));
+    console.log('[AUX Audit] Cheerio root element:', $.root().html().substring(0, 200));
+    
     interactiveSelectors.forEach(tag => {
-      $(tag).each((index, element) => {
+      const elements = $(tag);
+      console.log(`[AUX Audit] Found ${elements.length} <${tag}> elements`);
+      
+      elements.each((index, element) => {
         const $el = $(element);
         const ariaLabel = $el.attr('aria-label');
         const hasAriaLabel = !!ariaLabel;
@@ -127,6 +135,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
           text: text || undefined,
           type
         });
+        
+        // Log first few elements for debugging
+        if (index < 3) {
+          console.log(`[AUX Audit] Element ${index}:`, { tag, selector, text: text.substring(0, 50), hasAriaLabel });
+        }
       });
     });
     
@@ -224,7 +237,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       });
     });
     
-    console.log('[AUX Audit] Found', interactiveElements.length, 'interactive elements');
+    console.log('[AUX Audit] Total interactive elements found:', interactiveElements.length);
+    console.log('[AUX Audit] Breakdown by tag:', {
+      button: interactiveElements.filter(el => el.tag === 'button').length,
+      a: interactiveElements.filter(el => el.tag === 'a').length,
+      input: interactiveElements.filter(el => el.tag === 'input').length,
+      select: interactiveElements.filter(el => el.tag === 'select').length,
+      textarea: interactiveElements.filter(el => el.tag === 'textarea').length,
+      withRole: interactiveElements.filter(el => el.role).length,
+      withTabindex: interactiveElements.filter(el => !interactiveSelectors.includes(el.tag) && !el.role).length
+    });
     
     // Calculate ARIA score
     const labeledCount = interactiveElements.filter(
