@@ -1,24 +1,9 @@
 /**
- * AUX Audit API Endpoint - With SemanticAffordanceAnalyzer
+ * AUX Audit API Endpoint - Inline Implementation
+ * All logic inline to avoid module import issues in serverless
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-
-// Dynamic imports to avoid build-time issues
-async function loadCheerio() {
-  const cheerio = await import('cheerio');
-  return cheerio;
-}
-
-async function loadSemanticAnalyzer() {
-  const { SemanticAffordanceAnalyzer } = await import('../../lib/auxAudit/SemanticAffordanceAnalyzer');
-  return SemanticAffordanceAnalyzer;
-}
-
-async function loadFrictionAnalyzer() {
-  const { FrictionAnalyzer } = await import('../../lib/auxAudit/FrictionAnalyzer');
-  return FrictionAnalyzer;
-}
 
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   console.log('[AUX Audit] Handler started');
@@ -76,51 +61,137 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     const html = await htmlResponse.text();
     console.log('[AUX Audit] HTML fetched, length:', html.length);
     
-    // Load Cheerio
+    // Dynamic import of Cheerio
     console.log('[AUX Audit] Loading Cheerio...');
-    const cheerio = await loadCheerio();
+    const cheerio = await import('cheerio');
     const $ = cheerio.load(html);
     
-    const buttonCount = $('button').length;
-    const linkCount = $('a').length;
-    const inputCount = $('input').length;
+    console.log('[AUX Audit] Cheerio loaded successfully');
     
-    console.log('[AUX Audit] Cheerio counts - Buttons:', buttonCount, 'Links:', linkCount, 'Inputs:', inputCount);
+    // Extract interactive elements (inline logic)
+    const interactiveElements: any[] = [];
+    const interactiveSelectors = ['button', 'a', 'input', 'select'];
     
-    // Load and use SemanticAffordanceAnalyzer
-    console.log('[AUX Audit] Loading SemanticAffordanceAnalyzer...');
-    const SemanticAffordanceAnalyzer = await loadSemanticAnalyzer();
-    const analyzer = new SemanticAffordanceAnalyzer();
+    interactiveSelectors.forEach(tag => {
+      $(tag).each((index, element) => {
+        const $el = $(element);
+        const ariaLabel = $el.attr('aria-label');
+        const hasAriaLabel = !!ariaLabel;
+        const role = $el.attr('role');
+        const text = $el.text().trim();
+        const type = tag === 'input' ? $el.attr('type') : undefined;
+        
+        // Generate selector
+        const id = $el.attr('id');
+        const className = $el.attr('class');
+        const name = $el.attr('name');
+        
+        let selector: string;
+        if (id) {
+          selector = `#${id}`;
+        } else if (className) {
+          const firstClass = className.split(' ')[0];
+          selector = `${tag}.${firstClass}`;
+        } else if (name) {
+          selector = `${tag}[name="${name}"]`;
+        } else {
+          selector = `${tag}:nth-of-type(${index + 1})`;
+        }
+        
+        interactiveElements.push({
+          tag,
+          selector,
+          hasAriaLabel,
+          ariaLabel,
+          role,
+          text: text || undefined,
+          type
+        });
+      });
+    });
     
-    console.log('[AUX Audit] Running semantic analysis...');
-    const semanticAnalysis = await analyzer.analyzeHTML(html, cheerio);
+    console.log('[AUX Audit] Found', interactiveElements.length, 'interactive elements');
     
-    console.log('[AUX Audit] Semantic analysis complete');
-    console.log('[AUX Audit] ARIA Score:', semanticAnalysis.ariaScore);
-    console.log('[AUX Audit] Interactive elements:', semanticAnalysis.interactiveElements.length);
+    // Calculate ARIA score
+    const labeledCount = interactiveElements.filter(
+      el => el.hasAriaLabel || el.role
+    ).length;
+    const ariaScore = interactiveElements.length > 0 
+      ? Math.round((labeledCount / interactiveElements.length) * 10000) / 100
+      : 0;
     
-    // Load and use FrictionAnalyzer
-    console.log('[AUX Audit] Loading FrictionAnalyzer...');
-    const FrictionAnalyzer = await loadFrictionAnalyzer();
-    const frictionAnalyzer = new FrictionAnalyzer();
+    console.log('[AUX Audit] ARIA Score:', ariaScore);
     
-    console.log('[AUX Audit] Running friction analysis...');
-    const frictionPoints = await frictionAnalyzer.detectFriction(html, $);
+    // Detect friction points (inline logic)
+    const frictionPoints: any[] = [];
     
-    console.log('[AUX Audit] Friction analysis complete');
-    console.log('[AUX Audit] Friction points found:', frictionPoints.length);
+    // Detect CAPTCHA
+    const lowerHtml = html.toLowerCase();
+    if (lowerHtml.includes('turnstile') || lowerHtml.includes('recaptcha')) {
+      frictionPoints.push({
+        type: 'captcha',
+        description: 'CAPTCHA detected - blocks automated agent interaction',
+        severity: 'high',
+        location: 'Page contains CAPTCHA implementation'
+      });
+    }
+    
+    // Detect interstitials
+    const interstitialSelectors = [
+      '[role="dialog"]',
+      '[role="alertdialog"]',
+      '.modal',
+      '.overlay'
+    ];
+    
+    for (const selector of interstitialSelectors) {
+      const elements = $(selector);
+      if (elements.length > 0) {
+        let hasVisible = false;
+        elements.each((_, el) => {
+          const style = $(el).attr('style') || '';
+          if (!style.includes('display: none') && !style.includes('display:none')) {
+            hasVisible = true;
+            return false;
+          }
+        });
+        
+        if (hasVisible) {
+          frictionPoints.push({
+            type: 'interstitial',
+            description: 'Intrusive interstitial detected',
+            severity: 'medium',
+            location: 'Modal or overlay element found'
+          });
+          break;
+        }
+      }
+    }
+    
+    // Detect canvas UI
+    const canvasElements = $('canvas');
+    if (canvasElements.length >= 3) {
+      frictionPoints.push({
+        type: 'canvas',
+        description: 'Canvas-based UI detected',
+        severity: 'high',
+        location: 'Multiple canvas elements found'
+      });
+    }
+    
+    console.log('[AUX Audit] Found', frictionPoints.length, 'friction points');
     
     // Response
     const results = {
       score: 75,
       classification: 'Agent-Capable' as const,
       protocols: [],
-      ariaScore: semanticAnalysis.ariaScore,
-      interactiveElements: semanticAnalysis.interactiveElements,
+      ariaScore,
+      interactiveElements,
       frictionPoints,
       recommendations: [],
       intentTriggers: [],
-      summary: `Analysis complete. ARIA score: ${semanticAnalysis.ariaScore.toFixed(1)}%, found ${semanticAnalysis.interactiveElements.length} interactive elements, ${frictionPoints.length} friction points detected`,
+      summary: `Analysis complete. ARIA score: ${ariaScore.toFixed(1)}%, found ${interactiveElements.length} interactive elements, ${frictionPoints.length} friction points detected`,
       riskLevel: 'medium' as const,
       analyzedAt: new Date().toISOString()
     };
