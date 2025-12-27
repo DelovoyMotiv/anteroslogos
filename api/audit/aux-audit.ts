@@ -657,7 +657,11 @@ Friction Points: ${frictionPoints.length}
 Protocols Available: ${protocols.filter(p => p.available).length}
 
 Sample Interactive Elements (first 10):
-${interactiveElements.slice(0, 10).map(el => `- ${el.tag}: "${el.text || el.ariaLabel || 'no label'}" (${el.selector})`).join('\n')}
+${interactiveElements.slice(0, 10).map(el => {
+  const text = el.text || el.ariaLabel || 'no label';
+  const truncatedText = text.length > 100 ? text.substring(0, 100) + '...' : text;
+  return `- ${el.tag}: "${truncatedText}" (${el.selector})`;
+}).join('\n')}
 
 Friction Points:
 ${frictionPoints.map(fp => `- ${fp.type}: ${fp.description}`).join('\n') || 'None detected'}
@@ -691,6 +695,9 @@ Format as JSON:
             max_tokens: 1500,
           }),
           signal: AbortSignal.timeout(30000)
+        }).catch(fetchError => {
+          console.error('[AUX Audit] LLM fetch error:', fetchError);
+          throw fetchError;
         });
         
         console.log('[AUX Audit] LLM response status:', response.status);
@@ -956,12 +963,17 @@ Format as JSON:
     res.status(200).json(results);
     
   } catch (error) {
-    console.error('[AUX Audit] Error:', error);
+    console.error('[AUX Audit] Critical error:', error);
+    console.error('[AUX Audit] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    
+    // Ensure we always return JSON, never HTML
+    res.setHeader('Content-Type', 'application/json');
     res.status(500).json({ 
       error: 'Internal server error',
       code: 'INTERNAL_ERROR',
       message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined
+      details: error instanceof Error ? error.stack : undefined
     });
+    return;
   }
 }
