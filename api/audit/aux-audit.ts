@@ -7,8 +7,76 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import * as cheerio from 'cheerio';
-import { ProtocolDiscoveryEngine } from '../../lib/auxAudit/ProtocolDiscoveryEngine';
 import { SemanticAffordanceAnalyzer } from '../../lib/auxAudit/SemanticAffordanceAnalyzer';
+import type { ProtocolStatus } from '../../lib/auxAudit/types';
+
+/**
+ * Simplified Protocol Discovery (without cache for serverless)
+ */
+async function discoverProtocols(url: string): Promise<ProtocolStatus[]> {
+  const normalizeUrl = (url: string): string => {
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      return `https://${url}`;
+    }
+    return url;
+  };
+  
+  const baseUrl = normalizeUrl(url);
+  
+  const protocolPaths = [
+    { name: 'agents.json', path: '/agents.json' },
+    { name: 'ai-plugin.json', path: '/.well-known/ai-plugin.json' },
+    { name: 'mcp.json', path: '/.well-known/mcp.json' }
+  ];
+  
+  const protocolChecks = protocolPaths.map(async ({ name, path }) => {
+    try {
+      const fullUrl = new URL(path, baseUrl).toString();
+      const response = await fetch(fullUrl, {
+        method: 'HEAD',
+        headers: { 'User-Agent': 'AUX-Audit-Bot/1.0' },
+        signal: AbortSignal.timeout(5000)
+      });
+      
+      return {
+        name,
+        available: response.ok || response.status === 304,
+        url: fullUrl
+      };
+    } catch {
+      return {
+        name,
+        available: false,
+        url: new URL(path, baseUrl).toString()
+      };
+    }
+  });
+  
+  const protocols = await Promise.all(protocolChecks);
+  
+  // Add robots.txt check
+  try {
+    const robotsUrl = new URL('/robots.txt', baseUrl).toString();
+    const response = await fetch(robotsUrl, {
+      headers: { 'User-Agent': 'AUX-Audit-Bot/1.0' },
+      signal: AbortSignal.timeout(5000)
+    });
+    
+    protocols.push({
+      name: 'robots.txt',
+      available: response.ok,
+      url: robotsUrl
+    });
+  } catch {
+    protocols.push({
+      name: 'robots.txt',
+      available: false,
+      url: new URL('/robots.txt', baseUrl).toString()
+    });
+  }
+  
+  return protocols;
+}
 
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -70,8 +138,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     
     // Step 3: Discover protocols
     console.log('[AUX Audit] Step 3: Discovering protocols...');
-    const protocolEngine = new ProtocolDiscoveryEngine();
-    const protocols = await protocolEngine.discoverProtocols(url);
+    const protocols = await discoverProtocols(url);
     console.log('[AUX Audit] Protocols found:', protocols.length);
     
     // Step 4: Analyze semantic affordance
