@@ -395,7 +395,6 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
       timestamp: new Date().toISOString()
     });
     return;
-    });
   }
 
   // Public endpoints - only allow GET
