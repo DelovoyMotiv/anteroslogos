@@ -24,6 +24,7 @@ const NotFound = lazy(() => import('./components/NotFound'));
 const DashboardLayout = lazy(() => import('./src/components/dashboard/DashboardLayout'));
 const DashboardOverview = lazy(() => import('./src/pages/dashboard/OverviewPage'));
 const DashboardAudit = lazy(() => import('./src/pages/dashboard/AuditPage'));
+const DashboardAUXAudit = lazy(() => import('./src/pages/dashboard/AUXAuditPage'));
 const DashboardAPIKeys = lazy(() => import('./src/pages/dashboard/APIKeysPage'));
 const DashboardAgentKeys = lazy(() => import('./src/pages/dashboard/AgentKeysPage'));
 const DashboardBilling = lazy(() => import('./src/pages/dashboard/BillingPage'));
@@ -105,6 +106,7 @@ const App: React.FC = () => {
                         <Route path="/dashboard" element={<DashboardLayout />}>
                             <Route index element={<DashboardOverview />} />
                             <Route path="audit" element={<DashboardAudit />} />
+                            <Route path="aux-audit" element={<DashboardAUXAudit />} />
                             <Route path="api-keys" element={<DashboardAPIKeys />} />
                             <Route path="agent-keys" element={<DashboardAgentKeys />} />
                             <Route path="agent-manifest" element={<AgentManifestPage />} />

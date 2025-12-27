@@ -18,6 +18,9 @@ import {
   FileText,
   Search,
   FileJson,
+  Bot,
+  ChevronDown,
+  ChevronRight,
 } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../lib/dashboard/auth-guard';
@@ -32,11 +35,16 @@ interface NavItem {
 // Main navigation items
 const mainNav: NavItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Audit', href: '/dashboard/audit', icon: Search },
   { name: 'API Keys', href: '/dashboard/api-keys', icon: Key },
   { name: 'Agent Keys', href: '/dashboard/agent-keys', icon: Cpu },
   { name: 'Usage', href: '/dashboard/usage', icon: BarChart3 },
   { name: 'Billing', href: '/dashboard/billing', icon: CreditCard },
+];
+
+// Audit Suite items
+const auditNav: NavItem[] = [
+  { name: 'GEO Audit', href: '/dashboard/audit', icon: Search },
+  { name: 'AUX Audit', href: '/dashboard/aux-audit', icon: Bot },
 ];
 
 // Identity Layer items
@@ -55,12 +63,18 @@ export function Sidebar() {
   const location = useLocation();
   const { user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
+  const [auditSuiteExpanded, setAuditSuiteExpanded] = useState(true);
 
   // Load collapsed state from localStorage
   useEffect(() => {
     const saved = localStorage.getItem('sidebar-collapsed');
     if (saved) {
       setCollapsed(saved === 'true');
+    }
+    
+    const auditExpanded = localStorage.getItem('audit-suite-expanded');
+    if (auditExpanded !== null) {
+      setAuditSuiteExpanded(auditExpanded === 'true');
     }
   }, []);
 
@@ -69,6 +83,13 @@ export function Sidebar() {
     const newState = !collapsed;
     setCollapsed(newState);
     localStorage.setItem('sidebar-collapsed', String(newState));
+  };
+
+  // Toggle audit suite section
+  const toggleAuditSuite = () => {
+    const newState = !auditSuiteExpanded;
+    setAuditSuiteExpanded(newState);
+    localStorage.setItem('audit-suite-expanded', String(newState));
   };
 
 
@@ -105,7 +126,7 @@ export function Sidebar() {
               </span>
             </div>
             <p className="text-[10px] text-slate-500 font-mono ml-7">
-              GEO Audit Control
+              AI Audit Platform
             </p>
           </Link>
         ) : (
@@ -153,6 +174,76 @@ export function Sidebar() {
               );
             })}
           </nav>
+        </div>
+
+        {/* Audit Suite Section */}
+        <div className="px-3 py-3 border-t border-slate-800/50">
+          {!collapsed ? (
+            <>
+              <button
+                onClick={toggleAuditSuite}
+                className="flex items-center justify-between w-full px-2 mb-2 text-[10px] font-mono font-semibold text-slate-600 uppercase tracking-wider hover:text-slate-500 transition-colors"
+              >
+                <span>Audit Suite</span>
+                {auditSuiteExpanded ? (
+                  <ChevronDown className="w-3 h-3" />
+                ) : (
+                  <ChevronRight className="w-3 h-3" />
+                )}
+              </button>
+              {auditSuiteExpanded && (
+                <nav className="space-y-0.5">
+                  {auditNav.map((item) => {
+                    const isActive = location.pathname === item.href;
+                    const Icon = item.icon;
+
+                    return (
+                      <Link
+                        key={item.name}
+                        to={item.href}
+                        className={`
+                          flex items-center px-2 py-1.5 rounded transition-colors group
+                          ${
+                            isActive
+                              ? 'bg-slate-800/50 text-slate-100'
+                              : 'text-slate-400 hover:bg-slate-900/30 hover:text-slate-200'
+                          }
+                        `}
+                      >
+                        <Icon className="w-4 h-4 flex-shrink-0" />
+                        <span className="ml-2.5 text-xs font-medium">{item.name}</span>
+                      </Link>
+                    );
+                  })}
+                </nav>
+              )}
+            </>
+          ) : (
+            <nav className="space-y-0.5">
+              {auditNav.map((item) => {
+                const isActive = location.pathname === item.href;
+                const Icon = item.icon;
+
+                return (
+                  <Link
+                    key={item.name}
+                    to={item.href}
+                    className={`
+                      flex items-center px-2 py-1.5 rounded transition-colors group
+                      ${
+                        isActive
+                          ? 'bg-slate-800/50 text-slate-100'
+                          : 'text-slate-400 hover:bg-slate-900/30 hover:text-slate-200'
+                      }
+                    `}
+                    title={item.name}
+                  >
+                    <Icon className="w-4 h-4 flex-shrink-0" />
+                  </Link>
+                );
+              })}
+            </nav>
+          )}
         </div>
 
         {/* Identity Layer Section */}
