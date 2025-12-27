@@ -1,6 +1,7 @@
 /**
  * AUX Score Card - Technical Brutalist Design
  * Compact, data-dense display
+ * Mobile-responsive
  */
 
 import type { AUXScoreCardProps } from '../../lib/auxAudit/types';
@@ -25,15 +26,15 @@ export default function AUXScoreCard({ score, classification, summary }: AUXScor
   };
 
   return (
-    <div className="bg-slate-950 border border-slate-800 p-4">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-baseline gap-3">
-          <span className={`text-4xl font-mono font-bold ${getScoreColor()}`}>
+    <div className="bg-slate-950 border border-slate-800 p-3 sm:p-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 mb-3">
+        <div className="flex items-baseline gap-2 sm:gap-3">
+          <span className={`text-3xl sm:text-4xl font-mono font-bold ${getScoreColor()}`}>
             {score}
           </span>
-          <span className="text-slate-600 font-mono text-sm">/100</span>
+          <span className="text-slate-600 font-mono text-xs sm:text-sm">/100</span>
         </div>
-        <div className={`px-3 py-1 border font-mono text-xs uppercase tracking-wider ${getClassificationColor()}`}>
+        <div className={`px-2 sm:px-3 py-1 border font-mono text-[10px] sm:text-xs uppercase tracking-wider ${getClassificationColor()} self-start sm:self-auto`}>
           {classification}
         </div>
       </div>
@@ -45,7 +46,7 @@ export default function AUXScoreCard({ score, classification, summary }: AUXScor
         />
       </div>
 
-      <p className="text-xs font-mono text-slate-400 leading-relaxed">
+      <p className="text-[10px] sm:text-xs font-mono text-slate-400 leading-relaxed">
         {summary}
       </p>
     </div>

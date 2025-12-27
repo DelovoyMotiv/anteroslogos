@@ -1,6 +1,7 @@
 /**
  * Recommendations List - Technical Brutalist Design
  * Compact list with priority and impact
+ * Mobile-responsive
  */
 
 import type { RecommendationsListProps } from '../../lib/auxAudit/types';
@@ -12,7 +13,6 @@ export default function RecommendationsList({ recommendations }: Recommendations
     return 'text-blue-400 border-blue-900';
   };
 
-  // Sort by priority (high > medium > low) and impact
   const sorted = [...recommendations].sort((a, b) => {
     const priorityOrder = { high: 3, medium: 2, low: 1 };
     const priorityDiff = priorityOrder[b.priority] - priorityOrder[a.priority];
@@ -25,22 +25,22 @@ export default function RecommendationsList({ recommendations }: Recommendations
       {sorted.map((rec, index) => (
         <div 
           key={index}
-          className={`py-2 px-2 bg-slate-900/50 border-l-2 ${getPriorityColor(rec.priority)}`}
+          className={`py-1.5 sm:py-2 px-2 bg-slate-900/50 border-l-2 ${getPriorityColor(rec.priority)}`}
         >
           <div className="flex items-start justify-between gap-2 mb-1">
-            <span className="font-mono text-xs text-slate-300">
+            <span className="font-mono text-[10px] sm:text-xs text-slate-300">
               {rec.title}
             </span>
-            <div className="flex items-center gap-2">
-              <span className={`font-mono text-[10px] uppercase ${getPriorityColor(rec.priority)}`}>
+            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+              <span className={`font-mono text-[9px] sm:text-[10px] uppercase ${getPriorityColor(rec.priority)}`}>
                 {rec.priority}
               </span>
-              <span className="font-mono text-[10px] text-green-400">
+              <span className="font-mono text-[9px] sm:text-[10px] text-green-400">
                 +{rec.impact}
               </span>
             </div>
           </div>
-          <p className="text-xs text-slate-500 font-mono leading-relaxed">
+          <p className="text-[10px] sm:text-xs text-slate-500 font-mono leading-relaxed">
             {rec.description}
           </p>
         </div>
