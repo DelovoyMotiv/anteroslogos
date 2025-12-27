@@ -48,7 +48,7 @@ export default function AUXAuditPage() {
     setIsAnalyzing(true);
 
     try {
-      const response = await fetch('/api/audit/aux', {
+      const response = await fetch('/api/audit/aux-audit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
