@@ -628,6 +628,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     
     // ========================================================================
     // LLM ANALYSIS (Optional - only if API key available)
+    // TEMPORARILY DISABLED: LLM calls take too long for Vercel 10s limit
     // ========================================================================
     let recommendations: any[] = [];
     let intentTriggers: any[] = [];
@@ -635,6 +636,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     
     const openRouterKey = getEnvVar('OPENROUTER_API_KEY');
     
+    // DISABLED: LLM analysis takes 5-15 seconds, exceeds Vercel timeout
+    /*
     if (openRouterKey) {
       console.log('[AUX Audit] Running LLM analysis...');
       
@@ -779,6 +782,9 @@ Format as JSON:
     } else {
       console.log('[AUX Audit] Skipping LLM analysis (no API key)');
     }
+    */
+    
+    console.log('[AUX Audit] LLM analysis disabled for performance - using fallback recommendations');
     
     // ========================================================================
     // FALLBACK RECOMMENDATIONS (if LLM didn't provide any)
