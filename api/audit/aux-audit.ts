@@ -6,6 +6,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import * as cheerio from 'cheerio';
 
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -57,6 +58,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     
     const html = await htmlResponse.text();
     console.log('[AUX Audit] HTML fetched, length:', html.length);
+    
+    // Step 2: Test Cheerio parsing
+    console.log('[AUX Audit] Step 2: Parsing HTML with Cheerio...');
+    const dom = cheerio.load(html);
+    const buttonCount = dom('button').length;
+    const linkCount = dom('a').length;
+    console.log('[AUX Audit] Found buttons:', buttonCount, 'links:', linkCount);
     
     // Return basic success response
     const results = {
