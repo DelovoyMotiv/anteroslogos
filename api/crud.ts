@@ -16,14 +16,12 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { withCors, withRateLimit, compose } from '../lib/validation/middleware';
 
-// Import handlers from original files
-import aipRegistryHandler from './aip-registry';
-import subscriptionsHandler from './subscriptions';
-import tenantsHandler from './tenants';
-
 /**
  * Main unified CRUD handler
  * Routes requests to appropriate resource handler based on ?resource= parameter
+ * 
+ * NOTE: This endpoint is currently a placeholder to reduce serverless function count
+ * for Vercel Hobby plan (12 function limit). Full implementation coming soon.
  */
 async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   const resource = req.query.resource as string;
@@ -36,24 +34,18 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
     });
   }
 
-  // Route to appropriate handler
-  switch (resource) {
-    case 'aip-registry':
-      return aipRegistryHandler(req, res);
-    
-    case 'subscriptions':
-      return subscriptionsHandler(req, res);
-    
-    case 'tenants':
-      return tenantsHandler(req, res);
-    
-    default:
-      return res.status(400).json({ 
-        error: 'Invalid resource',
-        resource,
-        allowed: ['aip-registry', 'subscriptions', 'tenants']
-      });
-  }
+  // Temporary response - implementation in progress
+  return res.status(501).json({
+    error: 'Not Implemented',
+    message: 'CRUD endpoints are being consolidated. Please use direct endpoints temporarily.',
+    resource,
+    migration: {
+      'aip-registry': 'Endpoint consolidation in progress',
+      'subscriptions': 'Endpoint consolidation in progress',
+      'tenants': 'Endpoint consolidation in progress'
+    },
+    timestamp: new Date().toISOString()
+  });
 }
 
 // Apply middleware: CORS -> Rate Limiting

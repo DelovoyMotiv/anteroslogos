@@ -24,9 +24,6 @@ import type { BlogPost, BlogAuthor, BlogCategory, BlogTag } from '../types/datab
 import { sendErrorResponse, notFoundError, databaseError } from './_lib/blog/errorHandler.js';
 import { getSupabaseClient, withRetry, logDatabaseError } from './_lib/blog/databaseConnection.js';
 
-// Import admin handler for admin actions
-import adminBlogHandler from './admin/blog';
-
 // Lazy initialization of Supabase client
 // This ensures environment variables are available when the function runs
 function getClient() {
@@ -390,10 +387,13 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
 
   // Check if this is an admin action (starts with 'admin-')
   if (action.startsWith('admin-')) {
-    // Strip 'admin-' prefix and route to admin handler
-    const adminAction = action.substring(6); // Remove 'admin-' prefix
-    req.query.action = adminAction;
-    return adminBlogHandler(req, res);
+    // Admin endpoints temporarily disabled due to Vercel function limit
+    return res.status(501).json({
+      error: 'Not Implemented',
+      message: 'Admin blog endpoints are being consolidated. Please use direct admin endpoint temporarily.',
+      action,
+      timestamp: new Date().toISOString()
+    });
   }
 
   // Public endpoints - only allow GET
