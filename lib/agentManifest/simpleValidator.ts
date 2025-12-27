@@ -1,12 +1,12 @@
 /**
- * Simple validator for LogosJSON without zod dependency
+ * Simple validator for AgentsJSON without zod dependency
  * Minimal validation for serverless functions
  * 
  * @module lib/agentManifest/simpleValidator
  * @version 1.0.0
  */
 
-import type { LogosJSON } from './types';
+import type { AgentsJSON } from './types';
 
 /**
  * Validation result type
@@ -16,10 +16,10 @@ export type ValidationResult<T> =
   | { success: false; error: { message: string; errors: Array<{ path: string; message: string }> } };
 
 /**
- * Simple validation for LogosJSON manifest
+ * Simple validation for AgentsJSON manifest
  * Does basic structure checks without zod
  */
-export function validateManifest(input: unknown): ValidationResult<LogosJSON> {
+export function validateManifest(input: unknown): ValidationResult<AgentsJSON> {
   const errors: Array<{ path: string; message: string }> = [];
 
   // Check if input is an object
@@ -36,23 +36,13 @@ export function validateManifest(input: unknown): ValidationResult<LogosJSON> {
   const manifest = input as any;
 
   // Validate $schema
-  if (manifest.$schema !== 'https://anoteroslogos.com/schemas/logos-v1.json') {
+  if (manifest.$schema !== 'https://anoteroslogos.com/schemas/agents-v1.json') {
     errors.push({ path: '$schema', message: 'Invalid schema URL' });
   }
 
-  // Validate meta
-  if (!manifest.meta || typeof manifest.meta !== 'object') {
-    errors.push({ path: 'meta', message: 'Meta object is required' });
-  } else {
-    if (!manifest.meta.version) {
-      errors.push({ path: 'meta.version', message: 'Version is required' });
-    }
-    if (!manifest.meta.updated) {
-      errors.push({ path: 'meta.updated', message: 'Updated date is required' });
-    }
-    if (!manifest.meta.authority_level) {
-      errors.push({ path: 'meta.authority_level', message: 'Authority level is required' });
-    }
+  // Validate version
+  if (manifest.version !== '1.0') {
+    errors.push({ path: 'version', message: 'Version must be "1.0"' });
   }
 
   // Validate identity
@@ -65,42 +55,49 @@ export function validateManifest(input: unknown): ValidationResult<LogosJSON> {
     if (!manifest.identity.description || manifest.identity.description.length < 10) {
       errors.push({ path: 'identity.description', message: 'Description must be at least 10 characters' });
     }
-    if (!Array.isArray(manifest.identity.domain_focus) || manifest.identity.domain_focus.length === 0) {
-      errors.push({ path: 'identity.domain_focus', message: 'At least one domain focus tag is required' });
+    if (!Array.isArray(manifest.identity.tags) || manifest.identity.tags.length === 0) {
+      errors.push({ path: 'identity.tags', message: 'At least one tag is required' });
     }
   }
 
-  // Validate knowledge_topology
-  if (!manifest.knowledge_topology || typeof manifest.knowledge_topology !== 'object') {
-    errors.push({ path: 'knowledge_topology', message: 'Knowledge topology object is required' });
+  // Validate knowledge
+  if (!Array.isArray(manifest.knowledge) || manifest.knowledge.length === 0) {
+    errors.push({ path: 'knowledge', message: 'At least one knowledge entry is required' });
   } else {
-    if (!Array.isArray(manifest.knowledge_topology.roots) || manifest.knowledge_topology.roots.length === 0) {
-      errors.push({ path: 'knowledge_topology.roots', message: 'At least one knowledge root is required' });
-    } else {
-      manifest.knowledge_topology.roots.forEach((root: any, index: number) => {
-        if (!root.url) {
-          errors.push({ path: `knowledge_topology.roots[${index}].url`, message: 'URL is required' });
-        }
-        if (!root.semantic_role) {
-          errors.push({ path: `knowledge_topology.roots[${index}].semantic_role`, message: 'Semantic role is required' });
-        }
-        if (!root.instruction || root.instruction.length < 10) {
-          errors.push({ path: `knowledge_topology.roots[${index}].instruction`, message: 'Instruction must be at least 10 characters' });
-        }
-      });
-    }
+    const validRoles = ['documentation', 'pricing', 'about', 'product', 'contact', 'support'];
+    manifest.knowledge.forEach((entry: any, index: number) => {
+      if (!entry.role) {
+        errors.push({ path: `knowledge[${index}].role`, message: 'Role is required' });
+      } else if (!validRoles.includes(entry.role)) {
+        errors.push({ path: `knowledge[${index}].role`, message: `Role must be one of: ${validRoles.join(', ')}` });
+      }
+      if (!entry.url) {
+        errors.push({ path: `knowledge[${index}].url`, message: 'URL is required' });
+      }
+      if (!entry.description || entry.description.length < 5) {
+        errors.push({ path: `knowledge[${index}].description`, message: 'Description must be at least 5 characters' });
+      }
+    });
   }
 
-  // Validate directives
-  if (!manifest.directives || typeof manifest.directives !== 'object') {
-    errors.push({ path: 'directives', message: 'Directives object is required' });
-  } else {
-    if (!manifest.directives.crawling) {
-      errors.push({ path: 'directives.crawling', message: 'Crawling policy is required' });
-    }
-    if (!manifest.directives.attribution) {
-      errors.push({ path: 'directives.attribution', message: 'Attribution policy is required' });
-    }
+  // Validate actions (can be empty array)
+  if (!Array.isArray(manifest.actions)) {
+    errors.push({ path: 'actions', message: 'Actions must be an array' });
+  } else if (manifest.actions.length > 0) {
+    const validTypes = ['GET', 'POST', 'PUT', 'DELETE'];
+    manifest.actions.forEach((action: any, index: number) => {
+      if (!action.name) {
+        errors.push({ path: `actions[${index}].name`, message: 'Action name is required' });
+      }
+      if (!action.type) {
+        errors.push({ path: `actions[${index}].type`, message: 'Action type is required' });
+      } else if (!validTypes.includes(action.type)) {
+        errors.push({ path: `actions[${index}].type`, message: `Type must be one of: ${validTypes.join(', ')}` });
+      }
+      if (!action.path) {
+        errors.push({ path: `actions[${index}].path`, message: 'Action path is required' });
+      }
+    });
   }
 
   if (errors.length > 0) {
@@ -115,7 +112,7 @@ export function validateManifest(input: unknown): ValidationResult<LogosJSON> {
 
   return {
     success: true,
-    data: manifest as LogosJSON,
+    data: manifest as AgentsJSON,
   };
 }
 

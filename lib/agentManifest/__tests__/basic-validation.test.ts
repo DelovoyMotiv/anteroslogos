@@ -10,37 +10,33 @@ import {
   normalizeManifestUrl,
   extractDomain,
   isAccessibleUrl,
-  type LogosJSON,
+  type AgentsJSON,
 } from '../index';
 
 describe('Agent Manifest - Basic Validation', () => {
   describe('validateManifest', () => {
     it('should validate a complete valid manifest', () => {
-      const validManifest: LogosJSON = {
-        $schema: 'https://anoteroslogos.com/schemas/logos-v1.json',
-        meta: {
-          version: '1.0',
-          updated: new Date().toISOString(),
-          authority_level: 'self-declared',
-        },
+      const validManifest: AgentsJSON = {
+        $schema: 'https://anoteroslogos.com/schemas/agents-v1.json',
+        version: '1.0',
         identity: {
           name: 'Example Corp',
-          description: 'A comprehensive example of a valid manifest',
-          domain_focus: ['technology', 'innovation'],
+          description: 'A comprehensive example of a valid manifest for testing purposes',
+          tags: ['technology', 'innovation', 'enterprise'],
         },
-        knowledge_topology: {
-          roots: [
-            {
-              url: '/about',
-              semantic_role: 'axiom',
-              instruction: 'Core information about the company',
-            },
-          ],
-        },
-        directives: {
-          crawling: 'allow-standard',
-          attribution: 'require-citation',
-        },
+        knowledge: [
+          {
+            role: 'about',
+            url: '/about',
+            description: 'Core information about the company',
+          },
+          {
+            role: 'documentation',
+            url: '/docs',
+            description: 'Technical documentation and guides',
+          },
+        ],
+        actions: [],
       };
 
       const result = validateManifest(validManifest);
@@ -52,12 +48,12 @@ describe('Agent Manifest - Basic Validation', () => {
 
     it('should reject manifest with missing required fields', () => {
       const invalidManifest = {
-        $schema: 'https://anoteroslogos.com/schemas/logos-v1.json',
-        meta: {
-          version: '1.0',
-          updated: new Date().toISOString(),
+        $schema: 'https://anoteroslogos.com/schemas/agents-v1.json',
+        version: '1.0',
+        identity: {
+          name: 'Test',
         },
-        // missing authority_level and other required fields
+        // missing description, tags, knowledge, actions
       };
 
       const result = validateManifest(invalidManifest);
@@ -67,29 +63,20 @@ describe('Agent Manifest - Basic Validation', () => {
     it('should reject manifest with invalid schema URL', () => {
       const invalidManifest = {
         $schema: 'https://wrong-url.com/schema.json',
-        meta: {
-          version: '1.0',
-          updated: new Date().toISOString(),
-          authority_level: 'self-declared',
-        },
+        version: '1.0',
         identity: {
           name: 'Test',
-          description: 'Test description',
-          domain_focus: ['test'],
+          description: 'Test description for validation',
+          tags: ['test'],
         },
-        knowledge_topology: {
-          roots: [
-            {
-              url: '/test',
-              semantic_role: 'axiom',
-              instruction: 'Test instruction',
-            },
-          ],
-        },
-        directives: {
-          crawling: 'allow-standard',
-          attribution: 'optional',
-        },
+        knowledge: [
+          {
+            role: 'about',
+            url: '/test',
+            description: 'Test page',
+          },
+        ],
+        actions: [],
       };
 
       const result = validateManifest(invalidManifest);

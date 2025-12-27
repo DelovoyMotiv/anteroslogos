@@ -12,7 +12,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createMockRequest, createMockResponse } from './helpers';
 import handler from '../tools';
 import * as generator from '../../lib/agentManifest/generator';
-import type { LogosJSON } from '../../lib/agentManifest/types';
+import type { AgentsJSON } from '../../lib/agentManifest/types';
+
+// Mock fetch globally
+global.fetch = vi.fn();
 
 // Mock the generator module
 vi.mock('../../lib/agentManifest/generator', async () => {
@@ -24,35 +27,43 @@ vi.mock('../../lib/agentManifest/generator', async () => {
 });
 
 describe('Agent Manifest API Endpoint', () => {
-  const mockManifest: LogosJSON = {
-    $schema: 'https://anoteroslogos.com/schemas/logos-v1.json',
-    meta: {
-      version: '1.0',
-      updated: new Date().toISOString(),
-      authority_level: 'self-declared',
-    },
+  const mockManifest: AgentsJSON = {
+    $schema: 'https://anoteroslogos.com/schemas/agents-v1.json',
+    version: '1.0',
     identity: {
       name: 'Test Website',
       description: 'A test website for manifest generation',
-      domain_focus: ['testing', 'development'],
+      tags: ['testing', 'development'],
     },
-    knowledge_topology: {
-      roots: [
-        {
-          url: '/',
-          semantic_role: 'axiom',
-          instruction: 'Homepage with core information',
-        },
-      ],
-    },
-    directives: {
-      crawling: 'allow-standard',
-      attribution: 'require-citation',
-    },
+    knowledge: [
+      {
+        role: 'about',
+        url: '/about',
+        description: 'Information about the company',
+      },
+      {
+        role: 'product',
+        url: '/products',
+        description: 'Product catalog and features',
+      },
+    ],
+    actions: [],
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
+    
+    // Setup default successful fetch response
+    vi.mocked(global.fetch).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        choices: [{
+          message: {
+            content: JSON.stringify(mockManifest)
+          }
+        }]
+      }),
+    } as Response);
   });
 
   describe('Request Method Validation', () => {
@@ -62,8 +73,6 @@ describe('Agent Manifest API Endpoint', () => {
         body: { tool: 'agent-manifest', url: 'https://example.com' },
       });
       const res = createMockResponse();
-
-      vi.mocked(generator.generateManifest).mockResolvedValue(mockManifest);
 
       await handler(req, res);
 
@@ -152,7 +161,7 @@ describe('Agent Manifest API Endpoint', () => {
       expect(res.statusCode).toBe(400);
       expect(res.jsonData).toMatchObject({
         success: false,
-        error: expect.stringContaining('URL is required'),
+        error: expect.stringContaining('Please enter a website URL'),
       });
     });
 
@@ -201,7 +210,7 @@ describe('Agent Manifest API Endpoint', () => {
     it('should reject invalid URL formats', async () => {
       const req = createMockRequest({
         method: 'POST',
-        body: { tool: 'agent-manifest', url: 'not-a-valid-url' },
+        body: { tool: 'agent-manifest', url: 'ht!tp://invalid url with spaces' },
       });
       const res = createMockResponse();
 
@@ -221,8 +230,6 @@ describe('Agent Manifest API Endpoint', () => {
       });
       const res = createMockResponse();
 
-      vi.mocked(generator.generateManifest).mockResolvedValue(mockManifest);
-
       await handler(req, res);
 
       expect(res.statusCode).toBe(200);
@@ -235,8 +242,6 @@ describe('Agent Manifest API Endpoint', () => {
         body: { tool: 'agent-manifest', url: 'https://example.com' },
       });
       const res = createMockResponse();
-
-      vi.mocked(generator.generateManifest).mockResolvedValue(mockManifest);
 
       await handler(req, res);
 
@@ -253,8 +258,6 @@ describe('Agent Manifest API Endpoint', () => {
       });
       const res = createMockResponse();
 
-      vi.mocked(generator.generateManifest).mockResolvedValue(mockManifest);
-
       await handler(req, res);
 
       expect(res.statusCode).toBe(200);
@@ -266,52 +269,25 @@ describe('Agent Manifest API Endpoint', () => {
       });
     });
 
-    it('should call generateManifest with normalized URL', async () => {
-      const req = createMockRequest({
-        method: 'POST',
-        body: { tool: 'agent-manifest', url: 'https://example.com/' },
-      });
-      const res = createMockResponse();
-
-      vi.mocked(generator.generateManifest).mockResolvedValue(mockManifest);
-
-      await handler(req, res);
-
-      expect(generator.generateManifest).toHaveBeenCalledWith(
-        expect.stringMatching(/^https:\/\/example\.com/)
-      );
-    });
-
-    it('should return valid LogosJSON structure', async () => {
+    it('should return valid AgentsJSON structure', async () => {
       const req = createMockRequest({
         method: 'POST',
         body: { tool: 'agent-manifest', url: 'https://example.com' },
       });
       const res = createMockResponse();
 
-      vi.mocked(generator.generateManifest).mockResolvedValue(mockManifest);
-
       await handler(req, res);
 
       expect(res.jsonData.data.manifest).toMatchObject({
         $schema: expect.any(String),
-        meta: expect.objectContaining({
-          version: expect.any(String),
-          updated: expect.any(String),
-          authority_level: expect.any(String),
-        }),
+        version: expect.any(String),
         identity: expect.objectContaining({
           name: expect.any(String),
           description: expect.any(String),
-          domain_focus: expect.any(Array),
+          tags: expect.any(Array),
         }),
-        knowledge_topology: expect.objectContaining({
-          roots: expect.any(Array),
-        }),
-        directives: expect.objectContaining({
-          crawling: expect.any(String),
-          attribution: expect.any(String),
-        }),
+        knowledge: expect.any(Array),
+        actions: expect.any(Array),
       });
     });
   });
@@ -324,11 +300,17 @@ describe('Agent Manifest API Endpoint', () => {
       });
       const res = createMockResponse();
 
-      const validationError = new generator.SchemaValidationError(
-        'Validation failed',
-        [{ path: 'meta.version', message: 'Required' }]
-      );
-      vi.mocked(generator.generateManifest).mockRejectedValue(validationError);
+      // Mock fetch to return invalid JSON structure
+      vi.mocked(global.fetch).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          choices: [{
+            message: {
+              content: JSON.stringify({ invalid: 'structure' })
+            }
+          }]
+        }),
+      } as Response);
 
       await handler(req, res);
 
@@ -346,18 +328,24 @@ describe('Agent Manifest API Endpoint', () => {
       });
       const res = createMockResponse();
 
-      const jsonError = new generator.InvalidJSONError(
-        'Invalid JSON',
-        'not json'
-      );
-      vi.mocked(generator.generateManifest).mockRejectedValue(jsonError);
+      // Mock fetch to return non-JSON content
+      vi.mocked(global.fetch).mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          choices: [{
+            message: {
+              content: 'not valid json at all'
+            }
+          }]
+        }),
+      } as Response);
 
       await handler(req, res);
 
       expect(res.statusCode).toBe(500);
       expect(res.jsonData).toMatchObject({
         success: false,
-        error: expect.stringContaining('Failed to generate valid manifest'),
+        error: expect.stringContaining('Failed to generate manifest'),
       });
     });
 
@@ -368,12 +356,14 @@ describe('Agent Manifest API Endpoint', () => {
       });
       const res = createMockResponse();
 
-      const configError = new generator.ManifestGenerationError(
-        'AI service is not configured'
-      );
-      vi.mocked(generator.generateManifest).mockRejectedValue(configError);
+      // Temporarily remove API key
+      const originalKey = process.env.OPENROUTER_API_KEY;
+      delete process.env.OPENROUTER_API_KEY;
 
       await handler(req, res);
+
+      // Restore API key
+      process.env.OPENROUTER_API_KEY = originalKey;
 
       expect(res.statusCode).toBe(503);
       expect(res.jsonData).toMatchObject({
@@ -389,17 +379,20 @@ describe('Agent Manifest API Endpoint', () => {
       });
       const res = createMockResponse();
 
-      const rateLimitError = new generator.ManifestGenerationError(
-        'rate limit exceeded'
-      );
-      vi.mocked(generator.generateManifest).mockRejectedValue(rateLimitError);
+      // Mock fetch to return rate limit error
+      vi.mocked(global.fetch).mockResolvedValueOnce({
+        ok: false,
+        json: async () => ({
+          error: { message: 'rate limit exceeded' }
+        }),
+      } as Response);
 
       await handler(req, res);
 
-      expect(res.statusCode).toBe(429);
+      expect(res.statusCode).toBe(500);
       expect(res.jsonData).toMatchObject({
         success: false,
-        error: expect.stringContaining('Rate limit exceeded'),
+        error: expect.stringContaining('Failed to generate manifest'),
       });
     });
 
@@ -410,17 +403,17 @@ describe('Agent Manifest API Endpoint', () => {
       });
       const res = createMockResponse();
 
-      const timeoutError = new generator.ManifestGenerationError(
-        'Request timeout'
-      );
-      vi.mocked(generator.generateManifest).mockRejectedValue(timeoutError);
+      // Mock fetch to throw AbortError
+      const abortError = new Error('The operation was aborted');
+      abortError.name = 'AbortError';
+      vi.mocked(global.fetch).mockRejectedValueOnce(abortError);
 
       await handler(req, res);
 
       expect(res.statusCode).toBe(504);
       expect(res.jsonData).toMatchObject({
         success: false,
-        error: expect.stringContaining('timed out'),
+        error: expect.stringContaining('timeout'),
       });
     });
 
@@ -431,9 +424,8 @@ describe('Agent Manifest API Endpoint', () => {
       });
       const res = createMockResponse();
 
-      vi.mocked(generator.generateManifest).mockRejectedValue(
-        new Error('Unknown error')
-      );
+      // Mock fetch to throw generic error
+      vi.mocked(global.fetch).mockRejectedValueOnce(new Error('Unknown error'));
 
       await handler(req, res);
 
@@ -452,8 +444,6 @@ describe('Agent Manifest API Endpoint', () => {
         body: { tool: 'agent-manifest', url: 'https://example.com' },
       });
       const res = createMockResponse();
-
-      vi.mocked(generator.generateManifest).mockResolvedValue(mockManifest);
 
       await handler(req, res);
 
@@ -480,8 +470,6 @@ describe('Agent Manifest API Endpoint', () => {
         body: { tool: 'agent-manifest', url: 'https://example.com' },
       });
       const res = createMockResponse();
-
-      vi.mocked(generator.generateManifest).mockResolvedValue(mockManifest);
 
       await handler(req, res);
 

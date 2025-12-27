@@ -1,95 +1,60 @@
 /**
- * JSON Schema validator for LogosJSON manifest validation
- * Validates generated manifests against the logos.json schema
+ * JSON Schema validator for AgentsJSON manifest validation
+ * Validates generated manifests against the agents.json schema
  * 
  * @module lib/agentManifest/validator
  * @version 1.0.0
  */
 
 import { z } from 'zod';
-import type { LogosJSON } from './types';
+import type { AgentsJSON } from './types';
 
 /**
- * Zod schema for semantic roles
+ * Zod schema for web semantic roles
  */
-const SemanticRoleSchema = z.enum(['axiom', 'theorem', 'lemma', 'corollary', 'definition']);
+const WebSemanticRoleSchema = z.enum(['documentation', 'pricing', 'about', 'product', 'contact', 'support']);
 
 /**
- * Zod schema for authority levels
+ * Zod schema for HTTP methods
  */
-const AuthorityLevelSchema = z.enum(['self-declared', 'verified', 'authoritative']);
+const HttpMethodSchema = z.enum(['GET', 'POST', 'PUT', 'DELETE']);
 
 /**
- * Zod schema for crawling policies
+ * Zod schema for knowledge entries
  */
-const CrawlingPolicySchema = z.enum([
-  'allow-high-frequency',
-  'allow-standard',
-  'allow-low-frequency',
-  'disallow'
-]);
-
-/**
- * Zod schema for attribution policies
- */
-const AttributionPolicySchema = z.enum([
-  'require-link',
-  'require-citation',
-  'optional',
-  'none'
-]);
-
-/**
- * Zod schema for knowledge root entries
- */
-const KnowledgeRootSchema = z.object({
+const KnowledgeEntrySchema = z.object({
+  role: WebSemanticRoleSchema,
   url: z.string().min(1, 'URL is required'),
-  semantic_role: SemanticRoleSchema,
-  instruction: z.string().min(10, 'Instruction must be at least 10 characters'),
+  description: z.string().min(5, 'Description must be at least 5 characters'),
 });
 
 /**
- * Zod schema for manifest metadata
+ * Zod schema for action entries
  */
-const LogosMetadataSchema = z.object({
-  version: z.string().min(1, 'Version is required'),
-  updated: z.string().datetime('Invalid ISO 8601 date format'),
-  authority_level: AuthorityLevelSchema,
+const ActionSchema = z.object({
+  name: z.string().min(1, 'Action name is required'),
+  type: HttpMethodSchema,
+  path: z.string().min(1, 'Action path is required'),
 });
 
 /**
  * Zod schema for identity information
  */
-const LogosIdentitySchema = z.object({
+const AgentIdentitySchema = z.object({
   name: z.string().min(1, 'Name is required'),
   description: z.string().min(10, 'Description must be at least 10 characters'),
-  domain_focus: z.array(z.string()).min(1, 'At least one domain focus tag is required'),
+  tags: z.array(z.string()).min(1, 'At least one tag is required'),
 });
 
 /**
- * Zod schema for knowledge topology
+ * Complete Zod schema for AgentsJSON
  */
-const KnowledgeTopologySchema = z.object({
-  roots: z.array(KnowledgeRootSchema).min(1, 'At least one knowledge root is required'),
-});
-
-/**
- * Zod schema for directives
- */
-const LogosDirectivesSchema = z.object({
-  crawling: CrawlingPolicySchema,
-  attribution: AttributionPolicySchema,
-});
-
-/**
- * Complete Zod schema for LogosJSON
- */
-export const LogosJSONSchema = z.object({
-  $schema: z.literal('https://anoteroslogos.com/schemas/logos-v1.json'),
-  meta: LogosMetadataSchema,
-  identity: LogosIdentitySchema,
-  knowledge_topology: KnowledgeTopologySchema,
-  directives: LogosDirectivesSchema,
+export const AgentsJSONSchema = z.object({
+  $schema: z.literal('https://anoteroslogos.com/schemas/agents-v1.json'),
+  version: z.literal('1.0'),
+  identity: AgentIdentitySchema,
+  knowledge: z.array(KnowledgeEntrySchema).min(1, 'At least one knowledge entry is required'),
+  actions: z.array(ActionSchema),
 });
 
 /**
@@ -100,16 +65,16 @@ export type ValidationResult<T> =
   | { success: false; error: z.ZodError };
 
 /**
- * Validates a LogosJSON manifest against the schema
+ * Validates an AgentsJSON manifest against the schema
  * 
  * @param input - The manifest object to validate
  * @returns Validation result with typed data or error
  */
-export function validateManifest(input: unknown): ValidationResult<LogosJSON> {
-  const result = LogosJSONSchema.safeParse(input);
+export function validateManifest(input: unknown): ValidationResult<AgentsJSON> {
+  const result = AgentsJSONSchema.safeParse(input);
   if (result.success) {
-    // Zod validates the structure, so we can safely cast to LogosJSON
-    return { success: true, data: result.data as LogosJSON };
+    // Zod validates the structure, so we can safely cast to AgentsJSON
+    return { success: true, data: result.data as AgentsJSON };
   }
   return { success: false, error: result.error };
 }
@@ -134,12 +99,12 @@ export function formatValidationError(error: z.ZodError): {
 }
 
 /**
- * Type guard to check if an object is a valid LogosJSON manifest
+ * Type guard to check if an object is a valid AgentsJSON manifest
  * 
  * @param input - Object to check
- * @returns True if input is a valid LogosJSON manifest
+ * @returns True if input is a valid AgentsJSON manifest
  */
-export function isValidManifest(input: unknown): input is LogosJSON {
+export function isValidManifest(input: unknown): input is AgentsJSON {
   const result = validateManifest(input);
   return result.success;
 }

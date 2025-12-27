@@ -1,35 +1,41 @@
 import { useState } from 'react';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, Loader2, FileJson, Code } from 'lucide-react';
 import JSONDisplay from '../components/JSONDisplay';
+import AgentCard from '../components/AgentCard';
+import DeploymentInstructions from '../components/DeploymentInstructions';
 import SEOHead from '../components/SEOHead';
-import { LogosJSON } from '../lib/agentManifest/types';
+import { AgentsJSON } from '../lib/agentManifest/types';
+import { TabContainer } from '../src/pages/dashboard/audit/tabs/TabContainer';
+import { TabButton } from '../src/pages/dashboard/audit/tabs/TabButton';
+import { TabContent } from '../src/pages/dashboard/audit/tabs/TabContent';
 
 /**
  * AgentManifestPage Component
  * Dashboard page for the Agent Manifest Generator feature
- * Allows users to generate logos.json semantic topology files for their websites
+ * Allows users to generate agents.json files for their websites
  */
 const AgentManifestPage = () => {
   const [url, setUrl] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [result, setResult] = useState<LogosJSON | null>(null);
+  const [result, setResult] = useState<AgentsJSON | null>(null);
   const [error, setError] = useState('');
   const [copySuccess, setCopySuccess] = useState(false);
+  const [viewMode, setViewMode] = useState<'preview' | 'json'>('preview');
 
   // SEO metadata configuration
   const seoMetadata = {
     title: 'Agent Manifest Generator | Anóteros Lógos',
-    description: 'Generate a logos.json semantic topology file for your website. Help AI agents understand and navigate your content structure, improving AI visibility and citation potential in the agentic web.',
+    description: 'Generate an agents.json file for your website. Help AI agents understand and navigate your content structure, improving AI visibility and citation potential in the agentic web.',
     url: 'https://anoteroslogos.com/agent-manifest',
     type: 'website' as const,
-    keywords: 'agent manifest, logos.json, semantic topology, AI agents, agentic web, AI visibility, website structure, semantic web, AI discovery, agent identity',
+    keywords: 'agent manifest, agents.json, AI agents, agentic web, AI visibility, website structure, AI discovery, agent identity',
     schema: {
       '@context': 'https://schema.org',
       '@type': 'WebApplication',
       name: 'Agent Manifest Generator',
       applicationCategory: 'DeveloperApplication',
       operatingSystem: 'Web Browser',
-      description: 'Generate a logos.json semantic topology file for your website. Help AI agents understand and navigate your content structure, improving AI visibility and citation potential.',
+      description: 'Generate an agents.json file for your website. Help AI agents understand and navigate your content structure, improving AI visibility and citation potential.',
       url: 'https://anoteroslogos.com/agent-manifest',
       provider: {
         '@type': 'Organization',
@@ -42,12 +48,12 @@ const AgentManifestPage = () => {
         priceCurrency: 'USD'
       },
       featureList: [
-        'Generate standardized logos.json files',
-        'AI-powered semantic topology mapping',
+        'Generate standardized agents.json files',
+        'AI-powered manifest generation',
         'Improve AI agent discoverability',
         'Enhance citation potential',
         'Download or copy generated manifests',
-        'Validate against logos.json schema'
+        'Validate against agents.json schema'
       ],
       screenshot: 'https://anoteroslogos.com/images/og-image.jpg',
       softwareHelp: {
@@ -174,7 +180,7 @@ const AgentManifestPage = () => {
   };
 
   /**
-   * Handles download of logos.json file
+   * Handles download of agents.json file
    */
   const handleDownload = () => {
     if (!result) return;
@@ -184,7 +190,7 @@ const AgentManifestPage = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'logos.json'; // Changed from logos-v1.json
+    link.download = 'agents.json';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -224,7 +230,7 @@ const AgentManifestPage = () => {
           </h1>
 
           <p className="text-base md:text-lg text-white/60 mb-8 max-w-2xl mx-auto">
-            Create a logos.json semantic topology file for your domain
+            Create an agents.json file for your domain
           </p>
 
           {/* Input Form */}
@@ -255,7 +261,7 @@ const AgentManifestPage = () => {
                     <span>Generating...</span>
                   </>
                 ) : (
-                  'Crystallize Logos'
+                  'Generate Manifest'
                 )}
               </button>
             </div>
@@ -280,7 +286,7 @@ const AgentManifestPage = () => {
             <div className="max-w-2xl mx-auto text-center" role="status" aria-live="polite" aria-atomic="true">
               <p className="text-white/50 text-sm animate-pulse">
                 <span className="sr-only">Loading: </span>
-                Generating your semantic topology...
+                Generating your agent manifest...
               </p>
             </div>
           )}
@@ -304,10 +310,10 @@ const AgentManifestPage = () => {
               <div className="flex gap-3" role="group" aria-label="Manifest actions">
                 <button
                   onClick={handleDownload}
-                  aria-label="Download logos.json file"
+                  aria-label="Download agents.json file"
                   className="px-4 py-2 bg-brand-accent/10 hover:bg-brand-accent/20 text-brand-accent border border-brand-accent/30 rounded-lg text-sm font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-brand-accent/20 focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-2 focus:ring-offset-brand-bg"
                 >
-                  Download logos.json
+                  Download agents.json
                 </button>
                 <button
                   onClick={handleCopy}
@@ -320,8 +326,38 @@ const AgentManifestPage = () => {
               </div>
             </div>
 
-            {/* JSON Display */}
-            <JSONDisplay json={result} />
+            {/* Tabs for View Toggle */}
+            <TabContainer>
+              <TabButton
+                id="preview"
+                label="Visual Preview"
+                icon={<FileJson className="w-4 h-4" />}
+                isActive={viewMode === 'preview'}
+                onClick={() => setViewMode('preview')}
+              />
+              <TabButton
+                id="json"
+                label="Raw JSON"
+                icon={<Code className="w-4 h-4" />}
+                isActive={viewMode === 'json'}
+                onClick={() => setViewMode('json')}
+              />
+            </TabContainer>
+
+            {/* Tab Content - Visual Preview */}
+            <TabContent isActive={viewMode === 'preview'}>
+              <AgentCard manifest={result} />
+            </TabContent>
+
+            {/* Tab Content - Raw JSON */}
+            <TabContent isActive={viewMode === 'json'}>
+              <JSONDisplay json={result} />
+            </TabContent>
+
+            {/* Deployment Instructions */}
+            <div className="mt-8">
+              <DeploymentInstructions />
+            </div>
 
             {/* Success Notification */}
             {copySuccess && (

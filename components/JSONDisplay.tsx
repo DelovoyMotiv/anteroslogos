@@ -1,16 +1,16 @@
 import React from 'react';
-import { LogosJSON } from '../lib/agentManifest/types';
+import { AgentsJSON } from '../lib/agentManifest/types';
 
 export interface JSONDisplayProps {
-  json: LogosJSON;
+  json: AgentsJSON;
   className?: string;
 }
 
 /**
  * JSONDisplay Component
- * Displays formatted JSON with syntax highlighting for logos.json manifests
+ * Displays formatted JSON with syntax highlighting for agents.json manifests
  * 
- * @param json - The LogosJSON object to display
+ * @param json - The AgentsJSON object to display
  * @param className - Optional additional CSS classes
  */
 export const JSONDisplay: React.FC<JSONDisplayProps> = ({ json, className = '' }) => {

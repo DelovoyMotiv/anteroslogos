@@ -19,4 +19,9 @@ if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
   console.warn('Warning: SUPABASE_SERVICE_ROLE_KEY not set. Some tests may be skipped.');
 }
 
+// Set mock API key for agent-manifest tests
+if (!process.env.OPENROUTER_API_KEY) {
+  process.env.OPENROUTER_API_KEY = 'test-api-key-for-mocking';
+}
+
 export const hasSupabase = !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);

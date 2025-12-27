@@ -1,6 +1,6 @@
 /**
  * Agent Manifest Generator
- * Public API for generating logos.json semantic topology files
+ * Public API for generating agents.json files
  * 
  * @module lib/agentManifest
  * @version 1.0.0
@@ -8,16 +8,12 @@
 
 // Export types
 export type {
-  LogosJSON,
-  LogosMetadata,
-  LogosIdentity,
-  LogosDirectives,
-  KnowledgeTopology,
-  KnowledgeRoot,
-  SemanticRole,
-  AuthorityLevel,
-  CrawlingPolicy,
-  AttributionPolicy,
+  AgentsJSON,
+  AgentIdentity,
+  KnowledgeEntry,
+  Action,
+  WebSemanticRole,
+  HttpMethod,
 } from './types';
 
 // Export validation functions
@@ -25,7 +21,7 @@ export {
   validateManifest,
   formatValidationError,
   isValidManifest,
-  LogosJSONSchema,
+  AgentsJSONSchema,
 } from './validator';
 
 export type { ValidationResult } from './validator';

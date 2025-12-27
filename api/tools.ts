@@ -9,6 +9,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { validateManifest } from '../lib/agentManifest/validator';
 
 /**
  * Base request interface
@@ -42,7 +43,44 @@ async function handleAgentManifest(
     if (!url || typeof url !== 'string' || url.trim().length === 0) {
       res.status(400).json({
         success: false,
-        error: 'URL is required',
+        error: 'Please enter a website URL',
+      });
+      return;
+    }
+
+    // Validate URL format
+    const trimmedUrl = url.trim();
+    let urlObj: URL;
+    try {
+      // First try parsing as-is
+      urlObj = new URL(trimmedUrl);
+    } catch {
+      // If that fails, try prepending https:// only if it doesn't already have a protocol
+      if (!trimmedUrl.includes('://')) {
+        try {
+          urlObj = new URL(`https://${trimmedUrl}`);
+        } catch {
+          res.status(400).json({
+            success: false,
+            error: 'Invalid URL format. Please enter a valid website URL.',
+          });
+          return;
+        }
+      } else {
+        // Has :// but still invalid
+        res.status(400).json({
+          success: false,
+          error: 'Invalid URL format. Please enter a valid website URL.',
+        });
+        return;
+      }
+    }
+    
+    // Additional validation: check for valid protocol
+    if (!['http:', 'https:'].includes(urlObj.protocol)) {
+      res.status(400).json({
+        success: false,
+        error: 'Invalid URL format. Please enter a valid website URL.',
       });
       return;
     }
@@ -79,47 +117,43 @@ async function handleAgentManifest(
           messages: [
             {
               role: 'system',
-              content: 'You are an expert in Semantic Topology and Agentic Web standards. Generate a complete logos.json file for the given domain. Return ONLY valid JSON, no markdown. Be thorough but concise.'
+              content: 'You are an expert in Agent-Native Web standards and AI discoverability. Generate a complete agents.json file for the given domain. Return ONLY valid JSON, no markdown. Use clear, accessible language - NO academic terminology.'
             },
             {
               role: 'user',
-              content: `Generate a complete logos.json semantic topology file for: ${url}
+              content: `Generate a complete agents.json file for: ${url}
 
 CRITICAL REQUIREMENTS:
-1. Include 3-5 knowledge roots (not just 1!)
-2. Use current date in ISO format for "updated" field
-3. Provide diverse semantic roles: axiom, theorem, lemma, corollary, definition
-4. Each root must have meaningful instructions for AI agents
+1. Include 3-5 knowledge entries (not just 1!)
+2. Use standard web semantic roles: documentation, pricing, about, product, contact, support
+3. Each entry must have meaningful descriptions for AI agents
+4. Include actions array (can be empty if no known APIs)
+
+FORBIDDEN TERMS (do NOT use):
+- axiom, theorem, lemma, corollary, definition
+- semantic topology, knowledge topology
+- Any academic or mathematical terminology
 
 Schema structure:
 {
-  "$schema": "https://anoteroslogos.com/schemas/logos-v1.json",
-  "meta": {
-    "version": "1.0",
-    "updated": "${new Date().toISOString()}",
-    "authority_level": "self-declared"
-  },
+  "$schema": "https://anoteroslogos.com/schemas/agents-v1.json",
+  "version": "1.0",
   "identity": {
     "name": "[Brand Name]",
     "description": "[High-entropy description of core value proposition]",
-    "domain_focus": ["Tag1", "Tag2", "Tag3"]
+    "tags": ["Industry", "Focus", "Category"]
   },
-  "knowledge_topology": {
-    "roots": [
-      {"url": "/", "semantic_role": "axiom", "instruction": "[How agents should treat homepage]"},
-      {"url": "/about", "semantic_role": "definition", "instruction": "[How agents should treat about page]"},
-      {"url": "/products", "semantic_role": "theorem", "instruction": "[How agents should treat products]"},
-      {"url": "/docs", "semantic_role": "lemma", "instruction": "[How agents should treat documentation]"},
-      {"url": "/blog", "semantic_role": "corollary", "instruction": "[How agents should treat blog]"}
-    ]
-  },
-  "directives": {
-    "crawling": "allow-standard",
-    "attribution": "require-citation"
-  }
+  "knowledge": [
+    {"role": "about", "url": "/about", "description": "[What this page contains]"},
+    {"role": "product", "url": "/products", "description": "[What this page contains]"},
+    {"role": "documentation", "url": "/docs", "description": "[What this page contains]"},
+    {"role": "pricing", "url": "/pricing", "description": "[What this page contains]"},
+    {"role": "contact", "url": "/contact", "description": "[What this page contains]"}
+  ],
+  "actions": []
 }
 
-Return ONLY the complete JSON object with 3-5 knowledge roots.`
+Return ONLY the complete JSON object with 3-5 knowledge entries.`
             }
           ],
           temperature: 0.7,
@@ -162,10 +196,21 @@ Return ONLY the complete JSON object with 3-5 knowledge roots.`
 
       const manifest = JSON.parse(jsonString);
 
+      // Validate the manifest against the schema
+      const validationResult = validateManifest(manifest);
+      if (!validationResult.success) {
+        console.error('[handleAgentManifest] Schema validation failed:', validationResult.error);
+        res.status(500).json({
+          success: false,
+          error: 'Failed to generate valid manifest. The AI response did not match the expected schema.',
+        });
+        return;
+      }
+
       console.log('[handleAgentManifest] Success');
       res.status(200).json({
         success: true,
-        data: { manifest },
+        data: { manifest: validationResult.data },
       });
 
     } catch (fetchError) {

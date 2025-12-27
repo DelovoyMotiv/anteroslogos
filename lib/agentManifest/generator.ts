@@ -1,6 +1,6 @@
 /**
  * Manifest generation service for Agent Manifest Generator
- * Core logic for generating logos.json using LLM
+ * Core logic for generating agents.json using LLM
  * 
  * @module lib/agentManifest/generator
  * @version 1.0.0
@@ -9,7 +9,7 @@
 import { createSimpleOpenRouterClient, type ChatMessage } from './openRouterClient';
 import { buildSystemPrompt, buildUserPrompt } from './prompts';
 import { validateManifest, formatValidationError, type ValidationResult } from './simpleValidator';
-import type { LogosJSON } from './types';
+import type { AgentsJSON } from './types';
 
 /**
  * Error thrown when manifest generation fails
@@ -82,7 +82,7 @@ function parseManifestResponse(response: string): unknown {
 }
 
 /**
- * Generates a logos.json manifest for a given URL using LLM
+ * Generates an agents.json manifest for a given URL using LLM
  * 
  * This function:
  * 1. Creates a simple OpenRouter client
@@ -92,7 +92,7 @@ function parseManifestResponse(response: string): unknown {
  * 5. Returns the validated manifest
  * 
  * @param url - The website URL to generate manifest for
- * @returns Promise resolving to validated LogosJSON manifest
+ * @returns Promise resolving to validated AgentsJSON manifest
  * @throws ManifestGenerationError if generation fails
  * @throws InvalidJSONError if LLM returns invalid JSON
  * @throws SchemaValidationError if manifest fails validation
@@ -111,7 +111,7 @@ function parseManifestResponse(response: string): unknown {
  * }
  * ```
  */
-export async function generateManifest(url: string): Promise<LogosJSON> {
+export async function generateManifest(url: string): Promise<AgentsJSON> {
   // Create simple LLM client
   const client = createSimpleOpenRouterClient();
   
@@ -150,7 +150,7 @@ export async function generateManifest(url: string): Promise<LogosJSON> {
     
     // Validation failed - TypeScript should narrow the type here
     // but we'll be explicit to help the compiler
-    const failedResult = validationResult as Extract<ValidationResult<LogosJSON>, { success: false }>;
+    const failedResult = validationResult as Extract<ValidationResult<AgentsJSON>, { success: false }>;
     const formattedError = formatValidationError(failedResult.error);
     throw new SchemaValidationError(
       formattedError.message,

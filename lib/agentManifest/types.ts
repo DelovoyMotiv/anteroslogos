@@ -1,5 +1,5 @@
 /**
- * TypeScript interfaces for LogosJSON schema
+ * TypeScript interfaces for AgentsJSON schema
  * Agent Manifest Generator data models
  * 
  * @module lib/agentManifest/types
@@ -7,92 +7,65 @@
  */
 
 /**
- * Semantic role types for knowledge topology
+ * Standard web semantic roles for knowledge entries
  */
-export type SemanticRole = 'axiom' | 'theorem' | 'lemma' | 'corollary' | 'definition';
+export type WebSemanticRole = 'documentation' | 'pricing' | 'about' | 'product' | 'contact' | 'support';
 
 /**
- * Authority level for manifest metadata
+ * HTTP method types for actions
  */
-export type AuthorityLevel = 'self-declared' | 'verified' | 'authoritative';
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
 /**
- * Crawling policy directives
+ * Knowledge entry in the agent manifest
+ * Represents a key page or resource on the website
  */
-export type CrawlingPolicy = 'allow-high-frequency' | 'allow-standard' | 'allow-low-frequency' | 'disallow';
-
-/**
- * Attribution requirement directives
- */
-export type AttributionPolicy = 'require-link' | 'require-citation' | 'optional' | 'none';
-
-/**
- * Knowledge root entry in the semantic topology
- */
-export interface KnowledgeRoot {
-  /** URL path to the knowledge root page */
+export interface KnowledgeEntry {
+  /** Semantic role of this page (standard web terminology) */
+  role: WebSemanticRole;
+  /** URL path to the page */
   url: string;
-  /** Semantic role of this page in the knowledge structure */
-  semantic_role: SemanticRole;
-  /** Instructions for AI agents on how to treat this page */
-  instruction: string;
+  /** Description of what this page contains */
+  description: string;
 }
 
 /**
- * Metadata about the manifest file
+ * Action entry representing an API endpoint or interactive feature
  */
-export interface LogosMetadata {
-  /** Schema version */
-  version: string;
-  /** ISO 8601 timestamp of last update */
-  updated: string;
-  /** Authority level of this manifest */
-  authority_level: AuthorityLevel;
+export interface Action {
+  /** Name of the action */
+  name: string;
+  /** HTTP method type */
+  type: HttpMethod;
+  /** API endpoint path */
+  path: string;
 }
 
 /**
  * Identity information about the website/brand
  */
-export interface LogosIdentity {
+export interface AgentIdentity {
   /** Brand or website name */
   name: string;
   /** High-entropy description of core value proposition */
   description: string;
-  /** Domain focus tags */
-  domain_focus: string[];
+  /** Industry/focus/category tags */
+  tags: string[];
 }
 
 /**
- * Knowledge topology structure
+ * Complete AgentsJSON manifest structure
+ * Represents an industry-standard agent-native file for AI agent navigation
  */
-export interface KnowledgeTopology {
-  /** Array of knowledge root entries */
-  roots: KnowledgeRoot[];
-}
-
-/**
- * Directives for AI agents
- */
-export interface LogosDirectives {
-  /** Crawling frequency policy */
-  crawling: CrawlingPolicy;
-  /** Attribution requirements */
-  attribution: AttributionPolicy;
-}
-
-/**
- * Complete LogosJSON manifest structure
- * Represents a semantic topology file for AI agent navigation
- */
-export interface LogosJSON {
+export interface AgentsJSON {
   /** JSON Schema reference */
   $schema: string;
-  /** Manifest metadata */
-  meta: LogosMetadata;
+  /** Schema version */
+  version: string;
   /** Website/brand identity */
-  identity: LogosIdentity;
-  /** Knowledge structure topology */
-  knowledge_topology: KnowledgeTopology;
-  /** AI agent directives */
-  directives: LogosDirectives;
+  identity: AgentIdentity;
+  /** Knowledge entries (key pages) */
+  knowledge: KnowledgeEntry[];
+  /** Available actions (API endpoints) */
+  actions: Action[];
 }
