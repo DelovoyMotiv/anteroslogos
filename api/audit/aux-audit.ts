@@ -95,7 +95,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     console.log('[AUX Audit] Starting interactive elements parsing...');
     console.log('[AUX Audit] HTML length:', html.length);
     console.log('[AUX Audit] HTML preview:', html.substring(0, 500));
-    console.log('[AUX Audit] Cheerio root element:', $.root().html().substring(0, 200));
+    const rootHtml = $.root().html();
+    console.log('[AUX Audit] Cheerio root element:', rootHtml ? rootHtml.substring(0, 200) : 'null');
     
     interactiveSelectors.forEach(tag => {
       const elements = $(tag);
@@ -247,6 +248,169 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       withRole: interactiveElements.filter(el => el.role).length,
       withTabindex: interactiveElements.filter(el => !interactiveSelectors.includes(el.tag) && !el.role).length
     });
+    
+    // ========================================================================
+    // FALLBACK: Use Playwright if Cheerio found nothing (JS-rendered sites)
+    // ========================================================================
+    if (interactiveElements.length === 0) {
+      console.log('[AUX Audit] No elements found with Cheerio, trying Playwright for JS-rendered content...');
+      
+      try {
+        const { chromium } = await import('playwright');
+        const browser = await chromium.launch({ headless: true });
+        const context = await browser.newContext({
+          userAgent: 'AUX-Audit-Bot/1.0'
+        });
+        const page = await context.newPage();
+        
+        // Navigate and wait for network idle
+        await page.goto(url, { 
+          waitUntil: 'networkidle',
+          timeout: 15000 
+        });
+        
+        console.log('[AUX Audit] Playwright page loaded, extracting elements...');
+        
+        // Extract interactive elements using page.evaluate
+        const playwrightElements = await page.evaluate(() => {
+          const elements: any[] = [];
+          
+          // Semantic HTML tags
+          const selectors = ['button', 'a', 'input', 'select', 'textarea'];
+          
+          selectors.forEach(tag => {
+            document.querySelectorAll(tag).forEach((el, index) => {
+              const element = el as HTMLElement;
+              const ariaLabel = element.getAttribute('aria-label');
+              const role = element.getAttribute('role');
+              const text = element.textContent?.trim() || '';
+              const type = tag === 'input' ? (element as HTMLInputElement).type : undefined;
+              
+              // Generate selector
+              const id = element.id;
+              const className = element.className;
+              const name = (element as any).name;
+              
+              let selector: string;
+              if (id) {
+                selector = `#${id}`;
+              } else if (className && typeof className === 'string') {
+                const firstClass = className.split(' ')[0];
+                selector = `${tag}.${firstClass}`;
+              } else if (name) {
+                selector = `${tag}[name="${name}"]`;
+              } else {
+                selector = `${tag}:nth-of-type(${index + 1})`;
+              }
+              
+              elements.push({
+                tag,
+                selector,
+                hasAriaLabel: !!ariaLabel,
+                ariaLabel: ariaLabel || undefined,
+                role: role || undefined,
+                text: text || undefined,
+                type
+              });
+            });
+          });
+          
+          // ARIA roles
+          const interactiveRoles = [
+            'button', 'link', 'menuitem', 'tab', 'checkbox', 'radio', 
+            'textbox', 'searchbox', 'combobox', 'slider', 'spinbutton',
+            'switch', 'option', 'menuitemcheckbox', 'menuitemradio'
+          ];
+          
+          interactiveRoles.forEach(roleValue => {
+            document.querySelectorAll(`[role="${roleValue}"]`).forEach((el, index) => {
+              const element = el as HTMLElement;
+              const tag = element.tagName.toLowerCase();
+              
+              // Skip if already counted
+              if (selectors.includes(tag)) return;
+              
+              const ariaLabel = element.getAttribute('aria-label');
+              const text = element.textContent?.trim() || '';
+              const id = element.id;
+              const className = element.className;
+              
+              let selector: string;
+              if (id) {
+                selector = `#${id}`;
+              } else if (className && typeof className === 'string') {
+                const firstClass = className.split(' ')[0];
+                selector = `${tag}.${firstClass}[role="${roleValue}"]`;
+              } else {
+                selector = `${tag}[role="${roleValue}"]:nth-of-type(${index + 1})`;
+              }
+              
+              elements.push({
+                tag,
+                selector,
+                hasAriaLabel: !!ariaLabel,
+                ariaLabel: ariaLabel || undefined,
+                role: roleValue,
+                text: text || undefined,
+                type: undefined
+              });
+            });
+          });
+          
+          // Tabindex elements
+          document.querySelectorAll('[tabindex]').forEach((el, index) => {
+            const element = el as HTMLElement;
+            const tag = element.tagName.toLowerCase();
+            const tabindex = element.getAttribute('tabindex');
+            
+            // Skip if already counted
+            if (selectors.includes(tag)) return;
+            if (element.getAttribute('role')) return;
+            
+            const tabindexNum = parseInt(tabindex || '-1', 10);
+            if (tabindexNum < 0) return;
+            
+            const ariaLabel = element.getAttribute('aria-label');
+            const text = element.textContent?.trim() || '';
+            const id = element.id;
+            const className = element.className;
+            
+            let selector: string;
+            if (id) {
+              selector = `#${id}`;
+            } else if (className && typeof className === 'string') {
+              const firstClass = className.split(' ')[0];
+              selector = `${tag}.${firstClass}[tabindex="${tabindex}"]`;
+            } else {
+              selector = `${tag}[tabindex="${tabindex}"]:nth-of-type(${index + 1})`;
+            }
+            
+            elements.push({
+              tag,
+              selector,
+              hasAriaLabel: !!ariaLabel,
+              ariaLabel: ariaLabel || undefined,
+              role: undefined,
+              text: text || undefined,
+              type: undefined
+            });
+          });
+          
+          return elements;
+        });
+        
+        await browser.close();
+        
+        console.log('[AUX Audit] Playwright found', playwrightElements.length, 'interactive elements');
+        interactiveElements.push(...playwrightElements);
+        
+      } catch (playwrightError) {
+        console.error('[AUX Audit] Playwright fallback failed:', playwrightError);
+        // Continue with empty array - will show in recommendations
+      }
+    }
+    
+    console.log('[AUX Audit] Final interactive elements count:', interactiveElements.length);
     
     // Calculate ARIA score
     const labeledCount = interactiveElements.filter(
