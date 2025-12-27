@@ -1,8 +1,14 @@
 /**
- * AUX Audit API Endpoint - Minimal Debug Version
+ * AUX Audit API Endpoint - Testing Cheerio
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+
+// Dynamic import to avoid build-time issues
+async function loadCheerio() {
+  const cheerio = await import('cheerio');
+  return cheerio;
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   console.log('[AUX Audit] Handler started');
@@ -40,7 +46,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     
     console.log('[AUX Audit] URL:', url);
     
-    // Minimal response
+    // Fetch HTML
+    console.log('[AUX Audit] Fetching HTML...');
+    const htmlResponse = await fetch(url, {
+      headers: {
+        'User-Agent': 'AUX-Audit-Bot/1.0'
+      },
+      signal: AbortSignal.timeout(10000)
+    });
+    
+    if (!htmlResponse.ok) {
+      res.status(400).json({
+        error: `Failed to fetch URL: ${htmlResponse.statusText}`,
+        code: 'FETCH_FAILED'
+      });
+      return;
+    }
+    
+    const html = await htmlResponse.text();
+    console.log('[AUX Audit] HTML fetched, length:', html.length);
+    
+    // Load and use Cheerio
+    console.log('[AUX Audit] Loading Cheerio...');
+    const cheerio = await loadCheerio();
+    const $ = cheerio.load(html);
+    
+    const buttonCount = $('button').length;
+    const linkCount = $('a').length;
+    const inputCount = $('input').length;
+    
+    console.log('[AUX Audit] Cheerio analysis complete');
+    console.log('[AUX Audit] Buttons:', buttonCount, 'Links:', linkCount, 'Inputs:', inputCount);
+    
+    // Response
     const results = {
       score: 75,
       classification: 'Agent-Capable' as const,
@@ -50,7 +88,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       frictionPoints: [],
       recommendations: [],
       intentTriggers: [],
-      summary: 'Minimal test response',
+      summary: `Cheerio test: Found ${buttonCount} buttons, ${linkCount} links, ${inputCount} inputs`,
       riskLevel: 'medium' as const,
       analyzedAt: new Date().toISOString()
     };
@@ -63,7 +101,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     res.status(500).json({ 
       error: 'Internal server error',
       code: 'INTERNAL_ERROR',
-      message: error instanceof Error ? error.message : 'Unknown error'
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
     });
   }
 }
