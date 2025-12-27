@@ -256,12 +256,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       console.log('[AUX Audit] No elements found with Cheerio, trying Playwright for JS-rendered content...');
       
       try {
-        const { chromium } = await import('playwright');
-        const browser = await chromium.launch({ headless: true });
+        // Use playwright-core + @sparticuz/chromium for serverless compatibility
+        const playwright = await import('playwright-core');
+        const chromium = await import('@sparticuz/chromium');
+        
+        console.log('[AUX Audit] Launching Chromium...');
+        
+        const browser = await playwright.chromium.launch({
+          args: chromium.default.args,
+          executablePath: await chromium.default.executablePath(),
+          headless: true,
+        });
+        
         const context = await browser.newContext({
           userAgent: 'AUX-Audit-Bot/1.0'
         });
         const page = await context.newPage();
+        
+        console.log('[AUX Audit] Navigating to URL...');
         
         // Navigate and wait for network idle
         await page.goto(url, { 
