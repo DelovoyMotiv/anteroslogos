@@ -360,7 +360,7 @@ Format as JSON:
             'X-Title': 'AUX Audit LLM Analysis',
           },
           body: JSON.stringify({
-            model: 'anthropic/claude-3.5-sonnet',
+            model: 'kwaipilot/kat-coder-pro:free',
             messages: [
               { role: 'user', content: prompt }
             ],
