@@ -209,35 +209,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     const baseUrl = normalizeUrl(url);
     
     const protocolPaths = [
-      { name: 'agents.json', path: '/agents.json' },
-      { name: 'ai-plugin.json', path: '/.well-known/ai-plugin.json' },
-      { name: 'mcp.json', path: '/.well-known/mcp.json' }
+      { name: 'agents.json', paths: ['/agents.json'] },
+      { name: 'ai-plugin.json', paths: ['/.well-known/ai-plugin.json'] },
+      { name: 'mcp.json', paths: ['/.well-known/mcp.json'] },
+      { name: 'AGENTS.md', paths: ['/AGENTS.md', '/.well-known/AGENTS.md'] },
+      { name: 'llm.txt', paths: ['/llm.txt', '/.well-known/llm.txt'] }
     ];
     
-    // Check protocols in parallel
-    const protocolChecks = protocolPaths.map(async ({ name, path }) => {
-      try {
-        const fullUrl = new URL(path, baseUrl).toString();
-        const response = await fetch(fullUrl, {
-          method: 'HEAD',
-          headers: { 'User-Agent': 'AUX-Audit-Bot/1.0' },
-          signal: AbortSignal.timeout(5000)
-        });
-        
-        const available = response.ok || response.status === 304;
-        
-        return {
-          name,
-          available,
-          url: fullUrl
-        };
-      } catch {
-        return {
-          name,
-          available: false,
-          url: new URL(path, baseUrl).toString()
-        };
+    // Check protocols in parallel - check multiple paths per protocol
+    const protocolChecks = protocolPaths.map(async ({ name, paths }) => {
+      // Try each path until we find one that exists
+      for (const path of paths) {
+        try {
+          const fullUrl = new URL(path, baseUrl).toString();
+          const response = await fetch(fullUrl, {
+            method: 'HEAD',
+            headers: { 'User-Agent': 'AUX-Audit-Bot/1.0' },
+            signal: AbortSignal.timeout(5000)
+          });
+          
+          if (response.ok || response.status === 304) {
+            return {
+              name,
+              available: true,
+              url: fullUrl
+            };
+          }
+        } catch {
+          // Continue to next path
+        }
       }
+      
+      // None of the paths worked
+      return {
+        name,
+        available: false,
+        url: new URL(paths[0], baseUrl).toString()
+      };
     });
     
     // Check robots.txt
