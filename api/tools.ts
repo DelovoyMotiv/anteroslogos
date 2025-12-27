@@ -9,7 +9,6 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { validateManifest } from '../lib/agentManifest/validator';
 
 /**
  * Base request interface
@@ -25,6 +24,40 @@ interface ToolsRequest {
 interface AgentManifestRequest extends ToolsRequest {
   tool: 'agent-manifest';
   url: string;
+}
+
+/**
+ * Simple inline validation for AgentsJSON
+ */
+function isValidAgentsJSON(obj: any): boolean {
+  try {
+    // Check required top-level fields
+    if (!obj || typeof obj !== 'object') return false;
+    if (obj.$schema !== 'https://anoteroslogos.com/schemas/agents-v1.json') return false;
+    if (obj.version !== '1.0') return false;
+    
+    // Check identity
+    if (!obj.identity || typeof obj.identity !== 'object') return false;
+    if (!obj.identity.name || typeof obj.identity.name !== 'string') return false;
+    if (!obj.identity.description || typeof obj.identity.description !== 'string') return false;
+    if (!Array.isArray(obj.identity.tags) || obj.identity.tags.length === 0) return false;
+    
+    // Check knowledge array
+    if (!Array.isArray(obj.knowledge) || obj.knowledge.length === 0) return false;
+    const validRoles = ['documentation', 'pricing', 'about', 'product', 'contact', 'support'];
+    for (const entry of obj.knowledge) {
+      if (!entry.role || !validRoles.includes(entry.role)) return false;
+      if (!entry.url || typeof entry.url !== 'string') return false;
+      if (!entry.description || typeof entry.description !== 'string') return false;
+    }
+    
+    // Check actions array (can be empty)
+    if (!Array.isArray(obj.actions)) return false;
+    
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -197,9 +230,8 @@ Return ONLY the complete JSON object with 3-5 knowledge entries.`
       const manifest = JSON.parse(jsonString);
 
       // Validate the manifest against the schema
-      const validationResult = validateManifest(manifest);
-      if (!validationResult.success) {
-        console.error('[handleAgentManifest] Schema validation failed:', validationResult.error);
+      if (!isValidAgentsJSON(manifest)) {
+        console.error('[handleAgentManifest] Schema validation failed');
         res.status(500).json({
           success: false,
           error: 'Failed to generate valid manifest. The AI response did not match the expected schema.',
@@ -210,7 +242,7 @@ Return ONLY the complete JSON object with 3-5 knowledge entries.`
       console.log('[handleAgentManifest] Success');
       res.status(200).json({
         success: true,
-        data: { manifest: validationResult.data },
+        data: { manifest },
       });
 
     } catch (fetchError) {
