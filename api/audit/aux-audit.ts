@@ -419,9 +419,13 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
 }
 
-export default withRateLimit(handler, {
-  skip: (req) => req.method === 'OPTIONS',
-});
+// Temporarily export without rate limiting for debugging
+export default handler;
+
+// TODO: Re-enable rate limiting after debugging
+// export default withRateLimit(handler, {
+//   skip: (req) => req.method === 'OPTIONS',
+// });
 
 async function performAnalysis(url: string, requestId: string): Promise<AUXAuditResults> {
   console.log(`[AUX Audit] [${requestId}] Starting analysis for: ${url}`);
