@@ -42,6 +42,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     return;
   }
   
+  // Add timeout protection
+  const timeoutId = setTimeout(() => {
+    console.error('[AUX Audit] Function timeout - taking too long');
+    if (!res.headersSent) {
+      res.setHeader('Content-Type', 'application/json');
+      res.status(504).json({
+        error: 'Request timeout',
+        code: 'TIMEOUT',
+        message: 'Analysis took too long. Try a simpler page or try again later.'
+      });
+    }
+  }, 9000); // 9 seconds (before Vercel's 10s limit)
+  
   try {
     console.log('[AUX Audit] Processing request');
     
@@ -57,13 +70,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     
     console.log('[AUX Audit] URL:', url);
     
-    // Fetch HTML
+    // Fetch HTML with shorter timeout
     console.log('[AUX Audit] Fetching HTML...');
     const htmlResponse = await fetch(url, {
       headers: {
         'User-Agent': 'AUX-Audit-Bot/1.0'
       },
-      signal: AbortSignal.timeout(10000)
+      signal: AbortSignal.timeout(5000) // Reduced from 10s to 5s
     });
     
     if (!htmlResponse.ok) {
@@ -525,7 +538,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
           const response = await fetch(fullUrl, {
             method: 'HEAD',
             headers: { 'User-Agent': 'AUX-Audit-Bot/1.0' },
-            signal: AbortSignal.timeout(5000)
+            signal: AbortSignal.timeout(3000) // Reduced from 5s to 3s
           });
           
           if (response.ok || response.status === 304) {
@@ -554,7 +567,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
         const robotsUrl = new URL('/robots.txt', baseUrl).toString();
         const response = await fetch(robotsUrl, {
           headers: { 'User-Agent': 'AUX-Audit-Bot/1.0' },
-          signal: AbortSignal.timeout(5000)
+          signal: AbortSignal.timeout(3000) // Reduced from 5s to 3s
         });
         
         if (!response.ok) {
@@ -694,7 +707,7 @@ Format as JSON:
             temperature: 0.7,
             max_tokens: 1500,
           }),
-          signal: AbortSignal.timeout(30000)
+          signal: AbortSignal.timeout(15000) // Reduced from 30s to 15s
         }).catch(fetchError => {
           console.error('[AUX Audit] LLM fetch error:', fetchError);
           throw fetchError;
@@ -960,20 +973,24 @@ Format as JSON:
     };
     
     console.log('[AUX Audit] Sending response with', results.interactiveElements.length, 'interactive elements');
+    clearTimeout(timeoutId);
     res.status(200).json(results);
     
   } catch (error) {
+    clearTimeout(timeoutId);
     console.error('[AUX Audit] Critical error:', error);
     console.error('[AUX Audit] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
     
     // Ensure we always return JSON, never HTML
-    res.setHeader('Content-Type', 'application/json');
-    res.status(500).json({ 
-      error: 'Internal server error',
-      code: 'INTERNAL_ERROR',
-      message: error instanceof Error ? error.message : 'Unknown error',
-      details: error instanceof Error ? error.stack : undefined
-    });
+    if (!res.headersSent) {
+      res.setHeader('Content-Type', 'application/json');
+      res.status(500).json({ 
+        error: 'Internal server error',
+        code: 'INTERNAL_ERROR',
+        message: error instanceof Error ? error.message : 'Unknown error',
+        details: error instanceof Error ? error.stack : undefined
+      });
+    }
     return;
   }
 }
