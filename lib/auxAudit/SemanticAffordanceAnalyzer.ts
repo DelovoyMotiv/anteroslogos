@@ -5,7 +5,6 @@
  * Extracts interactive elements and calculates ARIA density scores.
  */
 
-import * as cheerio from 'cheerio';
 import type { InteractiveElement, SemanticAnalysis } from './types';
 
 /**
@@ -21,11 +20,12 @@ export class SemanticAffordanceAnalyzer {
    * Analyzes HTML content for semantic affordance
    * 
    * @param html - Raw HTML string to analyze
+   * @param cheerioInstance - Pre-loaded Cheerio instance
    * @returns SemanticAnalysis with ARIA score and interactive elements
    */
-  async analyzeHTML(html: string): Promise<SemanticAnalysis> {
-    // Load HTML into Cheerio
-    const dom = cheerio.load(html);
+  async analyzeHTML(html: string, cheerioInstance: any): Promise<SemanticAnalysis> {
+    // Load HTML into Cheerio using provided instance
+    const dom = cheerioInstance.load(html);
     
     // Extract all interactive elements
     const interactiveElements = this.extractInteractiveElements(dom);
@@ -130,14 +130,14 @@ export class SemanticAffordanceAnalyzer {
    * 
    * Attempts to create a unique, readable selector
    * 
-   * @param $el - Cheerio element
+   * @param $el - Cheerio element (any type)
    * @param dom - Cheerio DOM instance (any type)
    * @param tag - Element tag name
    * @param index - Element index within its tag type
    * @returns CSS selector string
    */
   private generateSelector(
-    $el: cheerio.Cheerio<any>,
+    $el: any,
     dom: any,
     tag: string,
     index: number

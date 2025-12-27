@@ -93,7 +93,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     const analyzer = new SemanticAffordanceAnalyzer();
     
     console.log('[AUX Audit] Running semantic analysis...');
-    const semanticAnalysis = await analyzer.analyzeHTML(html);
+    const semanticAnalysis = await analyzer.analyzeHTML(html, cheerio);
     
     console.log('[AUX Audit] Semantic analysis complete');
     console.log('[AUX Audit] ARIA Score:', semanticAnalysis.ariaScore);
