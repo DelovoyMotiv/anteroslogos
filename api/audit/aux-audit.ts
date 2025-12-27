@@ -371,7 +371,28 @@ Format as JSON:
           if (jsonMatch) {
             const parsed = JSON.parse(jsonMatch[0]);
             recommendations = parsed.recommendations || [];
-            intentTriggers = parsed.intentTriggers || [];
+            
+            // Process intentTriggers - add element field
+            const rawIntentTriggers = parsed.intentTriggers || [];
+            intentTriggers = rawIntentTriggers.map((trigger: any) => {
+              // Find matching interactive element by selector
+              const matchingElement = interactiveElements.find(
+                el => el.selector === trigger.selector
+              );
+              
+              return {
+                intent: trigger.intent || 'unknown',
+                selector: trigger.selector || '',
+                confidence: trigger.confidence || 'low',
+                element: matchingElement || {
+                  tag: 'unknown',
+                  selector: trigger.selector || '',
+                  hasAriaLabel: false,
+                  text: undefined
+                }
+              };
+            });
+            
             llmSummary = parsed.summary || '';
             
             console.log('[AUX Audit] LLM analysis complete');
