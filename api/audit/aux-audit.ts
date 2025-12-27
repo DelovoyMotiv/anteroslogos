@@ -88,7 +88,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     // SEMANTIC ANALYSIS - Extract interactive elements
     // ========================================================================
     const interactiveElements: any[] = [];
-    const interactiveSelectors = ['button', 'a', 'input', 'select'];
+    
+    // Semantic HTML tags
+    const interactiveSelectors = ['button', 'a', 'input', 'select', 'textarea'];
     
     interactiveSelectors.forEach(tag => {
       $(tag).each((index, element) => {
@@ -125,6 +127,100 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
           text: text || undefined,
           type
         });
+      });
+    });
+    
+    // ARIA roles that indicate interactive elements
+    const interactiveRoles = [
+      'button', 'link', 'menuitem', 'tab', 'checkbox', 'radio', 
+      'textbox', 'searchbox', 'combobox', 'slider', 'spinbutton',
+      'switch', 'option', 'menuitemcheckbox', 'menuitemradio'
+    ];
+    
+    interactiveRoles.forEach(roleValue => {
+      $(`[role="${roleValue}"]`).each((index, element) => {
+        const $el = $(element);
+        const tag = element.tagName?.toLowerCase() || 'div';
+        
+        // Skip if already counted as semantic element
+        if (interactiveSelectors.includes(tag)) {
+          return;
+        }
+        
+        const ariaLabel = $el.attr('aria-label');
+        const hasAriaLabel = !!ariaLabel;
+        const text = $el.text().trim();
+        const id = $el.attr('id');
+        const className = $el.attr('class');
+        
+        let selector: string;
+        if (id) {
+          selector = `#${id}`;
+        } else if (className) {
+          const firstClass = className.split(' ')[0];
+          selector = `${tag}.${firstClass}[role="${roleValue}"]`;
+        } else {
+          selector = `${tag}[role="${roleValue}"]:nth-of-type(${index + 1})`;
+        }
+        
+        interactiveElements.push({
+          tag,
+          selector,
+          hasAriaLabel,
+          ariaLabel,
+          role: roleValue,
+          text: text || undefined,
+          type: undefined
+        });
+      });
+    });
+    
+    // Elements with tabindex (focusable elements)
+    $('[tabindex]').each((index, element) => {
+      const $el = $(element);
+      const tag = element.tagName?.toLowerCase() || 'div';
+      const tabindex = $el.attr('tabindex');
+      
+      // Skip if already counted
+      if (interactiveSelectors.includes(tag)) {
+        return;
+      }
+      
+      // Skip if has role (already counted above)
+      if ($el.attr('role')) {
+        return;
+      }
+      
+      // Only count positive or zero tabindex (negative means programmatically focusable only)
+      const tabindexNum = parseInt(tabindex || '-1', 10);
+      if (tabindexNum < 0) {
+        return;
+      }
+      
+      const ariaLabel = $el.attr('aria-label');
+      const hasAriaLabel = !!ariaLabel;
+      const text = $el.text().trim();
+      const id = $el.attr('id');
+      const className = $el.attr('class');
+      
+      let selector: string;
+      if (id) {
+        selector = `#${id}`;
+      } else if (className) {
+        const firstClass = className.split(' ')[0];
+        selector = `${tag}.${firstClass}[tabindex="${tabindex}"]`;
+      } else {
+        selector = `${tag}[tabindex="${tabindex}"]:nth-of-type(${index + 1})`;
+      }
+      
+      interactiveElements.push({
+        tag,
+        selector,
+        hasAriaLabel,
+        ariaLabel,
+        role: undefined,
+        text: text || undefined,
+        type: undefined
       });
     });
     
