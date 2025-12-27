@@ -626,7 +626,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       console.log('[AUX Audit] Running LLM analysis...');
       
       try {
-        const prompt = `Analyze this website for AI agent actionability:
+        const prompt = `YOU ARE A TIER-1 AGENTIC INFRASTRUCTURE ARCHITECT. Your goal is to provide engineering-grade solutions, not generic advice.
+
+RULES FOR RECOMMENDATIONS:
+1. CAPTCHA/SECURITY: Never suggest simply "removing" security. Instead, suggest:
+   - "Implement Trusted Agent Protocol (TAP) with cryptographic signatures"
+   - "Whitelist verified AI User-Agents (OAI-SearchBot, ClaudeBot, GoogleBot-AI) in WAF rules"
+   - "Use signed JWT tokens in X-Agent-Auth headers for authorized agents"
+   - "Implement rate-limited /api/agent endpoints with API key authentication"
+
+2. INTERACTIVE ELEMENTS: If missing, suggest:
+   - "Implement agents.json manifest at /.well-known/agents.json"
+   - "Expose API endpoints via Model Context Protocol (MCP)"
+   - "Add role and aria-label attributes to interactive divs"
+   - "Implement Server-Side Rendering (SSR) or static HTML fallback for agent crawlers"
+
+3. PROTOCOLS: If missing, suggest:
+   - "Add agents.json with capability declarations"
+   - "Implement AGENTS.md with human-readable agent documentation"
+   - "Add llm.txt with site context and navigation hints"
+   - "Configure robots.txt to allow OAI-SearchBot and ClaudeBot"
+
+4. TONE: Technical, precise, authoritative. No fluff. Focus on 2025-2026 best practices.
+
+ANALYZE THIS WEBSITE FOR AI AGENT ACTIONABILITY:
 
 ARIA Score: ${ariaScore}%
 Interactive Elements: ${interactiveElements.length}
@@ -741,11 +764,12 @@ Format as JSON:
     // FALLBACK RECOMMENDATIONS (if LLM didn't provide any)
     // ========================================================================
     if (recommendations.length === 0) {
-      // Generate basic recommendations based on analysis
+      // Generate professional engineering-grade recommendations based on analysis
+      
       if (ariaScore < 50) {
         recommendations.push({
-          title: 'Add ARIA Labels and Semantic Structure',
-          description: 'Implement ARIA roles, labels, and semantic HTML elements (e.g., <button>, <form>) to make interactive components discoverable by AI agents.',
+          title: 'Implement Semantic HTML and ARIA Attributes',
+          description: 'Add role, aria-label, and aria-describedby attributes to interactive elements. Use semantic HTML tags (<button>, <nav>, <form>) instead of generic <div> elements to improve agent discoverability.',
           priority: 'high',
           impact: 40
         });
@@ -753,8 +777,8 @@ Format as JSON:
       
       if (interactiveElements.length === 0) {
         recommendations.push({
-          title: 'Introduce Interactive Elements',
-          description: 'Add actionable components such as search bars, forms, buttons, and links with clear selectors to enable agent interaction.',
+          title: 'Add Server-Side Rendering or Static HTML Fallback',
+          description: 'Implement SSR (Next.js, Nuxt) or generate static HTML snapshots for agent crawlers. Detect User-Agent headers (OAI-SearchBot, ClaudeBot) and serve pre-rendered content to enable agent interaction with JavaScript-heavy sites.',
           priority: 'high',
           impact: 60
         });
@@ -766,26 +790,37 @@ Format as JSON:
       if (availableProtocols < totalProtocols / 2) {
         recommendations.push({
           title: 'Implement Agent Discovery Protocols',
-          description: 'Add agents.json, ai-plugin.json, or AGENTS.md files to enable AI agents to discover your API capabilities and interaction patterns.',
+          description: 'Create /.well-known/agents.json with capability declarations, add /AGENTS.md with human-readable documentation, and configure /llm.txt with site context. Update robots.txt to allow OAI-SearchBot and ClaudeBot.',
           priority: 'medium',
           impact: 30
         });
       }
       
       if (frictionPoints.length > 0) {
-        recommendations.push({
-          title: 'Reduce Agent Friction Points',
-          description: 'Remove or provide alternatives to CAPTCHAs, interstitials, and canvas-based UI that block automated agent access.',
-          priority: 'high',
-          impact: 35
-        });
+        const hasCaptcha = frictionPoints.some(fp => fp.type === 'captcha');
+        
+        if (hasCaptcha) {
+          recommendations.push({
+            title: 'Implement Trusted Agent Authentication',
+            description: 'Instead of removing CAPTCHA, whitelist verified AI agents in your WAF (Cloudflare, AWS WAF). Use signed JWT tokens in X-Agent-Auth headers or implement rate-limited /api/agent endpoints with API key authentication for authorized agents.',
+            priority: 'high',
+            impact: 45
+          });
+        } else {
+          recommendations.push({
+            title: 'Reduce Agent Friction Points',
+            description: 'Provide agent-friendly alternatives to interstitials and canvas-based UI. Implement conditional rendering based on User-Agent detection to serve simplified interfaces to AI agents.',
+            priority: 'medium',
+            impact: 25
+          });
+        }
       }
       
       // If still no recommendations, add a generic one
       if (recommendations.length === 0) {
         recommendations.push({
-          title: 'Maintain Agent-Friendly Design',
-          description: 'Continue following web standards and accessibility best practices to ensure AI agents can effectively interact with your site.',
+          title: 'Maintain Agent-Friendly Architecture',
+          description: 'Continue following web standards, semantic HTML, and accessibility best practices. Consider implementing Model Context Protocol (MCP) endpoints for advanced agent capabilities.',
           priority: 'low',
           impact: 10
         });
