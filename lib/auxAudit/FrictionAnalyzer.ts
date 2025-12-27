@@ -5,7 +5,6 @@
  * Detects CAPTCHAs, interstitials, canvas-based UIs, and other friction points.
  */
 
-import type { CheerioAPI } from 'cheerio';
 import type { FrictionPoint } from './types';
 
 /**
@@ -22,10 +21,10 @@ export class FrictionAnalyzer {
    * Detects all friction points in the HTML content
    * 
    * @param html - Raw HTML string to analyze
-   * @param dom - Cheerio DOM instance
+   * @param dom - Cheerio DOM instance (any type to avoid static import)
    * @returns Array of detected friction points
    */
-  async detectFriction(html: string, dom: CheerioAPI): Promise<FrictionPoint[]> {
+  async detectFriction(html: string, dom: any): Promise<FrictionPoint[]> {
     const frictionPoints: FrictionPoint[] = [];
     
     // Detect CAPTCHAs
@@ -79,10 +78,10 @@ export class FrictionAnalyzer {
    * 
    * Looks for modal dialogs, overlays, and popups that may block content
    * 
-   * @param dom - Cheerio DOM instance
+   * @param dom - Cheerio DOM instance (any type)
    * @returns true if interstitials are detected
    */
-  detectInterstitials(dom: CheerioAPI): boolean {
+  detectInterstitials(dom: any): boolean {
     // Common selectors for modals and overlays
     const interstitialSelectors = [
       '[role="dialog"]',
@@ -128,10 +127,10 @@ export class FrictionAnalyzer {
    * 
    * Canvas elements are not accessible to agents as they don't expose DOM structure
    * 
-   * @param dom - Cheerio DOM instance
+   * @param dom - Cheerio DOM instance (any type)
    * @returns true if significant canvas usage is detected
    */
-  detectCanvasUI(dom: CheerioAPI): boolean {
+  detectCanvasUI(dom: any): boolean {
     const canvasElements = dom('canvas');
     
     // If there are no canvas elements, no friction

@@ -6,7 +6,6 @@
  */
 
 import * as cheerio from 'cheerio';
-import type { CheerioAPI } from 'cheerio';
 import type { InteractiveElement, SemanticAnalysis } from './types';
 
 /**
@@ -52,10 +51,10 @@ export class SemanticAffordanceAnalyzer {
    * 
    * Interactive elements are: button, a, input, select
    * 
-   * @param dom - Cheerio DOM instance
+   * @param dom - Cheerio DOM instance (any type to avoid static import issues)
    * @returns Array of InteractiveElement objects
    */
-  extractInteractiveElements(dom: CheerioAPI): InteractiveElement[] {
+  extractInteractiveElements(dom: any): InteractiveElement[] {
     const elements: InteractiveElement[] = [];
     
     // Define interactive element selectors
@@ -132,14 +131,14 @@ export class SemanticAffordanceAnalyzer {
    * Attempts to create a unique, readable selector
    * 
    * @param $el - Cheerio element
-   * @param dom - Cheerio DOM instance
+   * @param dom - Cheerio DOM instance (any type)
    * @param tag - Element tag name
    * @param index - Element index within its tag type
    * @returns CSS selector string
    */
   private generateSelector(
     $el: cheerio.Cheerio<any>,
-    dom: CheerioAPI,
+    dom: any,
     tag: string,
     index: number
   ): string {
