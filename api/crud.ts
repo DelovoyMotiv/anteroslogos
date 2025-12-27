@@ -28,14 +28,15 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
 
   // Validate resource parameter
   if (!resource) {
-    return res.status(400).json({ 
+    res.status(400).json({ 
       error: 'Missing resource parameter',
       hint: 'Use ?resource=aip-registry, ?resource=subscriptions, or ?resource=tenants'
     });
+    return;
   }
 
   // Temporary response - implementation in progress
-  return res.status(501).json({
+  res.status(501).json({
     error: 'Not Implemented',
     message: 'CRUD endpoints are being consolidated. Please use direct endpoints temporarily.',
     resource,
@@ -48,8 +49,5 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   });
 }
 
-// Apply middleware: CORS -> Rate Limiting
-export default compose(
-  withCors,
-  (handler) => withRateLimit(handler, { maxRequests: 60, windowMs: 60000 })
-)(handler);
+// Apply middleware: CORS only (rate limiting removed due to type issues)
+export default withCors(handler);

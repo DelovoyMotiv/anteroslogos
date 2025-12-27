@@ -388,11 +388,13 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   // Check if this is an admin action (starts with 'admin-')
   if (action.startsWith('admin-')) {
     // Admin endpoints temporarily disabled due to Vercel function limit
-    return res.status(501).json({
+    res.status(501).json({
       error: 'Not Implemented',
       message: 'Admin blog endpoints are being consolidated. Please use direct admin endpoint temporarily.',
       action,
       timestamp: new Date().toISOString()
+    });
+    return;
     });
   }
 
