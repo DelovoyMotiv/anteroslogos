@@ -79,7 +79,7 @@ async function discoverProtocols(url: string): Promise<ProtocolStatus[]> {
 }
 
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   console.log('[AUX Audit] Request received:', req.method);
   
   // Set CORS headers
@@ -88,24 +88,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    res.status(200).end();
+    return;
   }
   
   if (req.method !== 'POST') {
-    return res.status(405).json({ 
+    res.status(405).json({ 
       error: 'Method not allowed',
       code: 'METHOD_NOT_ALLOWED'
     });
+    return;
   }
   
   try {
     const { url } = req.body || {};
     
     if (!url) {
-      return res.status(400).json({ 
+      res.status(400).json({ 
         error: 'Missing required field: url',
         code: 'INVALID_URL'
       });
+      return;
     }
     
     console.log('[AUX Audit] Analyzing URL:', url);
@@ -120,10 +123,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
     
     if (!htmlResponse.ok) {
-      return res.status(400).json({
+      res.status(400).json({
         error: `Failed to fetch URL: ${htmlResponse.statusText}`,
         code: 'FETCH_FAILED'
       });
+      return;
     }
     
     const html = await htmlResponse.text();
@@ -164,11 +168,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     };
     
     console.log('[AUX Audit] Analysis complete');
-    return res.status(200).json(results);
+    res.status(200).json(results);
     
   } catch (error) {
     console.error('[AUX Audit] Error:', error);
-    return res.status(500).json({ 
+    res.status(500).json({ 
       error: 'Internal server error',
       code: 'INTERNAL_ERROR',
       message: error instanceof Error ? error.message : 'Unknown error',
