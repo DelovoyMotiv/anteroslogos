@@ -466,41 +466,64 @@ Format as JSON:
           signal: AbortSignal.timeout(30000)
         });
         
+        console.log('[AUX Audit] LLM response status:', response.status);
+        
         if (response.ok) {
           const data = await response.json();
-          const content = data.choices[0].message.content;
+          console.log('[AUX Audit] LLM response data:', JSON.stringify(data).substring(0, 500));
           
-          // Try to parse JSON from response
-          const jsonMatch = content.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            const parsed = JSON.parse(jsonMatch[0]);
-            recommendations = parsed.recommendations || [];
+          const content = data.choices?.[0]?.message?.content;
+          
+          if (!content) {
+            console.error('[AUX Audit] No content in LLM response');
+          } else {
+            console.log('[AUX Audit] LLM content:', content.substring(0, 300));
             
-            // Process intentTriggers - add element field
-            const rawIntentTriggers = parsed.intentTriggers || [];
-            intentTriggers = rawIntentTriggers.map((trigger: any) => {
-              // Find matching interactive element by selector
-              const matchingElement = interactiveElements.find(
-                el => el.selector === trigger.selector
-              );
-              
-              return {
-                intent: trigger.intent || 'unknown',
-                selector: trigger.selector || '',
-                confidence: trigger.confidence || 'low',
-                element: matchingElement || {
-                  tag: 'unknown',
-                  selector: trigger.selector || '',
-                  hasAriaLabel: false,
-                  text: undefined
-                }
-              };
-            });
-            
-            llmSummary = parsed.summary || '';
-            
-            console.log('[AUX Audit] LLM analysis complete');
+            // Try to parse JSON from response
+            const jsonMatch = content.match(/\{[\s\S]*\}/);
+            if (jsonMatch) {
+              try {
+                const parsed = JSON.parse(jsonMatch[0]);
+                recommendations = parsed.recommendations || [];
+                
+                console.log('[AUX Audit] Parsed recommendations:', recommendations.length);
+                
+                // Process intentTriggers - add element field
+                const rawIntentTriggers = parsed.intentTriggers || [];
+                intentTriggers = rawIntentTriggers.map((trigger: any) => {
+                  // Find matching interactive element by selector
+                  const matchingElement = interactiveElements.find(
+                    el => el.selector === trigger.selector
+                  );
+                  
+                  return {
+                    intent: trigger.intent || 'unknown',
+                    selector: trigger.selector || '',
+                    confidence: trigger.confidence || 'low',
+                    element: matchingElement || {
+                      tag: 'unknown',
+                      selector: trigger.selector || '',
+                      hasAriaLabel: false,
+                      text: undefined
+                    }
+                  };
+                });
+                
+                console.log('[AUX Audit] Parsed intentTriggers:', intentTriggers.length);
+                
+                llmSummary = parsed.summary || '';
+                
+                console.log('[AUX Audit] LLM analysis complete');
+              } catch (parseError) {
+                console.error('[AUX Audit] Failed to parse JSON from LLM response:', parseError);
+              }
+            } else {
+              console.error('[AUX Audit] No JSON found in LLM response');
+            }
           }
+        } else {
+          const errorText = await response.text();
+          console.error('[AUX Audit] LLM API error:', response.status, errorText);
         }
       } catch (error) {
         console.error('[AUX Audit] LLM analysis failed:', error);
@@ -508,6 +531,108 @@ Format as JSON:
       }
     } else {
       console.log('[AUX Audit] Skipping LLM analysis (no API key)');
+    }
+    
+    // ========================================================================
+    // FALLBACK RECOMMENDATIONS (if LLM didn't provide any)
+    // ========================================================================
+    if (recommendations.length === 0) {
+      // Generate basic recommendations based on analysis
+      if (ariaScore < 50) {
+        recommendations.push({
+          title: 'Add ARIA Labels and Semantic Structure',
+          description: 'Implement ARIA roles, labels, and semantic HTML elements (e.g., <button>, <form>) to make interactive components discoverable by AI agents.',
+          priority: 'high',
+          impact: 40
+        });
+      }
+      
+      if (interactiveElements.length === 0) {
+        recommendations.push({
+          title: 'Introduce Interactive Elements',
+          description: 'Add actionable components such as search bars, forms, buttons, and links with clear selectors to enable agent interaction.',
+          priority: 'high',
+          impact: 60
+        });
+      }
+      
+      const availableProtocols = protocols.filter(p => p.available).length;
+      if (availableProtocols === 0) {
+        recommendations.push({
+          title: 'Implement Agent Discovery Protocols',
+          description: 'Add agents.json, ai-plugin.json, or AGENTS.md files to enable AI agents to discover your API capabilities and interaction patterns.',
+          priority: 'medium',
+          impact: 30
+        });
+      }
+      
+      if (frictionPoints.length > 0) {
+        recommendations.push({
+          title: 'Reduce Agent Friction Points',
+          description: 'Remove or provide alternatives to CAPTCHAs, interstitials, and canvas-based UI that block automated agent access.',
+          priority: 'high',
+          impact: 35
+        });
+      }
+      
+      // If still no recommendations, add a generic one
+      if (recommendations.length === 0) {
+        recommendations.push({
+          title: 'Maintain Agent-Friendly Design',
+          description: 'Continue following web standards and accessibility best practices to ensure AI agents can effectively interact with your site.',
+          priority: 'low',
+          impact: 10
+        });
+      }
+    }
+    
+    // ========================================================================
+    // FALLBACK INTENT TRIGGERS (if LLM didn't provide any)
+    // ========================================================================
+    if (intentTriggers.length === 0 && interactiveElements.length > 0) {
+      // Generate basic intent triggers from interactive elements
+      const searchElements = interactiveElements.filter(el => 
+        el.type === 'search' || 
+        (el.text && el.text.toLowerCase().includes('search')) ||
+        (el.ariaLabel && el.ariaLabel.toLowerCase().includes('search'))
+      );
+      
+      if (searchElements.length > 0) {
+        intentTriggers.push({
+          intent: 'search',
+          selector: searchElements[0].selector,
+          confidence: 'medium',
+          element: searchElements[0]
+        });
+      }
+      
+      const submitElements = interactiveElements.filter(el => 
+        el.type === 'submit' || 
+        (el.text && (el.text.toLowerCase().includes('submit') || el.text.toLowerCase().includes('send'))) ||
+        (el.tag === 'button' && el.text)
+      );
+      
+      if (submitElements.length > 0) {
+        intentTriggers.push({
+          intent: 'submit',
+          selector: submitElements[0].selector,
+          confidence: 'medium',
+          element: submitElements[0]
+        });
+      }
+      
+      const navigationLinks = interactiveElements.filter(el => 
+        el.tag === 'a' && el.text
+      );
+      
+      if (navigationLinks.length > 0) {
+        intentTriggers.push({
+          intent: 'navigate',
+          selector: navigationLinks[0].selector,
+          confidence: 'low',
+          element: navigationLinks[0]
+        });
+      }
     }
     
     // ========================================================================
