@@ -7,6 +7,8 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import * as cheerio from 'cheerio';
+import { ProtocolDiscoveryEngine } from '../../lib/auxAudit/ProtocolDiscoveryEngine';
+import { SemanticAffordanceAnalyzer } from '../../lib/auxAudit/SemanticAffordanceAnalyzer';
 
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -66,17 +68,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const linkCount = dom('a').length;
     console.log('[AUX Audit] Found buttons:', buttonCount, 'links:', linkCount);
     
+    // Step 3: Discover protocols
+    console.log('[AUX Audit] Step 3: Discovering protocols...');
+    const protocolEngine = new ProtocolDiscoveryEngine();
+    const protocols = await protocolEngine.discoverProtocols(url);
+    console.log('[AUX Audit] Protocols found:', protocols.length);
+    
+    // Step 4: Analyze semantic affordance
+    console.log('[AUX Audit] Step 4: Analyzing semantic affordance...');
+    const semanticAnalyzer = new SemanticAffordanceAnalyzer();
+    const semanticAnalysis = await semanticAnalyzer.analyzeHTML(html);
+    console.log('[AUX Audit] ARIA Score:', semanticAnalysis.ariaScore);
+    console.log('[AUX Audit] Interactive elements:', semanticAnalysis.interactiveElements.length);
+    
     // Return basic success response
     const results = {
       score: 75,
       classification: 'Agent-Capable' as const,
-      protocols: [],
-      ariaScore: 0,
-      interactiveElements: [],
+      protocols,
+      ariaScore: semanticAnalysis.ariaScore,
+      interactiveElements: semanticAnalysis.interactiveElements,
       frictionPoints: [],
       recommendations: [],
       intentTriggers: [],
-      summary: 'Basic analysis completed. HTML fetched successfully.',
+      summary: `Analysis completed. Found ${protocols.length} protocols, ARIA score: ${semanticAnalysis.ariaScore.toFixed(1)}%`,
       riskLevel: 'medium' as const,
       analyzedAt: new Date().toISOString()
     };
