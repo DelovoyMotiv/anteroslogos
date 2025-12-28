@@ -85,18 +85,6 @@ const Stats: React.FC = () => {
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-brand-accent/5 to-transparent"></div>
             
             <div className="max-w-7xl mx-auto px-6 relative z-10">
-                <AnimatedSection>
-                    <div className="text-center mb-20">
-                        <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold">
-                            <span className="block font-mono text-sm tracking-widest uppercase text-brand-accent mb-6">
-                                The Impact
-                            </span>
-                            Defining the Future of{' '}
-                            <span className="text-brand-accent">Digital Authority</span>
-                        </h2>
-                    </div>
-                </AnimatedSection>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-16">
                     {stats.map((stat, index) => (
                         <AnimatedSection key={stat.label} delay={index * 100}>

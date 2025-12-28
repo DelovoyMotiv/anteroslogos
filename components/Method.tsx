@@ -22,126 +22,126 @@ const Method = forwardRef<HTMLElement>((_props, ref) => {
     const pillars: Pillar[] = [
         {
             icon: Database,
-            title: 'Knowledge Infrastructure',
-            userFacing: 'Real-time website analysis and knowledge graph extraction optimized for AI retrieval systems.',
+            title: 'Smart Content Analysis',
+            userFacing: 'We analyze your website and transform it into AI-friendly knowledge that search engines and AI assistants can easily understand and cite.',
             systems: [
                 {
-                    name: 'GEO Audit Engine',
-                    description: 'Multi-platform scoring across Perplexity, ChatGPT, Claude, and Gemini with Schema.org parsing and NER'
+                    name: 'Multi-Platform Scoring',
+                    description: 'Track your visibility across ChatGPT, Claude, Perplexity, and Gemini in real-time'
                 },
                 {
-                    name: 'Knowledge Graph Engine',
-                    description: 'Self-learning semantic graphs with bidirectional citation feedback and cross-platform authority propagation'
+                    name: 'Knowledge Graph',
+                    description: 'Build connections between your content and industry topics to increase authority'
                 },
                 {
-                    name: 'Causal Citation Tracer',
-                    description: 'Counterfactual simulation using BFS/DFS + A* pathfinding for ROI attribution and visibility prediction'
+                    name: 'Citation Tracking',
+                    description: 'See exactly which content drives AI citations and measure your ROI'
                 },
                 {
-                    name: 'Citation Intelligence',
-                    description: 'ML-based probability scoring with ensemble models and continuous retraining from citation feedback'
+                    name: 'Predictive Intelligence',
+                    description: 'Get recommendations on what content to create next for maximum AI visibility'
                 }
             ],
             technologies: [
-                { name: 'RDF Graphs' },
-                { name: 'A* Pathfinding' },
-                { name: 'Platform Decision Emulation' },
-                { name: 'Bidirectional Learning' }
+                { name: 'Real-time Analysis' },
+                { name: 'Smart Recommendations' },
+                { name: 'ROI Attribution' },
+                { name: 'Continuous Learning' }
             ],
-            outcome: 'Machine-readable knowledge foundation'
+            outcome: 'Your content becomes AI-discoverable'
         },
         {
             icon: Shield,
-            title: 'Cryptographic Provenance',
-            userFacing: 'First production implementation of cryptographically verifiable provenance tokens for AI agent interactions.',
+            title: 'Verified Trust & Authenticity',
+            userFacing: 'Cryptographic proof that your content is authentic and trustworthy, making AI systems more likely to cite you as a reliable source.',
             systems: [
                 {
-                    name: 'UCPT Tokens',
-                    description: 'RFC 9052 COSE_Sign1 + RFC 8949 CBOR with Ed25519 signatures and SHA3-512 hashing for replay protection'
+                    name: 'Digital Signatures',
+                    description: 'Every piece of content gets a unique cryptographic signature proving its authenticity'
                 },
                 {
-                    name: 'Byzantine Fault Tolerance',
-                    description: 'PBFT consensus with 7-node quorum tolerating f=2 Byzantine nodes using Castro & Liskov algorithm'
+                    name: 'Trust Network',
+                    description: 'Build verifiable trust relationships with other authoritative sources in your industry'
                 },
                 {
-                    name: 'Causal Consensus Oracle',
-                    description: 'Provenance-based voting weight calculated from knowledge graph depth with 95% cache hit rate'
+                    name: 'Authority Scoring',
+                    description: 'Your trust score increases as more AI systems cite your verified content'
                 },
                 {
-                    name: 'Off-Chain Oracle',
-                    description: '10x throughput improvement via distributed LRU cache with mesh gossip protocol broadcasting'
+                    name: 'Fast Verification',
+                    description: 'AI systems can instantly verify your content authenticity without delays'
                 }
             ],
             technologies: [
-                { name: 'COSE_Sign1', spec: 'RFC 9052' },
-                { name: 'Ed25519 Signatures' },
-                { name: 'PBFT Consensus' },
-                { name: 'Trust Attestation' }
+                { name: 'Cryptographic Signatures' },
+                { name: 'Trust Verification' },
+                { name: 'Authority Tracking' },
+                { name: 'Instant Validation' }
             ],
-            outcome: 'Cryptographically verifiable AI claims',
-            stats: '2f+1 quorum (5 of 7 nodes)'
+            outcome: 'AI systems trust your content',
+            stats: 'Verified by 7-node trust network'
         },
         {
             icon: Network,
-            title: 'Autonomous Agent Economy',
-            userFacing: 'Production micropayments on Base L2 with contribution-based rewards solving the agent ecosystem cold-start problem.',
+            title: 'AI Agent Ecosystem',
+            userFacing: 'Connect directly with AI agents and get paid when they use your content, creating a new revenue stream from AI citations.',
             systems: [
                 {
-                    name: 'APA Micropayments',
-                    description: 'USDC invoicing on Base L2 with automatic detection, double-entry bookkeeping, and reorg protection'
+                    name: 'Micropayments',
+                    description: 'Receive automatic payments in USDC when AI agents cite your content'
                 },
                 {
-                    name: 'Universal Agent Protocol',
-                    description: 'HTTP/2 + WebSocket transport with cryptographic trust attestation and circuit breaker patterns'
+                    name: 'Agent Discovery',
+                    description: 'AI agents can easily find and connect with your content through standardized protocols'
                 },
                 {
-                    name: 'A2A Protocol',
-                    description: 'Full Linux Foundation compliance (14/14 requirements) with JSON-RPC 2.0 and SSE streaming'
+                    name: 'Contribution Rewards',
+                    description: 'Earn rewards based on how valuable your content is to the AI ecosystem'
                 },
                 {
-                    name: 'Causal Contribution Credits',
-                    description: 'Graph-theoretic reward computation with discount tiers from Bronze (25%) to Platinum (90%)'
-                },
-                {
-                    name: 'Mesh Network',
-                    description: 'Kademlia DHT with 160-bit node IDs, XOR distance metric, and capability-based routing'
+                    name: 'Network Effects',
+                    description: 'As more agents join, your content reaches more AI systems automatically'
                 }
             ],
             technologies: [
-                { name: 'USDC on Base L2' },
-                { name: 'HTTP/2 Streaming' },
-                { name: 'JSON-RPC 2.0' },
-                { name: 'Kademlia DHT' }
+                { name: 'Crypto Payments' },
+                { name: 'Agent Protocol' },
+                { name: 'Reward System' },
+                { name: 'Network Growth' }
             ],
-            outcome: 'Self-sustaining agent network',
-            stats: 'Supports 1000+ agents in mesh'
+            outcome: 'Monetize your AI citations',
+            stats: 'Connected to 1000+ AI agents'
         },
         {
             icon: Boxes,
-            title: 'Enterprise Integration',
-            userFacing: 'Direct LLM integration through industry-standard protocols with isolated execution and semantic tool discovery.',
+            title: 'Seamless Integration',
+            userFacing: 'Works with your existing tools and platforms. No technical expertise required - we handle all the complex AI integration for you.',
             systems: [
                 {
-                    name: 'MCP Integration',
-                    description: 'Model Context Protocol v2.0 with isolated-vm sandbox (128MB heap, 60s timeout) and automatic cleanup'
+                    name: 'One-Click Setup',
+                    description: 'Connect your website in minutes with our simple integration process'
                 },
                 {
-                    name: 'Anthropic Advanced Tool Use',
-                    description: 'Programmatic execution with semantic BM25 tool search and async function bridges'
+                    name: 'Universal Compatibility',
+                    description: 'Works with WordPress, Shopify, custom sites, and all major platforms'
                 },
                 {
-                    name: 'TypeScript SDK',
-                    description: 'Production-grade client with resilience patterns, circuit breakers, and exponential backoff'
+                    name: 'Auto-Discovery',
+                    description: 'AI systems automatically find and index your content without manual work'
+                },
+                {
+                    name: 'Developer-Friendly',
+                    description: 'Full API access for custom integrations and advanced use cases'
                 }
             ],
             technologies: [
-                { name: 'MCP v2.0' },
-                { name: 'RFC 8615 Well-Known', spec: 'RFC 8615' },
-                { name: 'Token Bucket Rate Limiting' },
-                { name: 'SSE Streaming' }
+                { name: 'Simple Setup' },
+                { name: 'Platform Agnostic' },
+                { name: 'Auto-Indexing' },
+                { name: 'Full API Access' }
             ],
-            outcome: 'Direct LLM integration',
-            stats: 'Agent card discovery via well-known endpoints'
+            outcome: 'Start getting AI citations today',
+            stats: 'Works with any website platform'
         }
     ];
 
@@ -165,21 +165,21 @@ const Method = forwardRef<HTMLElement>((_props, ref) => {
                         {/* Badge */}
                         <div className="inline-flex items-center gap-2.5 px-5 py-2.5 mb-8 bg-gradient-to-r from-brand-accent/10 via-brand-accent/5 to-transparent border border-brand-accent/20 rounded-full backdrop-blur-sm hover:border-brand-accent/40 transition-all duration-300">
                             <svg className="w-4 h-4 text-brand-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                             </svg>
                             <span className="font-mono text-xs tracking-[0.15em] uppercase text-brand-accent/90 font-medium">
-                                Platform Architecture
+                                How It Works
                             </span>
                         </div>
 
                         <h2 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.1] tracking-tight mb-6">
                             <span className="bg-gradient-to-r from-white via-brand-accent to-white bg-clip-text text-transparent">
-                                Enterprise Infrastructure
+                                Four Pillars of AI Visibility
                             </span>
                         </h2>
                         
                         <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/70 max-w-3xl mx-auto leading-relaxed">
-                            Production-grade AI knowledge platform powering verifiable citations across generative engines.
+                            Everything you need to dominate AI search results and get cited by ChatGPT, Claude, Perplexity, and more.
                         </p>
                     </div>
                 </AnimatedSection>
