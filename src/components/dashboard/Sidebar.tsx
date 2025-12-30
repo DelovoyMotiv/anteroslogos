@@ -64,6 +64,7 @@ export function Sidebar() {
   const { user } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [auditSuiteExpanded, setAuditSuiteExpanded] = useState(true);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   // Load collapsed state from localStorage
   useEffect(() => {
@@ -83,6 +84,9 @@ export function Sidebar() {
     const newState = !collapsed;
     setCollapsed(newState);
     localStorage.setItem('sidebar-collapsed', String(newState));
+    
+    // Dispatch custom event to notify DashboardLayout
+    window.dispatchEvent(new Event('sidebar-toggle'));
   };
 
   // Toggle audit suite section
@@ -91,6 +95,11 @@ export function Sidebar() {
     setAuditSuiteExpanded(newState);
     localStorage.setItem('audit-suite-expanded', String(newState));
   };
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
 
 
   const handleSignOut = async () => {
@@ -106,13 +115,40 @@ export function Sidebar() {
   };
 
   return (
-    <div
-      className={`
-        fixed top-0 left-0 h-screen bg-black/70 backdrop-blur-xl border-r border-slate-800/50 flex flex-col
-        transition-all duration-300 ease-in-out z-40
-        ${collapsed ? 'w-16' : 'w-56'}
-      `}
-    >
+    <>
+      {/* Mobile Menu Button - Fixed at top */}
+      <button
+        onClick={() => setMobileOpen(!mobileOpen)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-black/70 backdrop-blur-xl border border-slate-800/50 rounded-lg text-slate-300 hover:text-slate-100 transition-colors"
+        aria-label="Toggle menu"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          {mobileOpen ? (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          ) : (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          )}
+        </svg>
+      </button>
+
+      {/* Mobile Overlay */}
+      {mobileOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <div
+        className={`
+          fixed top-0 left-0 h-screen bg-black/70 backdrop-blur-xl border-r border-slate-800/50 flex flex-col
+          transition-all duration-300 ease-in-out
+          ${collapsed ? 'w-16' : 'w-56'}
+          lg:z-40 z-50
+          ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        `}
+      >
       {/* Header - Logo + Subtitle */}
       <div className="px-3 py-4 border-b border-slate-800/50">
         {!collapsed ? (
@@ -369,6 +405,7 @@ export function Sidebar() {
           </button>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }

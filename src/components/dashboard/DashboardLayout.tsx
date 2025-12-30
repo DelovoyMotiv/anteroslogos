@@ -3,6 +3,7 @@
  * Main layout wrapper with sidebar and content area
  */
 
+import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Toaster } from 'sonner';
@@ -10,6 +11,31 @@ import { AuthGuard } from '../../../lib/dashboard/auth-guard';
 import DigitalBackground from '../../../components/DigitalBackground';
 
 export function DashboardLayout() {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Listen for sidebar state changes from localStorage
+  useEffect(() => {
+    const checkSidebarState = () => {
+      const saved = localStorage.getItem('sidebar-collapsed');
+      setSidebarCollapsed(saved === 'true');
+    };
+
+    // Initial check
+    checkSidebarState();
+
+    // Listen for storage events (when sidebar toggles)
+    window.addEventListener('storage', checkSidebarState);
+    
+    // Also listen for custom event from Sidebar component
+    const handleSidebarToggle = () => checkSidebarState();
+    window.addEventListener('sidebar-toggle', handleSidebarToggle);
+
+    return () => {
+      window.removeEventListener('storage', checkSidebarState);
+      window.removeEventListener('sidebar-toggle', handleSidebarToggle);
+    };
+  }, []);
+
   return (
     <AuthGuard requireAuth={true} redirectTo="/auth/login">
       <div className="min-h-screen bg-black relative">
@@ -21,8 +47,14 @@ export function DashboardLayout() {
           <Sidebar />
         
           {/* Main content - offset by sidebar width, HUD-style */}
-          <main className="pl-64 transition-all duration-300">
-            <div className="max-w-7xl mx-auto px-6 py-6">
+          <main 
+            className={`
+              transition-all duration-300 ease-in-out
+              lg:${sidebarCollapsed ? 'pl-16' : 'pl-56'}
+              pt-16 lg:pt-0
+            `}
+          >
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
               <Outlet />
             </div>
           </main>
