@@ -42,7 +42,7 @@ export function APIKeysPage() {
         return;
       }
 
-      const response = await fetch('/api/keys/create', {
+      const response = await fetch('/api/keys?type=api', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -50,6 +50,12 @@ export function APIKeysPage() {
         },
         body: JSON.stringify({ name }),
       });
+
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Server returned invalid response. Please try again.');
+      }
 
       const data = await response.json();
 
@@ -67,6 +73,7 @@ export function APIKeysPage() {
       
       fetchKeys();
     } catch (error) {
+      console.error('API key creation error:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to create key');
     }
   };
@@ -86,23 +93,32 @@ export function APIKeysPage() {
         return;
       }
 
-      const response = await fetch('/api/keys/revoke', {
-        method: 'POST',
+      const response = await fetch(`/api/keys?type=api&id=${keyId}`, {
+        method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
         },
-        body: JSON.stringify({ keyId }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to revoke key');
+      // Check if response is JSON (for error messages)
+      if (response.status !== 204) {
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          if (!response.ok) {
+            throw new Error(data.error || 'Failed to revoke key');
+          }
+        } else if (!response.ok) {
+          throw new Error('Failed to revoke key');
+        }
       }
 
       toast.success('API key revoked');
       fetchKeys();
     } catch (error) {
-      toast.error('Failed to revoke key');
+      console.error('API key revocation error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to revoke key');
     }
   };
 
