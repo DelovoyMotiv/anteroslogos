@@ -4,13 +4,13 @@
  */
 
 import { supabase } from '../supabase';
-import { scrypt, randomBytes } from 'crypto';
-import { promisify } from 'util';
+import crypto from 'node:crypto';
+import { promisify } from 'node:util';
 import type { UserProfileWithSubscription } from '../../types/lib-extended.types';
 import { APIKeySchema, type APIKey, apiKeyFromDb } from './schemas';
 import { selectQuery, insertSingle, insertQuery } from '../database/queryHelpers';
 
-const scryptAsync = promisify(scrypt);
+const scryptAsync = promisify(crypto.scrypt);
 
 // API key format: sk_{tier}_{32_random_chars}
 const TIER_PREFIXES = {
@@ -35,7 +35,7 @@ export interface CreateAPIKeyResult {
  */
 export function generateAPIKey(tier: 'free' | 'pro' | 'agency'): string {
   const prefix = TIER_PREFIXES[tier];
-  const randomPart = randomBytes(24).toString('base64url'); // 32 chars
+  const randomPart = crypto.randomBytes(24).toString('base64url'); // 32 chars
   return `sk_${prefix}_${randomPart}`;
 }
 
@@ -44,7 +44,7 @@ export function generateAPIKey(tier: 'free' | 'pro' | 'agency'): string {
  * Returns base64-encoded hash + salt
  */
 export async function hashAPIKey(key: string): Promise<string> {
-  const salt = randomBytes(16);
+  const salt = crypto.randomBytes(16);
   const derivedKey = (await scryptAsync(key, salt, 64)) as Buffer;
   
   // Store salt + derived key together (salt:key format)
