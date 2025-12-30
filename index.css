@@ -62,6 +62,19 @@ body {
     bottom: 0;
     animation-delay: 0.4s;
   }
+
+  /* Overflow prevention utilities for responsive layout */
+  .prevent-overflow {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+  }
+
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 
 ::-webkit-scrollbar {

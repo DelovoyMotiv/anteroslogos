@@ -10,6 +10,9 @@ export default {
   ],
   theme: {
     extend: {
+      screens: {
+        'xs': '400px',
+      },
       colors: {
         'brand-bg': '#121212',
         'brand-text': '#E0E0E0',

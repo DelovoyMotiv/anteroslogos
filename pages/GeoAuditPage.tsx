@@ -541,13 +541,13 @@ const GeoAuditPage = () => {
 
       {/* Results Section */}
       {result && (
-        <section className="py-8 px-4 lg:px-6">
+        <section className="py-8 px-4 sm:px-6">
           <div className="max-w-[1800px] mx-auto">
             {/* Overall Score - Professional Display */}
             <div className="mb-10">
-              <div className="flex flex-col lg:flex-row items-start justify-between gap-6">
+              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 lg:gap-6">
                 {/* Left: Main Score with Precision */}
-                <div className="flex-1">
+                <div className="flex-1 w-full lg:w-auto">
                   <h2 className="text-lg font-bold text-white/60 tracking-tight mb-3 uppercase text-xs">Overall GEO Score</h2>
                   <div className="flex items-end gap-3 mb-4">
                     {/* Main Score */}
@@ -607,7 +607,7 @@ const GeoAuditPage = () => {
                   
                   {/* Score Breakdown - Compact */}
                   {result.scoreBreakdown && typeof result.scoreBreakdown === 'object' && (
-                    <div className="grid grid-cols-3 gap-3 max-w-md">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 max-w-md">
                       <div className="p-2 bg-white/5 border border-white/10 rounded">
                         <div className="text-[9px] text-white/40 uppercase tracking-wide font-semibold mb-1">Core</div>
                         <div className={`text-lg font-bold tabular-nums ${getScoreColor(result.scoreBreakdown.core || 0)}`}>
@@ -635,12 +635,12 @@ const GeoAuditPage = () => {
                 </div>
                 
                 {/* Right: Export & Share Buttons - 9 formats available */}
-                <div className="flex flex-col gap-3">
-                  <div className="flex gap-2 flex-shrink-0 flex-wrap justify-center lg:justify-end">
+                <div className="flex flex-col gap-3 w-full lg:w-auto">
+                  <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-9 gap-2 w-full lg:w-auto">
                     <button
                       onClick={downloadPDFReport}
                       disabled={exportingFormat === ExportFormat.PDF}
-                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] min-w-[44px]"
                       title="Download PDF Report"
                       aria-label="Download professional PDF report"
                     >
@@ -653,7 +653,7 @@ const GeoAuditPage = () => {
                     <button
                       onClick={downloadHTMLReport}
                       disabled={exportingFormat === ExportFormat.HTML}
-                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] min-w-[44px]"
                       title="Download HTML Report"
                       aria-label="Download standalone HTML report"
                     >
@@ -666,7 +666,7 @@ const GeoAuditPage = () => {
                     <button
                       onClick={downloadMarkdownReport}
                       disabled={exportingFormat === ExportFormat.MARKDOWN}
-                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] min-w-[44px]"
                       title="Download Markdown Report (LLM-friendly)"
                       aria-label="Download markdown report for GitHub/docs/LLM"
                     >
@@ -679,7 +679,7 @@ const GeoAuditPage = () => {
                     <button
                       onClick={downloadXMLReport}
                       disabled={exportingFormat === ExportFormat.XML}
-                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] min-w-[44px]"
                       title="Download XML Report (LLM-friendly)"
                       aria-label="Download XML report for structured LLM analysis"
                     >
@@ -692,7 +692,7 @@ const GeoAuditPage = () => {
                     <button
                       onClick={downloadPlainTextReport}
                       disabled={exportingFormat === ExportFormat.PLAIN_TEXT}
-                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] min-w-[44px]"
                       title="Download Plain Text Report (Token-efficient for LLM)"
                       aria-label="Download plain text report for token-efficient LLM analysis"
                     >
@@ -705,7 +705,7 @@ const GeoAuditPage = () => {
                     <button
                       onClick={downloadYAMLReport}
                       disabled={exportingFormat === ExportFormat.YAML}
-                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] min-w-[44px]"
                       title="Download YAML Report (LLM-friendly)"
                       aria-label="Download YAML report for configuration analysis"
                     >
@@ -718,7 +718,7 @@ const GeoAuditPage = () => {
                     <button
                       onClick={downloadCSVReport}
                       disabled={exportingFormat === ExportFormat.CSV}
-                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] min-w-[44px]"
                       title="Download CSV Report"
                       aria-label="Download CSV report for data analysis"
                     >
@@ -731,7 +731,7 @@ const GeoAuditPage = () => {
                     <button
                       onClick={downloadReport}
                       disabled={exportingFormat === ExportFormat.JSON}
-                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px] min-w-[44px]"
                       title="Download JSON"
                       aria-label="Download JSON report"
                     >
@@ -743,7 +743,7 @@ const GeoAuditPage = () => {
                     </button>
                     <button
                       onClick={shareResults}
-                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group"
+                      className="p-2.5 hover:bg-white/5 rounded-lg transition-all group min-h-[44px] min-w-[44px]"
                       title="Share on Twitter"
                       aria-label="Share results on Twitter"
                     >
@@ -867,7 +867,7 @@ const GeoAuditPage = () => {
             <div className="mb-16">
               <h3 className="text-xl font-bold text-white mb-6 tracking-tight">Visual Analytics</h3>
               {/* Top Row: Charts 3 columns on desktop */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
                 <div className="lg:col-span-1">
                   <ScoreRadarChart 
                     scores={result.scores} 
@@ -898,7 +898,7 @@ const GeoAuditPage = () => {
                   </div>
                 )}
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2">
+              <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-3 auto-rows-fr">
                 {Object.entries(result.scores).map(([key, score]) => {
                   const change = comparison?.changes?.[key as keyof typeof comparison.changes] || 0;
                   const categoryName = key.replace(/([A-Z])/g, ' $1').trim();
@@ -906,7 +906,7 @@ const GeoAuditPage = () => {
                   return (
                   <div 
                     key={key} 
-                    className="relative p-2 bg-white/[0.03] border border-white/[0.08] rounded-md hover:border-brand-accent/30 hover:bg-white/[0.05] transition-all group"
+                    className="relative p-2 bg-white/[0.03] border border-white/[0.08] rounded-md hover:border-brand-accent/30 hover:bg-white/[0.05] transition-all group flex flex-col"
                   >
                     {/* Header with category name and change indicator */}
                     <div className="flex items-center justify-between gap-1 mb-1.5">
@@ -963,7 +963,7 @@ const GeoAuditPage = () => {
               })()}
               {result.details ? (
                 Object.keys(result.details).length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr">
                     {Object.entries(result.details)
                       .filter(([category]) => category !== 'aidAgent') // AID has dedicated section
                       .map(([category, details]: [string, any]) => {
@@ -973,8 +973,8 @@ const GeoAuditPage = () => {
                           hasStrengths: Array.isArray(details?.strengths),
                         });
                         return (
-                  <div key={category} className="p-3 bg-white/5 border border-white/10 rounded-lg space-y-3">
-                    <h4 className="text-xs font-bold text-white uppercase tracking-wide pb-2 border-b border-white/10">
+                  <div key={category} className="p-3 bg-white/5 border border-white/10 rounded-lg space-y-3 flex flex-col overflow-hidden">
+                    <h4 className="text-xs font-bold text-white uppercase tracking-wide pb-2 border-b border-white/10 break-words">
                       {category.replace(/([A-Z])/g, ' $1').trim()}
                     </h4>
                     
@@ -985,7 +985,7 @@ const GeoAuditPage = () => {
                           {details.strengths.map((strength: string, i: number) => (
                             <li key={i} className="text-[11px] text-white/60 flex items-start gap-1.5 leading-snug">
                               <CheckCircle className="w-3 h-3 text-green-400 flex-shrink-0 mt-0.5" />
-                              <span>{strength}</span>
+                              <span className="break-words">{strength}</span>
                             </li>
                           ))}
                         </ul>
@@ -999,7 +999,7 @@ const GeoAuditPage = () => {
                           {details.issues.map((issue: string, i: number) => (
                             <li key={i} className="text-[11px] text-white/60 flex items-start gap-1.5 leading-snug">
                               <AlertCircle className="w-3 h-3 text-orange-400 flex-shrink-0 mt-0.5" />
-                              <span>{issue}</span>
+                              <span className="break-words">{issue}</span>
                             </li>
                           ))}
                         </ul>
@@ -1256,8 +1256,8 @@ const GeoAuditPage = () => {
                         'bg-blue-500/5 border-blue-500/30'
                       }`}
                     >
-                      <div className="flex flex-col sm:flex-row items-start gap-3">
-                        <div className="flex gap-1.5 flex-shrink-0">
+                      <div className="flex flex-col gap-3">
+                        <div className="flex flex-wrap gap-1.5">
                           <div className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                             rec.priority === 'critical' ? 'bg-red-500/30 text-red-300' :
                             rec.priority === 'high' ? 'bg-orange-500/20 text-orange-300' :
@@ -1277,7 +1277,7 @@ const GeoAuditPage = () => {
                             </div>
                           )}
                         </div>
-                        <div className="flex-1 w-full sm:w-auto min-w-0">
+                        <div className="flex-1 w-full min-w-0">
                           <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 mb-1">
                             <h4 className="font-semibold text-sm">{rec.title}</h4>
                             <span className="text-[10px] text-white/40">• {rec.category}</span>
