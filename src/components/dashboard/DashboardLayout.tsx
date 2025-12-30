@@ -50,8 +50,8 @@ export function DashboardLayout() {
           <main 
             className={`
               transition-all duration-300 ease-in-out
-              lg:${sidebarCollapsed ? 'pl-16' : 'pl-56'}
               pt-16 lg:pt-0
+              ${sidebarCollapsed ? 'lg:pl-16' : 'lg:pl-56'}
             `}
           >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
