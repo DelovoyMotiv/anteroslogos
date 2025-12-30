@@ -10,8 +10,8 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import crypto from 'node:crypto';
-import { promisify } from 'node:util';
+import { createHash, randomBytes, scrypt } from 'crypto';
+import { promisify } from 'util';
 import { supabase } from '../lib/supabase';
 import {
   generateAgentKey,
@@ -32,7 +32,7 @@ const TIER_PREFIXES = {
  */
 function generateAPIKey(tier: 'free' | 'pro' | 'agency'): string {
   const prefix = TIER_PREFIXES[tier];
-  const randomPart = crypto.randomBytes(24).toString('base64url'); // 32 chars
+  const randomPart = randomBytes(24).toString('base64url'); // 32 chars
   return `sk_${prefix}_${randomPart}`;
 }
 
@@ -41,7 +41,7 @@ function generateAPIKey(tier: 'free' | 'pro' | 'agency'): string {
  * Returns base64-encoded hash + salt
  */
 async function hashAPIKey(key: string): Promise<string> {
-  const salt = crypto.randomBytes(16);
+  const salt = randomBytes(16);
   const derivedKey = (await scryptAsync(key, salt, 64)) as Buffer;
   
   // Store salt + derived key together (salt:key format)
