@@ -453,18 +453,9 @@ export async function auditWebsite(
     throw new Error('Failed to fetch website. Please check the URL and try again.');
   }
 
-  // Parse HTML
-  let doc: Document;
-  if (typeof DOMParser !== 'undefined') {
-    // Browser environment
-    const parser = new DOMParser();
-    doc = parser.parseFromString(htmlContent, 'text/html');
-  } else {
-    // Node.js environment - use jsdom
-    const { JSDOM } = await import('jsdom');
-    const dom = new JSDOM(htmlContent);
-    doc = dom.window.document;
-  }
+  // Parse HTML (browser environment only)
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlContent, 'text/html');
 
   // Run all audits with error handling
   let schemaMarkup, metaTags, structure, performance, eeat, technicalSEO, contentQuality, citationPotential, linkAnalysis, aiCrawlers, aidAgent;

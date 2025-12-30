@@ -322,28 +322,18 @@ export class ExtractionEngine {
     structure: StructureData;
   }> {
     try {
-      // Parse HTML using DOMParser (browser) or jsdom (Node.js)
-      let doc: Document;
+      // Parse HTML using DOMParser (browser environment only)
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
       
-      if (typeof DOMParser !== 'undefined') {
-        // Browser environment
-        const parser = new DOMParser();
-        doc = parser.parseFromString(html, 'text/html');
-        
-        // Check for parsing errors
-        const parserError = doc.querySelector('parsererror');
-        if (parserError) {
-          throw new AgentMiddlewareError(
-            ErrorCode.ERR_DOM_UNREADABLE,
-            'HTML parsing failed',
-            { error: parserError.textContent || 'Unknown parser error' }
-          );
-        }
-      } else {
-        // Node.js environment - use jsdom
-        const { JSDOM } = await import('jsdom');
-        const dom = new JSDOM(html);
-        doc = dom.window.document;
+      // Check for parsing errors
+      const parserError = doc.querySelector('parsererror');
+      if (parserError) {
+        throw new AgentMiddlewareError(
+          ErrorCode.ERR_DOM_UNREADABLE,
+          'HTML parsing failed',
+          { error: parserError.textContent || 'Unknown parser error' }
+        );
       }
       
       // Extract schema markup

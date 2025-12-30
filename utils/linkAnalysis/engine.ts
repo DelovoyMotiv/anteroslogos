@@ -7,7 +7,6 @@
  *              9.1, 9.3, 9.4
  */
 
-import { JSDOM } from 'jsdom';
 import { getDefaultLinkAnalysisDetails } from '../geoAuditDefaults';
 import type {
   LinkAnalysisDetails,
@@ -78,8 +77,9 @@ export async function analyzeLinkStructure(
     // Requirement 8.2: Try-catch for HTML parsing
     let doc: Document;
     try {
-      const dom = new JSDOM(htmlContent);
-      doc = dom.window.document;
+      // Use DOMParser for browser environment
+      const parser = new DOMParser();
+      doc = parser.parseFromString(htmlContent, 'text/html');
     } catch (error) {
       // Requirement 8.2: Structured logging
       console.error('Link analysis - HTML parsing failed:', {

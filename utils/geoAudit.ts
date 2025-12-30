@@ -184,18 +184,9 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
     throw new Error('Failed to fetch website. Please check the URL and try again.');
   }
 
-  // Parse HTML
-  let doc: Document;
-  if (typeof DOMParser !== 'undefined') {
-    // Browser environment
-    const parser = new DOMParser();
-    doc = parser.parseFromString(htmlContent, 'text/html');
-  } else {
-    // Node.js environment - use jsdom
-    const { JSDOM } = await import('jsdom');
-    const dom = new JSDOM(htmlContent);
-    doc = dom.window.document;
-  }
+  // Parse HTML (browser environment only)
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(htmlContent, 'text/html');
 
   // Run all audits
   const schemaMarkup = auditSchemaMarkup(doc);
