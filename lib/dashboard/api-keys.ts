@@ -150,7 +150,7 @@ export async function createAPIKey(
         name: params.name,
         key_hash: keyHash,
         key_prefix: keyPrefix,
-        scopes: params.scoped_tools || [],
+        scoped_tools: params.scoped_tools || null,
         rate_limit_per_minute: rateLimits.per_minute,
         expires_at: expiresAt,
       },
