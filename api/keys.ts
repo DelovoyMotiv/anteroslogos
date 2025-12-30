@@ -13,10 +13,6 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createHash, randomBytes, scrypt } from 'crypto';
 import { promisify } from 'util';
 import { supabaseServer as supabase } from '../lib/supabase-server';
-import {
-  generateAgentKey,
-  deleteAgentKey,
-} from '../lib/dashboard/agent-keys';
 
 const scryptAsync = promisify(crypto.scrypt);
 
@@ -239,11 +235,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             return res.status(500).json({ error: 'Internal server error' });
           }
         } else {
-          const result = await generateAgentKey(req.body);
-          if ('error' in result) {
-            return res.status(400).json({ error: result.error });
-          }
-          return res.status(201).json(result);
+          // Agent keys not supported in serverless functions yet
+          return res.status(501).json({ error: 'Agent key creation not implemented for serverless functions' });
         }
 
       case 'PUT': {
@@ -321,11 +314,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
           return res.status(204).end();
         } else {
-          const result = await deleteAgentKey(id);
-          if (!result.success) {
-            return res.status(500).json({ error: result.error });
-          }
-          return res.status(204).end();
+          // Agent keys not supported in serverless functions yet
+          return res.status(501).json({ error: 'Agent key deletion not implemented for serverless functions' });
         }
       }
 
