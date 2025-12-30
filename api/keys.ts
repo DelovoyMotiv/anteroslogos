@@ -10,15 +10,55 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import crypto from 'node:crypto';
+import { promisify } from 'node:util';
 import { supabase } from '../lib/supabase';
-import { 
-  createAPIKey, 
-  deleteAPIKey 
-} from '../lib/dashboard/api-keys';
 import {
   generateAgentKey,
   deleteAgentKey,
 } from '../lib/dashboard/agent-keys';
+
+const scryptAsync = promisify(crypto.scrypt);
+
+// API key format: sk_{tier}_{32_random_chars}
+const TIER_PREFIXES = {
+  free: 'fre',
+  pro: 'pro',
+  agency: 'agc',
+} as const;
+
+/**
+ * Generate a cryptographically secure API key
+ */
+function generateAPIKey(tier: 'free' | 'pro' | 'agency'): string {
+  const prefix = TIER_PREFIXES[tier];
+  const randomPart = crypto.randomBytes(24).toString('base64url'); // 32 chars
+  return `sk_${prefix}_${randomPart}`;
+}
+
+/**
+ * Hash API key using scrypt (N=16384, r=8, p=1)
+ * Returns base64-encoded hash + salt
+ */
+async function hashAPIKey(key: string): Promise<string> {
+  const salt = crypto.randomBytes(16);
+  const derivedKey = (await scryptAsync(key, salt, 64)) as Buffer;
+  
+  // Store salt + derived key together (salt:key format)
+  return `${salt.toString('base64')}:${derivedKey.toString('base64')}`;
+}
+
+/**
+ * Get plan-based rate limits
+ */
+function getPlanRateLimits(plan: 'free' | 'pro' | 'agency') {
+  const limits = {
+    free: { per_minute: 10, per_hour: 100 },
+    pro: { per_minute: 60, per_hour: 1000 },
+    agency: { per_minute: 300, per_hour: 10000 },
+  };
+  return limits[plan];
+}
 
 /**
  * Get authenticated user from request
@@ -122,11 +162,82 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       case 'POST':
         // Create new key
         if (keyType === 'api') {
-          const result = await createAPIKey(req.body);
-          if ('error' in result) {
-            return res.status(400).json({ error: result.error });
+          try {
+            // Get profile
+            const { data: profile, error: profileError } = await supabase
+              .from('profiles')
+              .select('current_plan, api_keys_count')
+              .eq('id', user.id)
+              .single();
+
+            if (profileError || !profile) {
+              return res.status(404).json({ error: 'Profile not found' });
+            }
+
+            // Check plan limits
+            const planLimits = {
+              free: 1,
+              pro: 5,
+              agency: 20,
+            };
+            
+            if (profile.api_keys_count >= planLimits[profile.current_plan as keyof typeof planLimits]) {
+              return res.status(400).json({ 
+                error: `Plan limit reached: ${planLimits[profile.current_plan as keyof typeof planLimits]} API keys max` 
+              });
+            }
+
+            // Generate key
+            const plaintextKey = generateAPIKey(profile.current_plan as 'free' | 'pro' | 'agency');
+            const keyHash = await hashAPIKey(plaintextKey);
+            const keyPrefix = plaintextKey.substring(0, 11); // sk_xxx_abc...
+
+            // Get rate limits based on plan
+            const rateLimits = getPlanRateLimits(profile.current_plan as 'free' | 'pro' | 'agency');
+
+            // Calculate expiration
+            const expiresAt = req.body.expires_in_days
+              ? new Date(Date.now() + req.body.expires_in_days * 24 * 60 * 60 * 1000).toISOString()
+              : null;
+
+            // Insert into database
+            const { data: key, error: insertError } = await supabase
+              .from('api_keys')
+              .insert({
+                user_id: user.id,
+                name: req.body.name,
+                key_hash: keyHash,
+                key_prefix: keyPrefix,
+                scoped_tools: req.body.scoped_tools || null,
+                rate_limit_per_minute: rateLimits.per_minute,
+                rate_limit_per_hour: rateLimits.per_hour,
+                expires_at: expiresAt,
+              })
+              .select()
+              .single();
+
+            if (insertError || !key) {
+              console.error('API key creation error:', insertError);
+              return res.status(500).json({ error: 'Failed to create API key' });
+            }
+
+            // Log audit event
+            await supabase.from('audit_log').insert({
+              user_id: user.id,
+              action: 'api_key.created',
+              resource_type: 'api_key',
+              resource_id: key.id,
+              metadata: { name: req.body.name, scoped_tools: req.body.scoped_tools },
+            });
+
+            return res.status(201).json({
+              key,
+              plaintext_key: plaintextKey,
+            });
+          } catch (error) {
+            console.error('createAPIKey error:', error);
+            return res.status(500).json({ error: 'Internal server error' });
           }
-          return res.status(201).json(result);
         } else {
           const result = await generateAgentKey(req.body);
           if ('error' in result) {
@@ -187,14 +298,35 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           return res.status(400).json({ error: 'Missing key ID' });
         }
 
-        const deleteFunc = keyType === 'api' ? deleteAPIKey : deleteAgentKey;
-        const result = await deleteFunc(id);
+        if (keyType === 'api') {
+          // Delete API key
+          const { error } = await supabase
+            .from('api_keys')
+            .delete()
+            .eq('id', id)
+            .eq('user_id', user.id);
 
-        if (!result.success) {
-          return res.status(500).json({ error: result.error });
+          if (error) {
+            console.error('deleteAPIKey error:', error);
+            return res.status(500).json({ error: 'Failed to delete API key' });
+          }
+
+          // Log audit event
+          await supabase.from('audit_log').insert({
+            user_id: user.id,
+            action: 'api_key.deleted',
+            resource_type: 'api_key',
+            resource_id: id,
+          });
+
+          return res.status(204).end();
+        } else {
+          const result = await deleteAgentKey(id);
+          if (!result.success) {
+            return res.status(500).json({ error: result.error });
+          }
+          return res.status(204).end();
         }
-
-        return res.status(204).end();
       }
 
       default:
