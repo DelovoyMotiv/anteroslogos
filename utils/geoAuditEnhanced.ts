@@ -20,6 +20,9 @@ import {
   getDefaultTechnicalSEODetails,
   getDefaultLinkAnalysisDetails,
 } from './geoAuditDefaults';
+// Import new Link Analysis Engine (Requirements: 10.1, 10.2)
+import { analyzeLinkStructure } from './linkAnalysis/engine';
+import type { LinkAnalysisOptions } from './linkAnalysis/types';
 
 // ==================== INTERFACES ====================
 
@@ -301,6 +304,14 @@ export interface LinkAnalysisDetails {
   uniqueInternalLinks: number;
   uniqueExternalLinks: number;
   brokenLinks: number;
+  brokenLinkDetails?: Array<{
+    url: string;
+    status: number;
+    broken: boolean;
+    redirected: boolean;
+    finalUrl?: string;
+    error?: string;
+  }>;
   linkDepth: 'shallow' | 'balanced' | 'deep';
   anchorTextQuality: number;
   emptyAnchors: number;
@@ -388,11 +399,31 @@ async function fetchHTML(url: string): Promise<string> {
 
 // ==================== MAIN AUDIT FUNCTION ====================
 
+/**
+ * Options for website audit
+ * Requirements: 9.1, 9.2, 10.2
+ */
+export interface AuditOptions {
+  /** Whether to use AI for enhanced recommendations */
+  useAI?: boolean;
+  /** Progress callback for UI updates */
+  onProgress?: (stage: string) => void;
+  /** Whether to check for broken links (disabled by default for performance) */
+  checkBrokenLinks?: boolean;
+  /** Maximum number of broken links to check (default: 20) */
+  maxBrokenLinkChecks?: number;
+}
+
 export async function auditWebsite(
   url: string, 
-  options?: { useAI?: boolean; onProgress?: (stage: string) => void }
+  options?: AuditOptions
 ): Promise<AuditResult> {
-  const { useAI = true, onProgress } = options || {};
+  const { 
+    useAI = true, 
+    onProgress,
+    checkBrokenLinks = false, // Disabled by default for performance (Requirement 9.1, 9.2)
+    maxBrokenLinkChecks = 20,
+  } = options || {};
   
   const normalizedUrl = normalizeUrl(url);
   
@@ -504,7 +535,11 @@ export async function auditWebsite(
   
   try {
     onProgress?.('Analyzing link structure...');
-    linkAnalysis = auditLinkAnalysis(doc, normalizedUrl);
+    // Use new Link Analysis Engine (Requirements: 10.1, 10.3, 10.4, 10.5)
+    linkAnalysis = await analyzeLinkStructure(normalizedUrl, htmlContent, {
+      checkBrokenLinks,
+      maxBrokenLinkChecks,
+    });
   } catch (error) {
     console.error('Link analysis audit failed:', error);
     linkAnalysis = getDefaultLinkAnalysisDetails();

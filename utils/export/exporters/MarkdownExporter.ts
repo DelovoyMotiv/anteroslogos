@@ -197,6 +197,7 @@ export class MarkdownExporter implements FormatExporter {
       md += `- **Internal Links:** ${result.details.linkAnalysis.internalLinks || 0}\n`;
       md += `- **External Links:** ${result.details.linkAnalysis.externalLinks || 0}\n`;
       md += `- **Nofollow Ratio:** ${(result.details.linkAnalysis.nofollowRatio * 100).toFixed(1)}%\n`;
+      md += `- **Broken Links:** ${result.details.linkAnalysis.brokenLinks || 0}\n`;
     }
     
     // Performance stats
@@ -326,10 +327,30 @@ export class MarkdownExporter implements FormatExporter {
       case 'eeat':
         if (details.authorInfo) {
           md += `**Author Information:**\n\n`;
-          md += `- Has Author: ${details.authorInfo.hasAuthor ? '✅' : '❌'}\n`;
+          md += `- Has Author: ${details.authorInfo.hasAuthor ? '✅' : '���'}\n`;
           md += `- Has Bio: ${details.authorInfo.hasBio ? '✅' : '❌'}\n`;
           md += `- Has Credentials: ${details.authorInfo.hasCredentials ? '✅' : '❌'}\n`;
           md += `\n`;
+        }
+        break;
+        
+      case 'linkAnalysis':
+        // Add broken links section if present
+        if (details.brokenLinkDetails && details.brokenLinkDetails.length > 0) {
+          md += `**🔴 Broken Links Detected:**\n\n`;
+          md += `| # | URL | Status | Error |\n`;
+          md += `|---|-----|--------|-------|\n`;
+          details.brokenLinkDetails.forEach((brokenLink: any, idx: number) => {
+            const url = this.escapeMarkdown(brokenLink.url);
+            const status = brokenLink.status;
+            const error = brokenLink.error ? this.escapeMarkdown(brokenLink.error) : '-';
+            md += `| ${idx + 1} | ${url} | ${status} | ${error} |\n`;
+          });
+          md += `\n`;
+          
+          if (details.brokenLinkDetails.length > 10) {
+            md += `*Showing first 10 broken links. Total: ${details.brokenLinkDetails.length}*\n\n`;
+          }
         }
         break;
     }
@@ -468,11 +489,11 @@ export class MarkdownExporter implements FormatExporter {
   private generateAIPAgentInfo(result: AuditResult): string {
     if (!result.details?.aidAgent) return '';
     
-    let md = `## AIP Agent Information\n\n`;
+    let md = `## AID Agent Information\n\n`;
     
     const aid = result.details.aidAgent;
     
-    md += `- **AIP Protocol Detected:** ${aid.detected ? 'Yes' : 'No'}\n`;
+    md += `- **AID Protocol Detected:** ${aid.detected ? 'Yes' : 'No'}\n`;
     md += `- **Discovery Method:** ${aid.discoveryMethod}\n`;
     
     if (aid.detected) {

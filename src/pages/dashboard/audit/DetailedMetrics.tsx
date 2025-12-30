@@ -147,7 +147,47 @@ export function DetailedMetrics({ result }: DetailedMetricsProps) {
           <MetricItem label="Image Links" value={result.details.linkAnalysis.imageLinks} />
           <MetricItem label="Link Depth" value={result.details.linkAnalysis.linkDepth} />
           <MetricItem label="Distribution" value={result.details.linkAnalysis.linkDistribution} />
+          <MetricItem 
+            label="Broken Links" 
+            value={result.details.linkAnalysis.brokenLinks} 
+            valueColor={result.details.linkAnalysis.brokenLinks > 0 ? 'text-red-400' : 'text-emerald-400'}
+          />
         </div>
+
+        {/* Broken Links Details */}
+        {result.details.linkAnalysis.brokenLinkDetails && result.details.linkAnalysis.brokenLinkDetails.length > 0 && (
+          <div className="mt-3 pt-3 border-t border-slate-700/50">
+            <div className="text-[10px] font-mono text-red-400 uppercase tracking-wider mb-2">
+              Broken Links ({result.details.linkAnalysis.brokenLinkDetails.length})
+            </div>
+            <div className="space-y-2">
+              {result.details.linkAnalysis.brokenLinkDetails.map((brokenLink, idx) => (
+                <div key={idx} className="bg-red-500/5 border border-red-500/20 p-2 rounded">
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <span className="text-xs text-slate-400 truncate flex-1 font-mono">{brokenLink.url}</span>
+                    <span className={`text-xs font-mono px-2 py-0.5 rounded flex-shrink-0 ${
+                      brokenLink.status >= 500 ? 'bg-orange-500/20 text-orange-400' :
+                      brokenLink.status >= 400 ? 'bg-red-500/20 text-red-400' :
+                      'bg-slate-500/20 text-slate-400'
+                    }`}>
+                      {brokenLink.status > 0 ? `HTTP ${brokenLink.status}` : 'Failed'}
+                    </span>
+                  </div>
+                  {brokenLink.error && (
+                    <div className="text-[10px] text-red-400/80 font-mono">
+                      Error: {brokenLink.error}
+                    </div>
+                  )}
+                  {brokenLink.redirected && brokenLink.finalUrl && (
+                    <div className="text-[10px] text-yellow-400/80 font-mono">
+                      Redirected to: {brokenLink.finalUrl}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {result.details.linkAnalysis.topInternalPages.length > 0 && (
           <div className="mt-3 pt-3 border-t border-slate-700/50">

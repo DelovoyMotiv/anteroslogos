@@ -666,6 +666,65 @@ function LinkAnalysisView({ details }: { details: any }) {
           </div>
         </div>
       )}
+
+      {/* Broken Links Section */}
+      {details.brokenLinkDetails && details.brokenLinkDetails.length > 0 && (
+        <div className="bg-red-500/5 border border-red-500/20 p-4 rounded-lg">
+          <h4 className="text-xs font-mono text-red-400 uppercase tracking-wider mb-3">
+            Broken Links ({details.brokenLinkDetails.length})
+          </h4>
+          <div className="space-y-3">
+            {details.brokenLinkDetails.map((brokenLink: any, idx: number) => (
+              <div key={idx} className="bg-black/30 border border-red-500/30 p-3 rounded-lg">
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs text-slate-400 truncate font-mono mb-1" title={brokenLink.url}>
+                      {brokenLink.url}
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`text-xs font-mono px-2 py-0.5 rounded ${
+                        brokenLink.status >= 500 ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' :
+                        brokenLink.status >= 400 ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+                        'bg-slate-500/20 text-slate-400 border border-slate-500/30'
+                      }`}>
+                        {brokenLink.status > 0 ? `HTTP ${brokenLink.status}` : 'Connection Failed'}
+                      </span>
+                      {brokenLink.redirected && (
+                        <span className="text-xs bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 px-2 py-0.5 rounded font-mono">
+                          Redirected
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <XCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+                </div>
+                {brokenLink.error && (
+                  <div className="text-xs text-red-400/80 font-mono bg-red-500/5 p-2 rounded mt-2">
+                    <span className="text-red-300 font-semibold">Error:</span> {brokenLink.error}
+                  </div>
+                )}
+                {brokenLink.redirected && brokenLink.finalUrl && (
+                  <div className="text-xs text-yellow-400/80 font-mono bg-yellow-500/5 p-2 rounded mt-2">
+                    <span className="text-yellow-300 font-semibold">Final URL:</span> {brokenLink.finalUrl}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* No Broken Links Message */}
+      {details.brokenLinks === 0 && details.brokenLinkDetails !== undefined && (
+        <div className="bg-emerald-500/5 border border-emerald-500/20 p-4 rounded-lg">
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 text-emerald-400" />
+            <span className="text-sm text-emerald-400 font-mono">
+              No broken links detected
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

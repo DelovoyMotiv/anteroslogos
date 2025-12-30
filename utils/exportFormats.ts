@@ -401,8 +401,25 @@ export function exportToXML(result: AuditResult): void {
   xml += `    <AICrawlersAllowed>${result.details?.aiCrawlers?.totalAICrawlers || 0}</AICrawlersAllowed>\n`;
   xml += `    <WordCount>${result.details?.contentQuality?.wordCount || 0}</WordCount>\n`;
   xml += `    <TotalLinks>${result.details?.linkAnalysis?.totalLinks || 0}</TotalLinks>\n`;
+  xml += `    <BrokenLinks>${result.details?.linkAnalysis?.brokenLinks || 0}</BrokenLinks>\n`;
   xml += `    <ImageCount>${result.details?.contentQuality?.imageCount || 0}</ImageCount>\n`;
   xml += `  </Statistics>\n\n`;
+
+  // Add broken links section if present
+  if (result.details?.linkAnalysis?.brokenLinkDetails && result.details.linkAnalysis.brokenLinkDetails.length > 0) {
+    xml += `  <BrokenLinks>\n`;
+    result.details.linkAnalysis.brokenLinkDetails.forEach((brokenLink, idx) => {
+      xml += `    <BrokenLink id="${idx + 1}">\n`;
+      xml += `      <URL>${escapeXML(brokenLink.url)}</URL>\n`;
+      xml += `      <Status>${brokenLink.status}</Status>\n`;
+      xml += `      <Broken>${brokenLink.broken}</Broken>\n`;
+      xml += `      <Redirected>${brokenLink.redirected}</Redirected>\n`;
+      if (brokenLink.finalUrl) xml += `      <FinalURL>${escapeXML(brokenLink.finalUrl)}</FinalURL>\n`;
+      if (brokenLink.error) xml += `      <Error>${escapeXML(brokenLink.error)}</Error>\n`;
+      xml += `    </BrokenLink>\n`;
+    });
+    xml += `  </BrokenLinks>\n\n`;
+  }
 
   xml += `</GEOAuditReport>`;
 
@@ -457,7 +474,25 @@ export function exportToPlainText(result: AuditResult): void {
   text += `AI Crawlers Allowed: ${result.details?.aiCrawlers?.totalAICrawlers || 0}\n`;
   text += `Word Count: ${result.details?.contentQuality?.wordCount || 0}\n`;
   text += `Total Links: ${result.details?.linkAnalysis?.totalLinks || 0}\n`;
+  text += `Broken Links: ${result.details?.linkAnalysis?.brokenLinks || 0}\n`;
   text += `Images: ${result.details?.contentQuality?.imageCount || 0}\n`;
+
+  // Add broken links section if present
+  if (result.details?.linkAnalysis?.brokenLinkDetails && result.details.linkAnalysis.brokenLinkDetails.length > 0) {
+    text += `\n${'='.repeat(80)}\n`;
+    text += `BROKEN LINKS DETECTED\n`;
+    text += `${'='.repeat(80)}\n\n`;
+    
+    result.details.linkAnalysis.brokenLinkDetails.forEach((brokenLink, idx) => {
+      text += `${idx + 1}. ${brokenLink.url}\n`;
+      text += `   Status: ${brokenLink.status}\n`;
+      text += `   Broken: ${brokenLink.broken ? 'Yes' : 'No'}\n`;
+      text += `   Redirected: ${brokenLink.redirected ? 'Yes' : 'No'}\n`;
+      if (brokenLink.finalUrl) text += `   Final URL: ${brokenLink.finalUrl}\n`;
+      if (brokenLink.error) text += `   Error: ${brokenLink.error}\n`;
+      text += `\n`;
+    });
+  }
 
   if (result.insights && result.insights.length > 0) {
     text += `\n${'='.repeat(80)}\n`;
@@ -602,7 +637,21 @@ export function exportToYAML(result: AuditResult): void {
   yaml += `    ai_crawlers_allowed: ${result.details?.aiCrawlers?.totalAICrawlers || 0}\n`;
   yaml += `    word_count: ${result.details?.contentQuality?.wordCount || 0}\n`;
   yaml += `    total_links: ${result.details?.linkAnalysis?.totalLinks || 0}\n`;
+  yaml += `    broken_links: ${result.details?.linkAnalysis?.brokenLinks || 0}\n`;
   yaml += `    image_count: ${result.details?.contentQuality?.imageCount || 0}\n`;
+
+  // Add broken links section if present
+  if (result.details?.linkAnalysis?.brokenLinkDetails && result.details.linkAnalysis.brokenLinkDetails.length > 0) {
+    yaml += `\n  broken_links_details:\n`;
+    result.details.linkAnalysis.brokenLinkDetails.forEach((brokenLink) => {
+      yaml += `    - url: ${escapeYAML(brokenLink.url)}\n`;
+      yaml += `      status: ${brokenLink.status}\n`;
+      yaml += `      broken: ${brokenLink.broken}\n`;
+      yaml += `      redirected: ${brokenLink.redirected}\n`;
+      if (brokenLink.finalUrl) yaml += `      final_url: ${escapeYAML(brokenLink.finalUrl)}\n`;
+      if (brokenLink.error) yaml += `      error: ${escapeYAML(brokenLink.error)}\n`;
+    });
+  }
 
   yaml += `\n  detailed_analysis:\n`;
   if (result.details) {

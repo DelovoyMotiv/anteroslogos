@@ -512,6 +512,8 @@ export async function generatePDFReport(
       pdf.text(`External Links: ${links.externalLinks}`, margin, yPos);
       yPos += 6;
       pdf.text(`Nofollow Ratio: ${(links.nofollowRatio * 100).toFixed(1)}%`, margin, yPos);
+      yPos += 6;
+      pdf.text(`Broken Links: ${links.brokenLinks || 0}`, margin, yPos);
       yPos += 10;
       
       if (links.strengths && links.strengths.length > 0) {
@@ -543,6 +545,64 @@ export async function generatePDFReport(
           const lines = pdf.splitTextToSize(issue, contentWidth - 10);
           pdf.text(lines, margin + 6, yPos);
           yPos += lines.length * 5 + 2;
+        });
+      }
+      
+      // Add broken links section if present
+      if (links.brokenLinkDetails && links.brokenLinkDetails.length > 0) {
+        checkPageBreak(20);
+        
+        pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(239, 68, 68);
+        pdf.text('Broken Links Detected:', margin, yPos);
+        yPos += 8;
+        
+        pdf.setFontSize(9);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(203, 213, 225);
+        
+        links.brokenLinkDetails.forEach((brokenLink, idx) => {
+          checkPageBreak(25);
+          
+          // Box for broken link
+          const boxStartY = yPos;
+          
+          // Number and URL
+          pdf.setFont('helvetica', 'bold');
+          pdf.setTextColor(239, 68, 68);
+          pdf.text(`${idx + 1}.`, margin + 2, yPos + 4);
+          
+          pdf.setFont('helvetica', 'normal');
+          pdf.setTextColor(203, 213, 225);
+          const urlLines = pdf.splitTextToSize(brokenLink.url, contentWidth - 15);
+          pdf.text(urlLines, margin + 8, yPos + 4);
+          yPos += urlLines.length * 4 + 2;
+          
+          // Status and details
+          pdf.setFontSize(8);
+          pdf.setTextColor(148, 163, 184);
+          pdf.text(`Status: ${brokenLink.status}`, margin + 8, yPos);
+          yPos += 4;
+          
+          if (brokenLink.error) {
+            const errorLines = pdf.splitTextToSize(`Error: ${brokenLink.error}`, contentWidth - 15);
+            pdf.text(errorLines, margin + 8, yPos);
+            yPos += errorLines.length * 4;
+          }
+          
+          if (brokenLink.redirected && brokenLink.finalUrl) {
+            pdf.text(`Redirected to: ${brokenLink.finalUrl}`, margin + 8, yPos);
+            yPos += 4;
+          }
+          
+          // Draw box
+          pdf.setDrawColor(239, 68, 68);
+          pdf.setLineWidth(0.2);
+          const boxHeight = yPos - boxStartY;
+          pdf.rect(margin, boxStartY - 1, contentWidth, boxHeight + 2, 'S');
+          
+          yPos += 4;
+          pdf.setFontSize(10);
         });
       }
     }
