@@ -152,6 +152,7 @@ export async function createAPIKey(
         key_prefix: keyPrefix,
         scoped_tools: params.scoped_tools || null,
         rate_limit_per_minute: rateLimits.per_minute,
+        rate_limit_per_hour: rateLimits.per_hour,
         expires_at: expiresAt,
       },
       APIKeySchema
@@ -195,7 +196,7 @@ export async function listAPIKeys(): Promise<APIKey[] | { error: string }> {
       supabase,
       'api_keys',
       APIKeySchema,
-      { user_id: user.id, is_active: true }
+      { user_id: user.id, revoked: false }
     );
 
     if (error) {
@@ -314,7 +315,7 @@ export async function validateAPIKeyFromHeader(
       supabase,
       'api_keys',
       APIKeySchema,
-      { is_active: true }
+      { revoked: false }
     );
 
     if (error || !keys) return null;
