@@ -14,7 +14,7 @@ import { createHash, randomBytes, scrypt } from 'crypto';
 import { promisify } from 'util';
 import { supabaseServer as supabase } from '../lib/supabase-server';
 
-const scryptAsync = promisify(crypto.scrypt);
+const scryptAsync = promisify(scrypt);
 
 // API key format: sk_{tier}_{32_random_chars}
 const TIER_PREFIXES = {
