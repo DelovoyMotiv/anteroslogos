@@ -87,18 +87,9 @@ export function OverviewPage() {
 
   return (
     <div className="space-y-3 pb-8">
-      {/* Compact Header with Status Indicator */}
+      {/* Compact Header */}
       <div className="flex items-center justify-between border-b border-slate-800/50 pb-3">
         <div>
-          <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-            <h1 className="text-base font-semibold text-slate-100 tracking-tight uppercase">
-              System Status
-            </h1>
-            <span className="text-[10px] font-mono text-slate-500 tracking-wider">
-              OPERATIONAL
-            </span>
-          </div>
           <p className="text-xs text-slate-500 mt-0.5 font-mono">
             {user?.email} · {subscription?.plan_tier?.toUpperCase() || 'FREE'} TIER
           </p>

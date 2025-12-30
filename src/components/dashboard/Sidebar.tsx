@@ -149,27 +149,28 @@ export function Sidebar() {
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
       >
-      {/* Header - Logo + Subtitle */}
+      {/* Header - Logo */}
       <div className="px-3 py-4 border-b border-slate-800/50">
         {!collapsed ? (
           <Link to="/dashboard" className="block">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-5 h-5 rounded-sm bg-blue-500 flex items-center justify-center">
-                <div className="w-2 h-2 bg-white" />
-              </div>
+            <div className="flex items-center gap-2">
+              <img 
+                src="/logo.svg" 
+                alt="Anóteros Lógos" 
+                className="w-5 h-5"
+              />
               <span className="font-semibold text-sm text-slate-100">
                 Anóteros Lógos
               </span>
             </div>
-            <p className="text-[10px] text-slate-500 font-mono ml-7">
-              AI Audit Platform
-            </p>
           </Link>
         ) : (
           <Link to="/dashboard" className="flex justify-center">
-            <div className="w-5 h-5 rounded-sm bg-blue-500 flex items-center justify-center">
-              <div className="w-2 h-2 bg-white" />
-            </div>
+            <img 
+              src="/logo.svg" 
+              alt="Anóteros Lógos" 
+              className="w-5 h-5"
+            />
           </Link>
         )}
       </div>
