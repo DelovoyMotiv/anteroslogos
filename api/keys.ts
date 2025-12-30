@@ -12,7 +12,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createHash, randomBytes, scrypt } from 'crypto';
 import { promisify } from 'util';
-import { supabase } from '../lib/supabase';
+import { supabaseServer as supabase } from '../lib/supabase-server';
 import {
   generateAgentKey,
   deleteAgentKey,
