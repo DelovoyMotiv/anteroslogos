@@ -83,6 +83,12 @@ async function getAuthenticatedUser(req: VercelRequest) {
  * Main handler
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  console.log('[API Keys] Request received:', {
+    method: req.method,
+    query: req.query,
+    hasAuth: !!req.headers.authorization,
+  });
+
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -93,13 +99,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (!supabase) {
+    console.error('[API Keys] Supabase not configured');
     return res.status(503).json({ error: 'Service unavailable' });
   }
 
+  console.log('[API Keys] Supabase configured, authenticating user...');
   const user = await getAuthenticatedUser(req);
   if (!user) {
+    console.error('[API Keys] Authentication failed');
     return res.status(401).json({ error: 'Unauthorized' });
   }
+
+  console.log('[API Keys] User authenticated:', user.id);
 
   const { type, id } = req.query;
   const keyType = typeof type === 'string' ? type : 'api';
@@ -159,7 +170,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // Create new key
         if (keyType === 'api') {
           try {
+            console.log('[API Keys] Creating API key for user:', user.id);
+            console.log('[API Keys] Request body:', req.body);
+
             // Get profile
+            console.log('[API Keys] Fetching profile...');
             const { data: profile, error: profileError } = await supabase
               .from('profiles')
               .select('current_plan, api_keys_count')
@@ -167,8 +182,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               .single();
 
             if (profileError || !profile) {
+              console.error('[API Keys] Profile fetch error:', profileError);
               return res.status(404).json({ error: 'Profile not found' });
             }
+
+            console.log('[API Keys] Profile found:', { plan: profile.current_plan, count: profile.api_keys_count });
 
             // Check plan limits
             const planLimits = {
@@ -178,13 +196,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             };
             
             if (profile.api_keys_count >= planLimits[profile.current_plan as keyof typeof planLimits]) {
+              console.log('[API Keys] Plan limit reached');
               return res.status(400).json({ 
                 error: `Plan limit reached: ${planLimits[profile.current_plan as keyof typeof planLimits]} API keys max` 
               });
             }
 
             // Generate key
+            console.log('[API Keys] Generating key...');
             const plaintextKey = generateAPIKey(profile.current_plan as 'free' | 'pro' | 'agency');
+            console.log('[API Keys] Key generated, hashing...');
             const keyHash = await hashAPIKey(plaintextKey);
             const keyPrefix = plaintextKey.substring(0, 11); // sk_xxx_abc...
 
@@ -196,6 +217,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               ? new Date(Date.now() + req.body.expires_in_days * 24 * 60 * 60 * 1000).toISOString()
               : null;
 
+            console.log('[API Keys] Inserting into database...');
             // Insert into database
             const { data: key, error: insertError } = await supabase
               .from('api_keys')
@@ -213,9 +235,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               .single();
 
             if (insertError || !key) {
-              console.error('API key creation error:', insertError);
+              console.error('[API Keys] Insert error:', insertError);
               return res.status(500).json({ error: 'Failed to create API key' });
             }
+
+            console.log('[API Keys] Key created successfully:', key.id);
 
             // Log audit event
             await supabase.from('audit_log').insert({
@@ -226,12 +250,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               metadata: { name: req.body.name, scoped_tools: req.body.scoped_tools },
             });
 
+            console.log('[API Keys] Returning success response');
             return res.status(201).json({
               key,
               plaintext_key: plaintextKey,
             });
           } catch (error) {
-            console.error('createAPIKey error:', error);
+            console.error('[API Keys] Unexpected error:', error);
             return res.status(500).json({ error: 'Internal server error' });
           }
         } else {
