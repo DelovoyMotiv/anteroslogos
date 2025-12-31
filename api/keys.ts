@@ -83,34 +83,46 @@ async function getAuthenticatedUser(req: VercelRequest) {
  * Main handler
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  console.log('[API Keys] Request received:', {
-    method: req.method,
-    query: req.query,
-    hasAuth: !!req.headers.authorization,
-  });
+  try {
+    console.log('[API Keys] Request received:', {
+      method: req.method,
+      query: req.query,
+      hasAuth: !!req.headers.authorization,
+      contentType: req.headers['content-type'],
+      bodyType: typeof req.body,
+      body: req.body,
+    });
 
-  // CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    // CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
+    }
 
-  if (!supabase) {
-    console.error('[API Keys] Supabase not configured');
-    return res.status(503).json({ error: 'Service unavailable' });
-  }
+    // Check environment variables
+    console.log('[API Keys] Environment check:', {
+      hasSupabaseUrl: !!process.env.SUPABASE_URL,
+      hasSupabaseAnonKey: !!process.env.SUPABASE_ANON_KEY,
+      hasViteSupabaseUrl: !!process.env.VITE_SUPABASE_URL,
+      hasViteSupabaseAnonKey: !!process.env.VITE_SUPABASE_ANON_KEY,
+    });
 
-  console.log('[API Keys] Supabase configured, authenticating user...');
-  const user = await getAuthenticatedUser(req);
-  if (!user) {
-    console.error('[API Keys] Authentication failed');
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
+    if (!supabase) {
+      console.error('[API Keys] Supabase not configured');
+      return res.status(503).json({ error: 'Service unavailable' });
+    }
 
-  console.log('[API Keys] User authenticated:', user.id);
+    console.log('[API Keys] Supabase configured, authenticating user...');
+    const user = await getAuthenticatedUser(req);
+    if (!user) {
+      console.error('[API Keys] Authentication failed');
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    console.log('[API Keys] User authenticated:', user.id);
 
   const { type, id } = req.query;
   const keyType = typeof type === 'string' ? type : 'api';
@@ -348,7 +360,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
   } catch (error) {
-    console.error(`Error in keys endpoint:`, error);
-    return res.status(500).json({ error: 'Internal server error' });
+    console.error('[API Keys] Error in keys endpoint:', error);
+    console.error('[API Keys] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+    return res.status(500).json({ 
+      error: 'Internal server error',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
   }
 }
