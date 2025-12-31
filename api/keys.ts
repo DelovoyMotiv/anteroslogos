@@ -181,96 +181,91 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       case 'POST':
         // Create new key
         if (keyType === 'api') {
-          try {
-            console.log('[API Keys] Creating API key for user:', user.id);
-            console.log('[API Keys] Request body:', req.body);
+          console.log('[API Keys] Creating API key for user:', user.id);
+          console.log('[API Keys] Request body:', req.body);
 
-            // Get profile
-            console.log('[API Keys] Fetching profile...');
-            const { data: profile, error: profileError } = await supabase
-              .from('profiles')
-              .select('current_plan, api_keys_count')
-              .eq('id', user.id)
-              .single();
+          // Get profile
+          console.log('[API Keys] Fetching profile...');
+          const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select('current_plan, api_keys_count')
+            .eq('id', user.id)
+            .single();
 
-            if (profileError || !profile) {
-              console.error('[API Keys] Profile fetch error:', profileError);
-              return res.status(404).json({ error: 'Profile not found' });
-            }
-
-            console.log('[API Keys] Profile found:', { plan: profile.current_plan, count: profile.api_keys_count });
-
-            // Check plan limits
-            const planLimits = {
-              free: 1,
-              pro: 5,
-              agency: 20,
-            };
-            
-            if (profile.api_keys_count >= planLimits[profile.current_plan as keyof typeof planLimits]) {
-              console.log('[API Keys] Plan limit reached');
-              return res.status(400).json({ 
-                error: `Plan limit reached: ${planLimits[profile.current_plan as keyof typeof planLimits]} API keys max` 
-              });
-            }
-
-            // Generate key
-            console.log('[API Keys] Generating key...');
-            const plaintextKey = generateAPIKey(profile.current_plan as 'free' | 'pro' | 'agency');
-            console.log('[API Keys] Key generated, hashing...');
-            const keyHash = await hashAPIKey(plaintextKey);
-            const keyPrefix = plaintextKey.substring(0, 11); // sk_xxx_abc...
-
-            // Get rate limits based on plan
-            const rateLimits = getPlanRateLimits(profile.current_plan as 'free' | 'pro' | 'agency');
-
-            // Calculate expiration
-            const expiresAt = req.body.expires_in_days
-              ? new Date(Date.now() + req.body.expires_in_days * 24 * 60 * 60 * 1000).toISOString()
-              : null;
-
-            console.log('[API Keys] Inserting into database...');
-            // Insert into database
-            const { data: key, error: insertError } = await supabase
-              .from('api_keys')
-              .insert({
-                user_id: user.id,
-                name: req.body.name,
-                key_hash: keyHash,
-                key_prefix: keyPrefix,
-                scoped_tools: req.body.scoped_tools || null,
-                rate_limit_per_minute: rateLimits.per_minute,
-                rate_limit_per_hour: rateLimits.per_hour,
-                expires_at: expiresAt,
-              })
-              .select()
-              .single();
-
-            if (insertError || !key) {
-              console.error('[API Keys] Insert error:', insertError);
-              return res.status(500).json({ error: 'Failed to create API key' });
-            }
-
-            console.log('[API Keys] Key created successfully:', key.id);
-
-            // Log audit event
-            await supabase.from('audit_log').insert({
-              user_id: user.id,
-              action: 'api_key.created',
-              resource_type: 'api_key',
-              resource_id: key.id,
-              metadata: { name: req.body.name, scoped_tools: req.body.scoped_tools },
-            });
-
-            console.log('[API Keys] Returning success response');
-            return res.status(201).json({
-              key,
-              plaintext_key: plaintextKey,
-            });
-          } catch (error) {
-            console.error('[API Keys] Unexpected error:', error);
-            return res.status(500).json({ error: 'Internal server error' });
+          if (profileError || !profile) {
+            console.error('[API Keys] Profile fetch error:', profileError);
+            return res.status(404).json({ error: 'Profile not found' });
           }
+
+          console.log('[API Keys] Profile found:', { plan: profile.current_plan, count: profile.api_keys_count });
+
+          // Check plan limits
+          const planLimits = {
+            free: 1,
+            pro: 5,
+            agency: 20,
+          };
+          
+          if (profile.api_keys_count >= planLimits[profile.current_plan as keyof typeof planLimits]) {
+            console.log('[API Keys] Plan limit reached');
+            return res.status(400).json({ 
+              error: `Plan limit reached: ${planLimits[profile.current_plan as keyof typeof planLimits]} API keys max` 
+            });
+          }
+
+          // Generate key
+          console.log('[API Keys] Generating key...');
+          const plaintextKey = generateAPIKey(profile.current_plan as 'free' | 'pro' | 'agency');
+          console.log('[API Keys] Key generated, hashing...');
+          const keyHash = await hashAPIKey(plaintextKey);
+          const keyPrefix = plaintextKey.substring(0, 11); // sk_xxx_abc...
+
+          // Get rate limits based on plan
+          const rateLimits = getPlanRateLimits(profile.current_plan as 'free' | 'pro' | 'agency');
+
+          // Calculate expiration
+          const expiresAt = req.body.expires_in_days
+            ? new Date(Date.now() + req.body.expires_in_days * 24 * 60 * 60 * 1000).toISOString()
+            : null;
+
+          console.log('[API Keys] Inserting into database...');
+          // Insert into database
+          const { data: key, error: insertError } = await supabase
+            .from('api_keys')
+            .insert({
+              user_id: user.id,
+              name: req.body.name,
+              key_hash: keyHash,
+              key_prefix: keyPrefix,
+              scoped_tools: req.body.scoped_tools || null,
+              rate_limit_per_minute: rateLimits.per_minute,
+              rate_limit_per_hour: rateLimits.per_hour,
+              expires_at: expiresAt,
+            })
+            .select()
+            .single();
+
+          if (insertError || !key) {
+            console.error('[API Keys] Insert error:', insertError);
+            return res.status(500).json({ error: 'Failed to create API key' });
+          }
+
+          console.log('[API Keys] Key created successfully:', key.id);
+
+          // Log audit event
+          await supabase.from('audit_log').insert({
+            user_id: user.id,
+            action: 'api_key.created',
+            resource_type: 'api_key',
+            resource_id: key.id,
+            metadata: { name: req.body.name, scoped_tools: req.body.scoped_tools },
+          });
+
+          console.log('[API Keys] Returning success response');
+          return res.status(201).json({
+            key,
+            plaintext_key: plaintextKey,
+          });
         } else {
           // Agent keys not supported in serverless functions yet
           return res.status(501).json({ error: 'Agent key creation not implemented for serverless functions' });
