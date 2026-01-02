@@ -22,7 +22,12 @@ export class ScrapingService {
    * @param extractionEngine - Optional ExtractionEngine instance (creates new one if not provided)
    */
   constructor(extractionEngine?: ExtractionEngine) {
-    this.extractionEngine = extractionEngine || new ExtractionEngine({ enableBrowser: true });
+    // Disable browser in serverless environment (Vercel)
+    // Browser (Playwright) requires special setup in serverless and causes initialization failures
+    const isServerless = typeof window === 'undefined' && process.env.VERCEL === '1';
+    this.extractionEngine = extractionEngine || new ExtractionEngine({ 
+      enableBrowser: !isServerless 
+    });
   }
 
   /**
