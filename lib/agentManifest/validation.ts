@@ -130,25 +130,26 @@ export class EnhancedValidator {
 
     // Step 1: Schema validation using existing validator
     const schemaResult = validateManifest(manifest);
+    
+    // Handle validation failure case
     if (!schemaResult.success) {
-      // Convert schema validation errors to our format
-      schemaResult.error.errors.forEach((err: { path: string; message: string }) => {
+      // When success is false, we have the error branch of the union type
+      const failureResult = schemaResult as { success: false; error: { message: string; errors: Array<{ path: string; message: string }> } };
+      failureResult.error.errors.forEach((err: { path: string; message: string }) => {
         errors.push({
           path: err.path,
           message: err.message,
           severity: 'error',
         });
       });
-    }
-
-    // If schema validation failed, return early
-    if (!schemaResult.success) {
+      
       return {
         success: false,
         errors,
       };
     }
 
+    // At this point, TypeScript knows schemaResult.success is true
     const validatedManifest = schemaResult.data;
 
     // Step 2: Check identity description length >= 20 characters
