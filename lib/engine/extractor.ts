@@ -322,38 +322,54 @@ export class ExtractionEngine {
     structure: StructureData;
   }> {
     try {
-      // Parse HTML using DOMParser (browser environment only)
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
+      // Check if we're in a browser or Node.js environment
+      const isBrowser = typeof window !== 'undefined' && typeof DOMParser !== 'undefined';
       
-      // Check for parsing errors
-      const parserError = doc.querySelector('parsererror');
-      if (parserError) {
-        throw new AgentMiddlewareError(
-          ErrorCode.ERR_DOM_UNREADABLE,
-          'HTML parsing failed',
-          { error: parserError.textContent || 'Unknown parser error' }
-        );
+      if (isBrowser) {
+        // Browser environment: use DOMParser
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        // Check for parsing errors
+        const parserError = doc.querySelector('parsererror');
+        if (parserError) {
+          throw new AgentMiddlewareError(
+            ErrorCode.ERR_DOM_UNREADABLE,
+            'HTML parsing failed',
+            { error: parserError.textContent || 'Unknown parser error' }
+          );
+        }
+        
+        // Extract data using DOM methods
+        const schemaMarkup = this.extractSchemaMarkup(doc);
+        const metaTags = this.extractMetaTags(doc);
+        const content = this.extractContent(doc, mode);
+        const structure = this.extractStructure(doc, schemaMarkup);
+        
+        return {
+          schemaMarkup,
+          metaTags,
+          content,
+          structure,
+        };
+      } else {
+        // Node.js environment: use cheerio
+        const cheerio = await import('cheerio');
+        const $ = cheerio.load(html);
+        
+        // Extract data using cheerio methods
+        const schemaMarkup = this.extractSchemaMarkupCheerio($);
+        const metaTags = this.extractMetaTagsCheerio($);
+        const content = this.extractContentCheerio($, mode);
+        const structure = this.extractStructureCheerio($, schemaMarkup);
+        
+        return {
+          schemaMarkup,
+          metaTags,
+          content,
+          structure,
+        };
       }
-      
-      // Extract schema markup
-      const schemaMarkup = this.extractSchemaMarkup(doc);
-      
-      // Extract meta tags
-      const metaTags = this.extractMetaTags(doc);
-      
-      // Extract content
-      const content = this.extractContent(doc, mode);
-      
-      // Extract structure
-      const structure = this.extractStructure(doc, schemaMarkup);
-      
-      return {
-        schemaMarkup,
-        metaTags,
-        content,
-        structure,
-      };
     } catch (error) {
       // Rethrow AgentMiddlewareError
       if (error instanceof AgentMiddlewareError) {
@@ -367,6 +383,39 @@ export class ExtractionEngine {
         { error: error instanceof Error ? error.message : String(error) }
       );
     }
+  }
+
+  /**
+   * Extracts Schema.org markup from document (cheerio version)
+   */
+  private extractSchemaMarkupCheerio($: any): SchemaMarkupData {
+    const scripts = $('script[type="application/ld+json"]');
+    const schemas: Record<string, unknown>[] = [];
+    const types: string[] = [];
+    
+    scripts.each((_: number, script: any) => {
+      try {
+        const schema = JSON.parse($(script).html() || '{}');
+        if (schema && typeof schema === 'object') {
+          schemas.push(schema);
+          
+          // Extract @type
+          if (schema['@type']) {
+            const type = Array.isArray(schema['@type']) 
+              ? schema['@type'] 
+              : [schema['@type']];
+            types.push(...type);
+          }
+        }
+      } catch {
+        // Skip invalid JSON
+      }
+    });
+    
+    return {
+      types: [...new Set(types)], // Deduplicate types
+      data: schemas,
+    };
   }
 
   /**
@@ -400,6 +449,61 @@ export class ExtractionEngine {
       types: [...new Set(types)], // Deduplicate types
       data: schemas,
     };
+  }
+
+  /**
+   * Extracts meta tags from document (cheerio version)
+   */
+  private extractMetaTagsCheerio($: any): MetaTagsData {
+    const metaTags: MetaTagsData = {};
+    
+    // Title
+    const title = $('title').first().text();
+    if (title) {
+      metaTags.title = title.trim();
+    }
+    
+    // Description
+    const description = $('meta[name="description"]').attr('content');
+    if (description) {
+      metaTags.description = description;
+    }
+    
+    // Keywords
+    const keywords = $('meta[name="keywords"]').attr('content');
+    if (keywords) {
+      metaTags.keywords = keywords.split(',').map(k => k.trim());
+    }
+    
+    // Open Graph
+    const ogTitle = $('meta[property="og:title"]').attr('content');
+    if (ogTitle) {
+      metaTags.ogTitle = ogTitle;
+    }
+    
+    const ogDescription = $('meta[property="og:description"]').attr('content');
+    if (ogDescription) {
+      metaTags.ogDescription = ogDescription;
+    }
+    
+    const ogImage = $('meta[property="og:image"]').attr('content');
+    if (ogImage) {
+      metaTags.ogImage = ogImage;
+    }
+    
+    // Twitter Card
+    const twitterCard = $('meta[name="twitter:card"]').attr('content');
+    if (twitterCard) {
+      metaTags.twitterCard = twitterCard;
+    }
+    
+    // Canonical
+    const canonical = $('link[rel="canonical"]').attr('href');
+    if (canonical) {
+      metaTags.canonical = canonical;
+    }
+    
+    return metaTags;
   }
 
   /**
@@ -461,6 +565,62 @@ export class ExtractionEngine {
   }
 
   /**
+   * Extracts content from document (cheerio version)
+   */
+  private extractContentCheerio($: any, mode: 'fast' | 'deep'): ContentData {
+    // Get title
+    const titleElement = $('title, h1').first();
+    const title = titleElement.text().trim() || 'Untitled';
+    
+    // Get summary (from meta description or first paragraph)
+    const metaDescription = $('meta[name="description"]').attr('content');
+    let summary = metaDescription || '';
+    
+    if (!summary) {
+      const firstParagraph = $('p').first();
+      summary = firstParagraph.text().trim().slice(0, 200) || '';
+    }
+    
+    const content: ContentData = {
+      title,
+      summary,
+    };
+    
+    // Deep mode: extract additional content
+    if (mode === 'deep') {
+      // Extract headings
+      const headings: string[] = [];
+      $('h1, h2, h3, h4, h5, h6').each((_: number, elem: any) => {
+        const text = $(elem).text().trim();
+        if (text) {
+          headings.push(text);
+        }
+      });
+      content.headings = headings;
+      
+      // Extract links
+      const links: string[] = [];
+      $('a[href]').each((_: number, elem: any) => {
+        const href = $(elem).attr('href');
+        if (href) {
+          links.push(href);
+        }
+      });
+      content.links = links;
+      
+      // Extract text content for word count
+      const bodyText = $('body').text() || '';
+      const words = bodyText.trim().split(/\s+/).filter(w => w.length > 0);
+      content.word_count = words.length;
+      
+      // TODO: Convert to markdown (simplified for now)
+      content.markdown = bodyText.trim().slice(0, 5000); // Limit to 5000 chars
+    }
+    
+    return content;
+  }
+
+  /**
    * Extracts content from document
    */
   private extractContent(doc: Document, mode: 'fast' | 'deep'): ContentData {
@@ -506,6 +666,19 @@ export class ExtractionEngine {
     }
     
     return content;
+  }
+
+  /**
+   * Extracts structure information from document (cheerio version)
+   */
+  private extractStructureCheerio($: any, schemaMarkup: SchemaMarkupData): StructureData {
+    return {
+      hasSchema: schemaMarkup.data.length > 0,
+      schemaTypes: schemaMarkup.types,
+      headingCount: $('h1, h2, h3, h4, h5, h6').length,
+      linkCount: $('a[href]').length,
+      imageCount: $('img').length,
+    };
   }
 
   /**
