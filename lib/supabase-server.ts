@@ -5,7 +5,6 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import type { Database } from '../types/database.types';
 
 // Server-side environment variables (no VITE_ prefix)
 const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
@@ -22,7 +21,7 @@ if (!isConfigured) {
  * Server-side Supabase client
  * Configured for serverless function usage
  */
-export const supabaseServer = isConfigured ? createClient<Database>(supabaseUrl, supabaseAnonKey, {
+export const supabaseServer = isConfigured ? createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false,
