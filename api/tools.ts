@@ -37,6 +37,7 @@ async function handleAgentManifest(
   res: VercelResponse
 ): Promise<void> {
   console.log('[handleAgentManifest] Starting');
+  console.log('[handleAgentManifest] Request body:', JSON.stringify(req.body));
   
   // Check if OpenRouter API key is configured
   if (!process.env.OPENROUTER_API_KEY) {
@@ -49,8 +50,11 @@ async function handleAgentManifest(
     return;
   }
   
+  console.log('[handleAgentManifest] API key is configured');
+  
   try {
     const { url } = req;
+    console.log('[handleAgentManifest] Processing URL:', url);
 
     // Basic URL validation
     if (!url || typeof url !== 'string' || url.trim().length === 0) {
@@ -101,13 +105,17 @@ async function handleAgentManifest(
     // Use the normalized URL
     const normalizedUrl = urlObj.toString();
 
+    console.log('[handleAgentManifest] URL normalized to:', normalizedUrl);
     console.log('[handleAgentManifest] Generating manifest using orchestrator');
 
     // Create orchestrator instance
+    console.log('[handleAgentManifest] Creating orchestrator instance...');
     const orchestrator = new ManifestGeneratorOrchestrator();
+    console.log('[handleAgentManifest] Orchestrator created successfully');
 
     try {
       // Generate manifest using orchestrator
+      console.log('[handleAgentManifest] Calling orchestrator.generate()...');
       const manifest = await orchestrator.generate(normalizedUrl);
 
       console.log('[handleAgentManifest] Success');
@@ -183,7 +191,14 @@ async function handleAgentManifest(
       throw error;
     } finally {
       // Cleanup orchestrator resources
-      await orchestrator.cleanup();
+      try {
+        console.log('[handleAgentManifest] Cleaning up orchestrator resources...');
+        await orchestrator.cleanup();
+        console.log('[handleAgentManifest] Cleanup completed');
+      } catch (cleanupError) {
+        console.error('[handleAgentManifest] Cleanup error:', cleanupError);
+        // Don't throw cleanup errors
+      }
     }
 
   } catch (error) {
