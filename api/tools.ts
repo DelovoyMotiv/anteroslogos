@@ -38,6 +38,17 @@ async function handleAgentManifest(
 ): Promise<void> {
   console.log('[handleAgentManifest] Starting');
   
+  // Check if OpenRouter API key is configured
+  if (!process.env.OPENROUTER_API_KEY) {
+    console.error('[handleAgentManifest] OPENROUTER_API_KEY not configured');
+    res.status(503).json({
+      success: false,
+      error: 'AI service is not configured. Please contact support.',
+      code: 'SERVICE_UNAVAILABLE',
+    });
+    return;
+  }
+  
   try {
     const { url } = req;
 
