@@ -3,16 +3,16 @@
  * Core logic for generating agents.json using LLM
  * 
  * @module lib/agentManifest/generator
- * @version 1.0.0
+ * @version 2.0.0
  */
 
-import { createSimpleOpenRouterClient, type ChatMessage } from './openRouterClient';
-import { buildSystemPrompt, buildUserPrompt } from './prompts';
-import { validateManifest, formatValidationError, type ValidationResult } from './simpleValidator';
+import { ManifestGeneratorOrchestrator } from './orchestrator';
+import { ManifestGenerationError as OrchestratorError, ErrorCode } from './errors';
 import type { AgentsJSON } from './types';
 
 /**
  * Error thrown when manifest generation fails
+ * Maintained for backward compatibility with existing code
  */
 export class ManifestGenerationError extends Error {
   constructor(
@@ -26,6 +26,7 @@ export class ManifestGenerationError extends Error {
 
 /**
  * Error thrown when LLM returns invalid JSON
+ * Maintained for backward compatibility with existing code
  */
 export class InvalidJSONError extends ManifestGenerationError {
   constructor(
@@ -39,6 +40,7 @@ export class InvalidJSONError extends ManifestGenerationError {
 
 /**
  * Error thrown when manifest fails schema validation
+ * Maintained for backward compatibility with existing code
  */
 export class SchemaValidationError extends ManifestGenerationError {
   constructor(
@@ -51,45 +53,17 @@ export class SchemaValidationError extends ManifestGenerationError {
 }
 
 /**
- * Parses the LLM response and extracts JSON
- * Handles cases where LLM returns markdown-wrapped JSON
- * 
- * @param response - Raw LLM response
- * @returns Parsed JSON object
- * @throws InvalidJSONError if response cannot be parsed
- */
-function parseManifestResponse(response: string): unknown {
-  let jsonString = response.trim();
-  
-  // Remove markdown code blocks if present
-  if (jsonString.startsWith('```')) {
-    // Extract content between ```json and ``` or ``` and ```
-    const match = jsonString.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/);
-    if (match && match[1]) {
-      jsonString = match[1].trim();
-    }
-  }
-  
-  // Try to parse JSON
-  try {
-    return JSON.parse(jsonString);
-  } catch (error) {
-    throw new InvalidJSONError(
-      'Failed to parse LLM response as JSON',
-      response
-    );
-  }
-}
-
-/**
  * Generates an agents.json manifest for a given URL using LLM
  * 
- * This function:
- * 1. Creates a simple OpenRouter client
- * 2. Builds system and user prompts
- * 3. Calls the LLM (Claude Sonnet 4.5)
- * 4. Parses and validates the JSON response
+ * This function now delegates to ManifestGeneratorOrchestrator which:
+ * 1. Scrapes actual HTML content from the URL
+ * 2. Validates content meets minimum quality thresholds
+ * 3. Passes scraped content to LLM with strict "no inference" constraints
+ * 4. Validates generated manifest comprehensively
  * 5. Returns the validated manifest
+ * 
+ * Error handling maintains backward compatibility by wrapping orchestrator errors
+ * into the legacy error types (ManifestGenerationError, InvalidJSONError, SchemaValidationError)
  * 
  * @param url - The website URL to generate manifest for
  * @returns Promise resolving to validated AgentsJSON manifest
@@ -105,6 +79,8 @@ function parseManifestResponse(response: string): unknown {
  * } catch (error) {
  *   if (error instanceof SchemaValidationError) {
  *     console.error('Validation errors:', error.validationErrors);
+ *   } else if (error instanceof InvalidJSONError) {
+ *     console.error('Invalid JSON:', error.rawResponse);
  *   } else {
  *     console.error('Generation failed:', error.message);
  *   }
@@ -112,58 +88,62 @@ function parseManifestResponse(response: string): unknown {
  * ```
  */
 export async function generateManifest(url: string): Promise<AgentsJSON> {
-  // Create simple LLM client
-  const client = createSimpleOpenRouterClient();
-  
-  if (!client) {
-    throw new ManifestGenerationError(
-      'AI service is not configured. Please ensure OPENROUTER_API_KEY is set.'
-    );
-  }
+  // Create orchestrator instance
+  const orchestrator = new ManifestGeneratorOrchestrator();
   
   try {
-    // Build prompts
-    const systemPrompt = buildSystemPrompt();
-    const userPrompt = buildUserPrompt(url);
+    // Delegate to orchestrator
+    const manifest = await orchestrator.generate(url);
     
-    // Prepare messages
-    const messages: ChatMessage[] = [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userPrompt }
-    ];
+    // Cleanup resources
+    await orchestrator.cleanup();
     
-    // Call LLM with Claude Sonnet 4.5
-    const response = await client.chat(messages, {
-      temperature: 0.7,
-      max_tokens: 2000,
-    });
-    
-    // Parse JSON response
-    const parsedResponse = parseManifestResponse(response);
-    
-    // Validate against schema
-    const validationResult = validateManifest(parsedResponse);
-    
-    if (validationResult.success) {
-      return validationResult.data;
-    }
-    
-    // Validation failed - TypeScript should narrow the type here
-    // but we'll be explicit to help the compiler
-    const failedResult = validationResult as Extract<ValidationResult<AgentsJSON>, { success: false }>;
-    const formattedError = formatValidationError(failedResult.error);
-    throw new SchemaValidationError(
-      formattedError.message,
-      formattedError.errors
-    );
+    return manifest;
     
   } catch (error) {
-    // Re-throw our custom errors
+    // Cleanup resources on error
+    try {
+      await orchestrator.cleanup();
+    } catch (cleanupError) {
+      // Ignore cleanup errors
+      console.error('[generateManifest] Cleanup failed:', cleanupError);
+    }
+    
+    // Wrap orchestrator errors for backward compatibility
+    if (error instanceof OrchestratorError) {
+      // Map orchestrator error codes to legacy error types
+      switch (error.code) {
+        case ErrorCode.INVALID_JSON:
+          // Extract raw response from details if available
+          const rawResponse = error.details?.rawResponse as string || 'Unable to retrieve raw response';
+          throw new InvalidJSONError(
+            error.message,
+            rawResponse
+          );
+        
+        case ErrorCode.VALIDATION_FAILED:
+          // Extract validation errors from details
+          const validationErrors = error.details?.validationErrors as Array<{ path: string; message: string }> || [];
+          throw new SchemaValidationError(
+            error.message,
+            validationErrors
+          );
+        
+        default:
+          // Wrap all other orchestrator errors as ManifestGenerationError
+          throw new ManifestGenerationError(
+            error.message,
+            error.cause
+          );
+      }
+    }
+    
+    // Re-throw legacy errors as-is
     if (error instanceof ManifestGenerationError) {
       throw error;
     }
     
-    // Wrap other errors
+    // Wrap unknown errors
     throw new ManifestGenerationError(
       'Failed to generate manifest',
       error

@@ -3,61 +3,82 @@
  * System and user prompts for LLM-based manifest generation
  * 
  * @module lib/agentManifest/prompts
- * @version 1.0.0
+ * @version 2.0.0
  */
+
+import type { ScrapedContent } from './types';
 
 /**
- * Builds the system prompt for manifest generation
- * Instructs the LLM to act as an Agent-Native Web standards expert
+ * Truth Engine Prompt Builder
+ * Builds prompts that enforce content-only analysis without inference
  * 
- * @returns System prompt string
+ * This class ensures the LLM operates as a "Truth Engine" that:
+ * - Analyzes ONLY provided scraped content
+ * - Does NOT infer functionality from URLs or domain names
+ * - Does NOT use general knowledge about brands
+ * - Returns errors when context is insufficient
  */
-export function buildSystemPrompt(): string {
-  return `You are an expert in Agent-Native Web standards and AI discoverability. 
-Your task is to generate an agents.json file for a given domain based on general 
-knowledge of the brand and typical website structures.
+export class TruthEnginePromptBuilder {
+  /**
+   * Builds the system prompt for Truth Engine mode
+   * Enforces strict constraints against hallucination and inference
+   * 
+   * @returns System prompt string with Truth Engine constraints
+   */
+  buildSystemPrompt(): string {
+    return `You are a Truth Engine for generating agents.json manifests.
 
-The agents.json format is an industry-standard file that helps AI agents understand 
-and navigate website content. It includes:
+Your task is to analyze scraped website content and generate a structured agents.json file 
+that represents ONLY what is explicitly present in the provided content.
+
+CRITICAL CONSTRAINTS:
+1. Analyze ONLY the provided scraped content
+2. Do NOT infer functionality from the URL or domain name
+3. Do NOT use general knowledge about the brand or company
+4. If the provided content is insufficient to generate a meaningful manifest, return an error status
+5. Base ALL descriptions on actual text from the scraped page
+6. Extract identity information from the actual page title and description
+7. Identify knowledge entries from actual links and headings found on the page
+
+FORBIDDEN ACTIONS:
+- Inferring features from domain names (e.g., "stripe.com" → payment processing)
+- Using general knowledge about companies or brands
+- Inventing capabilities not explicitly mentioned in the content
+- Creating generic descriptions not based on page text
+- Assuming typical website structures without evidence
+
+REQUIRED ACTIONS:
+- Extract identity information from the provided page title and description
+- Identify knowledge entries from actual links and headings in the content
+- Use exact or paraphrased text from the page for all descriptions
+- Return an error if the content is too vague, generic, or insufficient
+- Ensure all knowledge entry URLs are from the actual links found on the page
+
+The agents.json format includes:
 - Identity information (brand name, description, tags)
 - Knowledge entries (key pages with their roles and descriptions)
 - Actions (available API endpoints or interactive features)
-
-CRITICAL REQUIREMENTS:
-1. Return ONLY valid JSON - no markdown, no explanations
-2. Follow the exact schema structure provided
-3. Use clear, accessible language - NO academic terminology
-4. Provide high-entropy, informative descriptions
-5. Identify 3-5 key pages as knowledge entries
-6. Use standard web semantic roles (documentation, pricing, about, product, contact, support)
-7. Include actions array (can be empty if no APIs are known)
 
 SCHEMA STRUCTURE:
 {
   "$schema": "https://anoteroslogos.com/schemas/agents-v1.json",
   "version": "1.0",
   "identity": {
-    "name": "[Brand Name]",
-    "description": "[High-entropy description of core value proposition]",
-    "tags": ["Industry", "Focus", "Category"]
+    "name": "[Brand Name from page title]",
+    "description": "[Description from page content]",
+    "tags": ["Tags based on page content"]
   },
   "knowledge": [
     {
       "role": "documentation|pricing|about|product|contact|support",
-      "url": "/[path]",
-      "description": "[What this page contains]"
+      "url": "/[path from actual links]",
+      "description": "[Description from page content]"
     }
   ],
-  "actions": [
-    {
-      "name": "[action_name]",
-      "type": "GET|POST|PUT|DELETE",
-      "path": "/api/[endpoint]"
-    }
-  ]
+  "actions": []
 }
 
-SEMANTIC ROLES GUIDE (use these, NOT academic terms):
+SEMANTIC ROLES (use these for knowledge entries):
 - documentation: Technical guides, API docs, developer resources
 - pricing: Cost structure, plans, pricing information
 - about: Company information, team, mission, history
@@ -70,27 +91,88 @@ FORBIDDEN TERMS (do NOT use):
 - semantic topology, knowledge topology
 - Any academic or mathematical terminology
 
-Respond with ONLY the JSON object, no additional text.`;
+ERROR HANDLING:
+If the provided content is insufficient (too short, too generic, or lacks clear structure), 
+respond with:
+{
+  "error": "INSUFFICIENT_CONTEXT",
+  "message": "The provided content is insufficient to generate a meaningful manifest."
+}
+
+Otherwise, return ONLY valid JSON following the schema above - no markdown, no explanations.`;
+  }
+
+  /**
+   * Builds the user prompt with scraped content
+   * Includes all scraped content elements for analysis
+   * 
+   * @param content - Scraped content from the website
+   * @returns User prompt string with scraped content
+   */
+  buildUserPrompt(content: ScrapedContent): string {
+    // Truncate text content to first 1000 characters for prompt
+    const textExcerpt = content.textContent.substring(0, 1000);
+    
+    // Format headings as a numbered list
+    const headingsList = content.headings.length > 0
+      ? content.headings.map((h, i) => `${i + 1}. ${h}`).join('\n')
+      : '(No headings found)';
+    
+    // Format links as a numbered list (limit to first 20 for prompt size)
+    const linksList = content.links.length > 0
+      ? content.links.slice(0, 20).map((link, i) => `${i + 1}. ${link}`).join('\n')
+      : '(No links found)';
+    
+    return `Generate an agents.json manifest based ONLY on the following scraped content:
+
+URL: ${content.url}
+
+TITLE: ${content.title}
+
+DESCRIPTION: ${content.description}
+
+HEADINGS:
+${headingsList}
+
+LINKS (first 20):
+${linksList}
+
+TEXT EXCERPT (first 1000 characters):
+${textExcerpt}
+
+INSTRUCTIONS:
+1. Use the title and description for identity information
+2. Identify 3-5 knowledge entries from the links and headings above
+3. Use actual text from the page for all descriptions
+4. Ensure all knowledge entry URLs are from the links listed above
+5. If you cannot identify clear knowledge entries from this content, return an error
+
+Remember: Analyze ONLY the content provided above. Do NOT use general knowledge about this domain.
+Return ONLY the JSON object, no markdown formatting or explanations.`;
+  }
 }
 
 /**
- * Builds the user prompt for manifest generation
- * Provides the URL and specific instructions for generation
- * 
- * @param url - The website URL to generate manifest for
- * @returns User prompt string
+ * Legacy function for backward compatibility
+ * @deprecated Use TruthEnginePromptBuilder.buildSystemPrompt() instead
+ */
+export function buildSystemPrompt(): string {
+  const builder = new TruthEnginePromptBuilder();
+  return builder.buildSystemPrompt();
+}
+
+/**
+ * Legacy function for backward compatibility
+ * @deprecated Use TruthEnginePromptBuilder.buildUserPrompt() instead
  */
 export function buildUserPrompt(url: string): string {
+  // Legacy function only accepts URL, not scraped content
+  // This is maintained for backward compatibility but should not be used
   return `Generate an agents.json file for the following website:
 
 URL: ${url}
 
-Based on general knowledge of this domain and typical website structures, create a 
-comprehensive agents.json file that:
-1. Accurately describes the brand's identity and focus areas (use 2-4 tags)
-2. Identifies 3-5 key pages as knowledge entries with appropriate roles
-3. Uses standard web terminology (documentation, pricing, about, product, contact, support)
-4. Includes an actions array (empty array [] if no known APIs)
+Note: This is a legacy prompt format. New implementations should use TruthEnginePromptBuilder with scraped content.
 
 Remember: Return ONLY the JSON object, no markdown formatting or explanations.`;
 }

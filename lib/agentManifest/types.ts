@@ -69,3 +69,33 @@ export interface AgentsJSON {
   /** Available actions (API endpoints) */
   actions: Action[];
 }
+
+/**
+ * Scraped content from a website
+ * Contains structured data extracted from HTML
+ */
+export interface ScrapedContent {
+  /** Normalized URL that was scraped */
+  url: string;
+  /** Page title (from <title> or first <h1>) */
+  title: string;
+  /** Meta description or first paragraph */
+  description: string;
+  /** All h1-h6 headings found on the page */
+  headings: string[];
+  /** All href values found on the page */
+  links: string[];
+  /** First 2000 characters of body text */
+  textContent: string;
+  /** Metadata about the scraping operation */
+  metadata: {
+    /** Raw HTML content length in characters */
+    contentLength: number;
+    /** Extracted text content length in characters */
+    textLength: number;
+    /** Method used to extract content */
+    extractionMethod: 'browser' | 'static';
+    /** ISO 8601 timestamp of when content was scraped */
+    timestamp: string;
+  };
+}

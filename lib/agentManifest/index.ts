@@ -14,7 +14,17 @@ export type {
   Action,
   WebSemanticRole,
   HttpMethod,
+  ScrapedContent,
 } from './types';
+
+// Export error types and classes
+export {
+  ScrapeError,
+  ManifestGenerationError,
+  ErrorCode,
+} from './errors';
+
+export type { ScrapeErrorCode } from './errors';
 
 // Export validation functions
 export {
@@ -37,13 +47,33 @@ export {
 // Export generation functions
 export {
   generateManifest,
-  ManifestGenerationError,
   InvalidJSONError,
   SchemaValidationError,
 } from './generator';
+
+// Note: ManifestGenerationError is exported from './errors' above (new version)
+// The old version from './generator' is kept for backward compatibility but not re-exported
 
 // Export prompt builders (for testing)
 export {
   buildSystemPrompt,
   buildUserPrompt,
 } from './prompts';
+
+// Export scraping service
+export {
+  ScrapingService,
+} from './scraping';
+
+// Export validation services
+export {
+  LivenessValidator,
+  EnhancedValidator,
+} from './validation';
+
+export type { EnhancedValidationResult } from './validation';
+
+// Export orchestrator
+export {
+  ManifestGeneratorOrchestrator,
+} from './orchestrator';

@@ -16,12 +16,13 @@ vi.mock('../openRouterClient', () => ({
 
 describe('Prompt Builders', () => {
   describe('buildSystemPrompt', () => {
-    it('should contain Agent-Native Web standards keywords', () => {
+    it('should contain Truth Engine constraints', () => {
       const prompt = buildSystemPrompt();
       
-      expect(prompt).toContain('Agent-Native Web');
+      expect(prompt).toContain('Truth Engine');
       expect(prompt).toContain('agents.json');
-      expect(prompt).toContain('industry-standard');
+      expect(prompt).toContain('ONLY the provided scraped content');
+      expect(prompt).toContain('Do NOT infer functionality from the URL');
     });
     
     it('should contain standard web semantic roles', () => {
@@ -93,10 +94,11 @@ describe('Prompt Builders', () => {
       expect(prompt).toContain('agents.json');
     });
     
-    it('should mention standard web terminology', () => {
+    it('should indicate legacy format', () => {
       const prompt = buildUserPrompt('https://example.com');
       
-      expect(prompt).toContain('standard web terminology');
+      expect(prompt).toContain('legacy prompt format');
+      expect(prompt).toContain('TruthEnginePromptBuilder');
     });
     
     it('should NOT mention academic terminology', () => {
