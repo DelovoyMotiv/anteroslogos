@@ -133,7 +133,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const tableName = keyType === 'api' ? 'api_keys' : 'agent_keys';
 
-  try {
     switch (req.method) {
       case 'GET':
         if (id && typeof id === 'string') {
