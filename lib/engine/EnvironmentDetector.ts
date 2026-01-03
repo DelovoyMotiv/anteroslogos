@@ -7,7 +7,16 @@
  * - Environment-specific browser launch configuration
  */
 
-import chromium from '@sparticuz/chromium';
+// Lazy import to avoid loading @sparticuz/chromium when not needed
+// This prevents initialization errors in serverless environments when browser is disabled
+let chromiumModule: typeof import('@sparticuz/chromium') | null = null;
+
+async function getChromiumModule() {
+  if (!chromiumModule) {
+    chromiumModule = await import('@sparticuz/chromium');
+  }
+  return chromiumModule.default;
+}
 
 export interface BrowserLaunchOptions {
   executablePath?: string;
@@ -44,6 +53,8 @@ export class EnvironmentDetector {
     if (this.isVercel()) {
       try {
         // Use @sparticuz/chromium for Vercel serverless
+        // Lazy load to avoid initialization errors when browser is disabled
+        const chromium = await getChromiumModule();
         const path = await chromium.executablePath();
         console.log('[EnvironmentDetector] Vercel Chromium path:', path);
         return path;

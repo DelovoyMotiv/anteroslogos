@@ -5,7 +5,8 @@
  * appropriate hydration wait times for proper content extraction.
  */
 
-import { Page } from 'playwright';
+// Use type-only import to avoid loading playwright at module initialization
+import type { Page } from 'playwright';
 
 /**
  * Supported CSR frameworks
