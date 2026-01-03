@@ -2,6 +2,8 @@
  * Unified Keys Management Endpoint
  * Handles both API keys and Agent keys to optimize Vercel function count
  * 
+ * Self-contained version - no external lib imports for Vercel compatibility
+ * 
  * Routes:
  * - /api/keys?type=api - API key operations
  * - /api/keys?type=agent - Agent key operations
@@ -10,11 +12,32 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createHash, randomBytes, scrypt } from 'crypto';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { randomBytes, scrypt } from 'crypto';
 import { promisify } from 'util';
-import { supabaseServer as supabase } from '../lib/supabase-server';
 
 const scryptAsync = promisify(scrypt);
+
+/**
+ * Create Supabase client inline (self-contained for Vercel)
+ */
+function getSupabaseClient(): SupabaseClient | null {
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('[API Keys] Missing Supabase credentials');
+    return null;
+  }
+  
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+      detectSessionInUrl: false,
+    },
+  });
+}
 
 // API key format: sk_{tier}_{32_random_chars}
 const TIER_PREFIXES = {
@@ -59,11 +82,7 @@ function getPlanRateLimits(plan: 'free' | 'pro' | 'agency') {
 /**
  * Get authenticated user from request
  */
-async function getAuthenticatedUser(req: VercelRequest) {
-  if (!supabase) {
-    return null;
-  }
-
+async function getAuthenticatedUser(req: VercelRequest, supabase: SupabaseClient) {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
     return null;
@@ -110,13 +129,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       hasViteSupabaseAnonKey: !!process.env.VITE_SUPABASE_ANON_KEY,
     });
 
+    // Create Supabase client inline
+    const supabase = getSupabaseClient();
     if (!supabase) {
       console.error('[API Keys] Supabase not configured');
-      return res.status(503).json({ error: 'Service unavailable' });
+      return res.status(503).json({ error: 'Service unavailable - database not configured' });
     }
 
     console.log('[API Keys] Supabase configured, authenticating user...');
-    const user = await getAuthenticatedUser(req);
+    const user = await getAuthenticatedUser(req, supabase);
     if (!user) {
       console.error('[API Keys] Authentication failed');
       return res.status(401).json({ error: 'Unauthorized' });
