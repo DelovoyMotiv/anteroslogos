@@ -16,7 +16,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { ALL_TOOLS, toClaudeTool, toOpenAIFunction } from '../../lib/mcp/schemas';
+import { ALL_TOOLS, GRAPH_TOOLS, toClaudeTool, toOpenAIFunction } from '../../lib/mcp/schemas';
 import { createClient } from '@supabase/supabase-js';
 import { executeProgrammatic } from '../../app/api/mcp/programmatic/route';
 import { MeshNetworkRouter, type UCPTCascadeMessage } from '../../lib/mesh/network';
@@ -31,7 +31,8 @@ import {
   McpResourcesReadParamsSchema,
   McpPromptsGetParamsSchema,
 } from '../../lib/validation/apiSchemas';
-import type { isInitializableRouter, ValidatedApiHandler } from '../../types/api.types';
+import type { ValidatedApiHandler } from '../../types/api.types';
+import { isInitializableRouter } from '../../types/api.types';
 import type { JSONObject } from '../../types/common.types';
 
 // =====================================================
