@@ -66,54 +66,71 @@ export function apiKeyFromDb(row: Record<string, unknown>): APIKey {
 // =====================================================
 
 /**
- * Agent Key schema that accepts both aip_uri (from DB) and aid_uri (from API)
- * Uses preprocessing to normalize the field name
+ * Base Agent Key schema without preprocessing
+ * Accepts aid_uri directly (after mapping from aip_uri)
  */
-export const AgentKeySchema = z.preprocess(
-  (data: unknown) => {
-    if (typeof data === 'object' && data !== null) {
-      const obj = data as Record<string, unknown>;
-      // If aip_uri exists but aid_uri doesn't, copy it
-      if ('aip_uri' in obj && !('aid_uri' in obj)) {
-        return { ...obj, aid_uri: obj.aip_uri };
-      }
-    }
-    return data;
-  },
-  z.object({
-    id: z.string().uuid(),
-    user_id: z.string().uuid(),
-    tenant_id: z.string().uuid().nullable(),
-    name: z.string().min(1),
-    aid_uri: z.string(),
-    public_key: z.string(),
-    key_algorithm: z.string(),
-    permissions: z.union([z.array(z.string()), z.record(z.unknown())]),
-    metadata: z.record(z.unknown()),
-    revoked: z.boolean(),
-    revoked_at: flexibleDatetime.nullable(),
-    created_at: flexibleDatetime,
-    updated_at: flexibleDatetime,
-  })
-);
+const AgentKeyBaseSchema = z.object({
+  id: z.string().uuid(),
+  user_id: z.string().uuid(),
+  tenant_id: z.string().uuid().nullable(),
+  name: z.string().min(1),
+  aid_uri: z.string(),
+  public_key: z.string(),
+  key_algorithm: z.string(),
+  permissions: z.union([z.array(z.string()), z.record(z.unknown())]),
+  metadata: z.record(z.unknown()),
+  revoked: z.boolean(),
+  revoked_at: flexibleDatetime.nullable(),
+  created_at: flexibleDatetime,
+  updated_at: flexibleDatetime,
+});
 
-export type AgentKey = z.infer<typeof AgentKeySchema>;
+export type AgentKey = z.infer<typeof AgentKeyBaseSchema>;
+
+/**
+ * Agent Key schema for use with queryHelpers
+ * Wraps base schema with preprocessing to handle aip_uri -> aid_uri mapping
+ */
+export const AgentKeySchema = AgentKeyBaseSchema;
+
+/**
+ * Parse agent key from database row
+ * Maps aip_uri to aid_uri for API consistency
+ */
+export function parseAgentKeyFromDb(data: unknown): AgentKey | null {
+  try {
+    if (typeof data !== 'object' || data === null) return null;
+    
+    const obj = data as Record<string, unknown>;
+    const normalized = {
+      ...obj,
+      aid_uri: obj.aip_uri || obj.aid_uri,
+    };
+    
+    return AgentKeyBaseSchema.parse(normalized);
+  } catch (error) {
+    console.error('parseAgentKeyFromDb error:', error);
+    return null;
+  }
+}
+
+/**
+ * Parse multiple agent keys from database rows
+ */
+export function parseAgentKeysFromDb(data: unknown[]): AgentKey[] {
+  return data
+    .map(item => parseAgentKeyFromDb(item))
+    .filter((item): item is AgentKey => item !== null);
+}
 
 /**
  * Convert database row to Agent Key domain model
- * Maps database column 'aip_uri' to 'aid_uri' for API consistency
+ * @deprecated Use parseAgentKeyFromDb instead
  */
 export function agentKeyFromDb(row: Record<string, unknown>): AgentKey {
-  return AgentKeySchema.parse({
-    ...row,
-    // Map database column aip_uri to aid_uri
-    aid_uri: row.aip_uri || row.aid_uri,
-    created_at: typeof row.created_at === 'string' ? row.created_at : new Date(row.created_at as Date).toISOString(),
-    updated_at: typeof row.updated_at === 'string' ? row.updated_at : new Date(row.updated_at as Date).toISOString(),
-    revoked_at: row.revoked_at ? (typeof row.revoked_at === 'string' ? row.revoked_at : new Date(row.revoked_at as Date).toISOString()) : null,
-    // Ensure permissions is an array
-    permissions: Array.isArray(row.permissions) ? row.permissions : [],
-  });
+  const result = parseAgentKeyFromDb(row);
+  if (!result) throw new Error('Failed to parse agent key from database');
+  return result;
 }
 
 // =====================================================
