@@ -36,6 +36,12 @@ function getSupabaseClient(): SupabaseClient | null {
       persistSession: false,
       detectSessionInUrl: false,
     },
+    global: {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    },
   });
 }
 
