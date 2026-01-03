@@ -9,7 +9,7 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { ManifestGeneratorOrchestrator, ManifestGenerationError, ErrorCode } from '../lib/agentManifest';
+import { ManifestGeneratorOrchestrator, ManifestGenerationError, ErrorCode } from '../lib/agentManifest/index';
 
 /**
  * Base request interface
