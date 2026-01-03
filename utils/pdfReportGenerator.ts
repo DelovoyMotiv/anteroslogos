@@ -245,10 +245,10 @@ export async function generatePDFReport(
     pdf.setLineWidth(0.3);
     pdf.rect(x, y, boxWidth, boxHeight, 'S');
 
-    // Label
+    // Label - dark text for readability on white background
     pdf.setFontSize(10);
     pdf.setFont('helvetica', 'normal');
-    pdf.setTextColor(203, 213, 225);
+    pdf.setTextColor(30, 41, 59);
     pdf.text(metric.label, x + 5, y + 8);
 
     // Score
@@ -280,7 +280,7 @@ export async function generatePDFReport(
 
     pdf.setFontSize(10);
     pdf.setFont('helvetica', 'normal');
-    pdf.setTextColor(203, 213, 225);
+    pdf.setTextColor(30, 41, 59);
 
     result.insights.slice(0, 5).forEach((insight) => {
       checkPageBreak(15);
@@ -309,7 +309,7 @@ export async function generatePDFReport(
     // Table header
     pdf.setFontSize(10);
     pdf.setFont('helvetica', 'bold');
-    pdf.setTextColor(148, 163, 184);
+    pdf.setTextColor(71, 85, 105);
     pdf.text('Category', margin, yPos);
     pdf.text('Score', margin + 110, yPos);
     pdf.text('Status', margin + 140, yPos);
@@ -323,7 +323,7 @@ export async function generatePDFReport(
 
     // Table rows
     pdf.setFont('helvetica', 'normal');
-    pdf.setTextColor(203, 213, 225);
+    pdf.setTextColor(30, 41, 59);
 
     Object.entries(result.scores).forEach(([category, score]) => {
       checkPageBreak(15);
@@ -363,7 +363,7 @@ export async function generatePDFReport(
       pdf.setFillColor(scoreColor[0], scoreColor[1], scoreColor[2]);
       pdf.rect(barX, barY, (barWidth * score) / 100, barHeight, 'F');
 
-      pdf.setTextColor(203, 213, 225);
+      pdf.setTextColor(30, 41, 59);
       pdf.setFont('helvetica', 'normal');
       yPos += 8;
     });
@@ -383,7 +383,7 @@ export async function generatePDFReport(
     
     pdf.setFontSize(10);
     pdf.setFont('helvetica', 'normal');
-    pdf.setTextColor(203, 213, 225);
+    pdf.setTextColor(30, 41, 59);
     
     if (result.details.schemaMarkup) {
       const schema = result.details.schemaMarkup;
@@ -396,12 +396,14 @@ export async function generatePDFReport(
       
       if (schema.strengths && schema.strengths.length > 0) {
         pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(30, 41, 59);
         pdf.text('Strengths:', margin, yPos);
         yPos += 6;
         pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(22, 101, 52);
         schema.strengths.forEach(strength => {
           checkPageBreak(10);
-          pdf.setFillColor(96, 165, 250);
+          pdf.setFillColor(22, 163, 74);
           pdf.circle(margin + 2, yPos - 2, 0.8, 'F');
           const lines = pdf.splitTextToSize(strength, contentWidth - 10);
           pdf.text(lines, margin + 6, yPos);
@@ -413,9 +415,11 @@ export async function generatePDFReport(
       if (schema.issues && schema.issues.length > 0) {
         checkPageBreak(10);
         pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(30, 41, 59);
         pdf.text('Issues:', margin, yPos);
         yPos += 6;
         pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(185, 28, 28);
         schema.issues.forEach(issue => {
           checkPageBreak(10);
           pdf.setFillColor(239, 68, 68);
@@ -439,7 +443,7 @@ export async function generatePDFReport(
     
     pdf.setFontSize(10);
     pdf.setFont('helvetica', 'normal');
-    pdf.setTextColor(203, 213, 225);
+    pdf.setTextColor(30, 41, 59);
     
     if (result.details.contentQuality) {
       const content = result.details.contentQuality;
@@ -458,12 +462,14 @@ export async function generatePDFReport(
       
       if (content.strengths && content.strengths.length > 0) {
         pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(30, 41, 59);
         pdf.text('Strengths:', margin, yPos);
         yPos += 6;
         pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(22, 101, 52);
         content.strengths.forEach(strength => {
           checkPageBreak(10);
-          pdf.setFillColor(96, 165, 250);
+          pdf.setFillColor(22, 163, 74);
           pdf.circle(margin + 2, yPos - 2, 0.8, 'F');
           const lines = pdf.splitTextToSize(strength, contentWidth - 10);
           pdf.text(lines, margin + 6, yPos);
@@ -475,9 +481,11 @@ export async function generatePDFReport(
       if (content.issues && content.issues.length > 0) {
         checkPageBreak(10);
         pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(30, 41, 59);
         pdf.text('Issues:', margin, yPos);
         yPos += 6;
         pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(185, 28, 28);
         content.issues.forEach(issue => {
           checkPageBreak(10);
           pdf.setFillColor(239, 68, 68);
@@ -502,7 +510,7 @@ export async function generatePDFReport(
       
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'normal');
-      pdf.setTextColor(203, 213, 225);
+      pdf.setTextColor(30, 41, 59);
       
       const links = result.details.linkAnalysis;
       pdf.text(`Total Links: ${links.totalLinks}`, margin, yPos);
@@ -518,12 +526,14 @@ export async function generatePDFReport(
       
       if (links.strengths && links.strengths.length > 0) {
         pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(30, 41, 59);
         pdf.text('Strengths:', margin, yPos);
         yPos += 6;
         pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(22, 101, 52);
         links.strengths.forEach(strength => {
           checkPageBreak(10);
-          pdf.setFillColor(96, 165, 250);
+          pdf.setFillColor(22, 163, 74);
           pdf.circle(margin + 2, yPos - 2, 0.8, 'F');
           const lines = pdf.splitTextToSize(strength, contentWidth - 10);
           pdf.text(lines, margin + 6, yPos);
@@ -535,9 +545,11 @@ export async function generatePDFReport(
       if (links.issues && links.issues.length > 0) {
         checkPageBreak(10);
         pdf.setFont('helvetica', 'bold');
+        pdf.setTextColor(30, 41, 59);
         pdf.text('Issues:', margin, yPos);
         yPos += 6;
         pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(185, 28, 28);
         links.issues.forEach(issue => {
           checkPageBreak(10);
           pdf.setFillColor(239, 68, 68);
@@ -553,13 +565,13 @@ export async function generatePDFReport(
         checkPageBreak(20);
         
         pdf.setFont('helvetica', 'bold');
-        pdf.setTextColor(239, 68, 68);
+        pdf.setTextColor(185, 28, 28);
         pdf.text('Broken Links Detected:', margin, yPos);
         yPos += 8;
         
         pdf.setFontSize(9);
         pdf.setFont('helvetica', 'normal');
-        pdf.setTextColor(203, 213, 225);
+        pdf.setTextColor(30, 41, 59);
         
         links.brokenLinkDetails.forEach((brokenLink, idx) => {
           checkPageBreak(25);
@@ -569,18 +581,18 @@ export async function generatePDFReport(
           
           // Number and URL
           pdf.setFont('helvetica', 'bold');
-          pdf.setTextColor(239, 68, 68);
+          pdf.setTextColor(185, 28, 28);
           pdf.text(`${idx + 1}.`, margin + 2, yPos + 4);
           
           pdf.setFont('helvetica', 'normal');
-          pdf.setTextColor(203, 213, 225);
+          pdf.setTextColor(30, 41, 59);
           const urlLines = pdf.splitTextToSize(brokenLink.url, contentWidth - 15);
           pdf.text(urlLines, margin + 8, yPos + 4);
           yPos += urlLines.length * 4 + 2;
           
           // Status and details
           pdf.setFontSize(8);
-          pdf.setTextColor(148, 163, 184);
+          pdf.setTextColor(71, 85, 105);
           pdf.text(`Status: ${brokenLink.status}`, margin + 8, yPos);
           yPos += 4;
           
@@ -620,7 +632,7 @@ export async function generatePDFReport(
       
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'normal');
-      pdf.setTextColor(203, 213, 225);
+      pdf.setTextColor(30, 41, 59);
       
       const kg = result.knowledgeGraph;
       pdf.text(`Entities: ${kg.entities.length}`, margin, yPos);
@@ -656,7 +668,7 @@ export async function generatePDFReport(
       
       pdf.setFontSize(10);
       pdf.setFont('helvetica', 'normal');
-      pdf.setTextColor(203, 213, 225);
+      pdf.setTextColor(30, 41, 59);
       
       const browser = result.browserMetadata;
       pdf.text(`Used Browser: ${browser.usedBrowser ? 'Yes' : 'No'}`, margin, yPos);
@@ -727,14 +739,14 @@ export async function generatePDFReport(
         // Description
         pdf.setFontSize(9);
         pdf.setFont('helvetica', 'normal');
-        pdf.setTextColor(203, 213, 225);
+        pdf.setTextColor(30, 41, 59);
         const descLines = pdf.splitTextToSize(rec.description, contentWidth - 10);
         pdf.text(descLines, margin + 3, yPos);
         yPos += descLines.length * 4 + 3;
 
         // Impact
         if (rec.impact) {
-          pdf.setTextColor(148, 163, 184);
+          pdf.setTextColor(71, 85, 105);
           pdf.setFont('helvetica', 'italic');
           const impactLines = pdf.splitTextToSize(`Impact: ${rec.impact}`, contentWidth - 10);
           pdf.text(impactLines, margin + 3, yPos);
@@ -752,7 +764,7 @@ export async function generatePDFReport(
           pdf.text(`Effort: ${rec.effort.toUpperCase()}`, margin + 3, yPos);
           
           if (rec.estimatedTime) {
-            pdf.setTextColor(148, 163, 184);
+            pdf.setTextColor(71, 85, 105);
             pdf.text(`| ${rec.estimatedTime}`, margin + 35, yPos);
           }
           yPos += 5;
@@ -791,7 +803,7 @@ export async function generatePDFReport(
 
   pdf.setFontSize(11);
   pdf.setFont('helvetica', 'normal');
-  pdf.setTextColor(203, 213, 225);
+  pdf.setTextColor(30, 41, 59);
 
   const nextSteps = [
     'Review critical and high-priority recommendations first',
@@ -835,7 +847,7 @@ export async function generatePDFReport(
   
   pdf.setFontSize(10);
   pdf.setFont('helvetica', 'normal');
-  pdf.setTextColor(203, 213, 225);
+  pdf.setTextColor(30, 41, 59);
   
   tocEntries.forEach(entry => {
     checkPageBreak(8);
@@ -848,7 +860,7 @@ export async function generatePDFReport(
     pdf.text(entry.title, titleX, yPos);
     
     // Dots
-    pdf.setTextColor(100, 100, 100);
+    pdf.setTextColor(150, 150, 150);
     const dotsStart = titleX + pdf.getTextWidth(entry.title) + 2;
     const dotsEnd = pageX - 2;
     let dotX = dotsStart;
@@ -858,7 +870,7 @@ export async function generatePDFReport(
     }
     
     // Page number
-    pdf.setTextColor(203, 213, 225);
+    pdf.setTextColor(30, 41, 59);
     pdf.text(entry.page.toString(), pageX, yPos, { align: 'right' });
     
     yPos += 6;
