@@ -542,11 +542,11 @@ describe('BrowserService Property Tests', () => {
       );
     });
 
-    it('should have default maximum of 5 concurrent browsers', () => {
+    it('should have default maximum of 3 concurrent browsers', () => {
       const service = new BrowserService();
       const config = (service as any).config;
 
-      expect(config.maxConcurrentBrowsers).toBe(5);
+      expect(config.maxConcurrentBrowsers).toBe(3);
     });
 
     it('should allow configuration of pool size', () => {

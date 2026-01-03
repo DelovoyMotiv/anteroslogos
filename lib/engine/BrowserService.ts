@@ -2,17 +2,20 @@
  * BrowserService - Headless browser management for GEO Audit Engine
  * 
  * Manages Playwright browser instances with:
- * - Connection pooling (max 5 concurrent browsers)
+ * - Connection pooling (max 3 concurrent browsers)
  * - User-Agent rotation
  * - Viewport randomization
  * - Stealth mode (navigator.webdriver masking)
  * - Resource blocking (images, CSS, fonts)
+ * - Idle browser cleanup (30-second timeout)
  */
 
 import { chromium, Browser, BrowserContext, Page } from 'playwright';
 import { getBrowserConfig, BrowserConfiguration } from './browser-config';
 import { ErrorHandler, AgentMiddlewareError, isAgentMiddlewareError } from './errors';
 import { ErrorCode } from '../../types/agent-middleware.types';
+import { EnvironmentDetector } from './EnvironmentDetector';
+import { CSRDetector, CSRFrameworkInfo } from './CSRDetector';
 
 export interface BrowserOptions {
   timeout?: number;
@@ -32,12 +35,14 @@ export interface BrowserResult {
     stylesheets: number;
     images: number;
   };
+  csrFramework?: CSRFrameworkInfo;
 }
 
 interface BrowserInstance {
   browser: Browser;
   inUse: boolean;
   createdAt: number;
+  lastUsed: number;
 }
 
 /**
@@ -49,12 +54,21 @@ export class BrowserService {
   private userAgentIndex = 0;
   private viewportIndex = 0;
   private errorHandler: ErrorHandler;
+  private environmentDetector: EnvironmentDetector;
+  private csrDetector: CSRDetector;
+  private idleCleanupInterval: NodeJS.Timeout | null = null;
+  private readonly IDLE_TIMEOUT_MS = 30000; // 30 seconds
 
   constructor(config?: Partial<BrowserConfiguration>) {
     this.config = config ? { ...getBrowserConfig(), ...config } : getBrowserConfig();
     this.errorHandler = new ErrorHandler((message, context) => {
       console.log(`[BrowserService] ${message}`, context);
     });
+    this.environmentDetector = new EnvironmentDetector();
+    this.csrDetector = new CSRDetector();
+    
+    // Start idle browser cleanup interval
+    this.startIdleCleanup();
   }
 
   /**
@@ -123,14 +137,15 @@ export class BrowserService {
             );
           }
           
-          // Detect CSR timeout
+          // Detect CSR timeout (Requirement 2.3: Include timeout duration)
           if (errorMessage.includes('Timeout') || 
               errorMessage.includes('timeout') ||
               errorMessage.includes('ERR_CSR_TIMEOUT')) {
+            const timeoutValue = options.timeout || this.config.pageLoadTimeout;
             throw new AgentMiddlewareError(
               ErrorCode.ERR_CSR_TIMEOUT,
-              'JavaScript execution timed out',
-              { url, timeout: options.timeout || this.config.pageLoadTimeout, originalError: errorMessage }
+              `JavaScript execution timed out after ${timeoutValue}ms`,
+              { url, timeout: timeoutValue, timeoutDuration: timeoutValue, originalError: errorMessage }
             );
           }
           
@@ -177,6 +192,7 @@ export class BrowserService {
       
       // Log browser launch (Property 45: Browser Launch Logging)
       const browserVersion = browser.version();
+      const actualWaitUntil = options.waitUntil || 'networkidle';
       console.log('[BrowserService] Browser launched', {
         version: browserVersion,
         url,
@@ -185,7 +201,7 @@ export class BrowserService {
           viewport: options.viewport || 'randomized',
           blockResources: options.blockResources !== false,
           timeout: options.timeout || this.config.pageLoadTimeout,
-          waitUntil: options.waitUntil || 'networkidle',
+          waitUntil: actualWaitUntil,
         },
         timestamp: new Date().toISOString(),
       });
@@ -285,14 +301,31 @@ export class BrowserService {
         }
       });
 
-      // Navigate to URL with timeout
+      // Navigate to URL with timeout (Property 9: Navigation Timeout Configuration)
+      // Requirement 3.1: Enforce maximum timeout of 15 seconds
       const timeout = options.timeout || this.config.pageLoadTimeout;
+      // Use networkidle for CSR support (Property 5: Network Idle Wait Strategy)
+      // Note: Playwright uses 'networkidle' (not 'networkidle2' like Puppeteer)
       const waitUntil = options.waitUntil || 'networkidle';
 
-      const response = await page.goto(url, {
-        timeout,
-        waitUntil,
-      });
+      let response;
+      try {
+        response = await page.goto(url, {
+          timeout,
+          waitUntil,
+        });
+      } catch (error) {
+        // Requirement 2.3, 3.2: Throw CSR_TIMEOUT error with timeout duration and ensure cleanup
+        if (error instanceof Error && (error.message.includes('Timeout') || error.message.includes('timeout'))) {
+          // Property 10: Timeout Cleanup - browser cleanup will happen in finally block
+          throw new AgentMiddlewareError(
+            ErrorCode.ERR_CSR_TIMEOUT,
+            `Page navigation timed out after ${timeout}ms`,
+            { url, timeout, timeoutDuration: timeout }
+          );
+        }
+        throw error;
+      }
 
       if (!response) {
         throw new Error('Failed to load page - no response received');
@@ -305,6 +338,32 @@ export class BrowserService {
           'Target site blocks bot access (403 Forbidden)',
           { url, status: 403, userAgent, viewport }
         );
+      }
+
+      // Detect CSR framework (Property 34-36: Framework Detection)
+      const csrFramework = await this.csrDetector.detectFramework(page);
+      
+      // Log CSR detection (Property 8: CSR Detection Logging, Property 37: Framework Detection Logging)
+      if (csrFramework.framework) {
+        console.log('[BrowserService] CSR framework detected', {
+          url,
+          framework: csrFramework.framework,
+          version: csrFramework.version,
+          markers: csrFramework.markers,
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      // Wait for hydration if CSR framework detected (Property 6: CSR Hydration Wait)
+      const hydrationWaitTime = this.csrDetector.getHydrationWaitTime(csrFramework.framework);
+      if (hydrationWaitTime > 0) {
+        console.log('[BrowserService] Waiting for CSR hydration', {
+          url,
+          framework: csrFramework.framework,
+          waitTime: hydrationWaitTime,
+          timestamp: new Date().toISOString(),
+        });
+        await page.waitForTimeout(hydrationWaitTime);
       }
 
       // Get final URL after redirects
@@ -338,7 +397,26 @@ export class BrowserService {
       }
 
       // Extract rendered HTML
-      const html = await page.content();
+      let html = await page.content();
+      
+      // Requirement 6.5: Limit content size to 5MB (Property 24: Content Size Limit)
+      const MAX_CONTENT_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+      const contentSize = Buffer.byteLength(html, 'utf8');
+      
+      if (contentSize > MAX_CONTENT_SIZE) {
+        console.warn('[BrowserService] Content size exceeds limit', {
+          url,
+          contentSize,
+          maxSize: MAX_CONTENT_SIZE,
+          truncated: true,
+          timestamp: new Date().toISOString(),
+        });
+        
+        // Truncate to 5MB
+        // Use Buffer to ensure we truncate at valid UTF-8 boundaries
+        const buffer = Buffer.from(html, 'utf8');
+        html = buffer.slice(0, MAX_CONTENT_SIZE).toString('utf8');
+      }
 
       // Calculate load time
       const loadTime = Date.now() - startTime;
@@ -350,6 +428,7 @@ export class BrowserService {
         loadTime,
         resourceCounts,
         redirectChain: redirectChain.length > 0 ? redirectChain : undefined,
+        csrFramework: csrFramework.framework || undefined,
         timestamp: new Date().toISOString(),
       });
 
@@ -359,8 +438,12 @@ export class BrowserService {
         redirectChain,
         loadTime,
         resourceCounts,
+        csrFramework: csrFramework.framework ? csrFramework : undefined,
       };
     } finally {
+      // Requirement 3.3: Close browser instances immediately after content extraction
+      // Requirement 3.2: Close browser instance on timeout (Property 10: Timeout Cleanup)
+      // Property 11: Post-Extraction Cleanup
       // Track memory usage before cleanup
       const memoryStats = await this.getMemoryUsage(context);
       
@@ -452,26 +535,22 @@ export class BrowserService {
     
     if (available) {
       available.inUse = true;
+      available.lastUsed = Date.now();
       return available.browser;
     }
 
     // Check if we can create new browser
     if (this.browserPool.length < this.config.maxConcurrentBrowsers) {
-      const browser = await chromium.launch({
-        headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-accelerated-2d-canvas',
-          '--disable-gpu',
-        ],
-      });
+      // Get environment-specific browser configuration
+      const browserConfig = await this.environmentDetector.getBrowserConfig();
+      
+      const browser = await chromium.launch(browserConfig);
 
       const instance: BrowserInstance = {
         browser,
         inUse: true,
         createdAt: Date.now(),
+        lastUsed: Date.now(),
       };
 
       this.browserPool.push(instance);
@@ -485,6 +564,7 @@ export class BrowserService {
         if (available) {
           clearInterval(checkInterval);
           available.inUse = true;
+          available.lastUsed = Date.now();
           resolve(available.browser);
         }
       }, 100);
@@ -498,6 +578,66 @@ export class BrowserService {
     const instance = this.browserPool.find(inst => inst.browser === browser);
     if (instance) {
       instance.inUse = false;
+      instance.lastUsed = Date.now();
+    }
+  }
+
+  /**
+   * Start idle browser cleanup interval
+   * Closes browsers that have been idle for more than 30 seconds
+   */
+  private startIdleCleanup(): void {
+    // Clear any existing interval
+    if (this.idleCleanupInterval) {
+      clearInterval(this.idleCleanupInterval);
+    }
+
+    // Run cleanup every 10 seconds
+    this.idleCleanupInterval = setInterval(() => {
+      this.cleanupIdleBrowsers().catch((error) => {
+        console.error('[BrowserService] Error during idle cleanup:', error);
+      });
+    }, 10000);
+  }
+
+  /**
+   * Clean up idle browser instances
+   * Closes browsers that have been idle for more than 30 seconds
+   */
+  async cleanupIdleBrowsers(): Promise<void> {
+    const now = Date.now();
+    const instancesToClose: BrowserInstance[] = [];
+
+    // Find idle browsers
+    for (const instance of this.browserPool) {
+      if (!instance.inUse && (now - instance.lastUsed) > this.IDLE_TIMEOUT_MS) {
+        instancesToClose.push(instance);
+      }
+    }
+
+    // Close idle browsers
+    for (const instance of instancesToClose) {
+      try {
+        // Log memory usage before closing (Property 29: Memory Usage Logging)
+        const stats = this.getPoolStats();
+        console.log('[BrowserService] Closing idle browser instance', {
+          idleTime: now - instance.lastUsed,
+          poolSize: stats.total,
+          inUse: stats.inUse,
+          available: stats.available,
+          timestamp: new Date().toISOString(),
+        });
+
+        await instance.browser.close();
+        
+        // Remove from pool
+        const index = this.browserPool.indexOf(instance);
+        if (index > -1) {
+          this.browserPool.splice(index, 1);
+        }
+      } catch (error) {
+        console.error('[BrowserService] Error closing idle browser:', error);
+      }
     }
   }
 
@@ -505,6 +645,12 @@ export class BrowserService {
    * Close all browser instances and clean up resources
    */
   async cleanup(): Promise<void> {
+    // Stop idle cleanup interval
+    if (this.idleCleanupInterval) {
+      clearInterval(this.idleCleanupInterval);
+      this.idleCleanupInterval = null;
+    }
+
     await Promise.all(
       this.browserPool.map(async (instance) => {
         try {

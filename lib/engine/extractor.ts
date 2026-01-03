@@ -16,6 +16,7 @@ import { AgentMiddlewareError } from './errors';
 import { normalizeUrl } from './utils';
 import { BrowserService } from './BrowserService';
 import type { BrowserConfiguration } from './browser-config';
+import { FallbackStrategy } from './FallbackStrategy';
 
 /**
  * ExtractionEngine class
@@ -26,6 +27,7 @@ export class ExtractionEngine {
   private readonly defaultUserAgent: string = 'Mozilla/5.0 (compatible; AgentMiddleware/1.0)';
   private readonly browserService: BrowserService | null;
   private readonly useBrowser: boolean;
+  private readonly fallbackStrategy: FallbackStrategy;
   private fallbackWarnings: string[] = [];
 
   /**
@@ -35,6 +37,7 @@ export class ExtractionEngine {
   constructor(options?: { enableBrowser?: boolean; browserConfig?: Partial<BrowserConfiguration> }) {
     this.useBrowser = options?.enableBrowser ?? (process.env.BROWSER_ENABLED !== 'false');
     this.browserService = this.useBrowser ? new BrowserService(options?.browserConfig) : null;
+    this.fallbackStrategy = new FallbackStrategy();
   }
 
   /**
@@ -63,6 +66,7 @@ export class ExtractionEngine {
     let html: string;
     let usedBrowser = false;
     let browserMetadata: ExtractionResult['browserMetadata'];
+    let extractionMethod: 'browser' | 'static' = 'static';
     
     // Try browser-based fetching first if enabled
     if (this.useBrowser && this.browserService && options.useBrowser !== false) {
@@ -74,34 +78,57 @@ export class ExtractionEngine {
         });
         html = browserResult.html;
         usedBrowser = true;
+        extractionMethod = 'browser';
         
-        // Capture browser metadata
+        // Capture browser metadata (Property 38: CSR Framework Result Field)
         browserMetadata = {
           usedBrowser: true,
           finalUrl: browserResult.finalUrl,
           redirectChain: browserResult.redirectChain,
           loadTime: browserResult.loadTime,
           resourceCounts: browserResult.resourceCounts,
+          ...(browserResult.csrFramework && { csrFramework: browserResult.csrFramework }),
         };
       } catch (error) {
-        // Check if it's a non-retryable error (WAF block, CAPTCHA)
-        if (error instanceof AgentMiddlewareError && error.code === ErrorCode.ERR_WAF_BLOCK) {
-          // Don't fallback for WAF blocks - throw the error
+        // Use FallbackStrategy to determine if we should fallback
+        const fallbackDecision = this.fallbackStrategy.shouldFallback(error as Error);
+        
+        // Requirement 4.2: No fallback for WAF/CAPTCHA blocks
+        if (!fallbackDecision.shouldFallback) {
+          // Log the decision and throw the error
+          console.error(`[ExtractionEngine] Browser fetch failed for ${normalizedUrl}: ${fallbackDecision.reason}. No fallback attempted.`);
+          
+          // Requirement 4.4: Log memory errors before throwing
+          if (error instanceof AgentMiddlewareError && error.code === ErrorCode.ERR_INTERNAL) {
+            const errorMessage = error.message.toLowerCase();
+            if (errorMessage.includes('memory') || errorMessage.includes('heap')) {
+              console.error(`[ExtractionEngine] Memory error detected: ${error.message}`);
+            }
+          }
+          
           throw error;
         }
         
-        // Log browser failure and fallback to static fetching
+        // Requirement 4.1, 4.4: Fallback for timeout, network, and memory errors
         const errorMessage = error instanceof Error ? error.message : String(error);
-        console.warn(`[ExtractionEngine] Browser fetch failed for ${normalizedUrl}: ${errorMessage}. Falling back to static fetching.`);
+        console.warn(`[ExtractionEngine] Browser fetch failed for ${normalizedUrl}: ${errorMessage}. ${fallbackDecision.reason}. Falling back to static fetching.`);
         
-        // Add fallback warning
-        this.fallbackWarnings.push(
-          'Browser-based rendering failed. Falling back to static HTML fetching. ' +
-          'Client-side rendered (CSR) content may not be available.'
-        );
+        // Requirement 4.4: Log memory errors
+        if (error instanceof AgentMiddlewareError && error.code === ErrorCode.ERR_INTERNAL) {
+          const errMsg = error.message.toLowerCase();
+          if (errMsg.includes('memory') || errMsg.includes('heap')) {
+            console.error(`[ExtractionEngine] Memory error during browser rendering: ${error.message}`);
+          }
+        }
+        
+        // Requirement 4.3: Add warning message to results
+        if (fallbackDecision.warningMessage) {
+          this.fallbackWarnings.push(fallbackDecision.warningMessage);
+        }
         
         // Fallback to static fetching
         html = await this.fetchHTML(normalizedUrl, timeout, options.userAgent);
+        extractionMethod = 'static';
         
         // Mark as fallback
         browserMetadata = {
@@ -111,6 +138,7 @@ export class ExtractionEngine {
     } else {
       // Use static fetching if browser disabled
       html = await this.fetchHTML(normalizedUrl, timeout, options.userAgent);
+      extractionMethod = 'static';
       
       // Mark as static fetching
       browserMetadata = {
@@ -158,7 +186,10 @@ export class ExtractionEngine {
       browserMetadata,
     };
     
-    // Add fallback warnings to result if any
+    // Requirement 4.5: Track extraction method (browser vs static)
+    (result as any).extractionMethod = extractionMethod;
+    
+    // Requirement 4.3: Add fallback warnings to result if any
     if (this.fallbackWarnings.length > 0) {
       (result as any).warnings = this.fallbackWarnings;
       (result as any).csrSupport = 'unavailable';

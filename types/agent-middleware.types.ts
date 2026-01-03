@@ -137,6 +137,11 @@ export interface ExtractionResult {
       stylesheets: number;
       images: number;
     };
+    csrFramework?: {
+      framework: string | null;
+      version?: string;
+      markers: string[];
+    };
   };
 }
 

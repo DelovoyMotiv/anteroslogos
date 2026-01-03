@@ -4,9 +4,9 @@
  * 
  * Environment Variables:
  * - BROWSER_ENABLED: Enable/disable browser mode (default: true)
- * - BROWSER_TIMEOUT: Browser instance timeout in ms (default: 30000)
- * - BROWSER_PAGE_TIMEOUT: Page load timeout in ms (default: 15000)
- * - BROWSER_MAX_CONCURRENT: Max concurrent browser instances (default: 5)
+ * - BROWSER_TIMEOUT: Page load timeout in ms (default: 15000) - Requirement 5.5
+ * - BROWSER_PAGE_TIMEOUT: (deprecated, use BROWSER_TIMEOUT) Page load timeout in ms
+ * - BROWSER_MAX_CONCURRENT: Max concurrent browser instances (default: 3)
  * - BROWSER_BLOCK_IMAGES: Block image loading (default: true)
  * - BROWSER_BLOCK_CSS: Block CSS loading (default: true)
  * - BROWSER_BLOCK_FONTS: Block font loading (default: true)
@@ -80,7 +80,7 @@ export const DEFAULT_BROWSER_CONFIG: BrowserConfiguration = {
     randomizeViewport: true,
     injectMouseMovement: false, // Optional, not implemented in MVP
   },
-  maxConcurrentBrowsers: 5,
+  maxConcurrentBrowsers: 3,
   browserTimeout: 30000, // 30 seconds
   pageLoadTimeout: 15000, // 15 seconds
 };
@@ -257,21 +257,28 @@ export function getBrowserConfig(): BrowserConfiguration {
   };
   
   // Override with environment variables if present
-  config.browserTimeout = parseIntEnv(
-    process.env.BROWSER_TIMEOUT,
-    DEFAULT_BROWSER_CONFIG.browserTimeout,
-    1000,
-    300000,
-    'BROWSER_TIMEOUT'
-  );
+  // Requirement 5.5: Support BROWSER_TIMEOUT environment variable
+  // Also support BROWSER_PAGE_TIMEOUT for backward compatibility
+  const timeoutEnvValue = process.env.BROWSER_TIMEOUT || process.env.BROWSER_PAGE_TIMEOUT;
+  if (timeoutEnvValue !== undefined) {
+    config.pageLoadTimeout = parseIntEnv(
+      timeoutEnvValue,
+      DEFAULT_BROWSER_CONFIG.pageLoadTimeout,
+      1000,
+      300000,
+      'BROWSER_TIMEOUT'
+    );
+  }
   
-  config.pageLoadTimeout = parseIntEnv(
-    process.env.BROWSER_PAGE_TIMEOUT,
-    DEFAULT_BROWSER_CONFIG.pageLoadTimeout,
-    1000,
-    300000,
-    'BROWSER_PAGE_TIMEOUT'
-  );
+  if (process.env.BROWSER_TIMEOUT !== undefined) {
+    config.browserTimeout = parseIntEnv(
+      process.env.BROWSER_TIMEOUT,
+      DEFAULT_BROWSER_CONFIG.browserTimeout,
+      1000,
+      300000,
+      'BROWSER_TIMEOUT'
+    );
+  }
   
   config.maxConcurrentBrowsers = parseIntEnv(
     process.env.BROWSER_MAX_CONCURRENT,

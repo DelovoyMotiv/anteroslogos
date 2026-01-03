@@ -425,6 +425,20 @@ async function handleGet(req: VercelRequest, res: VercelResponse): Promise<void>
 }
 
 // ============================================================================
+// VERCEL FUNCTION CONFIGURATION
+// ============================================================================
+
+/**
+ * Vercel function configuration for browser scraping
+ * **Validates: Requirements 8.1, 8.2, 8.3**
+ */
+export const config = {
+  maxDuration: 60,        // 60 seconds for browser rendering and CSR hydration
+  memory: 1024,           // 1GB for Chromium and page rendering
+  runtime: 'nodejs18.x',  // Node.js 18+ for modern features
+};
+
+// ============================================================================
 // MAIN HANDLER
 // ============================================================================
 

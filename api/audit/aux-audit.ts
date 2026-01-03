@@ -5,6 +5,24 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
+// ============================================================================
+// VERCEL FUNCTION CONFIGURATION
+// ============================================================================
+
+/**
+ * Vercel function configuration for browser scraping
+ * **Validates: Requirements 8.1, 8.2, 8.3**
+ */
+export const config = {
+  maxDuration: 60,        // 60 seconds for Playwright browser rendering
+  memory: 1024,           // 1GB for Chromium and page analysis
+  runtime: 'nodejs18.x',  // Node.js 18+ for modern features
+};
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
 // Helper function to get env var
 function getEnvVar(key: string): string | undefined {
   if (typeof process !== 'undefined' && process.env) {
