@@ -552,9 +552,18 @@ export class BrowserService {
           headless: browserConfig.headless,
           argsCount: browserConfig.args.length,
           isVercel: this.environmentDetector.isVercel(),
+          nodeVersion: process.version,
+          platform: process.platform,
+          arch: process.arch,
         });
         
-        const browser = await chromium.launch(browserConfig);
+        // Add timeout to browser launch (30 seconds max)
+        const launchPromise = chromium.launch(browserConfig);
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error('Browser launch timeout after 30 seconds')), 30000);
+        });
+        
+        const browser = await Promise.race([launchPromise, timeoutPromise]);
 
         const instance: BrowserInstance = {
           browser,
@@ -569,11 +578,25 @@ export class BrowserService {
         
         return browser;
       } catch (error) {
-        console.error('[BrowserService] Failed to launch browser:', error);
+        console.error('[BrowserService] Failed to launch browser:', {
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined,
+          isVercel: this.environmentDetector.isVercel(),
+          nodeVersion: process.version,
+          platform: process.platform,
+          arch: process.arch,
+        });
+        
         throw new AgentMiddlewareError(
           ErrorCode.ERR_INTERNAL,
-          `Failed to launch browser: ${error instanceof Error ? error.message : String(error)}`,
-          { originalError: error }
+          `Failed to launch browser in ${this.environmentDetector.isVercel() ? 'Vercel' : 'local'} environment: ${error instanceof Error ? error.message : String(error)}`,
+          { 
+            originalError: error,
+            isVercel: this.environmentDetector.isVercel(),
+            nodeVersion: process.version,
+            platform: process.platform,
+            arch: process.arch,
+          }
         );
       }
     }

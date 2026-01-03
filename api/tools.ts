@@ -218,71 +218,94 @@ export default async function handler(
   req: VercelRequest,
   res: VercelResponse
 ): Promise<void> {
-  // Log incoming request
-  console.log('[api/tools] Incoming request:', {
-    method: req.method,
-    url: req.url,
-    headers: req.headers,
-    body: req.body,
-  });
-
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  res.setHeader('Content-Type', 'application/json');
-
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
-  // Validate request method (POST only)
-  if (req.method !== 'POST') {
-    res.status(405).json({
-      success: false,
-      error: 'Method not allowed. Use POST.',
-    });
-    return;
-  }
-
+  // Wrap everything in try-catch to ensure we always return JSON
   try {
-    const body = req.body as ToolsRequest;
-    const { tool } = body;
+    // Log incoming request
+    console.log('[api/tools] Incoming request:', {
+      method: req.method,
+      url: req.url,
+      headers: req.headers,
+      body: req.body,
+      env: {
+        VERCEL: process.env.VERCEL,
+        NODE_VERSION: process.version,
+        PLATFORM: process.platform,
+        ARCH: process.arch,
+      },
+    });
 
-    console.log('[api/tools] Processing tool:', tool);
+    // Set CORS headers
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Content-Type', 'application/json');
 
-    // Validate tool parameter
-    if (!tool || typeof tool !== 'string') {
-      res.status(400).json({
+    // Handle preflight requests
+    if (req.method === 'OPTIONS') {
+      res.status(200).end();
+      return;
+    }
+
+    // Validate request method (POST only)
+    if (req.method !== 'POST') {
+      res.status(405).json({
         success: false,
-        error: 'Tool parameter is required.',
+        error: 'Method not allowed. Use POST.',
       });
       return;
     }
 
-    // Route to appropriate handler
-    switch (tool) {
-      case 'agent-manifest':
-        console.log('[api/tools] Routing to agent-manifest handler');
-        await handleAgentManifest(body as AgentManifestRequest, res);
-        break;
+    try {
+      const body = req.body as ToolsRequest;
+      const { tool } = body;
 
-      default:
+      console.log('[api/tools] Processing tool:', tool);
+
+      // Validate tool parameter
+      if (!tool || typeof tool !== 'string') {
         res.status(400).json({
           success: false,
-          error: `Unknown tool: ${tool}. Supported tools: agent-manifest`,
+          error: 'Tool parameter is required.',
         });
-    }
+        return;
+      }
 
+      // Route to appropriate handler
+      switch (tool) {
+        case 'agent-manifest':
+          console.log('[api/tools] Routing to agent-manifest handler');
+          await handleAgentManifest(body as AgentManifestRequest, res);
+          break;
+
+        default:
+          res.status(400).json({
+            success: false,
+            error: `Unknown tool: ${tool}. Supported tools: agent-manifest`,
+          });
+      }
+
+    } catch (error) {
+      console.error('[api/tools] Unexpected error:', error);
+      console.error('[api/tools] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
+      res.status(500).json({
+        success: false,
+        error: 'An unexpected error occurred.',
+        details: error instanceof Error ? error.message : String(error),
+      });
+    }
   } catch (error) {
-    console.error('[api/tools] Unexpected error:', error);
-    console.error('[api/tools] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
-    res.status(500).json({
-      success: false,
-      error: 'An unexpected error occurred.',
-      details: error instanceof Error ? error.message : String(error),
-    });
+    // Last resort error handler - ensure we always return JSON
+    console.error('[api/tools] Critical error in handler:', error);
+    try {
+      res.setHeader('Content-Type', 'application/json');
+      res.status(500).json({
+        success: false,
+        error: 'A critical error occurred.',
+        details: error instanceof Error ? error.message : String(error),
+      });
+    } catch (finalError) {
+      // If even JSON response fails, log it
+      console.error('[api/tools] Failed to send error response:', finalError);
+    }
   }
 }
