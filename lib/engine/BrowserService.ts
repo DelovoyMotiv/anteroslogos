@@ -527,6 +527,7 @@ export class BrowserService {
   }
 
   /**
+  /**
    * Get or create browser instance from pool
    */
   private async getBrowserInstance(): Promise<Browser> {
@@ -541,20 +542,40 @@ export class BrowserService {
 
     // Check if we can create new browser
     if (this.browserPool.length < this.config.maxConcurrentBrowsers) {
-      // Get environment-specific browser configuration
-      const browserConfig = await this.environmentDetector.getBrowserConfig();
-      
-      const browser = await chromium.launch(browserConfig);
+      try {
+        // Get environment-specific browser configuration
+        const browserConfig = await this.environmentDetector.getBrowserConfig();
+        
+        console.log('[BrowserService] Launching browser with config:', {
+          hasExecutablePath: !!browserConfig.executablePath,
+          executablePath: browserConfig.executablePath,
+          headless: browserConfig.headless,
+          argsCount: browserConfig.args.length,
+          isVercel: this.environmentDetector.isVercel(),
+        });
+        
+        const browser = await chromium.launch(browserConfig);
 
-      const instance: BrowserInstance = {
-        browser,
-        inUse: true,
-        createdAt: Date.now(),
-        lastUsed: Date.now(),
-      };
+        const instance: BrowserInstance = {
+          browser,
+          inUse: true,
+          createdAt: Date.now(),
+          lastUsed: Date.now(),
+        };
 
-      this.browserPool.push(instance);
-      return browser;
+        this.browserPool.push(instance);
+        
+        console.log('[BrowserService] Browser launched successfully');
+        
+        return browser;
+      } catch (error) {
+        console.error('[BrowserService] Failed to launch browser:', error);
+        throw new AgentMiddlewareError(
+          ErrorCode.ERR_INTERNAL,
+          `Failed to launch browser: ${error instanceof Error ? error.message : String(error)}`,
+          { originalError: error }
+        );
+      }
     }
 
     // Wait for available browser

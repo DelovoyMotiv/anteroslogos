@@ -42,12 +42,20 @@ export class EnvironmentDetector {
    */
   async getChromiumPath(): Promise<string | undefined> {
     if (this.isVercel()) {
-      // Use @sparticuz/chromium for Vercel serverless
-      return await chromium.executablePath();
+      try {
+        // Use @sparticuz/chromium for Vercel serverless
+        const path = await chromium.executablePath();
+        console.log('[EnvironmentDetector] Vercel Chromium path:', path);
+        return path;
+      } catch (error) {
+        console.error('[EnvironmentDetector] Failed to get Chromium path:', error);
+        throw new Error(`Failed to get Chromium executable path: ${error instanceof Error ? error.message : String(error)}`);
+      }
     }
     
     // Use Playwright's bundled Chromium for local development
     // Playwright will use its default path when executablePath is undefined
+    console.log('[EnvironmentDetector] Using Playwright bundled Chromium');
     return undefined;
   }
 
@@ -56,6 +64,12 @@ export class EnvironmentDetector {
    * @returns Browser launch options
    */
   async getBrowserConfig(): Promise<BrowserLaunchOptions> {
+    const isVercelEnv = this.isVercel();
+    console.log('[EnvironmentDetector] Getting browser config for environment:', {
+      isVercel: isVercelEnv,
+      VERCEL: process.env.VERCEL,
+    });
+    
     const executablePath = await this.getChromiumPath();
     
     // Serverless-optimized launch flags
@@ -68,18 +82,27 @@ export class EnvironmentDetector {
     ];
 
     // Add Vercel-specific optimizations
-    if (this.isVercel()) {
+    if (isVercelEnv) {
       args.push(
         '--single-process',
         '--no-zygote',
         '--disable-software-rasterizer',
       );
+      console.log('[EnvironmentDetector] Added Vercel-specific flags');
     }
 
-    return {
+    const config = {
       executablePath,
       headless: true,
       args,
     };
+    
+    console.log('[EnvironmentDetector] Browser config ready:', {
+      hasExecutablePath: !!config.executablePath,
+      headless: config.headless,
+      argsCount: config.args.length,
+    });
+
+    return config;
   }
 }
