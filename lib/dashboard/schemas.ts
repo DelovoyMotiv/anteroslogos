@@ -67,23 +67,27 @@ export function apiKeyFromDb(row: Record<string, unknown>): APIKey {
 
 /**
  * Agent Key schema matching the agent_keys table structure
+ * Note: Database column is 'aip_uri' but we expose it as 'aid_uri' for API consistency
  */
 export const AgentKeySchema = z.object({
   id: z.string().uuid(),
   user_id: z.string().uuid(),
-  tenant_id: z.string().uuid().optional(),
-  aid_registry_id: z.string().uuid().optional(),
+  tenant_id: z.string().uuid().nullable(),
   name: z.string().min(1),
-  aid_uri: z.string(),
+  aip_uri: z.string(),
   public_key: z.string(),
   key_algorithm: z.string(),
-  permissions: z.array(z.string()),
+  permissions: z.union([z.array(z.string()), z.record(z.unknown())]),
   metadata: z.record(z.unknown()),
   revoked: z.boolean(),
   revoked_at: flexibleDatetime.nullable(),
   created_at: flexibleDatetime,
   updated_at: flexibleDatetime,
-});
+}).transform((data) => ({
+  ...data,
+  // Map aip_uri to aid_uri for API consistency
+  aid_uri: data.aip_uri,
+}));
 
 export type AgentKey = z.infer<typeof AgentKeySchema>;
 
@@ -96,6 +100,8 @@ export function agentKeyFromDb(row: Record<string, unknown>): AgentKey {
     created_at: typeof row.created_at === 'string' ? row.created_at : new Date(row.created_at as Date).toISOString(),
     updated_at: typeof row.updated_at === 'string' ? row.updated_at : new Date(row.updated_at as Date).toISOString(),
     revoked_at: row.revoked_at ? (typeof row.revoked_at === 'string' ? row.revoked_at : new Date(row.revoked_at as Date).toISOString()) : null,
+    // Ensure permissions is an array
+    permissions: Array.isArray(row.permissions) ? row.permissions : [],
   });
 }
 
