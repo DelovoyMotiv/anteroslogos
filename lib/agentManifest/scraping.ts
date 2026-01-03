@@ -16,6 +16,7 @@ import { ScrapeError } from './errors';
  */
 export class ScrapingService {
   private readonly extractionEngine: ExtractionEngine;
+  private readonly isServerless: boolean;
 
   /**
    * Constructor
@@ -24,9 +25,9 @@ export class ScrapingService {
   constructor(extractionEngine?: ExtractionEngine) {
     // Disable browser in serverless environment (Vercel)
     // Browser (Playwright) requires special setup in serverless and causes initialization failures
-    const isServerless = typeof window === 'undefined' && process.env.VERCEL === '1';
+    this.isServerless = typeof window === 'undefined' && process.env.VERCEL === '1';
     this.extractionEngine = extractionEngine || new ExtractionEngine({ 
-      enableBrowser: !isServerless 
+      enableBrowser: !this.isServerless 
     });
   }
 
@@ -40,10 +41,11 @@ export class ScrapingService {
   async scrapeForManifest(url: string): Promise<ScrapedContent> {
     try {
       // Use ExtractionEngine with deep mode to get headings, links, and text
+      // On Vercel (serverless), browser is disabled, so use static extraction
       const result = await this.extractionEngine.extract(url, {
         mode: 'deep',
         timeout: 15000, // 15 seconds as per requirements
-        useBrowser: true,
+        useBrowser: !this.isServerless, // Only use browser if not in serverless environment
       });
 
       // Extract title from <title> or first <h1>
