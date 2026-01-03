@@ -602,18 +602,21 @@ async function mainHandler(
     
     switch (format) {
       case 'openai':
-        return res.status(200).json(Object.values(ALL_TOOLS).map(toOpenAIFunction));
+        res.status(200).json(Object.values(ALL_TOOLS).map(toOpenAIFunction));
+        return;
       case 'claude':
-        return res.status(200).json(Object.values(ALL_TOOLS).map(tool => toClaudeTool(tool)));
+        res.status(200).json(Object.values(ALL_TOOLS).map(tool => toClaudeTool(tool)));
+        return;
       case 'mcp':
-        return res.status(200).json({
+        res.status(200).json({
           serverInfo: MCP_SERVER_INFO,
           tools: getMcpTools(),
           resources: MCP_RESOURCES,
           prompts: MCP_PROMPTS,
         });
+        return;
       default:
-        return res.status(200).json({
+        res.status(200).json({
           name: MCP_SERVER_INFO.name,
           version: MCP_SERVER_INFO.version,
           protocolVersion: MCP_SERVER_INFO.protocolVersion,
@@ -625,12 +628,13 @@ async function mainHandler(
           },
           documentation: 'https://anoteroslogos.com/agent-identity',
         });
+        return;
     }
   }
 
   // POST - JSON-RPC 2.0 (validated by middleware)
   if (!validated) {
-    return res.status(400).json({
+    res.status(400).json({
       jsonrpc: '2.0',
       id: null,
       error: {
@@ -638,6 +642,7 @@ async function mainHandler(
         message: 'Invalid Request',
       },
     });
+    return;
   }
 
   const response: JsonRpcResponse = {
@@ -700,7 +705,7 @@ async function mainHandler(
     }
   }
   
-  return res.status(response.error ? 400 : 200).json(response);
+  res.status(response.error ? 400 : 200).json(response);
 }
 
 // Apply middleware: CORS -> Rate Limiting -> JSON-RPC Validation (for POST only)

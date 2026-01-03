@@ -180,7 +180,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse): Promise<void
     const validation = wrapRequestSchema.safeParse(req.body);
 
     if (!validation.success) {
-      return createErrorResponse(
+      createErrorResponse(
         res,
         'ERR_INVALID_URL',
         'Invalid request body',
@@ -188,6 +188,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse): Promise<void
         { errors: validation.error.errors },
         requestId
       );
+      return;
     }
 
     const { url, mode = 'fast', format = 'compact' } = validation.data;
@@ -198,7 +199,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse): Promise<void
     const authResult = await authMiddleware.authenticate(authHeader);
 
     if (!authResult.success) {
-      return createErrorResponse(
+      createErrorResponse(
         res,
         authResult.error!.code,
         authResult.error!.message,
@@ -206,6 +207,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse): Promise<void
         { url },
         requestId
       );
+      return;
     }
 
     const apiKey = authResult.apiKey!;
@@ -220,7 +222,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse): Promise<void
         res.setHeader(key, value);
       });
 
-      return createErrorResponse(
+      createErrorResponse(
         res,
         'ERR_RATE_LIMIT',
         getRateLimitMessage(rateLimitResult),
@@ -233,6 +235,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse): Promise<void
         },
         requestId
       );
+      return;
     }
 
     // Record rate limit attempt
@@ -252,7 +255,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse): Promise<void
         tags: ['agent-api', 'quota', 'exceeded'],
       });
 
-      return createErrorResponse(
+      createErrorResponse(
         res,
         quotaResult.error!.code,
         quotaResult.error!.message,
@@ -260,6 +263,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse): Promise<void
         { url, remaining: quotaResult.remaining },
         requestId
       );
+      return;
     }
 
     // Log request with quota information
@@ -292,7 +296,8 @@ async function handlePost(req: VercelRequest, res: VercelResponse): Promise<void
       });
 
       res.setHeader('X-Agent-Protocol-Version', AGENT_API_VERSION);
-      return res.status(200).json(cached.data);
+      res.status(200).json(cached.data);
+      return;
     }
 
     // Cache miss - perform extraction
@@ -380,7 +385,8 @@ async function handlePost(req: VercelRequest, res: VercelResponse): Promise<void
     });
 
     res.setHeader('X-Agent-Protocol-Version', AGENT_API_VERSION);
-    return res.status(200).json(response);
+    res.status(200).json(response);
+    return;
   } catch (error) {
     // Log error with full context
     logError(error, requestUrl, requestId);
@@ -389,7 +395,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse): Promise<void
     if (error instanceof AgentMiddlewareError) {
       const status = getStatusCode(error.code);
 
-      return createErrorResponse(
+      createErrorResponse(
         res,
         error.code,
         error.message,
@@ -397,10 +403,11 @@ async function handlePost(req: VercelRequest, res: VercelResponse): Promise<void
         { ...error.details, url: requestUrl },
         requestId
       );
+      return;
     }
 
     // Return ERR_INTERNAL for unexpected errors
-    return createErrorResponse(
+    createErrorResponse(
       res,
       'ERR_INTERNAL',
       'Internal server error',
@@ -408,6 +415,7 @@ async function handlePost(req: VercelRequest, res: VercelResponse): Promise<void
       { url: requestUrl },
       requestId
     );
+    return;
   }
 }
 
@@ -419,9 +427,8 @@ async function handleGet(req: VercelRequest, res: VercelResponse): Promise<void>
   // Return the comprehensive OpenAPI specification
   // Includes detailed error documentation, rate limiting info, and curl examples
 
-
   res.setHeader('X-Agent-Protocol-Version', AGENT_API_VERSION);
-  return res.status(200).json(openApiSpec);
+  res.status(200).json(openApiSpec);
 }
 
 // ============================================================================
@@ -452,20 +459,24 @@ export default async function handler(
 
   // Handle preflight
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    res.status(200).end();
+    return;
   }
 
   switch (req.method) {
     case 'GET':
-      return handleGet(req, res);
+      await handleGet(req, res);
+      return;
     case 'POST':
-      return handlePost(req, res);
+      await handlePost(req, res);
+      return;
     default:
-      return createErrorResponse(
+      createErrorResponse(
         res,
         'ERR_INVALID_URL',
         'Method not allowed',
         405
       );
+      return;
   }
 }
