@@ -6,7 +6,8 @@
  */
 
 // Use type-only import to avoid loading playwright at module initialization
-import type { Page } from 'playwright';
+// Use playwright-core types (same API as playwright but without bundled browsers)
+import type { Page } from 'playwright-core';
 
 /**
  * Supported CSR frameworks

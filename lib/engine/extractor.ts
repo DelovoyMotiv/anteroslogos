@@ -25,8 +25,10 @@ import { FallbackStrategy } from './FallbackStrategy';
 export class ExtractionEngine {
   private readonly defaultTimeout: number = 15000; // 15 seconds
   private readonly defaultUserAgent: string = 'Mozilla/5.0 (compatible; AgentMiddleware/1.0)';
-  private readonly browserService: BrowserService | null;
+  private browserService: BrowserService | null = null;
+  private browserServicePromise: Promise<BrowserService> | null = null;
   private readonly useBrowser: boolean;
+  private readonly browserConfig?: Partial<BrowserConfiguration>;
   private readonly fallbackStrategy: FallbackStrategy;
   private fallbackWarnings: string[] = [];
 
@@ -36,17 +38,37 @@ export class ExtractionEngine {
    */
   constructor(options?: { enableBrowser?: boolean; browserConfig?: Partial<BrowserConfiguration> }) {
     this.useBrowser = options?.enableBrowser ?? (process.env.BROWSER_ENABLED !== 'false');
+    this.browserConfig = options?.browserConfig;
     
-    // Lazy load BrowserService only when needed to avoid importing playwright on serverless
-    if (this.useBrowser) {
-      // Dynamic import to avoid loading playwright when not needed
-      const { BrowserService: BrowserServiceClass } = require('./BrowserService');
-      this.browserService = new BrowserServiceClass(options?.browserConfig);
-    } else {
-      this.browserService = null;
-    }
+    // BrowserService is now lazily loaded to avoid importing playwright at module initialization
+    // This is critical for Vercel serverless deployment
     
     this.fallbackStrategy = new FallbackStrategy();
+  }
+
+  /**
+   * Lazily loads and returns the BrowserService instance
+   * This avoids loading playwright at module initialization time
+   */
+  private async getBrowserService(): Promise<BrowserService | null> {
+    if (!this.useBrowser) {
+      return null;
+    }
+    
+    if (this.browserService) {
+      return this.browserService;
+    }
+    
+    // Use a promise to ensure we only load once even with concurrent calls
+    if (!this.browserServicePromise) {
+      this.browserServicePromise = (async () => {
+        const { BrowserService: BrowserServiceClass } = await import('./BrowserService');
+        this.browserService = new BrowserServiceClass(this.browserConfig);
+        return this.browserService;
+      })();
+    }
+    
+    return this.browserServicePromise;
   }
 
   /**
@@ -78,9 +100,11 @@ export class ExtractionEngine {
     let extractionMethod: 'browser' | 'static' = 'static';
     
     // Try browser-based fetching first if enabled
-    if (this.useBrowser && this.browserService && options.useBrowser !== false) {
+    // Get browser service lazily to avoid loading playwright at module initialization
+    const browserService = await this.getBrowserService();
+    if (this.useBrowser && browserService && options.useBrowser !== false) {
       try {
-        const browserResult = await this.browserService.fetchPageWithRetry(normalizedUrl, {
+        const browserResult = await browserService.fetchPageWithRetry(normalizedUrl, {
           timeout,
           waitUntil: 'networkidle',
           blockResources: true,
@@ -899,6 +923,7 @@ export class ExtractionEngine {
    * Cleanup resources (browser instances)
    */
   async cleanup(): Promise<void> {
+    // Only cleanup if browserService was actually loaded
     if (this.browserService) {
       await this.browserService.cleanup();
     }

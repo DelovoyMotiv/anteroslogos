@@ -10,12 +10,28 @@
  * - Idle browser cleanup (30-second timeout)
  */
 
-import { chromium, Browser, BrowserContext, Page } from 'playwright';
+// Use type-only imports to avoid loading playwright at module initialization
+// Use playwright-core types (same API as playwright but without bundled browsers)
+import type { Browser, BrowserContext, Page } from 'playwright-core';
 import { getBrowserConfig, BrowserConfiguration } from './browser-config';
 import { ErrorHandler, AgentMiddlewareError, isAgentMiddlewareError } from './errors';
 import { ErrorCode } from '../../types/agent-middleware.types';
 import { EnvironmentDetector } from './EnvironmentDetector';
 import { CSRDetector, CSRFrameworkInfo } from './CSRDetector';
+
+// Lazy load playwright-core to avoid initialization errors in serverless environments
+// playwright-core is used instead of playwright because:
+// 1. playwright-core doesn't bundle browser binaries (smaller bundle size)
+// 2. On Vercel, we use @sparticuz/chromium for the browser binary
+// 3. Locally, playwright-core can use system-installed browsers
+let playwrightModule: typeof import('playwright-core') | null = null;
+
+async function getPlaywright() {
+  if (!playwrightModule) {
+    playwrightModule = await import('playwright-core');
+  }
+  return playwrightModule;
+}
 
 export interface BrowserOptions {
   timeout?: number;
@@ -557,8 +573,9 @@ export class BrowserService {
           arch: process.arch,
         });
         
-        // Add timeout to browser launch (30 seconds max)
-        const launchPromise = chromium.launch(browserConfig);
+        // Lazy load playwright and launch browser with timeout (30 seconds max)
+        const playwright = await getPlaywright();
+        const launchPromise = playwright.chromium.launch(browserConfig);
         const timeoutPromise = new Promise<never>((_, reject) => {
           setTimeout(() => reject(new Error('Browser launch timeout after 30 seconds')), 30000);
         });

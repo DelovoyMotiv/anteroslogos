@@ -13,9 +13,7 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { withCors } from '../../lib/validation/middleware';
-import { BrowserService } from '../../lib/engine/BrowserService';
 import { isBrowserEnabled } from '../../lib/engine/browser-config';
-import { EnvironmentDetector } from '../../lib/engine/EnvironmentDetector';
 
 // Vercel function configuration
 export const config = {
@@ -42,6 +40,10 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
       });
       return;
     }
+
+    // Lazy load BrowserService and EnvironmentDetector to avoid loading playwright at module initialization
+    const { BrowserService } = await import('../../lib/engine/BrowserService');
+    const { EnvironmentDetector } = await import('../../lib/engine/EnvironmentDetector');
 
     // Create browser service instance
     const browserService = new BrowserService();
