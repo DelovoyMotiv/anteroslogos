@@ -21,7 +21,6 @@ import { EnvironmentDetector } from '../../lib/engine/EnvironmentDetector';
 export const config = {
   maxDuration: 60,        // 60 seconds for browser operations
   memory: 1024,           // 1GB for Chromium
-  runtime: 'nodejs18.x',  // Node.js 18+
 };
 
 async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {

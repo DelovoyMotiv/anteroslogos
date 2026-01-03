@@ -16,7 +16,6 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 export const config = {
   maxDuration: 60,        // 60 seconds for Playwright browser rendering
   memory: 1024,           // 1GB for Chromium and page analysis
-  runtime: 'nodejs18.x',  // Node.js 18+ for modern features
 };
 
 // ============================================================================

@@ -435,7 +435,6 @@ async function handleGet(req: VercelRequest, res: VercelResponse): Promise<void>
 export const config = {
   maxDuration: 60,        // 60 seconds for browser rendering and CSR hydration
   memory: 1024,           // 1GB for Chromium and page rendering
-  runtime: 'nodejs18.x',  // Node.js 18+ for modern features
 };
 
 // ============================================================================
