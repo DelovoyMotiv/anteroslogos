@@ -14,7 +14,7 @@ import type {
 import { ErrorCode } from '../../types/agent-middleware.types';
 import { AgentMiddlewareError } from './errors';
 import { normalizeUrl } from './utils';
-import { BrowserService } from './BrowserService';
+import type { BrowserService } from './BrowserService';
 import type { BrowserConfiguration } from './browser-config';
 import { FallbackStrategy } from './FallbackStrategy';
 
@@ -36,7 +36,16 @@ export class ExtractionEngine {
    */
   constructor(options?: { enableBrowser?: boolean; browserConfig?: Partial<BrowserConfiguration> }) {
     this.useBrowser = options?.enableBrowser ?? (process.env.BROWSER_ENABLED !== 'false');
-    this.browserService = this.useBrowser ? new BrowserService(options?.browserConfig) : null;
+    
+    // Lazy load BrowserService only when needed to avoid importing playwright on serverless
+    if (this.useBrowser) {
+      // Dynamic import to avoid loading playwright when not needed
+      const { BrowserService: BrowserServiceClass } = require('./BrowserService');
+      this.browserService = new BrowserServiceClass(options?.browserConfig);
+    } else {
+      this.browserService = null;
+    }
+    
     this.fallbackStrategy = new FallbackStrategy();
   }
 
