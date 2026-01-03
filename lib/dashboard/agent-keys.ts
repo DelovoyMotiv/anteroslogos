@@ -7,7 +7,7 @@ import { supabase } from '../supabase';
 import { ed25519 } from '@noble/curves/ed25519.js';
 import { registerAgent } from '../tenancy/aidRegistry';
 import { getCurrentTenantIdOrNull } from '../tenancy/context';
-import { AgentKeyFromDbSchema, AgentKeySchema, type AgentKey } from './schemas';
+import { AgentKeySchema, type AgentKey } from './schemas';
 import { selectQuery, selectSingle, insertSingle, insertQuery, updateQuery, deleteQuery } from '../database/queryHelpers';
 
 export interface GenerateAgentKeyParams {
@@ -224,7 +224,7 @@ export async function generateAgentKey(
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       },
-      AgentKeyFromDbSchema
+      AgentKeySchema
     );
 
     if (insertError || !agentKey) {
@@ -272,7 +272,7 @@ export async function listAgentKeys(): Promise<AgentKey[] | { error: string }> {
     const { data: keys, error } = await selectQuery(
       supabase,
       'agent_keys',
-      AgentKeyFromDbSchema,
+      AgentKeySchema,
       {
         user_id: user.id,
         tenant_id: tenantId,
@@ -316,7 +316,7 @@ export async function revokeAgentKey(
         id: keyId,
         user_id: user.id,
       },
-      AgentKeyFromDbSchema
+      AgentKeySchema
     );
 
     if (error || !data || data.length === 0) {
@@ -417,7 +417,7 @@ export async function getAgentKeyByAID(
     const { data: keys, error } = await selectQuery(
       supabase,
       'agent_keys',
-      AgentKeyFromDbSchema,
+      AgentKeySchema,
       {
         aip_uri: aidUri, // Database column name
         revoked: false,

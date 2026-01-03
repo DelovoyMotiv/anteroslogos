@@ -66,65 +66,38 @@ export function apiKeyFromDb(row: Record<string, unknown>): APIKey {
 // =====================================================
 
 /**
- * Agent Key schema for database rows (accepts aip_uri from DB)
- * Transforms aip_uri to aid_uri for API consistency
+ * Agent Key schema that accepts both aip_uri (from DB) and aid_uri (from API)
+ * Uses preprocessing to normalize the field name
  */
-const AgentKeyDbSchema = z.object({
-  id: z.string().uuid(),
-  user_id: z.string().uuid(),
-  tenant_id: z.string().uuid().nullable(),
-  name: z.string().min(1),
-  aip_uri: z.string(),
-  public_key: z.string(),
-  key_algorithm: z.string(),
-  permissions: z.union([z.array(z.string()), z.record(z.unknown())]),
-  metadata: z.record(z.unknown()),
-  revoked: z.boolean(),
-  revoked_at: flexibleDatetime.nullable(),
-  created_at: flexibleDatetime,
-  updated_at: flexibleDatetime,
-}).transform((data) => ({
-  id: data.id,
-  user_id: data.user_id,
-  tenant_id: data.tenant_id,
-  name: data.name,
-  aid_uri: data.aip_uri, // Map aip_uri to aid_uri
-  public_key: data.public_key,
-  key_algorithm: data.key_algorithm,
-  permissions: data.permissions,
-  metadata: data.metadata,
-  revoked: data.revoked,
-  revoked_at: data.revoked_at,
-  created_at: data.created_at,
-  updated_at: data.updated_at,
-}));
-
-/**
- * Agent Key schema for API responses (uses aid_uri)
- */
-export const AgentKeySchema = z.object({
-  id: z.string().uuid(),
-  user_id: z.string().uuid(),
-  tenant_id: z.string().uuid().nullable(),
-  name: z.string().min(1),
-  aid_uri: z.string(),
-  public_key: z.string(),
-  key_algorithm: z.string(),
-  permissions: z.union([z.array(z.string()), z.record(z.unknown())]),
-  metadata: z.record(z.unknown()),
-  revoked: z.boolean(),
-  revoked_at: flexibleDatetime.nullable(),
-  created_at: flexibleDatetime,
-  updated_at: flexibleDatetime,
-});
+export const AgentKeySchema = z.preprocess(
+  (data: unknown) => {
+    if (typeof data === 'object' && data !== null) {
+      const obj = data as Record<string, unknown>;
+      // If aip_uri exists but aid_uri doesn't, copy it
+      if ('aip_uri' in obj && !('aid_uri' in obj)) {
+        return { ...obj, aid_uri: obj.aip_uri };
+      }
+    }
+    return data;
+  },
+  z.object({
+    id: z.string().uuid(),
+    user_id: z.string().uuid(),
+    tenant_id: z.string().uuid().nullable(),
+    name: z.string().min(1),
+    aid_uri: z.string(),
+    public_key: z.string(),
+    key_algorithm: z.string(),
+    permissions: z.union([z.array(z.string()), z.record(z.unknown())]),
+    metadata: z.record(z.unknown()),
+    revoked: z.boolean(),
+    revoked_at: flexibleDatetime.nullable(),
+    created_at: flexibleDatetime,
+    updated_at: flexibleDatetime,
+  })
+);
 
 export type AgentKey = z.infer<typeof AgentKeySchema>;
-
-/**
- * Schema for parsing agent keys from database
- * Use this when querying agent_keys table
- */
-export const AgentKeyFromDbSchema = AgentKeyDbSchema;
 
 /**
  * Convert database row to Agent Key domain model
