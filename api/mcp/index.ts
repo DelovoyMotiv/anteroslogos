@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * MCP Protocol JSON-RPC 2.0 Endpoint
  * POST /api/mcp

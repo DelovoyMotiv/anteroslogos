@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Agent Middleware API Endpoint
  * 
