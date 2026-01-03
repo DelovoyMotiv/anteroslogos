@@ -20,17 +20,21 @@ const scryptAsync = promisify(scrypt);
 
 /**
  * Create Supabase client inline (self-contained for Vercel)
+ * Uses service role key to bypass RLS for server-side operations
  */
 function getSupabaseClient(): SupabaseClient | null {
   const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
-  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
+  // Use service role key for server-side operations (bypasses RLS)
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
   
-  if (!supabaseUrl || !supabaseAnonKey) {
+  if (!supabaseUrl || !supabaseKey) {
     console.error('[API Keys] Missing Supabase credentials');
     return null;
   }
   
-  return createClient(supabaseUrl, supabaseAnonKey, {
+  console.log('[API Keys] Using key type:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'service_role' : 'anon');
+  
+  return createClient(supabaseUrl, supabaseKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
@@ -211,16 +215,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           console.log('[API Keys] Request body:', req.body);
 
           // Get profile
-          console.log('[API Keys] Fetching profile...');
+          console.log('[API Keys] Fetching profile for user:', user.id);
           const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('current_plan, api_keys_count')
             .eq('id', user.id)
             .single();
 
+          console.log('[API Keys] Profile query result:', { 
+            hasData: !!profile, 
+            error: profileError,
+            errorCode: profileError?.code,
+            errorMessage: profileError?.message,
+            errorDetails: profileError?.details,
+            errorHint: profileError?.hint
+          });
+
           if (profileError || !profile) {
             console.error('[API Keys] Profile fetch error:', profileError);
-            return res.status(404).json({ error: 'Profile not found' });
+            // Try to get more info about the user
+            const { data: allProfiles } = await supabase
+              .from('profiles')
+              .select('id, email')
+              .limit(5);
+            console.log('[API Keys] Sample profiles in DB:', allProfiles);
+            return res.status(404).json({ 
+              error: 'Profile not found',
+              userId: user.id,
+              errorCode: profileError?.code,
+              errorMessage: profileError?.message
+            });
           }
 
           console.log('[API Keys] Profile found:', { plan: profile.current_plan, count: profile.api_keys_count });
