@@ -2,10 +2,10 @@
  * Unified Tools API Endpoint
  * POST /api/tools
  * 
- * Simplified version that works in Vercel serverless environment
+ * Self-contained version with browser support via @sparticuz/chromium
  * 
  * @module api/tools
- * @version 3.0.0
+ * @version 4.1.0
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
@@ -28,12 +28,128 @@ interface ScrapedContent {
   description: string;
   headings: string[];
   textContent: string;
+  usedBrowser?: boolean;
 }
 
 /**
- * Simple fetch-based scraper (no browser, no playwright)
+ * Check if running in Vercel environment
  */
-async function scrapeUrl(url: string): Promise<ScrapedContent> {
+function isVercel(): boolean {
+  return process.env.VERCEL === '1' || process.env.VERCEL === 'true';
+}
+
+/**
+ * Scrape URL using headless browser (Playwright + @sparticuz/chromium)
+ */
+async function scrapeWithBrowser(url: string): Promise<ScrapedContent> {
+  console.log('[scrapeWithBrowser] Starting browser scrape for:', url);
+  
+  // Dynamically import playwright-core and chromium
+  const playwright = await import('playwright-core');
+  
+  let executablePath: string | undefined;
+  
+  if (isVercel()) {
+    // Use @sparticuz/chromium for Vercel
+    const chromium = await import('@sparticuz/chromium');
+    executablePath = await chromium.default.executablePath();
+    console.log('[scrapeWithBrowser] Using Vercel chromium:', executablePath);
+  }
+  
+  // Launch browser with serverless-optimized settings
+  const browser = await playwright.chromium.launch({
+    executablePath,
+    headless: true,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+      '--disable-accelerated-2d-canvas',
+      ...(isVercel() ? ['--single-process', '--no-zygote'] : []),
+    ],
+  });
+
+  try {
+    const context = await browser.newContext({
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      viewport: { width: 1920, height: 1080 },
+    });
+
+    // Mask webdriver detection
+    await context.addInitScript(() => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => false });
+    });
+
+    const page = await context.newPage();
+
+    // Block heavy resources for speed
+    await page.route('**/*', (route) => {
+      const type = route.request().resourceType();
+      if (['image', 'stylesheet', 'font', 'media'].includes(type)) {
+        return route.abort();
+      }
+      return route.continue();
+    });
+
+    // Navigate with networkidle for CSR hydration
+    await page.goto(url, {
+      timeout: 15000,
+      waitUntil: 'networkidle',
+    });
+
+    // Wait extra time for React/Vue hydration
+    await page.waitForTimeout(2000);
+
+    // Extract content
+    const html = await page.content();
+    
+    const cheerio = await import('cheerio');
+    const $ = cheerio.load(html);
+
+    let title = $('title').first().text().trim();
+    if (!title) {
+      title = $('h1').first().text().trim() || 'Untitled';
+    }
+
+    let description = $('meta[name="description"]').attr('content') || '';
+    if (!description) {
+      description = $('p').first().text().trim().slice(0, 200) || '';
+    }
+
+    const headings: string[] = [];
+    $('h1, h2, h3').each((_, elem) => {
+      const text = $(elem).text().trim();
+      if (text && headings.length < 10) {
+        headings.push(text);
+      }
+    });
+
+    const textContent = $('body').text().trim().slice(0, 2000);
+
+    await context.close();
+    
+    console.log('[scrapeWithBrowser] Successfully scraped, title:', title);
+
+    return {
+      url,
+      title,
+      description,
+      headings,
+      textContent,
+      usedBrowser: true,
+    };
+  } finally {
+    await browser.close();
+  }
+}
+
+/**
+ * Simple fetch-based scraper (fallback when browser unavailable)
+ */
+async function scrapeUrlSimple(url: string): Promise<ScrapedContent> {
+  console.log('[scrapeUrlSimple] Using simple fetch for:', url);
+  
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
 
@@ -55,23 +171,19 @@ async function scrapeUrl(url: string): Promise<ScrapedContent> {
 
     const html = await response.text();
     
-    // Use cheerio for parsing (it's a dependency)
     const cheerio = await import('cheerio');
     const $ = cheerio.load(html);
 
-    // Extract title
     let title = $('title').first().text().trim();
     if (!title) {
       title = $('h1').first().text().trim() || 'Untitled';
     }
 
-    // Extract description
     let description = $('meta[name="description"]').attr('content') || '';
     if (!description) {
       description = $('p').first().text().trim().slice(0, 200) || '';
     }
 
-    // Extract headings
     const headings: string[] = [];
     $('h1, h2, h3').each((_, elem) => {
       const text = $(elem).text().trim();
@@ -80,7 +192,6 @@ async function scrapeUrl(url: string): Promise<ScrapedContent> {
       }
     });
 
-    // Extract text content
     const textContent = $('body').text().trim().slice(0, 2000);
 
     return {
@@ -89,10 +200,27 @@ async function scrapeUrl(url: string): Promise<ScrapedContent> {
       description,
       headings,
       textContent,
+      usedBrowser: false,
     };
   } catch (error) {
     clearTimeout(timeoutId);
     throw error;
+  }
+}
+
+/**
+ * Main scrape function - tries browser first, falls back to simple fetch
+ */
+async function scrapeUrl(url: string): Promise<ScrapedContent> {
+  try {
+    // Try browser-based scraping first
+    return await scrapeWithBrowser(url);
+  } catch (error) {
+    console.error('[scrapeUrl] Browser scraping failed:', error);
+    console.log('[scrapeUrl] Falling back to simple fetch...');
+    
+    // Fallback to simple fetch
+    return await scrapeUrlSimple(url);
   }
 }
 
