@@ -66,10 +66,10 @@ export function apiKeyFromDb(row: Record<string, unknown>): APIKey {
 // =====================================================
 
 /**
- * Agent Key schema matching the agent_keys table structure
- * Note: Database column is 'aip_uri' but we expose it as 'aid_uri' for API consistency
+ * Agent Key schema for database rows (accepts aip_uri from DB)
+ * Transforms aip_uri to aid_uri for API consistency
  */
-export const AgentKeySchema = z.object({
+const AgentKeyDbSchema = z.object({
   id: z.string().uuid(),
   user_id: z.string().uuid(),
   tenant_id: z.string().uuid().nullable(),
@@ -84,19 +84,57 @@ export const AgentKeySchema = z.object({
   created_at: flexibleDatetime,
   updated_at: flexibleDatetime,
 }).transform((data) => ({
-  ...data,
-  // Map aip_uri to aid_uri for API consistency
-  aid_uri: data.aip_uri,
+  id: data.id,
+  user_id: data.user_id,
+  tenant_id: data.tenant_id,
+  name: data.name,
+  aid_uri: data.aip_uri, // Map aip_uri to aid_uri
+  public_key: data.public_key,
+  key_algorithm: data.key_algorithm,
+  permissions: data.permissions,
+  metadata: data.metadata,
+  revoked: data.revoked,
+  revoked_at: data.revoked_at,
+  created_at: data.created_at,
+  updated_at: data.updated_at,
 }));
+
+/**
+ * Agent Key schema for API responses (uses aid_uri)
+ */
+export const AgentKeySchema = z.object({
+  id: z.string().uuid(),
+  user_id: z.string().uuid(),
+  tenant_id: z.string().uuid().nullable(),
+  name: z.string().min(1),
+  aid_uri: z.string(),
+  public_key: z.string(),
+  key_algorithm: z.string(),
+  permissions: z.union([z.array(z.string()), z.record(z.unknown())]),
+  metadata: z.record(z.unknown()),
+  revoked: z.boolean(),
+  revoked_at: flexibleDatetime.nullable(),
+  created_at: flexibleDatetime,
+  updated_at: flexibleDatetime,
+});
 
 export type AgentKey = z.infer<typeof AgentKeySchema>;
 
 /**
+ * Schema for parsing agent keys from database
+ * Use this when querying agent_keys table
+ */
+export const AgentKeyFromDbSchema = AgentKeyDbSchema;
+
+/**
  * Convert database row to Agent Key domain model
+ * Maps database column 'aip_uri' to 'aid_uri' for API consistency
  */
 export function agentKeyFromDb(row: Record<string, unknown>): AgentKey {
   return AgentKeySchema.parse({
     ...row,
+    // Map database column aip_uri to aid_uri
+    aid_uri: row.aip_uri || row.aid_uri,
     created_at: typeof row.created_at === 'string' ? row.created_at : new Date(row.created_at as Date).toISOString(),
     updated_at: typeof row.updated_at === 'string' ? row.updated_at : new Date(row.updated_at as Date).toISOString(),
     revoked_at: row.revoked_at ? (typeof row.revoked_at === 'string' ? row.revoked_at : new Date(row.revoked_at as Date).toISOString()) : null,

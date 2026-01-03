@@ -4,7 +4,7 @@
  */
 
 import { supabase } from '../supabase';
-import { AgentKeySchema, type AgentKey } from './schemas';
+import { AgentKeyFromDbSchema, type AgentKey } from './schemas';
 import { selectQuery, updateQuery } from '../database/queryHelpers';
 
 // Re-export AgentKey type for external use
@@ -23,7 +23,7 @@ export async function listAgentKeys(): Promise<AgentKey[] | { error: string }> {
     const { data: keys, error } = await selectQuery(
       supabase,
       'agent_keys',
-      AgentKeySchema,
+      AgentKeyFromDbSchema,
       {
         user_id: user.id,
         revoked: false,
@@ -66,7 +66,7 @@ export async function revokeAgentKey(
         id: keyId,
         user_id: user.id,
       },
-      AgentKeySchema
+      AgentKeyFromDbSchema
     );
 
     if (error || !data || data.length === 0) {

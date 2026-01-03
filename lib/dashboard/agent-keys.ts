@@ -7,7 +7,7 @@ import { supabase } from '../supabase';
 import { ed25519 } from '@noble/curves/ed25519.js';
 import { registerAgent } from '../tenancy/aidRegistry';
 import { getCurrentTenantIdOrNull } from '../tenancy/context';
-import { AgentKeySchema, type AgentKey } from './schemas';
+import { AgentKeyFromDbSchema, AgentKeySchema, type AgentKey } from './schemas';
 import { selectQuery, selectSingle, insertSingle, insertQuery, updateQuery, deleteQuery } from '../database/queryHelpers';
 
 export interface GenerateAgentKeyParams {
@@ -210,9 +210,8 @@ export async function generateAgentKey(
       {
         user_id: user.id,
         tenant_id: tenantId,
-        aid_registry_id: registryResult.id,
         name: params.name,
-        aid_uri: aidUri,
+        aip_uri: aidUri, // Database column is aip_uri
         public_key: publicKeyBase64,
         key_algorithm: 'Ed25519',
         permissions,
@@ -225,7 +224,7 @@ export async function generateAgentKey(
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       },
-      AgentKeySchema
+      AgentKeyFromDbSchema
     );
 
     if (insertError || !agentKey) {
@@ -273,7 +272,7 @@ export async function listAgentKeys(): Promise<AgentKey[] | { error: string }> {
     const { data: keys, error } = await selectQuery(
       supabase,
       'agent_keys',
-      AgentKeySchema,
+      AgentKeyFromDbSchema,
       {
         user_id: user.id,
         tenant_id: tenantId,
@@ -317,7 +316,7 @@ export async function revokeAgentKey(
         id: keyId,
         user_id: user.id,
       },
-      AgentKeySchema
+      AgentKeyFromDbSchema
     );
 
     if (error || !data || data.length === 0) {
@@ -414,12 +413,13 @@ export async function getAgentKeyByAID(
     }
 
     // Query with RLS - will respect tenant isolation
+    // Note: database column is aip_uri, not aid_uri
     const { data: keys, error } = await selectQuery(
       supabase,
       'agent_keys',
-      AgentKeySchema,
+      AgentKeyFromDbSchema,
       {
-        aid_uri: aidUri,
+        aip_uri: aidUri, // Database column name
         revoked: false,
       }
     );
