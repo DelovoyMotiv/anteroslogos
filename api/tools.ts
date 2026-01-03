@@ -107,16 +107,30 @@ async function generateManifestWithLLM(content: ScrapedContent): Promise<object>
 
   const systemPrompt = `You are an expert at creating agents.json manifest files for websites.
 Generate a valid agents.json manifest based on the provided website content.
-The manifest should follow this structure:
+The manifest MUST follow this EXACT structure:
 {
-  "v": "1.0",
-  "url": "website url",
-  "name": "website name",
-  "description": "brief description",
-  "capabilities": ["list", "of", "capabilities"],
-  "knowledge": [{"topic": "topic name", "description": "topic description"}]
+  "$schema": "https://anoteroslogos.com/schemas/agents.json",
+  "version": "1.0",
+  "identity": {
+    "name": "Brand or website name",
+    "description": "High-entropy description of core value proposition",
+    "tags": ["tag1", "tag2", "tag3"]
+  },
+  "knowledge": [
+    {
+      "role": "documentation",
+      "url": "/docs",
+      "description": "Description of what this page contains"
+    }
+  ],
+  "actions": []
 }
-Return ONLY valid JSON, no markdown or explanations.`;
+
+IMPORTANT RULES:
+- "identity" object is REQUIRED with "name", "description", and "tags" array
+- "knowledge" array entries MUST have "role" (one of: documentation, pricing, about, product, contact, support), "url", and "description"
+- "actions" can be empty array if no API endpoints detected
+- Return ONLY valid JSON, no markdown or explanations`;
 
   const userPrompt = `Generate an agents.json manifest for this website:
 URL: ${content.url}
