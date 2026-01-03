@@ -14,6 +14,16 @@ import { z } from 'zod';
 // =====================================================
 
 /**
+ * Flexible datetime schema that accepts both ISO 8601 and Postgres timestamp formats
+ * Postgres returns: "2026-01-03 17:44:38.401264+00"
+ * ISO 8601 expects: "2026-01-03T17:44:38.401264Z"
+ */
+const flexibleDatetime = z.string().refine(
+  (val) => !isNaN(Date.parse(val)),
+  { message: 'Invalid datetime format' }
+);
+
+/**
  * API Key schema matching the api_keys table structure
  */
 export const APIKeySchema = z.object({
@@ -25,14 +35,14 @@ export const APIKeySchema = z.object({
   scoped_tools: z.array(z.string()).nullable(),
   rate_limit_per_minute: z.number().int().positive(),
   rate_limit_per_hour: z.number().int().positive(),
-  expires_at: z.string().datetime().nullable(),
-  last_used_at: z.string().datetime().nullable(),
+  expires_at: flexibleDatetime.nullable(),
+  last_used_at: flexibleDatetime.nullable(),
   usage_count: z.number().int().nonnegative(),
   revoked: z.boolean(),
-  revoked_at: z.string().datetime().nullable(),
+  revoked_at: flexibleDatetime.nullable(),
   revoked_reason: z.string().nullable(),
-  created_at: z.string().datetime(),
-  updated_at: z.string().datetime(),
+  created_at: flexibleDatetime,
+  updated_at: flexibleDatetime,
   tenant_id: z.string().uuid().nullable(),
 });
 
@@ -70,9 +80,9 @@ export const AgentKeySchema = z.object({
   permissions: z.array(z.string()),
   metadata: z.record(z.unknown()),
   revoked: z.boolean(),
-  revoked_at: z.string().datetime().nullable(),
-  created_at: z.string().datetime(),
-  updated_at: z.string().datetime(),
+  revoked_at: flexibleDatetime.nullable(),
+  created_at: flexibleDatetime,
+  updated_at: flexibleDatetime,
 });
 
 export type AgentKey = z.infer<typeof AgentKeySchema>;
@@ -104,8 +114,8 @@ export const CreditPackageSchema = z.object({
   bonus_percentage: z.number().min(0).max(100),
   is_active: z.boolean(),
   display_order: z.number().int(),
-  created_at: z.string().datetime(),
-  updated_at: z.string().datetime(),
+  created_at: flexibleDatetime,
+  updated_at: flexibleDatetime,
   description: z.string().nullable(),
   stripe_price_id: z.string().nullable().optional(),
   cost_per_credit: z.number().positive().optional(),
@@ -142,13 +152,13 @@ export const UsageEventSchema = z.object({
   tokens_used: z.number().int().nonnegative().nullable(),
   cost_ccc: z.number().nonnegative(),
   metadata: z.record(z.unknown()).nullable(),
-  created_at: z.string().datetime(),
+  created_at: flexibleDatetime,
   tenant_id: z.string().uuid().nullable(),
   ucpt_hash: z.string().nullable(),
   // Additional fields from usage-analytics.ts
   duration_ms: z.number().int().nonnegative().optional(),
   cost_usd: z.number().nonnegative().optional(),
-  timestamp: z.string().datetime().optional(),
+  timestamp: flexibleDatetime.optional(),
 });
 
 export type UsageEvent = z.infer<typeof UsageEventSchema>;
