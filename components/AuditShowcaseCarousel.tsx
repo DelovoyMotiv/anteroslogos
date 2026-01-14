@@ -286,31 +286,31 @@ const AuditShowcaseCarousel: React.FC = () => {
             {[...Array(5)].map((_, index) => (
               <div
                 key={index}
-                className="flex-shrink-0 w-[240px] sm:w-[260px] lg:w-[280px] bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-xl p-5 relative overflow-hidden"
+                className="flex-shrink-0 w-[180px] sm:w-[200px] lg:w-[220px] bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-lg p-3 relative overflow-hidden"
               >
                 {/* Shimmer effect overlay */}
                 <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
                 
                 {/* Skeleton content */}
                 {/* Header: Domain */}
-                <div className="mb-4">
-                  <div className="h-5 bg-white/10 rounded mb-2 w-3/4"></div>
-                  <div className="h-3 bg-white/10 rounded w-1/3"></div>
+                <div className="mb-2">
+                  <div className="h-4 bg-white/10 rounded mb-1 w-3/4"></div>
+                  <div className="h-2.5 bg-white/10 rounded w-1/3"></div>
                 </div>
                 
                 {/* Score section */}
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-2">
                   <div>
-                    <div className="h-3 bg-white/10 rounded mb-2 w-16"></div>
-                    <div className="h-8 bg-white/10 rounded w-12"></div>
+                    <div className="h-2 bg-white/10 rounded mb-1 w-14"></div>
+                    <div className="h-6 bg-white/10 rounded w-10"></div>
                   </div>
-                  <div className="h-8 bg-white/10 rounded w-12"></div>
+                  <div className="h-6 bg-white/10 rounded w-8"></div>
                 </div>
                 
                 {/* Mini metrics grid */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2">
                   {[...Array(4)].map((_, i) => (
-                    <div key={i} className="bg-white/5 rounded-lg p-2 h-12"></div>
+                    <div key={i} className="bg-white/5 rounded-md p-1.5 h-10"></div>
                   ))}
                 </div>
               </div>

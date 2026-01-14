@@ -67,16 +67,16 @@ const AuditCard: React.FC<AuditCardProps> = React.memo(({
   
   return (
     <article
-      className="flex-shrink-0 w-[240px] sm:w-[260px] lg:w-[280px] bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-xl p-5 hover:from-white/15 hover:to-white/10 hover:border-brand-accent/50 hover:shadow-lg hover:shadow-brand-accent/10 transition-all duration-300 group focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 backdrop-blur-sm"
+      className="flex-shrink-0 w-[180px] sm:w-[200px] lg:w-[220px] bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-lg p-3 hover:from-white/15 hover:to-white/10 hover:border-brand-accent/50 hover:shadow-lg hover:shadow-brand-accent/10 transition-all duration-300 group focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 backdrop-blur-sm"
       aria-label={`Audit result for ${domain}`}
       role="listitem"
       tabIndex={0}
     >
       {/* Header: Domain + Timestamp */}
-      <div className="mb-4">
+      <div className="mb-2">
         {/* Domain name with truncation */}
         <h3 
-          className="text-white font-semibold text-base mb-1 truncate group-hover:text-brand-accent transition-colors"
+          className="text-white font-semibold text-sm mb-0.5 truncate group-hover:text-brand-accent transition-colors"
           title={domain}
         >
           {domain}
@@ -84,18 +84,18 @@ const AuditCard: React.FC<AuditCardProps> = React.memo(({
         
         {/* Timestamp */}
         {relativeTime && (
-          <p className="text-white/40 text-xs">
+          <p className="text-white/40 text-[10px]">
             {relativeTime}
           </p>
         )}
       </div>
       
       {/* Main Score Section */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-2">
         <div>
-          <p className="text-white/50 text-xs mb-1 uppercase tracking-wider">GEO Score</p>
+          <p className="text-white/50 text-[9px] mb-0.5 uppercase tracking-wider">GEO Score</p>
           <p 
-            className="text-brand-accent text-3xl font-bold leading-none group-hover:scale-105 transition-transform"
+            className="text-brand-accent text-2xl font-bold leading-none group-hover:scale-105 transition-transform"
             aria-label={`Score: ${displayScore} out of 100`}
           >
             {displayScore}
@@ -104,7 +104,7 @@ const AuditCard: React.FC<AuditCardProps> = React.memo(({
         
         {/* Grade badge with enhanced styling */}
         <div
-          className={`px-4 py-2 rounded-lg text-base font-bold ${gradeColorClass} transition-all duration-300 group-hover:scale-105 shadow-lg`}
+          className={`px-2.5 py-1 rounded-md text-sm font-bold ${gradeColorClass} transition-all duration-300 group-hover:scale-105`}
           aria-label={`Grade: ${grade}`}
           role="status"
         >
@@ -113,14 +113,14 @@ const AuditCard: React.FC<AuditCardProps> = React.memo(({
       </div>
       
       {/* Mini Metrics Grid */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2">
         {/* Schema Markup */}
         {scoreSchemaMarkup !== undefined && (
-          <div className="flex items-center gap-2 bg-white/5 rounded-lg p-2 group-hover:bg-white/10 transition-colors">
-            <Shield className="w-4 h-4 text-white/50 flex-shrink-0" />
+          <div className="flex items-center gap-1.5 bg-white/5 rounded-md p-1.5 group-hover:bg-white/10 transition-colors">
+            <Shield className="w-3 h-3 text-white/50 flex-shrink-0" />
             <div className="min-w-0">
-              <p className="text-white/40 text-[10px] uppercase tracking-wide truncate">Schema</p>
-              <p className={`text-sm font-bold ${getScoreColor(scoreSchemaMarkup)}`}>
+              <p className="text-white/40 text-[8px] uppercase tracking-wide truncate">Schema</p>
+              <p className={`text-xs font-bold ${getScoreColor(scoreSchemaMarkup)}`}>
                 {Math.round(scoreSchemaMarkup)}
               </p>
             </div>
@@ -129,11 +129,11 @@ const AuditCard: React.FC<AuditCardProps> = React.memo(({
         
         {/* E-E-A-T */}
         {scoreEeat !== undefined && (
-          <div className="flex items-center gap-2 bg-white/5 rounded-lg p-2 group-hover:bg-white/10 transition-colors">
-            <Brain className="w-4 h-4 text-white/50 flex-shrink-0" />
+          <div className="flex items-center gap-1.5 bg-white/5 rounded-md p-1.5 group-hover:bg-white/10 transition-colors">
+            <Brain className="w-3 h-3 text-white/50 flex-shrink-0" />
             <div className="min-w-0">
-              <p className="text-white/40 text-[10px] uppercase tracking-wide truncate">E-E-A-T</p>
-              <p className={`text-sm font-bold ${getScoreColor(scoreEeat)}`}>
+              <p className="text-white/40 text-[8px] uppercase tracking-wide truncate">E-E-A-T</p>
+              <p className={`text-xs font-bold ${getScoreColor(scoreEeat)}`}>
                 {Math.round(scoreEeat)}
               </p>
             </div>
@@ -142,11 +142,11 @@ const AuditCard: React.FC<AuditCardProps> = React.memo(({
         
         {/* Performance */}
         {scorePerformance !== undefined && (
-          <div className="flex items-center gap-2 bg-white/5 rounded-lg p-2 group-hover:bg-white/10 transition-colors">
-            <Zap className="w-4 h-4 text-white/50 flex-shrink-0" />
+          <div className="flex items-center gap-1.5 bg-white/5 rounded-md p-1.5 group-hover:bg-white/10 transition-colors">
+            <Zap className="w-3 h-3 text-white/50 flex-shrink-0" />
             <div className="min-w-0">
-              <p className="text-white/40 text-[10px] uppercase tracking-wide truncate">Speed</p>
-              <p className={`text-sm font-bold ${getScoreColor(scorePerformance)}`}>
+              <p className="text-white/40 text-[8px] uppercase tracking-wide truncate">Speed</p>
+              <p className={`text-xs font-bold ${getScoreColor(scorePerformance)}`}>
                 {Math.round(scorePerformance)}
               </p>
             </div>
@@ -155,11 +155,11 @@ const AuditCard: React.FC<AuditCardProps> = React.memo(({
         
         {/* AI Crawlers */}
         {scoreAiCrawlers !== undefined && (
-          <div className="flex items-center gap-2 bg-white/5 rounded-lg p-2 group-hover:bg-white/10 transition-colors">
-            <Search className="w-4 h-4 text-white/50 flex-shrink-0" />
+          <div className="flex items-center gap-1.5 bg-white/5 rounded-md p-1.5 group-hover:bg-white/10 transition-colors">
+            <Search className="w-3 h-3 text-white/50 flex-shrink-0" />
             <div className="min-w-0">
-              <p className="text-white/40 text-[10px] uppercase tracking-wide truncate">AI Ready</p>
-              <p className={`text-sm font-bold ${getScoreColor(scoreAiCrawlers)}`}>
+              <p className="text-white/40 text-[8px] uppercase tracking-wide truncate">AI Ready</p>
+              <p className={`text-xs font-bold ${getScoreColor(scoreAiCrawlers)}`}>
                 {Math.round(scoreAiCrawlers)}
               </p>
             </div>
