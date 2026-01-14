@@ -72,35 +72,26 @@ const AuditCard: React.FC<AuditCardProps> = React.memo(({
       role="listitem"
       tabIndex={0}
     >
-      {/* Header: Favicon + Domain + Timestamp */}
-      <div className="flex items-start gap-3 mb-4">
-        {/* Favicon placeholder with gradient */}
-        <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-brand-accent/20 to-blue-500/20 border border-brand-accent/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-          <span className="text-brand-accent text-lg font-bold">
-            {domain.charAt(0).toUpperCase()}
-          </span>
-        </div>
+      {/* Header: Domain + Timestamp */}
+      <div className="mb-4">
+        {/* Domain name with truncation */}
+        <h3 
+          className="text-white font-semibold text-base mb-1 truncate group-hover:text-brand-accent transition-colors"
+          title={domain}
+        >
+          {domain}
+        </h3>
         
-        <div className="flex-1 min-w-0">
-          {/* Domain name with truncation */}
-          <h3 
-            className="text-white font-semibold text-base mb-1 truncate group-hover:text-brand-accent transition-colors"
-            title={domain}
-          >
-            {domain}
-          </h3>
-          
-          {/* Timestamp */}
-          {relativeTime && (
-            <p className="text-white/40 text-xs">
-              {relativeTime}
-            </p>
-          )}
-        </div>
+        {/* Timestamp */}
+        {relativeTime && (
+          <p className="text-white/40 text-xs">
+            {relativeTime}
+          </p>
+        )}
       </div>
       
       {/* Main Score Section */}
-      <div className="flex items-center justify-between mb-4 pb-4 border-b border-white/10">
+      <div className="flex items-center justify-between mb-4">
         <div>
           <p className="text-white/50 text-xs mb-1 uppercase tracking-wider">GEO Score</p>
           <p 
@@ -122,7 +113,7 @@ const AuditCard: React.FC<AuditCardProps> = React.memo(({
       </div>
       
       {/* Mini Metrics Grid */}
-      <div className="grid grid-cols-2 gap-3 mb-3">
+      <div className="grid grid-cols-2 gap-3">
         {/* Schema Markup */}
         {scoreSchemaMarkup !== undefined && (
           <div className="flex items-center gap-2 bg-white/5 rounded-lg p-2 group-hover:bg-white/10 transition-colors">
@@ -174,19 +165,6 @@ const AuditCard: React.FC<AuditCardProps> = React.memo(({
             </div>
           </div>
         )}
-      </div>
-      
-      {/* Progress bar */}
-      <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-        <div
-          className="h-full bg-gradient-to-r from-brand-accent to-blue-400 rounded-full transition-all duration-500 group-hover:from-blue-400 group-hover:to-brand-accent"
-          style={{ width: `${displayScore}%` }}
-          role="progressbar"
-          aria-valuenow={displayScore}
-          aria-valuemin={0}
-          aria-valuemax={100}
-          aria-label={`Score progress: ${displayScore} percent`}
-        />
       </div>
     </article>
   );

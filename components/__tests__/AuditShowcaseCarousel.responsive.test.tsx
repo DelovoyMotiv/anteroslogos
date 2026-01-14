@@ -162,19 +162,6 @@ describe('Responsive Design Implementation - AuditCard', () => {
       expect(auditCardSource).toContain('text-red-400');
     });
   });
-
-  describe('Progress Bar', () => {
-    it('should have progress bar with dynamic width', () => {
-      expect(auditCardSource).toContain('style={{ width:');
-    });
-
-    it('should have proper ARIA attributes for progress bar', () => {
-      expect(auditCardSource).toContain('role="progressbar"');
-      expect(auditCardSource).toContain('aria-valuenow');
-      expect(auditCardSource).toContain('aria-valuemin');
-      expect(auditCardSource).toContain('aria-valuemax');
-    });
-  });
 });
 
 describe('Responsive Design Implementation - AuditShowcaseCarousel', () => {

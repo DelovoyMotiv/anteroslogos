@@ -292,17 +292,14 @@ const AuditShowcaseCarousel: React.FC = () => {
                 <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
                 
                 {/* Skeleton content */}
-                {/* Header: Favicon + Domain */}
-                <div className="flex items-start gap-3 mb-4">
-                  <div className="w-10 h-10 bg-white/10 rounded-lg"></div>
-                  <div className="flex-1">
-                    <div className="h-5 bg-white/10 rounded mb-2 w-3/4"></div>
-                    <div className="h-3 bg-white/10 rounded w-1/3"></div>
-                  </div>
+                {/* Header: Domain */}
+                <div className="mb-4">
+                  <div className="h-5 bg-white/10 rounded mb-2 w-3/4"></div>
+                  <div className="h-3 bg-white/10 rounded w-1/3"></div>
                 </div>
                 
                 {/* Score section */}
-                <div className="flex items-center justify-between mb-4 pb-4 border-b border-white/10">
+                <div className="flex items-center justify-between mb-4">
                   <div>
                     <div className="h-3 bg-white/10 rounded mb-2 w-16"></div>
                     <div className="h-8 bg-white/10 rounded w-12"></div>
@@ -311,14 +308,11 @@ const AuditShowcaseCarousel: React.FC = () => {
                 </div>
                 
                 {/* Mini metrics grid */}
-                <div className="grid grid-cols-2 gap-3 mb-3">
+                <div className="grid grid-cols-2 gap-3">
                   {[...Array(4)].map((_, i) => (
                     <div key={i} className="bg-white/5 rounded-lg p-2 h-12"></div>
                   ))}
                 </div>
-                
-                {/* Progress bar */}
-                <div className="w-full h-2 bg-white/10 rounded-full"></div>
               </div>
             ))}
           </div>
