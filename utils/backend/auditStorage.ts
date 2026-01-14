@@ -184,7 +184,7 @@ function convertToDbFormat(result: AuditResult, userId: string | null): AuditIns
     robots_txt_allows_ai: checkAICrawlerSupport(result),
     
     // Anonymization (opt-in by user later)
-    is_public: false,
+    is_public: true,
     anonymized_domain: anonymizeDomain(domain),
     
     // Metadata
