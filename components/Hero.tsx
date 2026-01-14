@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AnimatedSection from './AnimatedSection';
 import GeoAnalysisForm from './GeoAnalysisForm';
 import PulseLine from './PulseLine';
+import AuditShowcaseCarousel from './AuditShowcaseCarousel';
 
 interface HeroProps {
     onScrollClick: () => void;
@@ -76,8 +77,15 @@ const Hero: React.FC<HeroProps> = ({ onScrollClick }) => {
                 </div>
             </AnimatedSection>
             
-            {/* Trust Bar */}
+            {/* Audit Showcase Carousel */}
             <AnimatedSection delay={600}>
+                <div className="mt-12 sm:mt-14 md:mt-16">
+                    <AuditShowcaseCarousel />
+                </div>
+            </AnimatedSection>
+            
+            {/* Trust Bar */}
+            <AnimatedSection delay={800}>
                 <aside className="mt-16 sm:mt-20 md:mt-24 pt-12 sm:pt-14 md:pt-16 border-t border-white/10" aria-label="Client trust indicators">
                     <h2 className="text-xs sm:text-sm text-white/40 uppercase tracking-[0.2em] mb-8 sm:mb-10 font-mono text-center">Trusted by Visionaries</h2>
                     <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 md:gap-8 lg:gap-12 xl:gap-16" role="list" aria-label="Client categories">
