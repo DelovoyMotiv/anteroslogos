@@ -10,6 +10,10 @@ export interface AuditData {
   grade: string;
   timestamp: string;
   url: string;
+  score_schema_markup?: number;
+  score_eeat?: number;
+  score_performance?: number;
+  score_ai_crawlers?: number;
 }
 
 // Component state interface
@@ -90,7 +94,7 @@ const AuditShowcaseCarousel: React.FC = () => {
         // Fetch 20 most recent PUBLIC audits with filters
         const { data, error } = await supabase
           .from('audits')
-          .select('id, domain, overall_score, grade, timestamp, url')
+          .select('id, domain, overall_score, grade, timestamp, url, score_schema_markup, score_eeat, score_performance, score_ai_crawlers')
           .is('deleted_at', null)
           .not('overall_score', 'is', null)
           .eq('is_public', true)
@@ -168,6 +172,31 @@ const AuditShowcaseCarousel: React.FC = () => {
               continue;
             }
 
+            // Convert mini metric scores to numbers if they're strings
+            const scoreSchemaMarkup = audit.score_schema_markup !== undefined
+              ? (typeof audit.score_schema_markup === 'string' 
+                  ? parseFloat(audit.score_schema_markup) 
+                  : audit.score_schema_markup)
+              : undefined;
+
+            const scoreEeat = audit.score_eeat !== undefined
+              ? (typeof audit.score_eeat === 'string' 
+                  ? parseFloat(audit.score_eeat) 
+                  : audit.score_eeat)
+              : undefined;
+
+            const scorePerformance = audit.score_performance !== undefined
+              ? (typeof audit.score_performance === 'string' 
+                  ? parseFloat(audit.score_performance) 
+                  : audit.score_performance)
+              : undefined;
+
+            const scoreAiCrawlers = audit.score_ai_crawlers !== undefined
+              ? (typeof audit.score_ai_crawlers === 'string' 
+                  ? parseFloat(audit.score_ai_crawlers) 
+                  : audit.score_ai_crawlers)
+              : undefined;
+
             if (!audit.grade || typeof audit.grade !== 'string') {
               if (import.meta.env.DEV) {
                 console.warn('[AuditShowcaseCarousel] Skipping audit with invalid grade:', audit);
@@ -192,7 +221,11 @@ const AuditShowcaseCarousel: React.FC = () => {
             // Add valid audit to the list
             validAudits.push({
               ...audit,
-              overall_score: scoreValue
+              overall_score: scoreValue,
+              score_schema_markup: scoreSchemaMarkup,
+              score_eeat: scoreEeat,
+              score_performance: scorePerformance,
+              score_ai_crawlers: scoreAiCrawlers,
             } as AuditData);
           } catch (validationError) {
             // Skip individual malformed records without crashing
@@ -249,24 +282,42 @@ const AuditShowcaseCarousel: React.FC = () => {
         aria-busy="true"
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
+          <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-4">
             {[...Array(5)].map((_, index) => (
               <div
                 key={index}
-                className="flex-shrink-0 w-[280px] sm:w-[320px] lg:w-[360px] bg-white/5 border border-white/10 rounded-xl p-6 relative overflow-hidden"
+                className="flex-shrink-0 w-[240px] sm:w-[260px] lg:w-[280px] bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-xl p-5 relative overflow-hidden"
               >
                 {/* Shimmer effect overlay */}
                 <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
                 
                 {/* Skeleton content */}
-                <div className="h-6 bg-white/10 rounded mb-4 w-3/4"></div>
-                <div className="flex items-end justify-between mb-3">
-                  <div>
-                    <div className="h-4 bg-white/10 rounded mb-2 w-16"></div>
-                    <div className="h-10 bg-white/10 rounded w-20"></div>
+                {/* Header: Favicon + Domain */}
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="w-10 h-10 bg-white/10 rounded-lg"></div>
+                  <div className="flex-1">
+                    <div className="h-5 bg-white/10 rounded mb-2 w-3/4"></div>
+                    <div className="h-3 bg-white/10 rounded w-1/3"></div>
                   </div>
-                  <div className="h-10 bg-white/10 rounded w-16"></div>
                 </div>
+                
+                {/* Score section */}
+                <div className="flex items-center justify-between mb-4 pb-4 border-b border-white/10">
+                  <div>
+                    <div className="h-3 bg-white/10 rounded mb-2 w-16"></div>
+                    <div className="h-8 bg-white/10 rounded w-12"></div>
+                  </div>
+                  <div className="h-8 bg-white/10 rounded w-12"></div>
+                </div>
+                
+                {/* Mini metrics grid */}
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="bg-white/5 rounded-lg p-2 h-12"></div>
+                  ))}
+                </div>
+                
+                {/* Progress bar */}
                 <div className="w-full h-2 bg-white/10 rounded-full"></div>
               </div>
             ))}
@@ -336,6 +387,11 @@ const AuditShowcaseCarousel: React.FC = () => {
               domain={audit.domain}
               score={audit.overall_score}
               grade={audit.grade}
+              timestamp={audit.timestamp}
+              scoreSchemaMarkup={audit.score_schema_markup}
+              scoreEeat={audit.score_eeat}
+              scorePerformance={audit.score_performance}
+              scoreAiCrawlers={audit.score_ai_crawlers}
             />
           ))}
         </div>
