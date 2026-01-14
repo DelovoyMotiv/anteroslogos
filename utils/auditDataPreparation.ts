@@ -54,6 +54,9 @@ export interface PreparedAuditData {
   has_author_markup: boolean;
   has_eeat_signals: boolean;
   robots_txt_allows_ai: boolean;
+  
+  // Public visibility flag
+  is_public: boolean;
 }
 
 /**
@@ -210,6 +213,9 @@ export function prepareAuditData(
     has_author_markup: auditResult.details?.eeat?.hasAuthorInfo || false,
     has_eeat_signals: (auditResult.details?.eeat?.authorityScore || 0) > 50,
     robots_txt_allows_ai: auditResult.details?.aiCrawlers?.allowsGPTBot || false,
+    
+    // Public visibility - all new audits are public by default for carousel
+    is_public: true,
   };
   
   return preparedData;
