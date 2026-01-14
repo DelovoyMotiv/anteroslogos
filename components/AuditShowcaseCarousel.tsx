@@ -33,6 +33,20 @@ const AuditShowcaseCarousel: React.FC = () => {
   // Ref for the scrollable container
   const carouselRef = useRef<HTMLDivElement>(null);
 
+  // Mouse wheel horizontal scroll handler
+  const handleWheel = useCallback((event: React.WheelEvent<HTMLDivElement>) => {
+    if (!carouselRef.current) return;
+    
+    // Prevent default vertical scroll
+    event.preventDefault();
+    
+    // Scroll horizontally based on wheel delta
+    carouselRef.current.scrollBy({
+      left: event.deltaY,
+      behavior: 'auto', // Use 'auto' for immediate response to wheel
+    });
+  }, []);
+
   // Keyboard navigation handler
   const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
     if (!carouselRef.current) return;
@@ -373,6 +387,7 @@ const AuditShowcaseCarousel: React.FC = () => {
           role="list"
           tabIndex={0}
           onKeyDown={handleKeyDown}
+          onWheel={handleWheel}
           aria-label="Scrollable carousel of recent audit results. Use arrow keys to navigate, Home to go to start, End to go to end."
         >
           {state.audits.map((audit) => (
