@@ -3,7 +3,6 @@ import Header from '../components/Header';
 import Hero from '../components/Hero';
 import TheShift from '../components/TheShift';
 import Process from '../components/Process';
-import Stats from '../components/Stats';
 import Method from '../components/Method';
 import ClientProfile from '../components/ClientProfile';
 import FAQ from '../components/FAQ';
@@ -52,7 +51,6 @@ const HomePage: React.FC = () => {
                 <Hero onScrollClick={() => handleScrollTo(methodRef)} />
                 <TheShift />
                 <Process ref={processRef} />
-                <Stats />
                 <Method ref={methodRef} />
                 <ClientProfile ref={clientProfileRef} />
                 <Team />
