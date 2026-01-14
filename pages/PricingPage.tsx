@@ -23,58 +23,67 @@ const PricingPage: React.FC = () => {
 
   const tiers: PricingTier[] = [
     {
-      name: 'Starter',
-      price: '$49',
+      name: 'Free',
+      price: '$0',
       period: '/month',
-      description: 'Perfect for individual professionals and small teams getting started with GEO.',
+      description: 'Perfect for trying out GEO and understanding AI optimization.',
       features: [
-        '100 audits per month',
-        'Basic knowledge graph analysis',
-        'ChatGPT & Claude integration',
-        'Email support (48h response)',
-        'Core GEO metrics',
-        '1 user seat',
+        '1 GEO audit/month',
+        'Basic verification',
+        'Community support',
+        'Public dashboard',
       ],
-      cta: 'Start Free Trial',
+      cta: 'Get Started Free',
       icon: <Zap className="w-6 h-6" />,
     },
     {
-      name: 'Professional',
-      price: '$199',
+      name: 'Starter',
+      price: '$19',
+      period: '/month',
+      description: 'Perfect for individual professionals and small teams getting started with GEO.',
+      features: [
+        '10 GEO audits/month',
+        'Full verification suite',
+        'Email support',
+        'Audit history (30 days)',
+        'API access',
+      ],
+      cta: 'Start Free Trial',
+      icon: <Rocket className="w-6 h-6" />,
+    },
+    {
+      name: 'Pro',
+      price: '$49',
       period: '/month',
       description: 'Advanced features and priority support for growing businesses.',
       features: [
-        'Unlimited audits',
-        'Advanced knowledge graph optimization',
-        'All LLM integrations (GPT, Claude, Perplexity)',
-        'Priority support (24h response)',
-        'UCPT provenance tokens',
-        'Causal citation tracer',
-        'API access',
-        'White-label reports',
-        '5 user seats',
+        '100 GEO audits/month',
+        'Priority verification',
+        'Priority support',
+        'Audit history (90 days)',
+        'Advanced analytics',
+        'Webhook notifications',
+        'Custom integrations',
       ],
       cta: 'Get Started',
       highlighted: true,
-      icon: <Rocket className="w-6 h-6" />,
+      icon: <Building className="w-6 h-6" />,
       badge: 'Most Popular',
     },
     {
       name: 'Enterprise',
-      price: 'Custom',
-      period: '',
+      price: '$499',
+      period: '/month',
       description: 'Tailored solutions for large organizations with dedicated support.',
       features: [
-        'Unlimited audits',
-        'Custom knowledge graph architecture',
-        'Dedicated LLM infrastructure',
-        'Dedicated account manager',
-        'SLA guarantee (99.9% uptime)',
-        'Advanced security (SSO, SAML)',
-        'Custom integrations',
-        'On-premise deployment option',
-        'Unlimited user seats',
-        'Training & onboarding',
+        'Unlimited GEO audits',
+        'Dedicated infrastructure',
+        'White-label options',
+        'SLA guarantee (99.9%)',
+        'Dedicated support',
+        'Custom contract terms',
+        'Bulk API discounts',
+        'Team management',
       ],
       cta: 'Contact Sales',
       icon: <Building className="w-6 h-6" />,
@@ -85,6 +94,7 @@ const PricingPage: React.FC = () => {
     if (tierName === 'Enterprise') {
       navigate('/contact');
     } else {
+      // For Free, Starter, and Pro plans - redirect to signup
       navigate('/auth/signup');
     }
   };
@@ -199,30 +209,31 @@ const PricingPage: React.FC = () => {
                 <div className="bg-white/5 border border-[#2A2A2A] rounded-xl p-6 hover:border-white/10 transition-colors">
                   <h3 className="text-xl font-semibold text-white mb-3">Can I change plans later?</h3>
                   <p className="text-white/70 leading-relaxed">
-                    Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately,
-                    and we'll prorate the billing accordingly.
+                    Yes, you can upgrade or downgrade your plan at any time. Changes take effect at the start
+                    of your next billing period.
                   </p>
                 </div>
                 <div className="bg-white/5 border border-[#2A2A2A] rounded-xl p-6 hover:border-white/10 transition-colors">
                   <h3 className="text-xl font-semibold text-white mb-3">What payment methods do you accept?</h3>
                   <p className="text-white/70 leading-relaxed">
-                    We accept all major credit cards (Visa, Mastercard, American Express) and ACH transfers
-                    for annual plans. Enterprise customers can request invoice billing.
+                    We accept USDC payments on Base L2 for transparent, low-fee transactions. You can pay
+                    using any Web3 wallet (MetaMask, Coinbase Wallet, etc.). Enterprise customers can request
+                    invoice billing.
                   </p>
                 </div>
                 <div className="bg-white/5 border border-[#2A2A2A] rounded-xl p-6 hover:border-white/10 transition-colors">
-                  <h3 className="text-xl font-semibold text-white mb-3">Is there a free trial?</h3>
+                  <h3 className="text-xl font-semibold text-white mb-3">Is there a free plan?</h3>
                   <p className="text-white/70 leading-relaxed">
-                    Yes! Starter and Professional plans include a 14-day free trial. No credit card required
-                    to start your trial.
+                    Yes! Our Free plan includes 1 GEO audit per month with basic verification and community
+                    support. Perfect for trying out the platform before upgrading.
                   </p>
                 </div>
                 <div className="bg-white/5 border border-[#2A2A2A] rounded-xl p-6 hover:border-white/10 transition-colors">
-                  <h3 className="text-xl font-semibold text-white mb-3">What is UCPT provenance?</h3>
+                  <h3 className="text-xl font-semibold text-white mb-3">What happens if I exceed my audit quota?</h3>
                   <p className="text-white/70 leading-relaxed">
-                    UCPT (Universal Citation Provenance Token) is our cryptographic proof system that
-                    verifies the authenticity and traceability of AI citations. Available in Professional
-                    and Enterprise plans.
+                    If you reach your monthly audit limit, you can upgrade to a higher plan or wait until
+                    your quota resets at the start of the next billing period. Enterprise plans include
+                    unlimited audits.
                   </p>
                 </div>
               </div>
