@@ -282,11 +282,11 @@ const AuditShowcaseCarousel: React.FC = () => {
         aria-busy="true"
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-4">
+          <div className="flex gap-2.5 overflow-x-auto scrollbar-hide pb-4">
             {[...Array(5)].map((_, index) => (
               <div
                 key={index}
-                className="flex-shrink-0 w-[180px] sm:w-[200px] lg:w-[220px] bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-lg p-3 relative overflow-hidden"
+                className="flex-shrink-0 w-[160px] sm:w-[180px] lg:w-[200px] bg-gradient-to-br from-white/10 to-white/5 border border-white/20 rounded-lg p-2.5 relative overflow-hidden"
               >
                 {/* Shimmer effect overlay */}
                 <div className="absolute inset-0 -translate-x-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/5 to-transparent"></div>
@@ -294,23 +294,23 @@ const AuditShowcaseCarousel: React.FC = () => {
                 {/* Skeleton content */}
                 {/* Header: Domain */}
                 <div className="mb-2">
-                  <div className="h-4 bg-white/10 rounded mb-1 w-3/4"></div>
-                  <div className="h-2.5 bg-white/10 rounded w-1/3"></div>
+                  <div className="h-3 bg-white/10 rounded mb-1 w-3/4"></div>
+                  <div className="h-2 bg-white/10 rounded w-1/3"></div>
                 </div>
                 
                 {/* Score section */}
                 <div className="flex items-center justify-between mb-2">
                   <div>
-                    <div className="h-2 bg-white/10 rounded mb-1 w-14"></div>
-                    <div className="h-6 bg-white/10 rounded w-10"></div>
+                    <div className="h-2 bg-white/10 rounded mb-1 w-12"></div>
+                    <div className="h-5 bg-white/10 rounded w-8"></div>
                   </div>
-                  <div className="h-6 bg-white/10 rounded w-8"></div>
+                  <div className="h-5 bg-white/10 rounded w-6"></div>
                 </div>
                 
                 {/* Mini metrics grid */}
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-1.5">
                   {[...Array(4)].map((_, i) => (
-                    <div key={i} className="bg-white/5 rounded-md p-1.5 h-10"></div>
+                    <div key={i} className="bg-white/5 rounded p-1.5 h-9"></div>
                   ))}
                 </div>
               </div>
@@ -356,7 +356,7 @@ const AuditShowcaseCarousel: React.FC = () => {
   // Success state with audit cards
   return (
     <section
-      className="w-full py-8"
+      className="w-full py-4"
       aria-label="Recent audit results"
       role="region"
     >
@@ -365,7 +365,7 @@ const AuditShowcaseCarousel: React.FC = () => {
         {/* Horizontal scrolling carousel container */}
         <div
           ref={carouselRef}
-          className="flex gap-3 overflow-x-auto scrollbar-hide pb-4 scroll-smooth focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 rounded-lg"
+          className="flex gap-2.5 overflow-x-auto scrollbar-hide pb-4 scroll-smooth focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 rounded-lg"
           style={{
             scrollbarWidth: 'none', // Firefox
             msOverflowStyle: 'none', // IE/Edge
