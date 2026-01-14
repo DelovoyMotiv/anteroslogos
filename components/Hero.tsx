@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AnimatedSection from './AnimatedSection';
 import GeoAnalysisForm from './GeoAnalysisForm';
-import PulseLine from './PulseLine';
 import AuditShowcaseCarousel from './AuditShowcaseCarousel';
 
 interface HeroProps {
@@ -37,11 +36,6 @@ const Hero: React.FC<HeroProps> = ({ onScrollClick }) => {
         
         <div className="relative z-10 w-full max-w-6xl mx-auto">
             <AnimatedSection>
-                {/* Pulse Line - feeling the internet's pulse in real-time */}
-                <div className="mb-6 sm:mb-8">
-                    <PulseLine />
-                </div>
-                
                 <h1
                     className="font-display font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl leading-[1.05] mb-0 tracking-tight px-2"
                     itemProp="headline"
