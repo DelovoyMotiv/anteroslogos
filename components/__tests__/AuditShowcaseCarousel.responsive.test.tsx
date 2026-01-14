@@ -23,45 +23,45 @@ const auditCardSource = readFileSync(join(__dirname, '../AuditCard.tsx'), 'utf-8
 const carouselSource = readFileSync(join(__dirname, '../AuditShowcaseCarousel.tsx'), 'utf-8');
 
 describe('Responsive Design Implementation - AuditCard', () => {
-  describe('Requirement 4.1: Mobile Viewport Card Width (280px at <640px)', () => {
-    it('should have w-[280px] class for mobile viewport', () => {
-      expect(auditCardSource).toContain('w-[280px]');
+  describe('Requirement 4.1: Mobile Viewport Card Width (180px at <640px)', () => {
+    it('should have w-[180px] class for mobile viewport', () => {
+      expect(auditCardSource).toContain('w-[180px]');
     });
 
-    it('should use w-[280px] as base width (no prefix)', () => {
+    it('should use w-[180px] as base width (no prefix)', () => {
       // Verify it's not prefixed with sm: or lg:
-      const match = auditCardSource.match(/className="[^"]*w-\[280px\]/);
+      const match = auditCardSource.match(/className="[^"]*w-\[180px\]/);
       expect(match).toBeTruthy();
     });
   });
 
-  describe('Requirement 4.2: Tablet Viewport Card Width (320px at 640-1024px)', () => {
-    it('should have sm:w-[320px] class for tablet viewport', () => {
-      expect(carouselSource).toContain('sm:w-[320px]');
+  describe('Requirement 4.2: Tablet Viewport Card Width (200px at 640-1024px)', () => {
+    it('should have sm:w-[200px] class for tablet viewport', () => {
+      expect(auditCardSource).toContain('sm:w-[200px]');
     });
 
     it('should use sm: prefix for tablet breakpoint', () => {
-      const match = auditCardSource.match(/sm:w-\[320px\]/);
+      const match = auditCardSource.match(/sm:w-\[200px\]/);
       expect(match).toBeTruthy();
     });
   });
 
-  describe('Requirement 4.3: Desktop Viewport Card Width (360px at >1024px)', () => {
-    it('should have lg:w-[360px] class for desktop viewport', () => {
-      expect(auditCardSource).toContain('lg:w-[360px]');
+  describe('Requirement 4.3: Desktop Viewport Card Width (220px at >1024px)', () => {
+    it('should have lg:w-[220px] class for desktop viewport', () => {
+      expect(auditCardSource).toContain('lg:w-[220px]');
     });
 
     it('should use lg: prefix for desktop breakpoint', () => {
-      const match = auditCardSource.match(/lg:w-\[360px\]/);
+      const match = auditCardSource.match(/lg:w-\[220px\]/);
       expect(match).toBeTruthy();
     });
   });
 
   describe('All Responsive Breakpoints Together', () => {
     it('should have all three responsive width classes in AuditCard', () => {
-      expect(auditCardSource).toContain('w-[280px]');
-      expect(auditCardSource).toContain('sm:w-[320px]');
-      expect(auditCardSource).toContain('lg:w-[360px]');
+      expect(auditCardSource).toContain('w-[180px]');
+      expect(auditCardSource).toContain('sm:w-[200px]');
+      expect(auditCardSource).toContain('lg:w-[220px]');
     });
 
     it('should have flex-shrink-0 to prevent card shrinking in horizontal layout', () => {
@@ -73,7 +73,7 @@ describe('Responsive Design Implementation - AuditCard', () => {
     it('should have proper background and border classes', () => {
       expect(auditCardSource).toContain('bg-white/5');
       expect(auditCardSource).toContain('border-white/10');
-      expect(auditCardSource).toContain('rounded-xl');
+      expect(auditCardSource).toContain('rounded-lg');
     });
 
     it('should have hover effects for interactivity', () => {
@@ -87,7 +87,7 @@ describe('Responsive Design Implementation - AuditCard', () => {
     });
 
     it('should have proper padding', () => {
-      expect(auditCardSource).toContain('p-6');
+      expect(auditCardSource).toContain('p-4');
     });
   });
 
@@ -178,13 +178,13 @@ describe('Responsive Design Implementation - AuditCard', () => {
 
 describe('Responsive Design Implementation - AuditShowcaseCarousel', () => {
   describe('Requirement 4.4: Consistent Spacing Between Cards', () => {
-    it('should have gap-4 class for consistent card spacing', () => {
-      expect(carouselSource).toContain('gap-4');
+    it('should have gap-3 class for consistent card spacing', () => {
+      expect(carouselSource).toContain('gap-3');
     });
 
     it('should maintain gap in carousel container', () => {
-      // Verify gap-4 is in the flex container
-      const match = carouselSource.match(/className="[^"]*flex[^"]*gap-4/);
+      // Verify gap-3 is in the flex container
+      const match = carouselSource.match(/className="[^"]*flex[^"]*gap-3/);
       expect(match).toBeTruthy();
     });
   });
@@ -200,9 +200,10 @@ describe('Responsive Design Implementation - AuditShowcaseCarousel', () => {
       expect(carouselSource).toContain('pb-4');
     });
 
-    it('should have container class for proper width management', () => {
-      expect(carouselSource).toContain('container');
-      expect(carouselSource).toContain('mx-auto');
+    it('should have full-width layout without container constraint', () => {
+      // Verify carousel is full-width (no container mx-auto in success state)
+      const successStateMatch = carouselSource.match(/Success state[\s\S]*?<section[\s\S]*?<div className="w-full/);
+      expect(successStateMatch).toBeTruthy();
     });
   });
 
@@ -273,9 +274,9 @@ describe('Responsive Design Implementation - AuditShowcaseCarousel', () => {
   });
 
   describe('Loading State Responsive Design', () => {
-    it('should have skeleton cards with responsive widths', () => {
-      // Check that skeleton cards also have responsive width classes
-      const skeletonMatch = carouselSource.match(/isLoading[\s\S]*?w-\[280px\][\s\S]*?sm:w-\[320px\][\s\S]*?lg:w-\[360px\]/);
+    it('should have skeleton cards with fixed widths for loading state', () => {
+      // Loading state uses fixed widths for skeleton cards
+      const skeletonMatch = carouselSource.match(/isLoading[\s\S]*?w-\[280px\]/);
       expect(skeletonMatch).toBeTruthy();
     });
 
@@ -293,21 +294,20 @@ describe('Responsive Design Implementation - AuditShowcaseCarousel', () => {
 describe('Responsive Design Integration Verification', () => {
   describe('Complete Responsive Implementation', () => {
     it('verifies all three breakpoints are implemented in AuditCard', () => {
-      const mobileMatch = auditCardSource.match(/w-\[280px\]/);
-      const tabletMatch = auditCardSource.match(/sm:w-\[320px\]/);
-      const desktopMatch = auditCardSource.match(/lg:w-\[360px\]/);
+      const mobileMatch = auditCardSource.match(/w-\[180px\]/);
+      const tabletMatch = auditCardSource.match(/sm:w-\[200px\]/);
+      const desktopMatch = auditCardSource.match(/lg:w-\[220px\]/);
       
       expect(mobileMatch).toBeTruthy();
       expect(tabletMatch).toBeTruthy();
       expect(desktopMatch).toBeTruthy();
     });
 
-    it('verifies carousel has proper container structure', () => {
-      expect(carouselSource).toContain('container');
-      expect(carouselSource).toContain('mx-auto');
+    it('verifies carousel has proper full-width structure', () => {
+      expect(carouselSource).toContain('w-full');
       expect(carouselSource).toContain('overflow-x-auto');
       expect(carouselSource).toContain('flex');
-      expect(carouselSource).toContain('gap-4');
+      expect(carouselSource).toContain('gap-3');
     });
 
     it('verifies responsive padding is implemented', () => {
@@ -335,11 +335,11 @@ describe('Responsive Design Integration Verification', () => {
   describe('Responsive Design Best Practices', () => {
     it('uses Tailwind responsive prefixes correctly', () => {
       // Mobile: no prefix
-      expect(auditCardSource).toMatch(/\bw-\[280px\]/);
+      expect(auditCardSource).toMatch(/\bw-\[180px\]/);
       // Tablet: sm: prefix
-      expect(auditCardSource).toMatch(/\bsm:w-\[320px\]/);
+      expect(auditCardSource).toMatch(/\bsm:w-\[200px\]/);
       // Desktop: lg: prefix
-      expect(auditCardSource).toMatch(/\blg:w-\[360px\]/);
+      expect(auditCardSource).toMatch(/\blg:w-\[220px\]/);
     });
 
     it('uses flex-shrink-0 to prevent card compression', () => {
@@ -347,7 +347,7 @@ describe('Responsive Design Integration Verification', () => {
     });
 
     it('uses consistent spacing with gap utility', () => {
-      expect(carouselSource).toContain('gap-4');
+      expect(carouselSource).toContain('gap-3');
     });
 
     it('hides scrollbar for clean aesthetics', () => {

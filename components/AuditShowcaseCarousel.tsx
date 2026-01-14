@@ -315,11 +315,12 @@ const AuditShowcaseCarousel: React.FC = () => {
       aria-label="Recent audit results"
       role="region"
     >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Full-width carousel container without max-width constraint */}
+      <div className="w-full px-4 sm:px-6 lg:px-8">
         {/* Horizontal scrolling carousel container */}
         <div
           ref={carouselRef}
-          className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 scroll-smooth focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 rounded-lg"
+          className="flex gap-3 overflow-x-auto scrollbar-hide pb-4 scroll-smooth focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 rounded-lg"
           style={{
             scrollbarWidth: 'none', // Firefox
             msOverflowStyle: 'none', // IE/Edge
@@ -338,7 +339,7 @@ const AuditShowcaseCarousel: React.FC = () => {
             />
           ))}
         </div>
-        <p className="text-white/50 text-sm mt-2 text-center">
+        <p className="text-white/50 text-xs mt-2 text-center">
           Use arrow keys to navigate through audits
         </p>
       </div>

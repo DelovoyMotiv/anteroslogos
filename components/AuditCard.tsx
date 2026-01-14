@@ -25,34 +25,34 @@ const AuditCard: React.FC<AuditCardProps> = React.memo(({ domain, score, grade }
   
   return (
     <article
-      className="flex-shrink-0 w-[280px] sm:w-[320px] lg:w-[360px] bg-white/5 border border-white/10 rounded-xl p-6 hover:bg-white/10 hover:border-brand-accent/50 transition-all duration-300 group focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
+      className="flex-shrink-0 w-[180px] sm:w-[200px] lg:w-[220px] bg-white/5 border border-white/10 rounded-lg p-4 hover:bg-white/10 hover:border-brand-accent/50 transition-all duration-300 group focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-accent focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900"
       aria-label={`Audit result for ${domain}`}
       role="listitem"
       tabIndex={0}
     >
       {/* Domain name with truncation */}
       <h3 
-        className="text-white font-semibold text-lg mb-4 truncate"
+        className="text-white font-medium text-sm mb-3 truncate"
         title={domain}
       >
         {domain}
       </h3>
       
-      {/* Score display */}
-      <div className="flex items-end justify-between mb-3">
+      {/* Score and Grade in compact layout */}
+      <div className="flex items-center justify-between mb-2">
         <div>
-          <p className="text-white/70 text-sm mb-1">Score</p>
+          <p className="text-white/50 text-xs mb-0.5">Score</p>
           <p 
-            className="text-brand-accent text-4xl font-bold"
+            className="text-brand-accent text-2xl font-bold leading-none"
             aria-label={`Score: ${displayScore} out of 100`}
           >
             {displayScore}
           </p>
         </div>
         
-        {/* Grade display with color coding */}
+        {/* Compact grade badge */}
         <div
-          className={`px-4 py-2 rounded-lg border font-semibold text-lg ${gradeColorClass} transition-all duration-300`}
+          className={`px-3 py-1.5 rounded-md text-sm font-semibold ${gradeColorClass} transition-all duration-300`}
           aria-label={`Grade: ${grade}`}
           role="status"
         >
@@ -60,8 +60,8 @@ const AuditCard: React.FC<AuditCardProps> = React.memo(({ domain, score, grade }
         </div>
       </div>
       
-      {/* Score bar visualization */}
-      <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+      {/* Compact score bar */}
+      <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
         <div
           className="h-full bg-brand-accent rounded-full transition-all duration-500 group-hover:bg-blue-400"
           style={{ width: `${displayScore}%` }}
