@@ -152,9 +152,15 @@ const AuditShowcaseCarousel: React.FC = () => {
               continue;
             }
 
-            if (typeof audit.overall_score !== 'number' || 
-                audit.overall_score < 0 || 
-                audit.overall_score > 100) {
+            // Convert overall_score to number if it's a string (Supabase numeric type)
+            const scoreValue = typeof audit.overall_score === 'string' 
+              ? parseFloat(audit.overall_score) 
+              : audit.overall_score;
+
+            if (typeof scoreValue !== 'number' || 
+                isNaN(scoreValue) ||
+                scoreValue < 0 || 
+                scoreValue > 100) {
               if (import.meta.env.DEV) {
                 console.warn('[AuditShowcaseCarousel] Skipping audit with invalid score:', audit);
               }
@@ -183,7 +189,10 @@ const AuditShowcaseCarousel: React.FC = () => {
             }
 
             // Add valid audit to the list
-            validAudits.push(audit as AuditData);
+            validAudits.push({
+              ...audit,
+              overall_score: scoreValue
+            } as AuditData);
           } catch (validationError) {
             // Skip individual malformed records without crashing
             if (import.meta.env.DEV) {
@@ -239,7 +248,6 @@ const AuditShowcaseCarousel: React.FC = () => {
         aria-busy="true"
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-white mb-6">Recent Audits</h2>
           <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-4">
             {[...Array(5)].map((_, index) => (
               <div
@@ -275,7 +283,6 @@ const AuditShowcaseCarousel: React.FC = () => {
         aria-label="Recent audit results"
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-white mb-6">Recent Audits</h2>
           <div className="bg-white/5 border border-white/10 rounded-xl p-6 text-center">
             <p className="text-white/70">{state.error}</p>
           </div>
@@ -292,7 +299,6 @@ const AuditShowcaseCarousel: React.FC = () => {
         aria-label="Recent audit results"
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-white mb-6">Recent Audits</h2>
           <div className="bg-white/5 border border-white/10 rounded-xl p-6 text-center">
             <p className="text-white/70">No audits available yet</p>
           </div>
@@ -309,7 +315,6 @@ const AuditShowcaseCarousel: React.FC = () => {
       role="region"
     >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl font-bold text-white mb-6">Recent Audits</h2>
         {/* Horizontal scrolling carousel container */}
         <div
           ref={carouselRef}
