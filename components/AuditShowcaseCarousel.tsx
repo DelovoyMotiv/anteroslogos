@@ -87,12 +87,13 @@ const AuditShowcaseCarousel: React.FC = () => {
           return;
         }
 
-        // Fetch 20 most recent audits with filters
+        // Fetch 20 most recent PUBLIC audits with filters
         const { data, error } = await supabase
           .from('audits')
           .select('id, domain, overall_score, grade, timestamp, url')
           .is('deleted_at', null)
           .not('overall_score', 'is', null)
+          .eq('is_public', true)
           .order('timestamp', { ascending: false })
           .limit(20);
 
