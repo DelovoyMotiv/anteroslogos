@@ -77,29 +77,6 @@ const Hero: React.FC<HeroProps> = ({ onScrollClick }) => {
                     <AuditShowcaseCarousel />
                 </div>
             </AnimatedSection>
-            
-            {/* Trust Bar */}
-            <AnimatedSection delay={800}>
-                <aside className="mt-16 sm:mt-20 md:mt-24 pt-12 sm:pt-14 md:pt-16 border-t border-white/10" aria-label="Client trust indicators">
-                    <h2 className="text-xs sm:text-sm text-white/40 uppercase tracking-[0.2em] mb-8 sm:mb-10 font-mono text-center">Trusted by Visionaries</h2>
-                    <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 md:gap-8 lg:gap-12 xl:gap-16" role="list" aria-label="Client categories">
-                        <div className="group flex flex-col items-center gap-2 px-4 sm:px-6 py-3 sm:py-4 rounded-xl hover:bg-white/5 transition-all duration-300" role="listitem">
-                            <h3 className="text-white/90 font-semibold text-base sm:text-lg md:text-xl whitespace-nowrap">AI Leaders</h3>
-                            <div className="w-12 h-0.5 bg-gradient-to-r from-transparent via-brand-accent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        </div>
-                        <div className="hidden sm:block w-px h-12 bg-white/10"></div>
-                        <div className="group flex flex-col items-center gap-2 px-4 sm:px-6 py-3 sm:py-4 rounded-xl hover:bg-white/5 transition-all duration-300" role="listitem">
-                            <h3 className="text-white/90 font-semibold text-base sm:text-lg md:text-xl whitespace-nowrap">Tech Innovators</h3>
-                            <div className="w-12 h-0.5 bg-gradient-to-r from-transparent via-brand-accent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        </div>
-                        <div className="hidden sm:block w-px h-12 bg-white/10"></div>
-                        <div className="group flex flex-col items-center gap-2 px-4 sm:px-6 py-3 sm:py-4 rounded-xl hover:bg-white/5 transition-all duration-300" role="listitem">
-                            <h3 className="text-white/90 font-semibold text-base sm:text-lg md:text-xl whitespace-nowrap">Fortune 500</h3>
-                            <div className="w-12 h-0.5 bg-gradient-to-r from-transparent via-brand-accent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        </div>
-                    </div>
-                </aside>
-            </AnimatedSection>
         </div>
         
         {/* Scroll Indicator */}
