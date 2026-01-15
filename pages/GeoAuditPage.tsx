@@ -7,6 +7,7 @@ import { validateAndSanitizeUrl, checkRateLimit, validateAuditResult } from '../
 import { analyzeAndGenerateAlerts, type Alert } from '../utils/monitoringAlerts';
 import { analyzeTrend, generatePerformanceInsights, type TrendAnalysis, type PerformanceInsights } from '../utils/advancedAnalytics';
 import { generateCompetitiveComparison, updateCompetitorData, type CompetitiveComparison } from '../utils/competitiveIntelligence';
+import { saveAuditToCloud } from '../utils/backend/auditStorage';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import AnalysisProgress from '../components/AnalysisProgress';
@@ -122,8 +123,20 @@ const GeoAuditPage = () => {
         throw new Error('Invalid audit result received. Please try again.');
       }
       
-      // Save to history
+      // Save to localStorage history
       saveAuditToHistory(auditResult as any);
+      
+      // Save to Supabase cloud (for carousel and analytics)
+      // This runs in background and doesn't block UI
+      saveAuditToCloud(auditResult).then((result) => {
+        if (result.success) {
+          console.log('✅ Audit saved to cloud:', result.id);
+        } else {
+          console.warn('⚠️ Failed to save audit to cloud:', result.error);
+        }
+      }).catch((error) => {
+        console.error('❌ Error saving audit to cloud:', error);
+      });
       
       // Get comparison with previous audit
       const comp = compareWithPrevious(auditResult);
