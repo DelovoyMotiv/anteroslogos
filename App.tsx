@@ -3,7 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import LoadingSpinner from './components/LoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AuthErrorBoundary } from './src/components/auth/AuthErrorBoundary';
-import { IOSInstallPrompt } from './components/IOSInstallPrompt';
+// PWA disabled - IOSInstallPrompt removed
+// import { IOSInstallPrompt } from './components/IOSInstallPrompt';
 import { logConfig, validateConfig } from './lib/config/env';
 
 // Lazy load all route components for optimal bundle splitting
@@ -125,7 +126,8 @@ const App: React.FC = () => {
                         <Route path="*" element={<NotFound />} />
                     </Routes>
                 </Suspense>
-                <IOSInstallPrompt />
+                {/* PWA disabled - IOSInstallPrompt removed */}
+                {/* <IOSInstallPrompt /> */}
             </Router>
         </ErrorBoundary>
     );
