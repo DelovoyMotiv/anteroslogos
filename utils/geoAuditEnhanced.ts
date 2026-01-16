@@ -610,7 +610,7 @@ export async function auditWebsite(
   const baseResult: AuditResult = {
     url: normalizedUrl,
     timestamp: new Date().toISOString(),
-    overallScore: scoreCalc.overall,
+    overallScore: scoreCalc.precise, // Use precise score with 3 decimal places
     preciseScore: scoreCalc.precise,
     grade,
     scoreBreakdown: scoreCalc.breakdown,

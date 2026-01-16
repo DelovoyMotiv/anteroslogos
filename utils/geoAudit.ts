@@ -208,15 +208,15 @@ export async function auditWebsite(url: string): Promise<AuditResult> {
     performance: calculatePerformanceScore(performance),
   };
 
-  // Overall score (weighted average)
-  const overallScore = Math.round(
+  // Overall score (weighted average) with 3 decimal precision
+  const overallScore = Number((
     scores.schemaMarkup * 0.25 +
     scores.metaTags * 0.15 +
     scores.aiCrawlers * 0.20 +
     scores.eeat * 0.20 +
     scores.structure * 0.10 +
     scores.performance * 0.10
-  );
+  ).toFixed(3));
 
   // Generate recommendations
   const recommendations = generateRecommendations({
