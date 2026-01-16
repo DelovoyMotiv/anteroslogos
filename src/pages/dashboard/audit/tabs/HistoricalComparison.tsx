@@ -87,9 +87,14 @@ export function HistoricalComparison({ result }: HistoricalComparisonProps) {
       setLoading(true);
       setError(null);
 
-      // Extract domain from current result
+      // Extract and normalize domain from current result
       const urlObj = new URL(result.url);
-      const domain = urlObj.hostname;
+      let domain = urlObj.hostname;
+      
+      // Normalize domain: remove www. prefix for consistency
+      if (domain.startsWith('www.')) {
+        domain = domain.substring(4);
+      }
 
       // Calculate date threshold based on time range
       const now = new Date();
@@ -112,6 +117,9 @@ export function HistoricalComparison({ result }: HistoricalComparisonProps) {
       }
 
       // Fetch historical audits for this domain
+      // Exclude current audit by timestamp to avoid self-comparison
+      const currentTimestamp = new Date(result.timestamp).toISOString();
+      
       const { data, error: fetchError } = await supabase
         .from('audits')
         .select(`
@@ -131,9 +139,10 @@ export function HistoricalComparison({ result }: HistoricalComparisonProps) {
           score_link_analysis
         `)
         .eq('user_id', user.id)
-        .eq('domain', domain)
+        .or(`domain.eq.${domain},domain.eq.www.${domain}`) // Match both with and without www
         .is('deleted_at', null)
         .gte('timestamp', dateThreshold.toISOString())
+        .neq('timestamp', currentTimestamp) // Exclude current audit
         .order('timestamp', { ascending: true })
         .limit(50);
 
@@ -148,10 +157,11 @@ export function HistoricalComparison({ result }: HistoricalComparisonProps) {
     }
   };
 
-  // Calculate comparison with previous audit
+  // Calculate comparison with most recent previous audit (last in the array)
   const getPreviousAudit = (): HistoricalAudit | null => {
-    if (historicalAudits.length < 2) return null;
-    return historicalAudits[historicalAudits.length - 2];
+    if (historicalAudits.length === 0) return null;
+    // Return the most recent audit (last in chronologically sorted array)
+    return historicalAudits[historicalAudits.length - 1];
   };
 
   const calculateChange = (current: number, previous: number): number => {
@@ -190,36 +200,33 @@ export function HistoricalComparison({ result }: HistoricalComparisonProps) {
     ? Math.round((new Date(result.timestamp).getTime() - new Date(previousAudit.timestamp).getTime()) / (1000 * 60 * 60 * 24))
     : 0;
 
-  // Prepare chart data
-  const chartData = historicalAudits.map(audit => ({
-    date: new Date(audit.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-    score: audit.overall_score,
-    timestamp: audit.timestamp,
-  }));
-
-  // Add current result to chart if not already included
-  const currentTimestamp = result.timestamp;
-  const isCurrentIncluded = chartData.some(d => d.timestamp === currentTimestamp);
-  if (!isCurrentIncluded) {
-    chartData.push({
-      date: new Date(currentTimestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+  // Prepare chart data - include all historical audits plus current
+  const chartData = [
+    ...historicalAudits.map(audit => ({
+      date: new Date(audit.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      score: Number(audit.overall_score), // Ensure it's a number
+      timestamp: audit.timestamp,
+    })),
+    // Always add current result as the latest point
+    {
+      date: new Date(result.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
       score: result.overallScore,
-      timestamp: currentTimestamp,
-    });
-  }
+      timestamp: result.timestamp,
+    }
+  ];
 
-  // Category comparisons
+  // Category comparisons - handle missing scores gracefully
   const categoryComparisons = hasPreviousData ? [
-    { name: 'Schema Markup', current: result.scores.schemaMarkup, previous: previousAudit.score_schema_markup },
-    { name: 'Meta Tags', current: result.scores.metaTags, previous: previousAudit.score_meta_tags },
-    { name: 'AI Crawlers', current: result.scores.aiCrawlers, previous: previousAudit.score_ai_crawlers },
-    { name: 'E-E-A-T', current: result.scores.eeat, previous: previousAudit.score_eeat },
-    { name: 'Structure', current: result.scores.structure, previous: previousAudit.score_structure },
-    { name: 'Performance', current: result.scores.performance, previous: previousAudit.score_performance },
-    { name: 'Content Quality', current: result.scores.contentQuality, previous: previousAudit.score_content_quality },
-    { name: 'Citation Potential', current: result.scores.citationPotential, previous: previousAudit.score_citation_potential },
-    { name: 'Technical SEO', current: result.scores.technicalSEO, previous: previousAudit.score_technical_seo },
-    { name: 'Link Analysis', current: result.scores.linkAnalysis, previous: previousAudit.score_link_analysis },
+    { name: 'Schema Markup', current: result.scores.schemaMarkup, previous: Number(previousAudit.score_schema_markup) || 0 },
+    { name: 'Meta Tags', current: result.scores.metaTags, previous: Number(previousAudit.score_meta_tags) || 0 },
+    { name: 'AI Crawlers', current: result.scores.aiCrawlers, previous: Number(previousAudit.score_ai_crawlers) || 0 },
+    { name: 'E-E-A-T', current: result.scores.eeat, previous: Number(previousAudit.score_eeat) || 0 },
+    { name: 'Structure', current: result.scores.structure, previous: Number(previousAudit.score_structure) || 0 },
+    { name: 'Performance', current: result.scores.performance, previous: Number(previousAudit.score_performance) || 0 },
+    { name: 'Content Quality', current: result.scores.contentQuality, previous: Number(previousAudit.score_content_quality) || 0 },
+    { name: 'Citation Potential', current: result.scores.citationPotential, previous: Number(previousAudit.score_citation_potential) || 0 },
+    { name: 'Technical SEO', current: result.scores.technicalSEO, previous: Number(previousAudit.score_technical_seo) || 0 },
+    { name: 'Link Analysis', current: result.scores.linkAnalysis, previous: Number(previousAudit.score_link_analysis) || 0 },
   ] : [];
 
   if (loading) {
@@ -265,8 +272,8 @@ export function HistoricalComparison({ result }: HistoricalComparisonProps) {
     );
   }
 
-  const overallChange = calculateChange(result.overallScore, previousAudit.overall_score);
-  const rateOfChange = calculateRateOfChange(result.overallScore, previousAudit.overall_score, daysBetween);
+  const overallChange = calculateChange(result.overallScore, Number(previousAudit.overall_score));
+  const rateOfChange = calculateRateOfChange(result.overallScore, Number(previousAudit.overall_score), daysBetween);
 
   return (
     <div className="space-y-4">
@@ -314,7 +321,24 @@ export function HistoricalComparison({ result }: HistoricalComparisonProps) {
           </h4>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+          {/* Previous Score */}
+          <div className="bg-black/30 border border-slate-700/50 p-3 rounded">
+            <div className="text-[9px] font-mono text-slate-500 uppercase tracking-wider mb-2">
+              Previous Score
+            </div>
+            <div className="text-2xl font-bold font-mono text-slate-400">
+              {Number(previousAudit.overall_score).toFixed(1)}
+            </div>
+            <div className="text-xs text-slate-500 mt-1">
+              {new Date(previousAudit.timestamp).toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: 'numeric'
+              })}
+            </div>
+          </div>
+
           {/* Current Score */}
           <div className="bg-black/30 border border-slate-700/50 p-3 rounded">
             <div className="text-[9px] font-mono text-slate-500 uppercase tracking-wider mb-2">
@@ -460,13 +484,34 @@ export function HistoricalComparison({ result }: HistoricalComparisonProps) {
 
       {/* Summary Stats */}
       <div className="bg-black/20 border border-slate-800/50 p-4 rounded-lg">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           <div className="text-center">
             <div className="text-[9px] font-mono text-slate-500 uppercase tracking-wider mb-1">
               Total Audits
             </div>
             <div className="text-lg font-bold font-mono text-slate-300">
-              {historicalAudits.length}
+              {historicalAudits.length + 1}
+            </div>
+            <div className="text-[8px] text-slate-600 mt-0.5">
+              Including current
+            </div>
+          </div>
+
+          <div className="text-center">
+            <div className="text-[9px] font-mono text-slate-500 uppercase tracking-wider mb-1">
+              First Audit
+            </div>
+            <div className="text-xs font-bold font-mono text-slate-400">
+              {historicalAudits.length > 0 
+                ? new Date(historicalAudits[0].timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                : 'Today'
+              }
+            </div>
+            <div className="text-[8px] text-slate-600 mt-0.5">
+              {historicalAudits.length > 0 
+                ? `Score: ${Number(historicalAudits[0].overall_score).toFixed(1)}`
+                : 'First audit'
+              }
             </div>
           </div>
 
@@ -477,6 +522,9 @@ export function HistoricalComparison({ result }: HistoricalComparisonProps) {
             <div className="text-lg font-bold font-mono text-emerald-400">
               {categoryComparisons.filter(c => calculateChange(c.current, c.previous) > 0.5).length}
             </div>
+            <div className="text-[8px] text-slate-600 mt-0.5">
+              Categories
+            </div>
           </div>
 
           <div className="text-center">
@@ -485,6 +533,9 @@ export function HistoricalComparison({ result }: HistoricalComparisonProps) {
             </div>
             <div className="text-lg font-bold font-mono text-red-400">
               {categoryComparisons.filter(c => calculateChange(c.current, c.previous) < -0.5).length}
+            </div>
+            <div className="text-[8px] text-slate-600 mt-0.5">
+              Categories
             </div>
           </div>
 
@@ -497,6 +548,9 @@ export function HistoricalComparison({ result }: HistoricalComparisonProps) {
                 const change = calculateChange(c.current, c.previous);
                 return change >= -0.5 && change <= 0.5;
               }).length}
+            </div>
+            <div className="text-[8px] text-slate-600 mt-0.5">
+              Categories
             </div>
           </div>
         </div>
