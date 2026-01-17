@@ -54,9 +54,7 @@ const Hero: React.FC<HeroProps> = ({ onScrollClick }) => {
                     className="mt-6 sm:mt-8 text-base sm:text-lg md:text-xl lg:text-2xl text-white/80 max-w-4xl mx-auto leading-relaxed px-4"
                     itemProp="description"
                 >
-                    The future of search is AI. We help brands get cited by generative engines{' '}
-                    <span className="font-bold text-brand-accent">300%</span> more than competitors{' '}
-                    through knowledge graph architecture.
+                    Our audit shows if AI can find your website, mention your brand, and what to change to get more visibility and traffic.
                 </p>
             </AnimatedSection>
             <AnimatedSection delay={400}>
