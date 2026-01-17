@@ -11,8 +11,33 @@ import {
   ChevronRight,
   Plus
 } from 'lucide-react';
-import type { BlogPost, BlogAuthor, BlogCategory } from '../../types/database.types';
 import { supabase } from '../../lib/supabase';
+
+// Local interfaces for admin view
+interface BlogAuthorData {
+  id: string;
+  name: string;
+  slug: string;
+  image_url?: string;
+}
+
+interface BlogCategoryData {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+interface BlogPostData {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  status: string;
+  published_date: string | null;
+  created_at: string;
+  author?: BlogAuthorData;
+  category?: BlogCategoryData;
+}
 
 interface BlogPostListProps {
   onEdit?: (postId: string) => void;
@@ -20,9 +45,9 @@ interface BlogPostListProps {
 }
 
 export default function BlogPostList({ onEdit, onDelete }: BlogPostListProps) {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [authors, setAuthors] = useState<BlogAuthor[]>([]);
-  const [categories, setCategories] = useState<BlogCategory[]>([]);
+  const [posts, setPosts] = useState<BlogPostData[]>([]);
+  const [authors, setAuthors] = useState<BlogAuthorData[]>([]);
+  const [categories, setCategories] = useState<BlogCategoryData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -123,16 +148,16 @@ export default function BlogPostList({ onEdit, onDelete }: BlogPostListProps) {
 
       // Fetch authors and categories for filters
       const [authorsRes, categoriesRes] = await Promise.all([
-        supabase.from('blog_authors').select('*').order('name'),
-        supabase.from('blog_categories').select('*').order('name'),
+        supabase.from('blog_authors').select('id, name, slug, image_url').order('name'),
+        supabase.from('blog_categories').select('id, name, slug').order('name'),
       ]);
 
       if (authorsRes.data) {
-        setAuthors(authorsRes.data);
+        setAuthors(authorsRes.data as BlogAuthorData[]);
       }
 
       if (categoriesRes.data) {
-        setCategories(categoriesRes.data);
+        setCategories(categoriesRes.data as BlogCategoryData[]);
       }
     } catch (err) {
       console.error('Error fetching posts:', err);
