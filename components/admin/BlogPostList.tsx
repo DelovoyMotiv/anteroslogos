@@ -55,51 +55,84 @@ export default function BlogPostList({ onEdit, onDelete }: BlogPostListProps) {
         throw new Error('Not authenticated');
       }
 
-      // Build query parameters
-      const params = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: postsPerPage.toString(),
-      });
+      // Calculate pagination
+      const from = (currentPage - 1) * postsPerPage;
+      const to = from + postsPerPage - 1;
 
+      // Build query for posts - fetch ALL posts (including drafts) for admin
+      let query = supabase
+        .from('blog_posts')
+        .select(`
+          *,
+          blog_authors!inner(id, name, slug, image_url),
+          blog_categories(id, name, slug)
+        `, { count: 'exact' })
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false });
+
+      // Apply filters
       if (statusFilter !== 'all') {
-        params.append('status', statusFilter);
+        query = query.eq('status', statusFilter);
       }
+
       if (categoryFilter !== 'all') {
-        params.append('category', categoryFilter);
+        // Get category ID first
+        const { data: category } = await supabase
+          .from('blog_categories')
+          .select('id')
+          .eq('slug', categoryFilter)
+          .single();
+        
+        if (category) {
+          query = query.eq('category_id', category.id);
+        }
       }
+
       if (authorFilter !== 'all') {
-        params.append('author', authorFilter);
+        // Get author ID first
+        const { data: author } = await supabase
+          .from('blog_authors')
+          .select('id')
+          .eq('slug', authorFilter)
+          .single();
+        
+        if (author) {
+          query = query.eq('author_id', author.id);
+        }
       }
 
-      // Fetch posts from admin API
-      const response = await fetch(`/api/admin/blog?action=posts&${params.toString()}`, {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-      });
+      // Apply pagination
+      query = query.range(from, to);
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch posts');
+      // Execute query
+      const { data: postsData, error: postsError, count } = await query;
+
+      if (postsError) {
+        throw postsError;
       }
 
-      const data = await response.json();
-      setPosts(data.posts || []);
-      setTotalPosts(data.total || 0);
+      // Transform data to match expected format
+      const transformedPosts = (postsData || []).map((post: any) => ({
+        ...post,
+        author: post.blog_authors,
+        category: post.blog_categories,
+      }));
+
+      setPosts(transformedPosts);
+      setTotalPosts(count || 0);
 
       // Fetch authors and categories for filters
       const [authorsRes, categoriesRes] = await Promise.all([
-        fetch('/api/blog?action=authors'),
-        fetch('/api/blog?action=categories'),
+        supabase.from('blog_authors').select('*').order('name'),
+        supabase.from('blog_categories').select('*').order('name'),
       ]);
 
-      if (authorsRes.ok) {
-        const authorsData = await authorsRes.json();
-        setAuthors(authorsData);
+      if (authorsRes.data) {
+        setAuthors(authorsRes.data);
       }
 
-      if (categoriesRes.ok) {
-        const categoriesData = await categoriesRes.json();
-        setCategories(categoriesData);
+      if (categoriesRes.data) {
+        setCategories(categoriesRes.data);
       }
     } catch (err) {
       console.error('Error fetching posts:', err);
@@ -124,15 +157,14 @@ export default function BlogPostList({ onEdit, onDelete }: BlogPostListProps) {
         throw new Error('Not authenticated');
       }
 
-      const response = await fetch(`/api/admin/blog?action=delete-post&id=${postId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-      });
+      // Soft delete the post by setting deleted_at timestamp
+      const { error } = await supabase
+        .from('blog_posts')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', postId);
 
-      if (!response.ok) {
-        throw new Error('Failed to delete post');
+      if (error) {
+        throw error;
       }
 
       // Refresh the list
@@ -143,7 +175,7 @@ export default function BlogPostList({ onEdit, onDelete }: BlogPostListProps) {
       }
     } catch (err) {
       console.error('Error deleting post:', err);
-      alert('Failed to delete post');
+      alert('Failed to delete post: ' + (err instanceof Error ? err.message : 'Unknown error'));
     }
   };
 
