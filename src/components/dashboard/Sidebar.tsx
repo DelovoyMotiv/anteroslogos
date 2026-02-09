@@ -11,11 +11,8 @@ import {
   Cpu,
   CreditCard,
   BarChart3,
-  Settings,
   ChevronLeft,
   LogOut,
-  Shield,
-  FileText,
   Search,
   FileJson,
   Bot,
@@ -50,13 +47,6 @@ const auditNav: NavItem[] = [
 // Identity Layer items
 const identityNav: NavItem[] = [
   { name: 'Agent Manifest', href: '/dashboard/agent-manifest', icon: FileJson },
-];
-
-// Administration items
-const adminNav: NavItem[] = [
-  { name: 'Settings', href: '/dashboard/settings', icon: Settings },
-  { name: 'Security', href: '/dashboard/security', icon: Shield },
-  { name: 'Documentation', href: '/docs', icon: FileText },
 ];
 
 export function Sidebar() {
@@ -292,42 +282,6 @@ export function Sidebar() {
           )}
           <nav className="space-y-0.5">
             {identityNav.map((item) => {
-              const isActive = location.pathname === item.href;
-              const Icon = item.icon;
-
-              return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`
-                    flex items-center px-2 py-1.5 rounded transition-colors group
-                    ${
-                      isActive
-                        ? 'bg-slate-800/50 text-slate-100'
-                        : 'text-slate-400 hover:bg-slate-900/30 hover:text-slate-200'
-                    }
-                  `}
-                  title={collapsed ? item.name : undefined}
-                >
-                  <Icon className="w-4 h-4 flex-shrink-0" />
-                  {!collapsed && (
-                    <span className="ml-2.5 text-xs font-medium">{item.name}</span>
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
-
-        {/* Administration Section */}
-        <div className="px-3 py-3 border-t border-slate-800/50">
-          {!collapsed && (
-            <h3 className="text-[10px] font-mono font-semibold text-slate-600 uppercase tracking-wider mb-2 px-2">
-              Administration
-            </h3>
-          )}
-          <nav className="space-y-0.5">
-            {adminNav.map((item) => {
               const isActive = location.pathname === item.href;
               const Icon = item.icon;
 
