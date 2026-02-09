@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import LoadingSpinner from './components/LoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
 import { AuthErrorBoundary } from './src/components/auth/AuthErrorBoundary';
+import { VersionChecker } from './components/VersionChecker';
 // PWA disabled - IOSInstallPrompt removed
 // import { IOSInstallPrompt } from './components/IOSInstallPrompt';
 import { logConfig, validateConfig } from './lib/config/env';
@@ -71,6 +72,7 @@ const App: React.FC = () => {
 
     return (
         <ErrorBoundary>
+            <VersionChecker />
             <Router>
                 <Suspense fallback={<LoadingSpinner />}>
                     <Routes>

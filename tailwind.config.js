@@ -246,6 +246,7 @@ export default {
         'reveal-text': 'reveal-text 1s cubic-bezier(0.77, 0, 0.175, 1) forwards',
         'scroll-indicator': 'scroll-indicator 2.2s ease-out infinite',
         'float': 'float 10s ease-in-out infinite',
+        'shimmer': 'shimmer 2s infinite',
       },
       keyframes: {
         'gradient-pan': {
@@ -291,11 +292,29 @@ export default {
           '25%': { transform: 'translate(10px, -10px)', opacity: '0.5' },
           '50%': { transform: 'translate(-10px, -20px)', opacity: '0.8' },
           '75%': { transform: 'translate(-15px, 10px)', opacity: '0.5' },
+        },
+        'shimmer': {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
         }
       }
     }
   },
   plugins: [
     require('@tailwindcss/typography'),
+    function({ addUtilities }) {
+      addUtilities({
+        '.scrollbar-hide': {
+          /* IE and Edge */
+          '-ms-overflow-style': 'none',
+          /* Firefox */
+          'scrollbar-width': 'none',
+          /* Safari and Chrome */
+          '&::-webkit-scrollbar': {
+            display: 'none'
+          }
+        }
+      })
+    }
   ],
 }

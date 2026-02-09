@@ -1,6 +1,7 @@
 import path from 'path';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import pkg from './package.json';
 
 export default defineConfig(({ mode }) => {
     // Note: mode parameter kept for TypeScript type inference, but not used
@@ -19,6 +20,7 @@ export default defineConfig(({ mode }) => {
         'process.env': {},
         'process.platform': JSON.stringify('browser'),
         'process.version': JSON.stringify(''),
+        'import.meta.env.VITE_APP_VERSION': JSON.stringify(pkg.version),
       },
       resolve: {
         alias: {
