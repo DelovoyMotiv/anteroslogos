@@ -115,6 +115,7 @@ export interface Recommendation {
 
 /**
  * Fetch HTML content from URL (browser-compatible)
+ * Skips direct fetch for external URLs to avoid CORS console errors
  */
 async function fetchHTML(url: string): Promise<string> {
   const corsProxies = [
@@ -124,29 +125,33 @@ async function fetchHTML(url: string): Promise<string> {
     'https://corsproxy.io/?',
   ];
 
-  // Try direct fetch first
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
-    
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; GEOAuditBot/1.0)',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      },
-      signal: controller.signal,
-    });
-    
-    clearTimeout(timeoutId);
-    
-    if (response.ok) {
-      return await response.text();
+  // Only try direct fetch for same-origin URLs
+  const isSameOrigin = typeof window !== 'undefined' && 
+    new URL(url).origin === window.location.origin;
+
+  if (isSameOrigin) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      
+      const response = await fetch(url, {
+        headers: {
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        },
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (response.ok) {
+        return await response.text();
+      }
+    } catch {
+      // Same-origin fetch failed, fall through to proxies
     }
-  } catch (error) {
-    console.log('Direct fetch failed, trying CORS proxies...');
   }
 
-  // Try CORS proxies
+  // Use CORS proxies for cross-origin requests
   for (const proxy of corsProxies) {
     try {
       const controller = new AbortController();
@@ -164,8 +169,8 @@ async function fetchHTML(url: string): Promise<string> {
           return text;
         }
       }
-    } catch (error) {
-      console.log(`Proxy ${proxy} failed, trying next...`);
+    } catch {
+      // Proxy failed, try next
     }
   }
 

@@ -391,29 +391,33 @@ async function fetchHTML(url: string): Promise<string> {
     },
   ];
 
-  // Try direct fetch first (works for same-origin or CORS-enabled sites)
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
-    
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; GEOAuditBot/1.0)',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      },
-      signal: controller.signal,
-    });
-    
-    clearTimeout(timeoutId);
-    
-    if (response.ok) {
-      const text = await response.text();
-      if (text && text.length > 100) {
-        return text;
+  // Check if URL is same-origin (only then try direct fetch)
+  const isSameOrigin = typeof window !== 'undefined' && 
+    new URL(url).origin === window.location.origin;
+
+  if (isSameOrigin) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      
+      const response = await fetch(url, {
+        headers: {
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        },
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (response.ok) {
+        const text = await response.text();
+        if (text && text.length > 100) {
+          return text;
+        }
       }
+    } catch {
+      // Same-origin fetch failed, fall through to proxies
     }
-  } catch (error) {
-    console.log('Direct fetch failed, trying CORS proxies...');
   }
 
   // Try CORS proxies in order
@@ -1727,7 +1731,7 @@ function auditMetaTags(doc: Document): MetaTagsDetails {
 }
 
 async function auditAICrawlers(baseUrl: string): Promise<AICrawlersDetails> {
-  // Fetch robots.txt with CORS proxy fallback
+  // Fetch robots.txt via CORS proxies (direct fetch always blocked by CORS for external sites)
   let robotsTxtFound = false;
   let robotsTxt = '';
   
@@ -1739,48 +1743,34 @@ async function auditAICrawlers(baseUrl: string): Promise<AICrawlersDetails> {
     'https://corsproxy.io/?',
   ];
   
-  // Try direct fetch first
-  try {
-    const response = await fetch(robotsUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; GEOAuditBot/1.0)',
-      },
-    });
-    
-    if (response.ok) {
-      const text = await response.text();
-      // Check if it's actually robots.txt (not HTML 404 page)
-      if (!text.trim().startsWith('<!DOCTYPE') && !text.trim().startsWith('<html')) {
-        robotsTxt = text.toLowerCase();
-        robotsTxtFound = true;
-      }
-    }
-  } catch (error) {
-    console.log('Direct fetch of robots.txt failed, trying CORS proxies...');
-  }
-  
-  // Try CORS proxies if direct fetch failed
-  if (!robotsTxtFound) {
-    for (const proxy of corsProxies) {
-      try {
-        const response = await fetch(proxy + encodeURIComponent(robotsUrl));
-        if (response.ok) {
-          const text = await response.text();
-          // Check if it's actually robots.txt (not HTML 404 page)
-          if (!text.trim().startsWith('<!DOCTYPE') && !text.trim().startsWith('<html')) {
-            robotsTxt = text.toLowerCase();
-            robotsTxtFound = true;
-            break;
-          }
+  // Use CORS proxies directly (skip direct fetch to avoid CORS console errors)
+  for (const proxy of corsProxies) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      
+      const response = await fetch(proxy + encodeURIComponent(robotsUrl), {
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (response.ok) {
+        const text = await response.text();
+        // Check if it's actually robots.txt (not HTML 404 page)
+        if (text && !text.trim().startsWith('<!DOCTYPE') && !text.trim().startsWith('<html')) {
+          robotsTxt = text.toLowerCase();
+          robotsTxtFound = true;
+          break;
         }
-      } catch (error) {
-        console.log(`Proxy ${proxy} failed for robots.txt, trying next...`);
       }
+    } catch {
+      // Proxy failed, try next
     }
   }
   
   if (!robotsTxtFound) {
-    console.log('Failed to fetch robots.txt after all attempts');
+    console.log('Failed to fetch robots.txt after all proxy attempts');
   }
   
   // Check for specific AI crawlers
