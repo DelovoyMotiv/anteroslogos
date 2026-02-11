@@ -364,18 +364,21 @@ export interface LinkAnalysisDetails {
  */
 async function fetchHTML(url: string): Promise<string> {
   // CORS proxy configurations with different URL formats
-  const corsProxies: Array<{ name: string; buildUrl: (targetUrl: string) => string; parseResponse?: (text: string) => string }> = [
+  const corsProxies: Array<{ name: string; buildUrl: (targetUrl: string) => string; timeout: number; parseResponse?: (text: string) => string }> = [
     {
       name: 'corsproxy.org',
       buildUrl: (u) => `https://corsproxy.org/?${encodeURIComponent(u)}`,
+      timeout: 15000,
     },
     {
       name: 'api.codetabs.com',
       buildUrl: (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+      timeout: 15000,
     },
     {
       name: 'api.allorigins.win',
       buildUrl: (u) => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
+      timeout: 20000,
       parseResponse: (text) => {
         try {
           const json = JSON.parse(text);
@@ -388,6 +391,7 @@ async function fetchHTML(url: string): Promise<string> {
     {
       name: 'corsproxy.io',
       buildUrl: (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+      timeout: 15000,
     },
   ];
 
@@ -425,7 +429,7 @@ async function fetchHTML(url: string): Promise<string> {
   for (const proxy of corsProxies) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 12000);
+      const timeoutId = setTimeout(() => controller.abort(), proxy.timeout);
       
       const proxyUrl = proxy.buildUrl(url);
       console.log(`Trying proxy: ${proxy.name}...`);
@@ -447,13 +451,14 @@ async function fetchHTML(url: string): Promise<string> {
           text = proxy.parseResponse(text);
         }
         
-        // Validate we got actual HTML content (not error page)
-        if (text && text.length > 100 && !text.includes('"error"')) {
+        // Validate: must have content and look like HTML (or at least substantial text)
+        if (text && text.length > 50) {
           console.log(`✓ Successfully fetched via ${proxy.name} (${text.length} bytes)`);
           return text;
         } else {
-          console.log(`Proxy ${proxy.name} returned invalid/empty content`);
-          errors.push(`${proxy.name}: empty or invalid response`);
+          const reason = !text ? 'empty' : `too short (${text.length} bytes)`;
+          console.log(`Proxy ${proxy.name}: ${reason}, trying next...`);
+          errors.push(`${proxy.name}: ${reason}`);
         }
       } else {
         console.log(`Proxy ${proxy.name} returned HTTP ${response.status}`);

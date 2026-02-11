@@ -152,12 +152,20 @@ async function fetchHTML(url: string): Promise<string> {
   }
 
   // Use CORS proxies for cross-origin requests
-  for (const proxy of corsProxies) {
+  const proxyConfigs = [
+    { url: corsProxies[0], timeout: 15000, name: 'corsproxy.org' },
+    { url: corsProxies[1], timeout: 15000, name: 'api.codetabs.com' },
+    { url: corsProxies[2], timeout: 20000, name: 'api.allorigins.win' },
+    { url: corsProxies[3], timeout: 15000, name: 'corsproxy.io' },
+  ];
+
+  const errors: string[] = [];
+  for (const proxy of proxyConfigs) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 12000);
+      const timeoutId = setTimeout(() => controller.abort(), proxy.timeout);
       
-      const response = await fetch(proxy + encodeURIComponent(url), {
+      const response = await fetch(proxy.url + encodeURIComponent(url), {
         signal: controller.signal,
       });
       
@@ -165,16 +173,22 @@ async function fetchHTML(url: string): Promise<string> {
       
       if (response.ok) {
         const text = await response.text();
-        if (text && text.length > 100) {
+        if (text && text.length > 50) {
           return text;
+        } else {
+          const reason = !text ? 'empty' : `too short (${text.length} bytes)`;
+          errors.push(`${proxy.name}: ${reason}`);
         }
+      } else {
+        errors.push(`${proxy.name}: HTTP ${response.status}`);
       }
-    } catch {
-      // Proxy failed, try next
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Unknown error';
+      errors.push(`${proxy.name}: ${msg}`);
     }
   }
 
-  throw new Error('Failed to fetch website. Please check the URL and try again.');
+  throw new Error(`Failed to fetch website via all proxies. Errors: ${errors.join('; ')}`);
 }
 
 /**
