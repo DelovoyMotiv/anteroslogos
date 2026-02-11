@@ -291,6 +291,14 @@ export class ExtractionEngine {
       // Strategy 2: CORS proxy fallback with multiple proxies
       const proxies = [
         {
+          url: `https://corsproxy.org/?${encodeURIComponent(url)}`,
+          parseResponse: async (res: Response) => await res.text()
+        },
+        {
+          url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+          parseResponse: async (res: Response) => await res.text()
+        },
+        {
           url: `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
           parseResponse: async (res: Response) => {
             const data = await res.json();
@@ -301,10 +309,6 @@ export class ExtractionEngine {
           url: `https://corsproxy.io/?${encodeURIComponent(url)}`,
           parseResponse: async (res: Response) => await res.text()
         },
-        {
-          url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-          parseResponse: async (res: Response) => await res.text()
-        }
       ];
       
       let lastError: Error | null = null;

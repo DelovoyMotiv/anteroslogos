@@ -359,41 +359,110 @@ export interface LinkAnalysisDetails {
 
 /**
  * Fetch HTML content from URL (browser-compatible)
- * Uses CORS proxy for cross-origin requests
+ * Uses multiple CORS proxy strategies for cross-origin requests
+ * Proxies are ordered by reliability and speed
  */
 async function fetchHTML(url: string): Promise<string> {
-  const corsProxies = [
-    'https://api.allorigins.win/raw?url=',
-    'https://corsproxy.io/?',
+  // CORS proxy configurations with different URL formats
+  const corsProxies: Array<{ name: string; buildUrl: (targetUrl: string) => string; parseResponse?: (text: string) => string }> = [
+    {
+      name: 'corsproxy.org',
+      buildUrl: (u) => `https://corsproxy.org/?${encodeURIComponent(u)}`,
+    },
+    {
+      name: 'api.codetabs.com',
+      buildUrl: (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+    },
+    {
+      name: 'api.allorigins.win',
+      buildUrl: (u) => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`,
+      parseResponse: (text) => {
+        try {
+          const json = JSON.parse(text);
+          return json.contents || text;
+        } catch {
+          return text;
+        }
+      },
+    },
+    {
+      name: 'corsproxy.io',
+      buildUrl: (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+    },
   ];
 
-  // Try direct fetch first
+  // Try direct fetch first (works for same-origin or CORS-enabled sites)
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    
     const response = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; GEOAuditBot/1.0)',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
       },
+      signal: controller.signal,
     });
     
+    clearTimeout(timeoutId);
+    
     if (response.ok) {
-      return await response.text();
+      const text = await response.text();
+      if (text && text.length > 100) {
+        return text;
+      }
     }
   } catch (error) {
     console.log('Direct fetch failed, trying CORS proxies...');
   }
 
-  // Try CORS proxies
+  // Try CORS proxies in order
+  const errors: string[] = [];
   for (const proxy of corsProxies) {
     try {
-      const response = await fetch(proxy + encodeURIComponent(url));
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
+      
+      const proxyUrl = proxy.buildUrl(url);
+      console.log(`Trying proxy: ${proxy.name}...`);
+      
+      const response = await fetch(proxyUrl, {
+        headers: {
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        },
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      
       if (response.ok) {
-        return await response.text();
+        let text = await response.text();
+        
+        // Apply custom response parser if defined
+        if (proxy.parseResponse) {
+          text = proxy.parseResponse(text);
+        }
+        
+        // Validate we got actual HTML content (not error page)
+        if (text && text.length > 100 && !text.includes('"error"')) {
+          console.log(`✓ Successfully fetched via ${proxy.name} (${text.length} bytes)`);
+          return text;
+        } else {
+          console.log(`Proxy ${proxy.name} returned invalid/empty content`);
+          errors.push(`${proxy.name}: empty or invalid response`);
+        }
+      } else {
+        console.log(`Proxy ${proxy.name} returned HTTP ${response.status}`);
+        errors.push(`${proxy.name}: HTTP ${response.status}`);
       }
     } catch (error) {
-      console.log(`Proxy ${proxy} failed, trying next...`);
+      const msg = error instanceof Error ? error.message : 'Unknown error';
+      console.log(`Proxy ${proxy.name} failed: ${msg}`);
+      errors.push(`${proxy.name}: ${msg}`);
     }
   }
 
+  console.error('All fetch methods failed:', errors);
   throw new Error('Failed to fetch website. Please check the URL and try again.');
 }
 
@@ -1664,6 +1733,8 @@ async function auditAICrawlers(baseUrl: string): Promise<AICrawlersDetails> {
   
   const robotsUrl = new URL('/robots.txt', baseUrl).href;
   const corsProxies = [
+    'https://corsproxy.org/?',
+    'https://api.codetabs.com/v1/proxy?quest=',
     'https://api.allorigins.win/raw?url=',
     'https://corsproxy.io/?',
   ];
@@ -2448,41 +2519,65 @@ async function auditTechnicalSEO(doc: Document, url: string): Promise<TechnicalS
   const robotsMeta = doc.querySelector('meta[name="robots"]');
   const hasNoIndex = robotsMeta?.getAttribute('content')?.includes('noindex') || false;
   
-  // Sitemap check with timeout
+  // Sitemap check with timeout and proxy fallback
   let hasSitemapXML = false;
   let sitemapAccessible = false;
   try {
     const sitemapUrl = new URL('/sitemap.xml', url).toString();
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const sitemapProxies = [
+      `https://corsproxy.org/?${encodeURIComponent(sitemapUrl)}`,
+      `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(sitemapUrl)}`,
+      `https://api.allorigins.win/raw?url=${encodeURIComponent(sitemapUrl)}`,
+    ];
     
-    const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(sitemapUrl)}`, {
-      signal: controller.signal
-    });
-    clearTimeout(timeoutId);
-    
-    hasSitemapXML = response.ok;
-    sitemapAccessible = response.ok;
+    for (const proxyUrl of sitemapProxies) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        
+        const response = await fetch(proxyUrl, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        
+        if (response.ok) {
+          hasSitemapXML = true;
+          sitemapAccessible = true;
+          break;
+        }
+      } catch {
+        continue;
+      }
+    }
   } catch (error) {
-    // Sitemap check failed - timeout or network error
     console.log('Sitemap check failed:', error instanceof Error ? error.message : 'Unknown error');
   }
   
-  // Robots.txt check with timeout
+  // Robots.txt check with timeout and proxy fallback
   let hasRobotsTxt = false;
   try {
     const robotsUrl = new URL('/robots.txt', url).toString();
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const robotsProxies = [
+      `https://corsproxy.org/?${encodeURIComponent(robotsUrl)}`,
+      `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(robotsUrl)}`,
+      `https://api.allorigins.win/raw?url=${encodeURIComponent(robotsUrl)}`,
+    ];
     
-    const response = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(robotsUrl)}`, {
-      signal: controller.signal
-    });
-    clearTimeout(timeoutId);
-    
-    hasRobotsTxt = response.ok;
+    for (const proxyUrl of robotsProxies) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000);
+        
+        const response = await fetch(proxyUrl, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        
+        if (response.ok) {
+          hasRobotsTxt = true;
+          break;
+        }
+      } catch {
+        continue;
+      }
+    }
   } catch (error) {
-    // Robots.txt check failed - timeout or network error
     console.log('Robots.txt check failed:', error instanceof Error ? error.message : 'Unknown error');
   }
   

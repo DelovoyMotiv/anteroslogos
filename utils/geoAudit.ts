@@ -118,17 +118,26 @@ export interface Recommendation {
  */
 async function fetchHTML(url: string): Promise<string> {
   const corsProxies = [
+    'https://corsproxy.org/?',
+    'https://api.codetabs.com/v1/proxy?quest=',
     'https://api.allorigins.win/raw?url=',
     'https://corsproxy.io/?',
   ];
 
   // Try direct fetch first
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    
     const response = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; GEOAuditBot/1.0)',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
       },
+      signal: controller.signal,
     });
+    
+    clearTimeout(timeoutId);
     
     if (response.ok) {
       return await response.text();
@@ -140,9 +149,20 @@ async function fetchHTML(url: string): Promise<string> {
   // Try CORS proxies
   for (const proxy of corsProxies) {
     try {
-      const response = await fetch(proxy + encodeURIComponent(url));
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
+      
+      const response = await fetch(proxy + encodeURIComponent(url), {
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+      
       if (response.ok) {
-        return await response.text();
+        const text = await response.text();
+        if (text && text.length > 100) {
+          return text;
+        }
       }
     } catch (error) {
       console.log(`Proxy ${proxy} failed, trying next...`);
