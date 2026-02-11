@@ -22,7 +22,6 @@ const Footer: React.FC<FooterProps> = () => {
 
   const companyLinks = [
     { label: 'Agent Identity', to: '/agent-identity' },
-    { label: 'Investors', to: '/investors' },
     { label: 'Privacy Policy', to: '/privacy-policy' },
     { label: 'Cookie Policy', to: '/cookie-policy' },
   ];
