@@ -6,7 +6,6 @@ import Process from '../components/Process';
 import Method from '../components/Method';
 import ClientProfile from '../components/ClientProfile';
 import FAQ from '../components/FAQ';
-import Team from '../components/Team';
 import FinalCTA from '../components/FinalCTA';
 import Footer from '../components/Footer';
 import Modal from '../components/Modal';
@@ -53,7 +52,6 @@ const HomePage: React.FC = () => {
                 <Process ref={processRef} />
                 <Method ref={methodRef} />
                 <ClientProfile ref={clientProfileRef} />
-                <Team />
                 <FAQ ref={faqRef} onCTAClick={handleOpenModal} />
                 <FinalCTA onCTAClick={handleOpenModal} />
             </main>
