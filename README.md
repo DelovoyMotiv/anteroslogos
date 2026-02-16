@@ -1,7 +1,7 @@
 # Anóteros Lógos - Enterprise AI Knowledge Infrastructure
 
 ![License](https://img.shields.io/badge/License-Proprietary-red)
-![Version](https://img.shields.io/badge/version-4.3.1-blue)
+![Version](https://img.shields.io/badge/version-4.4.0-blue)
 ![Node](https://img.shields.io/badge/node-20.x-green)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue)
 ![React](https://img.shields.io/badge/React-19.2-cyan)
@@ -11,7 +11,7 @@ AI knowledge infrastructure platform providing cryptographically verifiable prov
 
 Production URL: https://anoteroslogos.com
 
-Codebase: 848 files | 247,297 lines
+Codebase: 901 files | 266,134 lines
 
 ---
 
@@ -824,10 +824,9 @@ React 19 SPA with route-based code splitting and production-grade UI components.
 - HomePage - Platform positioning with GEO knowledge base
 - GeoAuditPage - Advanced tabbed audit interface with mobile optimization
 - AgentIdentityPage - AIP protocol documentation
-- InvestorRelationsPage - Infrastructure thesis
 - KnowledgeBasePage - GEO terminology and concepts
 - Dashboard - User portal (API keys, billing, usage, settings)
-- Blog - Content marketing
+- Blog - Editorial content with category filtering and featured articles
 
 **Audit Interface:**
 - Tabbed navigation with URL state synchronization and browser history support
@@ -1154,8 +1153,8 @@ pages/
   HomePage.tsx                   # Platform homepage
   GeoAuditPage.tsx              # Audit interface
   AgentIdentityPage.tsx         # AIP protocol
-  InvestorRelationsPage.tsx     # Infrastructure thesis
   KnowledgeBasePage.tsx         # GEO knowledge base
+  Blog.tsx                      # Editorial blog
   Dashboard/                    # User portal
 
 data/
@@ -1245,11 +1244,11 @@ tests/
 ## Statistics
 
 **Codebase:**
-- Total files: 848
-- Total lines: 247,297
-- TypeScript: 94.2%
-- PLpgSQL: 5.0%
-- CSS: 0.8%
+- Total files: 901
+- Total lines: 266,134
+- TypeScript: 92.4%
+- PLpgSQL: 7.5%
+- CSS: 0.1%
 
 **Test Coverage:**
 - Test pass rate: 97.1%
@@ -1288,5 +1287,5 @@ Proprietary - All rights reserved
 
 ---
 
-Last Updated: December 20, 2025
-Version: 4.3.1
+Last Updated: February 16, 2026
+Version: 4.4.0
