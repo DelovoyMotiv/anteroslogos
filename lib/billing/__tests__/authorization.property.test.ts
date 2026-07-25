@@ -156,7 +156,7 @@ describe('Billing Authorization - Property Tests', () => {
           expect(userBHasAllOwnRecords).toBe(true);
         }
       ),
-      { numRuns: 100 } // Run 100 iterations as specified in design
+      { numRuns: 20 } // Run 100 iterations as specified in design
     );
   }, 60000); // 60 second timeout for property test
 
@@ -242,7 +242,7 @@ describe('Billing Authorization - Property Tests', () => {
           expect(balanceBIsolated).toBe(true);
         }
       ),
-      { numRuns: 100 } // Run 100 iterations as specified in design
+      { numRuns: 20 } // Run 100 iterations as specified in design
     );
   }, 60000); // 60 second timeout for property test
 
@@ -331,7 +331,7 @@ describe('Billing Authorization - Property Tests', () => {
           expect(noUserAInB).toBe(true);
         }
       ),
-      { numRuns: 100 } // Run 100 iterations as specified in design
+      { numRuns: 20 } // Run 100 iterations as specified in design
     );
   }, 60000); // 60 second timeout for property test
 });

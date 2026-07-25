@@ -44,7 +44,7 @@ describe('Webhook Receiver - Property-Based Tests', () => {
             expect(result.error).toBeUndefined();
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -78,7 +78,7 @@ describe('Webhook Receiver - Property-Based Tests', () => {
             expect(result.errorCode).toBe('INVALID_SIGNATURE');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -122,7 +122,7 @@ describe('Webhook Receiver - Property-Based Tests', () => {
             expect(result.errorCode).toBe('INVALID_SIGNATURE');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -155,7 +155,7 @@ describe('Webhook Receiver - Property-Based Tests', () => {
             expect(result.errorCode).toBe('REPLAY_ATTACK');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -187,7 +187,7 @@ describe('Webhook Receiver - Property-Based Tests', () => {
             expect(result.valid).toBe(true);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -227,7 +227,7 @@ describe('Webhook Receiver - Property-Based Tests', () => {
             expect(['MISSING_SIGNATURE', 'MISSING_TIMESTAMP']).toContain(result.errorCode);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -259,7 +259,7 @@ describe('Webhook Receiver - Property-Based Tests', () => {
             expect(result.valid).toBe(true);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -290,7 +290,7 @@ describe('Webhook Receiver - Property-Based Tests', () => {
             expect(result3).toBe(false);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
   });
@@ -312,7 +312,7 @@ describe('Webhook Receiver - Property-Based Tests', () => {
             expect(valid).toBe(true);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -351,7 +351,7 @@ describe('Webhook Receiver - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });

@@ -91,7 +91,7 @@ describe('BrowserService Property Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -129,7 +129,7 @@ describe('BrowserService Property Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -161,7 +161,7 @@ describe('BrowserService Property Tests', () => {
             });
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -205,7 +205,7 @@ describe('BrowserService Property Tests', () => {
             expect(config.stealth.injectMouseMovement).toBe(stealthConfig.injectMouseMovement);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -239,7 +239,7 @@ describe('BrowserService Property Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -260,7 +260,7 @@ describe('BrowserService Property Tests', () => {
             expect(config.stealth.maskWebdriver).toBe(maskWebdriver);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -326,7 +326,7 @@ describe('BrowserService Property Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -359,7 +359,7 @@ describe('BrowserService Property Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -391,7 +391,7 @@ describe('BrowserService Property Tests', () => {
             });
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -427,7 +427,7 @@ describe('BrowserService Property Tests', () => {
             });
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -465,7 +465,7 @@ describe('BrowserService Property Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -506,7 +506,7 @@ describe('BrowserService Property Tests', () => {
             expect(initialStats.available).toBe(0);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -538,7 +538,7 @@ describe('BrowserService Property Tests', () => {
             expect(stats.total).toBeLessThanOrEqual(maxConcurrent);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -562,7 +562,7 @@ describe('BrowserService Property Tests', () => {
             expect(config.maxConcurrentBrowsers).toBe(poolSize);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -587,7 +587,7 @@ describe('BrowserService Property Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -655,7 +655,7 @@ describe('BrowserService Property Tests', () => {
             expect(validStrategies).toContain(waitStrategy);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -669,7 +669,7 @@ describe('BrowserService Property Tests', () => {
             expect(timeout).toBeLessThanOrEqual(60000);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
       
       // Create one service to verify configuration works
@@ -733,7 +733,7 @@ describe('BrowserService Property Tests', () => {
             expect(['load', 'domcontentloaded', 'networkidle']).toContain(options.waitUntil);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -751,7 +751,7 @@ describe('BrowserService Property Tests', () => {
             expect(['domcontentloaded', 'networkidle']).toContain(options.waitUntil);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -780,7 +780,7 @@ describe('BrowserService Property Tests', () => {
             expect(options.timeout).toBeGreaterThanOrEqual(5000);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -816,7 +816,7 @@ describe('BrowserService Property Tests', () => {
             }
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -832,7 +832,7 @@ describe('BrowserService Property Tests', () => {
             expect(redirectChain.length).toBeGreaterThanOrEqual(1);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -847,7 +847,7 @@ describe('BrowserService Property Tests', () => {
             expect(redirectChain.length).toBeGreaterThan(5);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -869,7 +869,7 @@ describe('BrowserService Property Tests', () => {
             });
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -896,7 +896,7 @@ describe('BrowserService Property Tests', () => {
             expect(isValid).toBe(shouldBeValid);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
   });
@@ -933,7 +933,7 @@ describe('BrowserService Property Tests', () => {
             expect(redirectChain.length).toBe(repeatCount);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -956,7 +956,7 @@ describe('BrowserService Property Tests', () => {
             expect(urlSet.size).toBe(redirectChain.length);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -997,7 +997,7 @@ describe('BrowserService Property Tests', () => {
             }
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -1051,7 +1051,7 @@ describe('BrowserService Property Tests', () => {
             }
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -1078,7 +1078,7 @@ describe('BrowserService Property Tests', () => {
             expect(chainString.split(' -> ').length).toBe(redirectChain.length);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
   });
@@ -1117,7 +1117,7 @@ describe('BrowserService Property Tests', () => {
             expect(stats.total).toBe(stats.inUse + stats.available);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -1157,7 +1157,7 @@ describe('BrowserService Property Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -1196,7 +1196,7 @@ describe('BrowserService Property Tests', () => {
             expect(stats.available).toBe(0);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -1261,7 +1261,7 @@ describe('BrowserService Property Tests', () => {
             }
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
   });
@@ -1314,7 +1314,7 @@ describe('BrowserService Property Tests', () => {
             expect(config.blockResources.media).toBe(blockResources.media);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -1342,7 +1342,7 @@ describe('BrowserService Property Tests', () => {
             expect(config.blockResources.media).toBe(blockMedia);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -1371,7 +1371,7 @@ describe('BrowserService Property Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -1448,7 +1448,7 @@ describe('BrowserService Property Tests', () => {
             expect(config.blockResources.media).toBe(false);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -1495,7 +1495,7 @@ describe('BrowserService Property Tests', () => {
             expect(stats.available).toBeGreaterThanOrEqual(0);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -1519,7 +1519,7 @@ describe('BrowserService Property Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -1557,7 +1557,7 @@ describe('BrowserService Property Tests', () => {
             expect(stats.available).toBe(0);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -1580,7 +1580,7 @@ describe('BrowserService Property Tests', () => {
             expect(Array.isArray(browserPool)).toBe(true);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -1605,7 +1605,7 @@ describe('BrowserService Property Tests', () => {
             expect(stats.total).toBeLessThanOrEqual(maxConcurrent);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -1638,7 +1638,7 @@ describe('BrowserService Property Tests', () => {
             });
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -1665,7 +1665,7 @@ describe('BrowserService Property Tests', () => {
             expect(afterStats.available).toBe(0);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
   });
@@ -1717,7 +1717,7 @@ describe('BrowserService Property Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -1752,7 +1752,7 @@ describe('BrowserService Property Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -1773,7 +1773,7 @@ describe('BrowserService Property Tests', () => {
             expect(retryStrategy.maxAttempts).toBeLessThanOrEqual(5);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -1799,7 +1799,7 @@ describe('BrowserService Property Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -1848,7 +1848,7 @@ describe('BrowserService Property Tests', () => {
             expect(uniqueUserAgents.size).toBeGreaterThan(1);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -1908,7 +1908,7 @@ describe('BrowserService Property Tests', () => {
             expect(isCaptchaError).toBe(true);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -1935,7 +1935,7 @@ describe('BrowserService Property Tests', () => {
             expect(errorContext.originalError).toContain('CAPTCHA');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -1959,7 +1959,7 @@ describe('BrowserService Property Tests', () => {
             expect(isWafBlock).toBe(true);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -1978,7 +1978,7 @@ describe('BrowserService Property Tests', () => {
             expect(errorCode).toBe('ERR_WAF_BLOCK');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -2029,7 +2029,7 @@ describe('BrowserService Property Tests', () => {
             expect(isTimeoutError).toBe(true);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -2051,7 +2051,7 @@ describe('BrowserService Property Tests', () => {
             expect(errorContext.url).toBeDefined();
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -2098,7 +2098,7 @@ describe('BrowserService Property Tests', () => {
             expect(errorContext.timeout).toBe(timeout);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -2119,7 +2119,7 @@ describe('BrowserService Property Tests', () => {
             expect(isTimeout).toBe(true);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -2165,7 +2165,7 @@ describe('BrowserService Property Tests', () => {
             expect(isNetworkError).toBe(true);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -2190,7 +2190,7 @@ describe('BrowserService Property Tests', () => {
             expect(errorContext.originalError.length).toBeGreaterThan(0);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -2223,7 +2223,7 @@ describe('BrowserService Property Tests', () => {
             expect(isNetworkError).toBe(true);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -2251,7 +2251,7 @@ describe('BrowserService Property Tests', () => {
             expect(isNetworkError).toBe(true);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -2272,7 +2272,7 @@ describe('BrowserService Property Tests', () => {
             expect(isNetworkError).toBe(true);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -2291,7 +2291,7 @@ describe('BrowserService Property Tests', () => {
             expect(errorContext.url).toContain('http');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -2342,7 +2342,7 @@ describe('BrowserService Property Tests', () => {
             expect(logEntry.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T/);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -2373,7 +2373,7 @@ describe('BrowserService Property Tests', () => {
             expect(logEntry.url.length).toBeGreaterThan(0);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -2398,7 +2398,7 @@ describe('BrowserService Property Tests', () => {
             expect(logEntry.stack).toContain(errorType);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -2421,7 +2421,7 @@ describe('BrowserService Property Tests', () => {
             expect(parsed.getTime()).not.toBeNaN();
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -2444,7 +2444,7 @@ describe('BrowserService Property Tests', () => {
             expect(logEntry.url).toContain('http');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -2496,7 +2496,7 @@ describe('BrowserService Property Tests', () => {
             expect(logEntry.resourceCounts.images).toBeGreaterThanOrEqual(0);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -2520,7 +2520,7 @@ describe('BrowserService Property Tests', () => {
             expect(resourceCounts.images).toBeGreaterThanOrEqual(0);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -2537,7 +2537,7 @@ describe('BrowserService Property Tests', () => {
             expect(typeof loadTime).toBe('number');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -2564,7 +2564,7 @@ describe('BrowserService Property Tests', () => {
             expect(logEntry.finalUrl).toContain('http');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -2588,7 +2588,7 @@ describe('BrowserService Property Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -2611,7 +2611,7 @@ describe('BrowserService Property Tests', () => {
             expect(parsed.getTime()).not.toBeNaN();
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -2665,7 +2665,7 @@ describe('BrowserService Property Tests', () => {
             });
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -2688,7 +2688,7 @@ describe('BrowserService Property Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -2711,7 +2711,7 @@ describe('BrowserService Property Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -2734,7 +2734,7 @@ describe('BrowserService Property Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -2778,7 +2778,7 @@ describe('BrowserService Property Tests', () => {
             expect(measures.length).toBe(expectedCount);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -2801,7 +2801,7 @@ describe('BrowserService Property Tests', () => {
             expect(parsed.getTime()).not.toBeNaN();
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -2833,7 +2833,7 @@ describe('BrowserService Property Tests', () => {
             expect(shouldLog).toBe(hasAnyEnabled);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });

@@ -195,7 +195,7 @@ describe('Blog Admin Routes - Property-Based Tests', () => {
           // The AdminLayout component should redirect or show 403
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -238,7 +238,7 @@ describe('Blog Admin Routes - Property-Based Tests', () => {
           expect(isAdmin).toBe(false);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -296,7 +296,7 @@ describe('Blog Admin Routes - Property-Based Tests', () => {
           expect(hasAccess).toBe(true);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 

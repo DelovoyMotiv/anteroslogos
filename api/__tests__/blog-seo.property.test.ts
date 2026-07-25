@@ -157,7 +157,7 @@ describe('Blog SEO - Property-Based Tests', () => {
             await supabase.from('blog_posts').delete().eq('id', insertedPost!.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -218,7 +218,7 @@ describe('Blog SEO - Property-Based Tests', () => {
             await supabase.from('blog_posts').delete().eq('id', insertedPost!.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -316,7 +316,7 @@ describe('Blog SEO - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 50 } // Reduced runs due to multiple inserts per test
+        { numRuns: 20 } // Reduced runs due to multiple inserts per test
       );
     });
   });

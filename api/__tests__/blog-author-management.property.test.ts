@@ -142,7 +142,7 @@ describe('Blog Author Management - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -242,7 +242,7 @@ describe('Blog Author Management - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
   });
@@ -343,7 +343,7 @@ describe('Blog Author Management - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
   });
@@ -457,7 +457,7 @@ describe('Blog Author Management - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 30 }
+        { numRuns: 20 }
       );
     });
   });

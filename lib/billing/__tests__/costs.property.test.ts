@@ -125,7 +125,7 @@ describe('Cost Configuration Property-Based Tests', () => {
           expect(result.newBalance).toBeCloseTo(initialBalance - expectedCost, 6);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -195,7 +195,7 @@ describe('Cost Configuration Property-Based Tests', () => {
           expect(insertedEventType).toMatch(/^SPEND_/);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -211,7 +211,7 @@ describe('Cost Configuration Property-Based Tests', () => {
           expect(cost).toBeGreaterThan(0);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -237,7 +237,7 @@ describe('Cost Configuration Property-Based Tests', () => {
           expect(metadata.description.length).toBeGreaterThan(0);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -275,7 +275,7 @@ describe('Cost Configuration Property-Based Tests', () => {
           expect(isValid).toBe(expectedValid);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 });

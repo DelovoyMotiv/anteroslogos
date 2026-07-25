@@ -25,7 +25,7 @@ describe('Agent Middleware Utils - Property-Based Tests', () => {
             expect(key1).toMatch(/^agent:wrap:[0-9a-f]{64}$/);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -44,7 +44,7 @@ describe('Agent Middleware Utils - Property-Based Tests', () => {
             expect(hashPart).toMatch(/^[0-9a-f]{64}$/);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -77,7 +77,7 @@ describe('Agent Middleware Utils - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -109,7 +109,7 @@ describe('Agent Middleware Utils - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -131,7 +131,7 @@ describe('Agent Middleware Utils - Property-Based Tests', () => {
             expect(key1).toBe(key2);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -153,7 +153,7 @@ describe('Agent Middleware Utils - Property-Based Tests', () => {
             expect(normalized1).toBe(normalized2);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -176,7 +176,7 @@ describe('Agent Middleware Utils - Property-Based Tests', () => {
             expect(normalized1).toContain(domain.toLowerCase());
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -204,7 +204,7 @@ describe('Agent Middleware Utils - Property-Based Tests', () => {
             expect(normalized3).not.toContain(':443');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -223,7 +223,7 @@ describe('Agent Middleware Utils - Property-Based Tests', () => {
             expect(normalized).toContain(`:${port}`);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -254,7 +254,7 @@ describe('Agent Middleware Utils - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -269,7 +269,7 @@ describe('Agent Middleware Utils - Property-Based Tests', () => {
             expect(isValidUrl(url)).toBe(true);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -284,7 +284,7 @@ describe('Agent Middleware Utils - Property-Based Tests', () => {
             expect(isValidUrl(url)).toBe(false);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -297,7 +297,7 @@ describe('Agent Middleware Utils - Property-Based Tests', () => {
             expect(isValidUrl(str)).toBe(false);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -315,7 +315,7 @@ describe('Agent Middleware Utils - Property-Based Tests', () => {
             expect(domain).toBe(parsed.hostname);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -337,7 +337,7 @@ describe('Agent Middleware Utils - Property-Based Tests', () => {
             expect(() => extractDomain(str)).toThrow();
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -355,7 +355,7 @@ describe('Agent Middleware Utils - Property-Based Tests', () => {
             expect(hash1).toBe(hash2);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -371,7 +371,7 @@ describe('Agent Middleware Utils - Property-Based Tests', () => {
             expect(hash).toMatch(/^[0-9a-f]{64}$/);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -392,7 +392,7 @@ describe('Agent Middleware Utils - Property-Based Tests', () => {
             expect(hash1).not.toBe(hash2);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });

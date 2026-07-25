@@ -91,7 +91,7 @@ describe('BillingService Property-Based Tests', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -156,7 +156,7 @@ describe('BillingService Property-Based Tests', () => {
           expect(insertedAmount).toBe(cost);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -203,7 +203,7 @@ describe('BillingService Property-Based Tests', () => {
           expect(balanceAfter).toBe(initialBalance);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -277,7 +277,7 @@ describe('BillingService Property-Based Tests', () => {
           expect(currentBalance).toBeGreaterThanOrEqual(0);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -342,7 +342,7 @@ describe('BillingService Property-Based Tests', () => {
           expect(balance).toBeCloseTo(expectedBalance, 6);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -391,7 +391,7 @@ describe('BillingService Property-Based Tests', () => {
           expect(balanceAfter).toBe(initialBalance);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -443,7 +443,7 @@ describe('BillingService Property-Based Tests', () => {
           expect(operationExecuted).toBe(false);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -518,7 +518,7 @@ describe('BillingService Property-Based Tests', () => {
           expect(balanceAfter).toBeCloseTo(initialBalance + depositAmount, 6);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 });

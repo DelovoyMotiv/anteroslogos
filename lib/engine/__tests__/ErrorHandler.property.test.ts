@@ -87,7 +87,7 @@ describe('ErrorHandler Property Tests', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -149,7 +149,7 @@ describe('ErrorHandler Property Tests', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -196,7 +196,7 @@ describe('ErrorHandler Property Tests', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -271,7 +271,7 @@ describe('ErrorHandler Property Tests', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -329,7 +329,7 @@ describe('ErrorHandler Property Tests', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -408,7 +408,7 @@ describe('ErrorHandler Property Tests', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 });

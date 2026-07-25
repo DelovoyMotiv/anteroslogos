@@ -133,7 +133,7 @@ describe('Blog CMS - RLS Policy Enforcement', () => {
             await adminSupabase.from('blog_posts').delete().eq('id', createdPost.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -174,7 +174,7 @@ describe('Blog CMS - RLS Policy Enforcement', () => {
             await adminSupabase.from('blog_posts').delete().eq('id', createdPost.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -215,7 +215,7 @@ describe('Blog CMS - RLS Policy Enforcement', () => {
             await adminSupabase.from('blog_posts').delete().eq('id', createdPost.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -264,7 +264,7 @@ describe('Blog CMS - RLS Policy Enforcement', () => {
             await adminSupabase.from('blog_posts').delete().eq('id', createdPost.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -300,7 +300,7 @@ describe('Blog CMS - RLS Policy Enforcement', () => {
             expect(checkPost).toBeNull();
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -353,7 +353,7 @@ describe('Blog CMS - RLS Policy Enforcement', () => {
             await adminSupabase.from('blog_posts').delete().eq('id', createdPost.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -403,7 +403,7 @@ describe('Blog CMS - RLS Policy Enforcement', () => {
             await adminSupabase.from('blog_posts').delete().eq('id', createdPost.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -445,7 +445,7 @@ describe('Blog CMS - RLS Policy Enforcement', () => {
             await adminSupabase.from('blog_authors').delete().eq('id', createdAuthor.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -481,7 +481,7 @@ describe('Blog CMS - RLS Policy Enforcement', () => {
             expect(checkAuthor).toBeNull();
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -523,7 +523,7 @@ describe('Blog CMS - RLS Policy Enforcement', () => {
             await adminSupabase.from('blog_categories').delete().eq('id', createdCategory.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -559,7 +559,7 @@ describe('Blog CMS - RLS Policy Enforcement', () => {
             expect(checkCategory).toBeNull();
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });

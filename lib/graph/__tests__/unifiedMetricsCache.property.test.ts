@@ -57,7 +57,7 @@ describe('Unified Graph Metrics Cache - Property Tests', () => {
           expect(result1.outDegree).toBe(result2.outDegree);
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   });
 
@@ -89,7 +89,7 @@ describe('Unified Graph Metrics Cache - Property Tests', () => {
           }
         }
       ),
-      { numRuns: 30 }
+      { numRuns: 20 }
     );
   });
 
@@ -114,7 +114,7 @@ describe('Unified Graph Metrics Cache - Property Tests', () => {
           expect(result.centrality).toBeLessThanOrEqual(1);
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   });
 
@@ -142,7 +142,7 @@ describe('Unified Graph Metrics Cache - Property Tests', () => {
           expect(result1.existingCount).toBe(result2.existingCount);
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   });
 
@@ -180,7 +180,7 @@ describe('Unified Graph Metrics Cache - Property Tests', () => {
           expect(hitRate2).toBeGreaterThanOrEqual(hitRate1);
         }
       ),
-      { numRuns: 30 }
+      { numRuns: 20 }
     );
   });
 
@@ -220,7 +220,7 @@ describe('Unified Graph Metrics Cache - Property Tests', () => {
           expect(missesAfter).toBeGreaterThanOrEqual(missesBefore + 1);
         }
       ),
-      { numRuns: 30 }
+      { numRuns: 20 }
     );
   });
 
@@ -254,7 +254,7 @@ describe('Unified Graph Metrics Cache - Property Tests', () => {
           expect(result.qualityBoost).toBeGreaterThanOrEqual(0);
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   });
 });

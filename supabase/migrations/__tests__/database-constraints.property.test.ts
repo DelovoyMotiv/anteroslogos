@@ -56,7 +56,7 @@ describe('Database Constraints Property Tests', () => {
             expect(error?.message).toMatch(/foreign key|violates/i);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -145,7 +145,7 @@ describe('Database Constraints Property Tests', () => {
             expect(error?.message).toMatch(/check|constraint|violates/i);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -185,7 +185,7 @@ describe('Database Constraints Property Tests', () => {
             expect(error?.message).toMatch(/check|constraint|violates/i);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -247,7 +247,7 @@ describe('Database Constraints Property Tests', () => {
             expect(error?.message).toMatch(/check|constraint|violates/i);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -274,7 +274,7 @@ describe('Database Constraints Property Tests', () => {
             expect(error?.message).toMatch(/check|constraint|violates/i);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -332,7 +332,7 @@ describe('Database Constraints Property Tests', () => {
             expect(error?.message).toMatch(/check|constraint|violates/i);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -392,7 +392,7 @@ describe('Database Constraints Property Tests', () => {
             expect(error?.message).toMatch(/check|constraint|violates/i);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 

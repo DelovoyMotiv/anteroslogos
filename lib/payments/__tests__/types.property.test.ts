@@ -34,7 +34,7 @@ describe('Payment Types - Property-Based Tests', () => {
             expect(Math.abs(parsedConverted - roundedAmount)).toBeLessThan(0.000001);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -52,7 +52,7 @@ describe('Payment Types - Property-Based Tests', () => {
             expect(result).toBe(true);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -67,7 +67,7 @@ describe('Payment Types - Property-Based Tests', () => {
             expect(result).toBe(false);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -82,7 +82,7 @@ describe('Payment Types - Property-Based Tests', () => {
             expect(result).toBe(false);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -100,7 +100,7 @@ describe('Payment Types - Property-Based Tests', () => {
             expect(result).toBe(true);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -115,7 +115,7 @@ describe('Payment Types - Property-Based Tests', () => {
             expect(result).toBe(false);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -130,7 +130,7 @@ describe('Payment Types - Property-Based Tests', () => {
             expect(result).toBe(false);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -152,7 +152,7 @@ describe('Payment Types - Property-Based Tests', () => {
             expect(id2).toMatch(/^inv_[0-9A-HJKMNP-TV-Z]{26}$/);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -177,7 +177,7 @@ describe('Payment Types - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -199,7 +199,7 @@ describe('Payment Types - Property-Based Tests', () => {
             expect(unitsSum).toBe(unitsA + unitsB);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 

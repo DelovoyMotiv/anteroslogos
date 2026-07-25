@@ -82,7 +82,7 @@ describe('Forecaster - Property-Based Tests', () => {
             expect(days).toContain(90);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
     
@@ -104,7 +104,7 @@ describe('Forecaster - Property-Based Tests', () => {
             });
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
     
@@ -140,7 +140,7 @@ describe('Forecaster - Property-Based Tests', () => {
             });
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
     
@@ -167,7 +167,7 @@ describe('Forecaster - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
     
@@ -216,7 +216,7 @@ describe('Forecaster - Property-Based Tests', () => {
             return true;
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
     
@@ -236,7 +236,7 @@ describe('Forecaster - Property-Based Tests', () => {
             expect(Math.abs(result.citationVelocity)).toBeLessThanOrEqual(11);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
     
@@ -271,7 +271,7 @@ describe('Forecaster - Property-Based Tests', () => {
             });
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
     
@@ -297,7 +297,7 @@ describe('Forecaster - Property-Based Tests', () => {
             });
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });

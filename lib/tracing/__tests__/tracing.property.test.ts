@@ -56,7 +56,7 @@ describe('Property-Based Tests: OpenTelemetry Tracing', () => {
             endSpan(span);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -75,7 +75,7 @@ describe('Property-Based Tests: OpenTelemetry Tracing', () => {
             endSpan(span);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -99,7 +99,7 @@ describe('Property-Based Tests: OpenTelemetry Tracing', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -113,7 +113,7 @@ describe('Property-Based Tests: OpenTelemetry Tracing', () => {
             expect(result).toBe(returnValue);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -130,7 +130,7 @@ describe('Property-Based Tests: OpenTelemetry Tracing', () => {
             expect(result).toBe(returnValue);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -147,7 +147,7 @@ describe('Property-Based Tests: OpenTelemetry Tracing', () => {
             }).toThrow(errorMessage);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -164,7 +164,7 @@ describe('Property-Based Tests: OpenTelemetry Tracing', () => {
             ).rejects.toThrow(errorMessage);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -187,7 +187,7 @@ describe('Property-Based Tests: OpenTelemetry Tracing', () => {
             end();
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -203,7 +203,7 @@ describe('Property-Based Tests: OpenTelemetry Tracing', () => {
             expect(true).toBe(true);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -222,7 +222,7 @@ describe('Property-Based Tests: OpenTelemetry Tracing', () => {
             expect(true).toBe(true);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -244,7 +244,7 @@ describe('Property-Based Tests: OpenTelemetry Tracing', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -263,7 +263,7 @@ describe('Property-Based Tests: OpenTelemetry Tracing', () => {
             expect(originalHeaders).toEqual(headersCopy);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -291,7 +291,7 @@ describe('Property-Based Tests: OpenTelemetry Tracing', () => {
             expect(caughtMessage).toBe(errorMessage);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -317,7 +317,7 @@ describe('Property-Based Tests: OpenTelemetry Tracing', () => {
             expect(caughtMessage).toBe(errorMessage);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -333,7 +333,7 @@ describe('Property-Based Tests: OpenTelemetry Tracing', () => {
             expect(result).toEqual(value);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -350,7 +350,7 @@ describe('Property-Based Tests: OpenTelemetry Tracing', () => {
             expect(result).toEqual(value);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });

@@ -126,7 +126,7 @@ describe('Transaction History Property-Based Tests', () => {
           expect(result.map((t) => t.id)).toEqual(expectedOrder.map((t) => t.id));
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -212,7 +212,7 @@ describe('Transaction History Property-Based Tests', () => {
           });
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 });

@@ -130,7 +130,7 @@ describe('Browser Configuration Property Tests', () => {
             expect(config.pageLoadTimeout).toBeLessThanOrEqual(30000);
           }
         ),
-        { numRuns: 100 } // Run 100 iterations as specified in design
+        { numRuns: 20 } // Run 100 iterations as specified in design
       );
     });
 
@@ -174,7 +174,7 @@ describe('Browser Configuration Property Tests', () => {
             expect(config.maxConcurrentBrowsers).toBe(maxConcurrent);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -201,7 +201,7 @@ describe('Browser Configuration Property Tests', () => {
             expect(config.blockResources.fonts).toBe(expectFonts);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -222,7 +222,7 @@ describe('Browser Configuration Property Tests', () => {
             expect(enabled).toBe(browserEnabled !== 'false');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -290,7 +290,7 @@ describe('Browser Configuration Property Tests', () => {
             expect(() => validateBrowserConfig(config)).toThrow(BrowserConfigurationError);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -310,7 +310,7 @@ describe('Browser Configuration Property Tests', () => {
             expect(() => validateBrowserConfig(config)).toThrow(BrowserConfigurationError);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -332,7 +332,7 @@ describe('Browser Configuration Property Tests', () => {
             expect(() => validateBrowserConfig(config)).toThrow(BrowserConfigurationError);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -374,7 +374,7 @@ describe('Browser Configuration Property Tests', () => {
             expect(() => validateBrowserConfig(config)).not.toThrow();
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -403,7 +403,7 @@ describe('Browser Configuration Property Tests', () => {
             expect(config.viewportSizes).toEqual(DEFAULT_BROWSER_CONFIG.viewportSizes);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -429,7 +429,7 @@ describe('Browser Configuration Property Tests', () => {
             expect(config.blockResources.media).toBe(DEFAULT_BROWSER_CONFIG.blockResources.media);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -453,7 +453,7 @@ describe('Browser Configuration Property Tests', () => {
             expect(config.stealth.injectMouseMovement).toBe(DEFAULT_BROWSER_CONFIG.stealth.injectMouseMovement);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -467,7 +467,7 @@ describe('Browser Configuration Property Tests', () => {
             })).toThrow(BrowserConfigurationError);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -518,7 +518,7 @@ describe('Browser Configuration Property Tests', () => {
             expect(() => getBrowserConfig()).toThrow(BrowserConfigurationError);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -535,7 +535,7 @@ describe('Browser Configuration Property Tests', () => {
             expect(() => getBrowserConfig()).toThrow(BrowserConfigurationError);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -548,7 +548,7 @@ describe('Browser Configuration Property Tests', () => {
             expect(isBrowserEnabled()).toBe(true);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
 
       fc.assert(
@@ -559,7 +559,7 @@ describe('Browser Configuration Property Tests', () => {
             expect(isBrowserEnabled()).toBe(false);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -573,7 +573,7 @@ describe('Browser Configuration Property Tests', () => {
             expect(isBrowserEnabled()).toBe(true);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
   });

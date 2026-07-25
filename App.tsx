@@ -13,10 +13,8 @@ const HomePage = lazy(() => import('./pages/HomePage'));
 const KnowledgeBasePage = lazy(() => import('./pages/KnowledgeBasePage'));
 const GeoAuditPage = lazy(() => import('./pages/GeoAuditPage'));
 const PricingPage = lazy(() => import('./pages/PricingPage'));
-const Blog = lazy(() => import('./pages/Blog'));
-const BlogPost = lazy(() => import('./pages/BlogPost'));
-const AuthorPage = lazy(() => import('./pages/Author'));
 const AgentIdentityPage = lazy(() => import('./pages/AgentIdentityPage'));
+const SreDevOpsPage = lazy(() => import('./pages/SreDevOpsPage'));
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
 const CookiePolicyPage = lazy(() => import('./pages/CookiePolicyPage'));
 const NotFound = lazy(() => import('./components/NotFound'));
@@ -32,13 +30,6 @@ const DashboardBilling = lazy(() => import('./src/pages/dashboard/BillingPage'))
 const DashboardUsage = lazy(() => import('./src/pages/dashboard/UsagePage'));
 const DashboardSettings = lazy(() => import('./src/pages/dashboard/SettingsPage'));
 const AgentManifestPage = lazy(() => import('./pages/AgentManifestPage'));
-
-// Admin pages (protected)
-const BlogAdminPage = lazy(() => import('./pages/admin/BlogAdminPage'));
-const BlogNewPostPage = lazy(() => import('./pages/admin/BlogNewPostPage'));
-const BlogEditPostPage = lazy(() => import('./pages/admin/BlogEditPostPage'));
-const BlogAuthorsPage = lazy(() => import('./pages/admin/BlogAuthorsPage'));
-const BlogCategoriesPage = lazy(() => import('./pages/admin/BlogCategoriesPage'));
 
 // Auth pages
 const LoginPage = lazy(() => import('./src/pages/auth/LoginPage'));
@@ -83,9 +74,16 @@ const App: React.FC = () => {
                         <Route path="/geo-vs-seo" element={<Navigate to="/knowledge-base/geo-vs-seo" replace />} />
                         <Route path="/geo-audit" element={<Navigate to="/method" replace />} />
                         <Route path="/method" element={<GeoAuditPage />} />
-                        <Route path="/blog" element={<Blog />} />
-                        <Route path="/blog/:slug" element={<BlogPost />} />
-                        <Route path="/author/:slug" element={<AuthorPage />} />
+
+                        {/* Services */}
+                        <Route path="/services/sre-devops" element={<SreDevOpsPage />} />
+                        <Route path="/services/*" element={<NotFound />} />
+
+                        {/* Blog retired (data source removed) — redirect legacy URLs home */}
+                        <Route path="/blog" element={<Navigate to="/" replace />} />
+                        <Route path="/blog/:slug" element={<Navigate to="/" replace />} />
+                        <Route path="/author/:slug" element={<Navigate to="/" replace />} />
+
                         <Route path="/agent-identity" element={<AgentIdentityPage />} />
                         <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                         <Route path="/cookie-policy" element={<CookiePolicyPage />} />
@@ -115,13 +113,6 @@ const App: React.FC = () => {
                             <Route path="usage" element={<DashboardUsage />} />
                             <Route path="settings" element={<DashboardSettings />} />
                         </Route>
-                        
-                        {/* Admin Routes (protected) */}
-                        <Route path="/admin/blog" element={<BlogAdminPage />} />
-                        <Route path="/admin/blog/new" element={<BlogNewPostPage />} />
-                        <Route path="/admin/blog/edit/:id" element={<BlogEditPostPage />} />
-                        <Route path="/admin/blog/authors" element={<BlogAuthorsPage />} />
-                        <Route path="/admin/blog/categories" element={<BlogCategoriesPage />} />
                         
                         <Route path="*" element={<NotFound />} />
                     </Routes>

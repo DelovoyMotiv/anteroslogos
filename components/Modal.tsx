@@ -145,12 +145,13 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
         
         {isSubmitted ? (
           <div className="text-center py-8">
-            <h3 id="dialog-title" className="font-display text-2xl font-bold text-brand-accent">Thank You</h3>
-            <p className="mt-2 text-brand-text/80">Your request has been received. We will be in touch shortly.</p>
+            <h3 id="dialog-title" className="font-display text-2xl font-bold text-brand-accent">Thank you</h3>
+            <p className="mt-2 text-brand-text/80">We&rsquo;ve got your message and will reply shortly.</p>
           </div>
         ) : (
           <>
-            <h3 id="dialog-title" className="font-display text-3xl font-bold text-center mb-6">Initiate Dialogue</h3>
+            <h3 id="dialog-title" className="font-display text-3xl font-bold text-center mb-2">Start a project</h3>
+            <p className="text-center text-brand-text/60 text-sm mb-6">Tell us what you&rsquo;re building and we&rsquo;ll reply with a straight answer.</p>
             {error && (
               <div className="bg-red-500/10 border border-red-500/50 text-red-400 px-4 py-3 rounded-md text-sm">
                 {error}
@@ -206,9 +207,9 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-brand-accent text-white font-bold py-3 rounded-md hover:bg-blue-500 transition-all disabled:bg-opacity-50 disabled:cursor-not-allowed transform hover:scale-105 hover:shadow-lg hover:shadow-blue-500/40"
+                className="w-full bg-brand-text text-brand-bg font-bold py-3 rounded-md hover:bg-white transition-all disabled:bg-opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5"
               >
-                {isSubmitting ? 'Submitting...' : 'Request Consultation'}
+                {isSubmitting ? 'Sending...' : 'Send message'}
               </button>
             </form>
           </>

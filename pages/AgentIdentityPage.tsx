@@ -410,7 +410,7 @@ console.log(agentCard.extensions.payment); // USDC on Base L2`
             </div>
 
             <p className="text-white/70 mb-6">
-              Stateless, machine-first agent authentication and discovery. Generate credentials, verify signatures, and explore capabilities—all without human intervention.
+              Stateless, machine-first agent authentication and discovery. Generate credentials, verify signatures, and explore capabilities, all without human intervention.
             </p>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">

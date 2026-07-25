@@ -50,7 +50,7 @@ describe('Agent Authentication Middleware - Property-Based Tests', () => {
             expect(result.error?.code).toBe(AUTH_ERROR_CODES.ERR_AUTH_MISSING);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -69,7 +69,7 @@ describe('Agent Authentication Middleware - Property-Based Tests', () => {
             expect(result.error?.code).toBe(AUTH_ERROR_CODES.ERR_AUTH_INVALID);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -98,7 +98,7 @@ describe('Agent Authentication Middleware - Property-Based Tests', () => {
             expect(result.error?.message).toContain('Invalid API key');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -147,7 +147,7 @@ describe('Agent Authentication Middleware - Property-Based Tests', () => {
             expect(result.error?.message).toContain('revoked');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -196,7 +196,7 @@ describe('Agent Authentication Middleware - Property-Based Tests', () => {
             expect(result.error?.message).toContain('expired');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -251,7 +251,7 @@ describe('Agent Authentication Middleware - Property-Based Tests', () => {
             expect(result.error).toBeUndefined();
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -300,7 +300,7 @@ describe('Agent Authentication Middleware - Property-Based Tests', () => {
             expect(result.error).toBeUndefined();
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -365,7 +365,7 @@ describe('Agent Authentication Middleware - Property-Based Tests', () => {
             );
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });

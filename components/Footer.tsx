@@ -14,14 +14,13 @@ const Footer: React.FC<FooterProps> = () => {
   const navigate = useNavigate();
 
   const productLinks = [
-    { label: 'Method', to: '/method' },
+    { label: 'Services', to: '/' },
+    { label: 'SRE & DevOps', to: '/services/sre-devops' },
     { label: 'Pricing', to: '/pricing' },
-    { label: 'Blog', to: '/blog' },
     { label: 'Knowledge Base', to: '/knowledge-base' },
   ];
 
   const companyLinks = [
-    { label: 'Agent Identity', to: '/agent-identity' },
     { label: 'Privacy Policy', to: '/privacy-policy' },
     { label: 'Cookie Policy', to: '/cookie-policy' },
   ];
@@ -58,10 +57,13 @@ const Footer: React.FC<FooterProps> = () => {
                 </span>
               </button>
               <p className="text-sm text-brand-text/40 leading-relaxed max-w-sm mb-5">
-                Encoding expertise into the foundational logic of AI.
+                A boutique digital studio that works across the full product
+                lifecycle: build, run, grow, and shape. High-load engineering,
+                SRE and DevOps, search and generative-engine optimization, and
+                growth, under one roof.
               </p>
               <p className="text-xs text-brand-accent/70 font-mono">
-                Don't rank. Become the source.
+                Don&rsquo;t rank. Become the source.
               </p>
             </div>
 
@@ -137,8 +139,8 @@ const Footer: React.FC<FooterProps> = () => {
           <p className="text-xs text-brand-text/25">
             &copy; {new Date().getFullYear()} Anóteros Lógos. All rights reserved.
           </p>
-          <p className="text-xs text-brand-text/20 font-mono italic">
-            The Nicosia Method™
+          <p className="text-xs text-brand-text/20 font-mono">
+            Boutique digital studio
           </p>
         </div>
       </div>

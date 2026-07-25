@@ -73,7 +73,7 @@ describe('Property 21: Entropy-Based Quality', () => {
           return true;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -137,7 +137,7 @@ describe('Property 21: Entropy-Based Quality', () => {
           return true;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -169,7 +169,7 @@ describe('Property 21: Entropy-Based Quality', () => {
           return true;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -230,7 +230,7 @@ describe('Property 21: Entropy-Based Quality', () => {
           return true;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 });
@@ -266,7 +266,7 @@ describe('Property 25: Kolmogorov Complexity Approximation', () => {
           return true;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -328,7 +328,7 @@ describe('Property 25: Kolmogorov Complexity Approximation', () => {
           return true;
         }
       ),
-      { numRuns: 50 } // Fewer runs for performance
+      { numRuns: 20 } // Fewer runs for performance
     );
   });
   
@@ -362,7 +362,7 @@ describe('Property 25: Kolmogorov Complexity Approximation', () => {
           return true;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   

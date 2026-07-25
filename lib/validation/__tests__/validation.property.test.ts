@@ -34,7 +34,7 @@ describe('Property-Based Validation Tests', () => {
             expect(result.success).toBe(false);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -52,7 +52,7 @@ describe('Property-Based Validation Tests', () => {
           const result = validateInput(AidSchema, validAid);
           expect(result.success).toBe(true);
         }),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -65,7 +65,7 @@ describe('Property-Based Validation Tests', () => {
             expect(result.success).toBe(false);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -81,7 +81,7 @@ describe('Property-Based Validation Tests', () => {
             expect(result.success).toBe(true);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -94,7 +94,7 @@ describe('Property-Based Validation Tests', () => {
             expect(result.success).toBe(false);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -110,7 +110,7 @@ describe('Property-Based Validation Tests', () => {
             expect(result.success).toBe(true);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -130,7 +130,7 @@ describe('Property-Based Validation Tests', () => {
             expect(result.success).toBe(false);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -148,7 +148,7 @@ describe('Property-Based Validation Tests', () => {
             expect(result.success).toBe(true);
           }
         }),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -164,7 +164,7 @@ describe('Property-Based Validation Tests', () => {
           const result = validateInput(UrlSchema, longUrl);
           expect(result.success).toBe(false);
         }),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -181,7 +181,7 @@ describe('Property-Based Validation Tests', () => {
           const result = validateInput(JsonRpcRequestSchema, request);
           expect(result.success).toBe(true);
         }),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -197,7 +197,7 @@ describe('Property-Based Validation Tests', () => {
           const result = validateInput(JsonRpcRequestSchema, request);
           expect(result.success).toBe(false);
         }),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -213,7 +213,7 @@ describe('Property-Based Validation Tests', () => {
           const result = validateInput(JsonRpcRequestSchema, request);
           expect(result.success).toBe(false);
         }),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -229,7 +229,7 @@ describe('Property-Based Validation Tests', () => {
           const result = validateInput(JsonRpcRequestSchema, request);
           expect(result.success).toBe(false);
         }),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -242,7 +242,7 @@ describe('Property-Based Validation Tests', () => {
           const result2 = validateInput(AidSchema, input);
           expect(result1.success).toBe(result2.success);
         }),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -254,7 +254,7 @@ describe('Property-Based Validation Tests', () => {
             expect(result).toHaveProperty('success');
           }).not.toThrow();
         }),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });

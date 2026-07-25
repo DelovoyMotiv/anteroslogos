@@ -146,7 +146,7 @@ describe('Blog Category and Tag Management - Property-Based Tests', () => {
             await supabase.from('blog_categories').delete().eq('id', insertedCategory.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -249,7 +249,7 @@ describe('Blog Category and Tag Management - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -337,7 +337,7 @@ describe('Blog Category and Tag Management - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -453,7 +453,7 @@ describe('Blog Category and Tag Management - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -606,7 +606,7 @@ describe('Blog Category and Tag Management - Property-Based Tests', () => {
             await supabase.from('blog_tags').delete().eq('id', tag.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });

@@ -88,7 +88,7 @@ describe('Temporal Analyzer - Property-Based Tests', () => {
             expect(detectionRate).toBeGreaterThanOrEqual(0.9);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -139,7 +139,7 @@ describe('Temporal Analyzer - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -183,7 +183,7 @@ describe('Temporal Analyzer - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
   });

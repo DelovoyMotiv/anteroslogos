@@ -14,10 +14,14 @@ export default {
         'xs': '400px',
       },
       colors: {
-        'brand-bg': '#121212',
-        'brand-text': '#E0E0E0',
-        'brand-accent': '#3B82F6',
-        'brand-secondary': '#374151',
+        'brand-bg': '#07080A',
+        'brand-surface': '#0D0F13',
+        'brand-elevated': '#12151B',
+        'brand-text': '#E6E8EC',
+        'brand-muted': '#767E8B',
+        'brand-accent': '#39D8E6',
+        'brand-accent-soft': '#7DE9F2',
+        'brand-secondary': '#1A1E26',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],

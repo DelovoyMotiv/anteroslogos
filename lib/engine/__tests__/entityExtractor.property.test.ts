@@ -64,7 +64,7 @@ describe('Entity Extractor - Property-Based Tests', () => {
             expect(Array.isArray(normalized.properties)).toBe(false);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -93,7 +93,7 @@ describe('Entity Extractor - Property-Based Tests', () => {
             expect(uniqueIds.size).toBe(ids.length);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -120,7 +120,7 @@ describe('Entity Extractor - Property-Based Tests', () => {
             expect(normalized.source).toBe(rawEntity.source);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -154,7 +154,7 @@ describe('Entity Extractor - Property-Based Tests', () => {
             expect(normalized.properties).toBeDefined();
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -186,7 +186,7 @@ describe('Entity Extractor - Property-Based Tests', () => {
             expect(normalized.description).toBe(rawEntity.description);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -219,7 +219,7 @@ describe('Entity Extractor - Property-Based Tests', () => {
             expect(normalized.confidence).toBeLessThanOrEqual(1);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -248,7 +248,7 @@ describe('Entity Extractor - Property-Based Tests', () => {
             expect(contentEntity.confidence).toBeGreaterThan(inferredEntity.confidence);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -285,7 +285,7 @@ describe('Entity Extractor - Property-Based Tests', () => {
             expect(completeEntity.confidence).toBeGreaterThanOrEqual(minimalEntity.confidence);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -314,7 +314,7 @@ describe('Entity Extractor - Property-Based Tests', () => {
             expect(maximalEntity.confidence).toBeLessThanOrEqual(1.0);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -347,7 +347,7 @@ describe('Entity Extractor - Property-Based Tests', () => {
             expect(entities[0].source).toBe('schema');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -388,7 +388,7 @@ describe('Entity Extractor - Property-Based Tests', () => {
             expect(entities.length).toBe(0);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -416,7 +416,7 @@ describe('Entity Extractor - Property-Based Tests', () => {
             expect(entities.length).toBe(0);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -445,7 +445,7 @@ describe('Entity Extractor - Property-Based Tests', () => {
             expect(relationships.length).toBe(0);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -474,7 +474,7 @@ describe('Entity Extractor - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });

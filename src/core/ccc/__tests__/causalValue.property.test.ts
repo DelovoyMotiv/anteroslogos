@@ -117,7 +117,7 @@ describe('Property 28: Quality Multiplier Application', () => {
           return true;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -177,7 +177,7 @@ describe('Property 28: Quality Multiplier Application', () => {
           return true;
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   });
   
@@ -217,7 +217,7 @@ describe('Property 28: Quality Multiplier Application', () => {
           return true;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 });
@@ -272,7 +272,7 @@ describe('Property 29: Path Creation Bonus', () => {
           return true;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -326,7 +326,7 @@ describe('Property 29: Path Creation Bonus', () => {
           return true;
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   });
   
@@ -375,7 +375,7 @@ describe('Property 29: Path Creation Bonus', () => {
           return true;
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   });
 });

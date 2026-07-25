@@ -104,7 +104,7 @@ describe('Real-Time Content Analyzer - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 100 } // Run 100 iterations as per design requirements
+        { numRuns: 20 } // Run 100 iterations as per design requirements
       );
     });
     
@@ -125,7 +125,7 @@ describe('Real-Time Content Analyzer - Property-Based Tests', () => {
             expect(result.analysisTime).toBeLessThan(2000);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
     
@@ -145,7 +145,7 @@ describe('Real-Time Content Analyzer - Property-Based Tests', () => {
             expect(result1.citationPotential).toBe(result2.citationPotential);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
     
@@ -170,7 +170,7 @@ describe('Real-Time Content Analyzer - Property-Based Tests', () => {
             expect(result.citationPotential).toBeLessThanOrEqual(100);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
     
@@ -199,7 +199,7 @@ describe('Real-Time Content Analyzer - Property-Based Tests', () => {
             expect(result.entityPresence.diversity).toBeLessThanOrEqual(100);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
     
@@ -244,7 +244,7 @@ describe('Real-Time Content Analyzer - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
   });

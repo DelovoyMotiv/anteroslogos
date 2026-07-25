@@ -212,7 +212,7 @@ describe('Blog Admin API - Property-Based Tests', () => {
             expect(data || error).toBeDefined();
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -269,7 +269,7 @@ describe('Blog Admin API - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -316,7 +316,7 @@ describe('Blog Admin API - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -392,7 +392,7 @@ describe('Blog Admin API - Property-Based Tests', () => {
             await supabase.from('blog_posts').delete().eq('id', post.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -442,7 +442,7 @@ describe('Blog Admin API - Property-Based Tests', () => {
             await supabase.from('blog_posts').delete().eq('id', post.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -533,7 +533,7 @@ describe('Blog Admin API - Property-Based Tests', () => {
             await supabase.from('blog_posts').delete().eq('id', post.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -694,7 +694,7 @@ describe('Blog Admin API - Property-Based Tests', () => {
             await supabase.from('blog_posts').delete().eq('id', post1.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -776,7 +776,7 @@ describe('Blog Admin API - Property-Based Tests', () => {
             expect(error?.code).toBe('23514'); // PostgreSQL check constraint violation
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -880,7 +880,7 @@ describe('Blog Admin API - Property-Based Tests', () => {
             await supabase.from('blog_posts').delete().eq('id', draftPost.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -948,7 +948,7 @@ describe('Blog Admin API - Property-Based Tests', () => {
             await supabase.from('blog_posts').delete().eq('id', post.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });

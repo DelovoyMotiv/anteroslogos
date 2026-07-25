@@ -79,7 +79,7 @@ const NotFound = () => {
                 <div className="mb-12 max-w-2xl mx-auto">
                     <div className="bg-gradient-to-br from-brand-secondary/20 to-brand-secondary/5 border border-brand-secondary/30 rounded-2xl p-8 backdrop-blur-sm">
                         <p className="text-brand-text/90 text-base md:text-lg leading-relaxed mb-4">
-                            Alas, dear traveler, you have stumbled upon the void — that eternal emptiness where URLs go to contemplate their existence. 
+                            Alas, dear traveler, you have stumbled upon the void, that eternal emptiness where URLs go to contemplate their existence. 
                             The page you seek is but a phantom, a digital mirage in the desert of broken links.
                         </p>
                         <p className="text-brand-text/70 text-sm md:text-base leading-relaxed">
@@ -157,7 +157,7 @@ const NotFound = () => {
                         "To err is human; to 404 is digital; to return home is wisdom."
                     </p>
                     <p className="text-brand-text/30 text-xs mt-2">
-                        — Philosophical musings of a lost URL
+                        Philosophical musings of a lost URL
                     </p>
                 </div>
             </div>

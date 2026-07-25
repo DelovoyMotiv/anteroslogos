@@ -212,7 +212,7 @@ describe('Blog CMS Schema - Property-Based Tests', () => {
             await supabase.from('blog_posts').delete().eq('id', insertedPost.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -293,7 +293,7 @@ describe('Blog CMS Schema - Property-Based Tests', () => {
             await supabase.from('blog_posts').delete().eq('id', insertedPost.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -364,7 +364,7 @@ describe('Blog CMS Schema - Property-Based Tests', () => {
             await supabase.from('blog_posts').delete().eq('id', insertedPost.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });

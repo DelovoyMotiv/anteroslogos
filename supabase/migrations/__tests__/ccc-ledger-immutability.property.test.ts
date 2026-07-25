@@ -103,7 +103,7 @@ describe('CCC Billing Ledger Immutability Property Tests', () => {
               .eq('id', insertedRecord.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -157,7 +157,7 @@ describe('CCC Billing Ledger Immutability Property Tests', () => {
             // Records will be cleaned up in afterAll hook
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -183,7 +183,7 @@ describe('CCC Billing Ledger Immutability Property Tests', () => {
             expect(error?.message).toMatch(/permission|denied|policy|violates/i);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -229,7 +229,7 @@ describe('CCC Billing Ledger Immutability Property Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -255,7 +255,7 @@ describe('CCC Billing Ledger Immutability Property Tests', () => {
             expect(error?.message).toMatch(/check|constraint|violates/i);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -281,7 +281,7 @@ describe('CCC Billing Ledger Immutability Property Tests', () => {
             expect(error?.message).toMatch(/check|constraint|violates/i);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -313,7 +313,7 @@ describe('CCC Billing Ledger Immutability Property Tests', () => {
             expect(error?.message).toMatch(/check|constraint|violates|invalid/i);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
   });

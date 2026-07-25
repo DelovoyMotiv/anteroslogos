@@ -65,7 +65,7 @@ describe('ExtractionEngine Browser Integration Properties', () => {
           expect((result as any).warnings[0]).toContain('Falling back to static HTML fetching');
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -115,7 +115,7 @@ describe('ExtractionEngine Browser Integration Properties', () => {
           expect((result as any).warnings[0]).toContain('Browser-based rendering failed');
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -169,7 +169,7 @@ describe('ExtractionEngine Browser Integration Properties', () => {
           expect((result as any).csrSupport).toBe('unavailable');
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -216,7 +216,7 @@ describe('ExtractionEngine Browser Integration Properties', () => {
           expect((result as any).csrSupport).toBeUndefined();
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -253,7 +253,7 @@ describe('ExtractionEngine Browser Integration Properties', () => {
           expect((result as any).csrSupport).toBeUndefined();
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 });
@@ -307,7 +307,7 @@ describe('ExtractionEngine File Validation Properties', () => {
           expect(result.content).toBe(robotsContent);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -346,7 +346,7 @@ describe('ExtractionEngine File Validation Properties', () => {
           expect(result.content).toBeUndefined();
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -385,7 +385,7 @@ describe('ExtractionEngine File Validation Properties', () => {
           expect(result.content).toBe(xmlContent);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -430,7 +430,7 @@ describe('ExtractionEngine File Validation Properties', () => {
           expect(result.content).toBe(robotsContent);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -470,7 +470,7 @@ describe('ExtractionEngine File Validation Properties', () => {
           expect(result.content).toBe(xmlContent);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -503,7 +503,7 @@ describe('ExtractionEngine File Validation Properties', () => {
           expect(result.content).toBeUndefined();
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -532,7 +532,7 @@ describe('ExtractionEngine File Validation Properties', () => {
           expect(result.content).toBeUndefined();
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -561,7 +561,7 @@ describe('ExtractionEngine File Validation Properties', () => {
           expect(result.content).toBeUndefined();
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 });

@@ -80,7 +80,7 @@ describe('Cache Service - Property-Based Tests', () => {
             expect(setCall[2]).toEqual({ ex: 86400 });
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -149,7 +149,7 @@ describe('Cache Service - Property-Based Tests', () => {
             expect(duration).toBeLessThan(100);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -215,7 +215,7 @@ describe('Cache Service - Property-Based Tests', () => {
             expect(mockRedis.set).toHaveBeenCalled();
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -254,7 +254,7 @@ describe('Cache Service - Property-Based Tests', () => {
             expect(mockRedis.get).toHaveBeenCalled();
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });

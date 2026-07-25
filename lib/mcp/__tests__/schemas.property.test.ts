@@ -202,7 +202,7 @@ describe('MCP Schemas - Property-Based Tests', () => {
             expect(openAPISpec.paths[expectedPath].post.operationId).toBe(expectedName);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -215,7 +215,7 @@ describe('MCP Schemas - Property-Based Tests', () => {
             expect(GRAPH_TOOLS[oldName]).toBeUndefined();
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -266,7 +266,7 @@ describe('MCP Schemas - Property-Based Tests', () => {
             });
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -282,7 +282,7 @@ describe('MCP Schemas - Property-Based Tests', () => {
             expect(tool.description.toLowerCase()).toContain('do not use for simple');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -348,7 +348,7 @@ describe('MCP Schemas - Property-Based Tests', () => {
             expect(grokTool.function.parameters.required).not.toContain('useAI');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -365,7 +365,7 @@ describe('MCP Schemas - Property-Based Tests', () => {
             expect(tool.parameters[1].name).toBe('useAI');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });

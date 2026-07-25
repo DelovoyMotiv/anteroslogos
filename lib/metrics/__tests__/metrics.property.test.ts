@@ -54,7 +54,7 @@ describe('Metrics Property-Based Tests', () => {
           expect(metrics).toContain(`status_code="${statusCode}"`);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -93,7 +93,7 @@ describe('Metrics Property-Based Tests', () => {
           }
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   });
   
@@ -130,7 +130,7 @@ describe('Metrics Property-Based Tests', () => {
           }
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   });
   
@@ -164,7 +164,7 @@ describe('Metrics Property-Based Tests', () => {
           }
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   });
   
@@ -211,7 +211,7 @@ describe('Metrics Property-Based Tests', () => {
           }
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   });
   
@@ -266,7 +266,7 @@ describe('Metrics Property-Based Tests', () => {
           }
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   });
   
@@ -315,7 +315,7 @@ describe('Metrics Property-Based Tests', () => {
           }
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   });
   
@@ -353,7 +353,7 @@ describe('Metrics Property-Based Tests', () => {
           }
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   });
 });

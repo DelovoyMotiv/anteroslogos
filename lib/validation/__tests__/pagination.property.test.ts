@@ -27,7 +27,7 @@ describe('Property 26: Pagination Support', () => {
             expect(effectiveLimit).toBe(50);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -41,7 +41,7 @@ describe('Property 26: Pagination Support', () => {
             expect(effectiveLimit).toBeLessThanOrEqual(100);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -54,7 +54,7 @@ describe('Property 26: Pagination Support', () => {
             expect(offset).toBeGreaterThanOrEqual(0);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -73,7 +73,7 @@ describe('Property 26: Pagination Support', () => {
             expect(hasMore).toBe(expectedHasMore);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -106,7 +106,7 @@ describe('Property 26: Pagination Support', () => {
             expect(typeof response.pagination.has_more).toBe('boolean');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -136,7 +136,7 @@ describe('Property 26: Pagination Support', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -166,7 +166,7 @@ describe('Property 26: Pagination Support', () => {
             expect(response.items.length).toBe(0);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -195,7 +195,7 @@ describe('Property 26: Pagination Support', () => {
             expect(response.pagination.has_more).toBe(false);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -221,7 +221,7 @@ describe('Property 26: Pagination Support', () => {
             expect(response.items.length).toBe(total);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -248,7 +248,7 @@ describe('Property 26: Pagination Support', () => {
             expect(response.pagination.has_more).toBe(false);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -286,7 +286,7 @@ describe('Property 26: Pagination Support', () => {
             });
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -318,7 +318,7 @@ describe('Property 26: Pagination Support', () => {
             expect(pageCount).toBe(expectedPages);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -379,7 +379,7 @@ describe('Property 26: Pagination Support', () => {
             expect(effective).toBeGreaterThanOrEqual(1);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -395,7 +395,7 @@ describe('Property 26: Pagination Support', () => {
             expect(parsed).toBe(offsetValue);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 

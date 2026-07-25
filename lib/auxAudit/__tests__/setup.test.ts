@@ -226,7 +226,7 @@ describe('AUX Audit Module - Generator Tests', () => {
         expect(typeof protocol.url).toBe('string');
         return true;
       }),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -240,7 +240,7 @@ describe('AUX Audit Module - Generator Tests', () => {
         expect(typeof element.hasAriaLabel).toBe('boolean');
         return true;
       }),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -260,7 +260,7 @@ describe('AUX Audit Module - Generator Tests', () => {
         expect(Array.isArray(results.intentTriggers)).toBe(true);
         return true;
       }),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 });

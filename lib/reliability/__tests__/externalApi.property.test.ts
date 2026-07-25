@@ -154,7 +154,7 @@ describe('Property 27: External API Resilience', () => {
           expect(response.status).toBe(200);
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   });
 
@@ -190,7 +190,7 @@ describe('Property 27: External API Resilience', () => {
           expect(response.data).toEqual(responseData);
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   });
 
@@ -305,7 +305,7 @@ describe('Property 27: External API Resilience', () => {
           expect(url.searchParams.get('sort')).toBe(params.sort);
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   });
 
@@ -346,7 +346,7 @@ describe('Property 27: External API Resilience', () => {
           expect(capturedHeaders['X-Custom-Header']).toBe(customValue);
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   });
 });

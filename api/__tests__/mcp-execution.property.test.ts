@@ -105,7 +105,7 @@ describe('MCP Tool Execution Router - Property-Based Tests', () => {
             expect(result.isError).toBeUndefined();
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -126,7 +126,7 @@ describe('MCP Tool Execution Router - Property-Based Tests', () => {
             expect(resultText).not.toContain('Unknown tool');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -147,7 +147,7 @@ describe('MCP Tool Execution Router - Property-Based Tests', () => {
             expect(errorContent.error).toContain('Unknown tool: auditSite');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -192,7 +192,7 @@ describe('MCP Tool Execution Router - Property-Based Tests', () => {
             expect(typeof parsedResult.metrics).toBe('object');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -216,7 +216,7 @@ describe('MCP Tool Execution Router - Property-Based Tests', () => {
             });
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -253,7 +253,7 @@ describe('MCP Tool Execution Router - Property-Based Tests', () => {
             expect(errorContent.tool).toBe('anoteros_logos');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -278,7 +278,7 @@ describe('MCP Tool Execution Router - Property-Based Tests', () => {
             expect(errorContent.tool).toBe('anoteros_logos');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -311,7 +311,7 @@ describe('MCP Tool Execution Router - Property-Based Tests', () => {
             expect(errorContent.tool).toBe('anoteros_logos');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });

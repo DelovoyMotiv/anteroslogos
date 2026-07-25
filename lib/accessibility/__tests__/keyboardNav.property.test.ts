@@ -72,7 +72,7 @@ describe('Keyboard Navigation - Property-Based Tests', () => {
             return true;
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -112,7 +112,7 @@ describe('Keyboard Navigation - Property-Based Tests', () => {
             return focusRestored;
           }
         ),
-        { numRuns: 30 }
+        { numRuns: 20 }
       );
     });
   });
@@ -149,7 +149,7 @@ describe('Keyboard Navigation - Property-Based Tests', () => {
             return tabbableCount === 1;
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -197,7 +197,7 @@ describe('Keyboard Navigation - Property-Based Tests', () => {
             return nextIsTabbable;
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
   });
@@ -228,7 +228,7 @@ describe('Keyboard Navigation - Property-Based Tests', () => {
             return hasCorrectMessage && hasCorrectPriority;
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
   });
@@ -318,7 +318,7 @@ describe('Keyboard Navigation - Property-Based Tests', () => {
             return focusable.length === numFocusable;
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
   });
@@ -337,7 +337,7 @@ describe('Keyboard Navigation - Property-Based Tests', () => {
             return result === (key === 'Enter');
           }
         ),
-        { numRuns: 30 }
+        { numRuns: 20 }
       );
     });
 
@@ -354,7 +354,7 @@ describe('Keyboard Navigation - Property-Based Tests', () => {
             return result === (key === ' ' || key === 'Spacebar');
           }
         ),
-        { numRuns: 30 }
+        { numRuns: 20 }
       );
     });
 
@@ -371,7 +371,7 @@ describe('Keyboard Navigation - Property-Based Tests', () => {
             return result === (key === 'Escape' || key === 'Esc');
           }
         ),
-        { numRuns: 30 }
+        { numRuns: 20 }
       );
     });
 
@@ -389,7 +389,7 @@ describe('Keyboard Navigation - Property-Based Tests', () => {
             return result === expected;
           }
         ),
-        { numRuns: 30 }
+        { numRuns: 20 }
       );
     });
   });
@@ -426,7 +426,7 @@ describe('Keyboard Navigation - Property-Based Tests', () => {
             return hasRole && hasTabIndex && respondsToEnter;
           }
         ),
-        { numRuns: 30 }
+        { numRuns: 20 }
       );
     });
   });

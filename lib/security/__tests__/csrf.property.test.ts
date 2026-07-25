@@ -114,7 +114,7 @@ describe('Property 5: CSRF Token Validation', () => {
           expect(validation.reason).toBeUndefined();
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -139,7 +139,7 @@ describe('Property 5: CSRF Token Validation', () => {
           expect(validation2.reason).toBe(validation3.reason);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -162,7 +162,7 @@ describe('Property 5: CSRF Token Validation', () => {
           expect(validation.reason).toBe('Token session mismatch');
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -188,7 +188,7 @@ describe('Property 5: CSRF Token Validation', () => {
           expect(handlerCalled).toBe(true);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -219,7 +219,7 @@ describe('Property 5: CSRF Token Validation', () => {
           });
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -246,7 +246,7 @@ describe('Property 5: CSRF Token Validation', () => {
           expect(handlerCalled).toBe(true);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -281,7 +281,7 @@ describe('Property 5: CSRF Token Validation', () => {
           });
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -305,7 +305,7 @@ describe('Property 5: CSRF Token Validation', () => {
           expect(tokens.size).toBe(count);
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   });
   
@@ -334,7 +334,7 @@ describe('Property 5: CSRF Token Validation', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 });

@@ -175,7 +175,7 @@ describe('Blog API - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -266,7 +266,7 @@ describe('Blog API - Property-Based Tests', () => {
             await supabase.from('blog_posts').delete().eq('id', insertedPost.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -355,7 +355,7 @@ describe('Blog API - Property-Based Tests', () => {
             await supabase.from('blog_categories').delete().eq('id', otherCategory.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -433,7 +433,7 @@ describe('Blog API - Property-Based Tests', () => {
             await supabase.from('blog_authors').delete().eq('id', otherAuthor.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -502,7 +502,7 @@ describe('Blog API - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });

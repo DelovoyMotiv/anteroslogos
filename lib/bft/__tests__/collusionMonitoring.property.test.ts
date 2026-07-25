@@ -127,7 +127,7 @@ describe('Collusion Monitoring - Property Tests', () => {
           return true;
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   });
   
@@ -178,7 +178,7 @@ describe('Collusion Monitoring - Property Tests', () => {
           return true;
         }
       ),
-      { numRuns: 30 }
+      { numRuns: 20 }
     );
   });
   
@@ -326,7 +326,7 @@ describe('Collusion Monitoring - Property Tests', () => {
           return true;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 });

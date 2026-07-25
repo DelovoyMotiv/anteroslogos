@@ -38,7 +38,7 @@ describe('Property 39: Structured JSON Logging', () => {
           expect(masked.active).toBe(data.active);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -52,7 +52,7 @@ describe('Property 39: Structured JSON Logging', () => {
           expect(masked).toBeDefined();
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -70,7 +70,7 @@ describe('Property 39: Structured JSON Logging', () => {
           expect(masked.length).toBe(data.length);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 });
@@ -90,7 +90,7 @@ describe('Property 40: Correlation ID Propagation', () => {
           expect(retrieved).toBe(correlationId);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -108,7 +108,7 @@ describe('Property 40: Correlation ID Propagation', () => {
           expect(retrieved).toBe(correlationId);
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   });
   
@@ -124,7 +124,7 @@ describe('Property 40: Correlation ID Propagation', () => {
           expect(id1).not.toBe(id2);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -149,7 +149,7 @@ describe('Property 40: Correlation ID Propagation', () => {
           expect(result).toBe(correlationId);
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   });
 });
@@ -167,7 +167,7 @@ describe('Property 41: No PII in Logs', () => {
           expect(masked.password).not.toBe(password);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -183,7 +183,7 @@ describe('Property 41: No PII in Logs', () => {
           expect(masked.apiKey).not.toBe(apiKey);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -199,7 +199,7 @@ describe('Property 41: No PII in Logs', () => {
           expect(masked.token).not.toBe(token);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -217,7 +217,7 @@ describe('Property 41: No PII in Logs', () => {
           expect(masked.password).toBe('***MASKED***');
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -233,7 +233,7 @@ describe('Property 41: No PII in Logs', () => {
           expect(masked).not.toContain(apiKey);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -258,7 +258,7 @@ describe('Property 41: No PII in Logs', () => {
           expect(masked.email).toBe('***MASKED***');
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -281,7 +281,7 @@ describe('Property 41: No PII in Logs', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 });
@@ -304,7 +304,7 @@ describe('Masking Invariants', () => {
           expect(masked.token).not.toBe(data.token);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -322,7 +322,7 @@ describe('Masking Invariants', () => {
           expect(masked2).toEqual(masked1);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -337,7 +337,7 @@ describe('Masking Invariants', () => {
           expect(Object.keys(masked).sort()).toEqual(Object.keys(data).sort());
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 });

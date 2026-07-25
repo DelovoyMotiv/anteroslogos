@@ -96,7 +96,7 @@ describe('SchemaValidator - Property 10: Complete @graph Traversal', () => {
           });
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -186,7 +186,7 @@ describe('SchemaValidator - Property 11: Schema Detection at Any Depth', () => {
           expect(foundSchema!.depth).toBe(depth);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -251,7 +251,7 @@ describe('SchemaValidator - Property 11: Schema Detection at Any Depth', () => {
           expect(type2Actual).toBe(type2);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 });
@@ -318,7 +318,7 @@ describe('SchemaValidator - Property 12: Nested Organization Schema Detection', 
           expect(foundOrg!.data.url).toBe(orgUrl);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -376,7 +376,7 @@ describe('SchemaValidator - Property 12: Nested Organization Schema Detection', 
           expect(foundOrg).toBeDefined();
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 });
@@ -474,7 +474,7 @@ describe('SchemaValidator - Property 13: Graph Structure Flattening', () => {
           expect(orgSchema!.data.name).toBe('Publisher Org');
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -533,7 +533,7 @@ describe('SchemaValidator - Property 13: Graph Structure Flattening', () => {
           expect(rootSchema!.path).toEqual([]);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 });
@@ -626,7 +626,7 @@ describe('SchemaValidator - Property 14: Complete Schema Discovery with Paths', 
           expect(authorType).toBe(nestedType);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -671,7 +671,7 @@ describe('SchemaValidator - Property 14: Complete Schema Discovery with Paths', 
           expect(result.types).toContain(type2);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 

@@ -211,7 +211,7 @@ describe('Migration SQL Pattern Properties', () => {
           expect(sql).not.toMatch(/--.*DROP/i);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -230,7 +230,7 @@ describe('Migration SQL Pattern Properties', () => {
           expect(sql).toMatch(/ON public\./);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 });

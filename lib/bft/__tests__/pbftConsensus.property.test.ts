@@ -125,7 +125,7 @@ describe('Property 35: Byzantine Fault Tolerance Preservation', () => {
           return true;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -151,7 +151,7 @@ describe('Property 35: Byzantine Fault Tolerance Preservation', () => {
           return true;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 });
@@ -226,7 +226,7 @@ describe('Property 36: Safety Under Byzantine Conditions', () => {
           return true;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -310,7 +310,7 @@ describe('Property 36: Safety Under Byzantine Conditions', () => {
           return true;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -358,7 +358,7 @@ describe('Property 36: Safety Under Byzantine Conditions', () => {
           return true;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 });

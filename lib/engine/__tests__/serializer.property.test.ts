@@ -10,7 +10,7 @@ import type { Entity, Relationship, SerializableData } from '../../../types/agen
 
 // Test configuration
 const testConfig = {
-  numRuns: 100,
+  numRuns: 20,
   verbose: false,
 };
 

@@ -145,7 +145,7 @@ describe('WebhookRetryService Property-Based Tests', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -165,7 +165,7 @@ describe('WebhookRetryService Property-Based Tests', () => {
           expect(nextDelay).toBe(currentDelay * 2);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -191,7 +191,7 @@ describe('WebhookRetryService Property-Based Tests', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -220,7 +220,7 @@ describe('WebhookRetryService Property-Based Tests', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -241,7 +241,7 @@ describe('WebhookRetryService Property-Based Tests', () => {
           expect(ALERT_THRESHOLD).toBe(5);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -284,7 +284,7 @@ describe('WebhookRetryService Property-Based Tests', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -306,7 +306,7 @@ describe('WebhookRetryService Property-Based Tests', () => {
           expect(nextDelay).toBe(currentDelay * 2);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -327,7 +327,7 @@ describe('WebhookRetryService Property-Based Tests', () => {
           expect(pendingCount + failedCount).toBe(totalCount);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 

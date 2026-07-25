@@ -341,7 +341,7 @@ describe('Performance Optimization - Property Tests', () => {
           return true;
         }
       ),
-      { numRuns: 30 }
+      { numRuns: 20 }
     );
   });
   

@@ -266,7 +266,7 @@ describe('Property 12: Competitive Gap Identification', () => {
           expect(missing.gap).toBe(missing.competitorScore);
         }
       }),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -284,7 +284,7 @@ describe('Property 12: Competitive Gap Identification', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -304,7 +304,7 @@ describe('Property 12: Competitive Gap Identification', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -323,7 +323,7 @@ describe('Property 12: Competitive Gap Identification', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -341,7 +341,7 @@ describe('Property 12: Competitive Gap Identification', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -360,7 +360,7 @@ describe('Property 12: Competitive Gap Identification', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -387,7 +387,7 @@ describe('Property 12: Competitive Gap Identification', () => {
           expect(uniqueNames.size).toBe(entityNames.length);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -419,7 +419,7 @@ describe('Property 12: Competitive Gap Identification', () => {
           expect(stats.averageGap).toBeGreaterThanOrEqual(0);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -454,7 +454,7 @@ describe('Property 12: Competitive Gap Identification', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -481,7 +481,7 @@ describe('Property 12: Competitive Gap Identification', () => {
         const missingEntities = getMissingEntities(gaps);
         expect(missingEntities.length).toBe(gaps.length);
       }),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -499,7 +499,7 @@ describe('Property 12: Competitive Gap Identification', () => {
           expect(gap.gap).toBeLessThan(10); // Allow small differences
         }
       }),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 });

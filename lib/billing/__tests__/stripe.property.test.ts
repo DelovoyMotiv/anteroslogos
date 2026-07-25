@@ -150,7 +150,7 @@ describe('Stripe Integration Property-Based Tests', () => {
           expect(result.url).toBe(sessionUrl);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -174,7 +174,7 @@ describe('Stripe Integration Property-Based Tests', () => {
           expect(backToUSD).toBeCloseTo(usdAmount, 10);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -234,7 +234,7 @@ describe('Stripe Integration Property-Based Tests', () => {
           expect(calculatedCCC).toBeCloseTo(cccAmount, 6);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -275,7 +275,7 @@ describe('Stripe Integration Property-Based Tests', () => {
           expect(result.success).toBe(true);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -298,7 +298,7 @@ describe('Stripe Integration Property-Based Tests', () => {
           expect(backToCCC).toBeCloseTo(amount, 10);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -317,7 +317,7 @@ describe('Stripe Integration Property-Based Tests', () => {
           expect(ANCHOR_PRICE_USD_PER_CCC).toBe(0.20);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 });

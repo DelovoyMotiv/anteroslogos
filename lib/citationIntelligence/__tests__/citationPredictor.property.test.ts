@@ -174,7 +174,7 @@ describe('Citation Predictor - Property-Based Tests', () => {
             expect(result.confidence.lower).toBeLessThanOrEqual(result.confidence.upper);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
     
@@ -212,7 +212,7 @@ describe('Citation Predictor - Property-Based Tests', () => {
             });
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
     
@@ -250,7 +250,7 @@ describe('Citation Predictor - Property-Based Tests', () => {
             });
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
     

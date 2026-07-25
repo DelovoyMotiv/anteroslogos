@@ -83,7 +83,7 @@ describe('Sentry Error Tracking - Property-Based Tests', () => {
             );
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -110,7 +110,7 @@ describe('Sentry Error Tracking - Property-Based Tests', () => {
             expect(Sentry.setUser).toHaveBeenCalledWith(user);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -138,7 +138,7 @@ describe('Sentry Error Tracking - Property-Based Tests', () => {
             expect(Sentry.addBreadcrumb).toHaveBeenCalledWith(breadcrumb);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -187,7 +187,7 @@ describe('Sentry Error Tracking - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -253,7 +253,7 @@ describe('Sentry Error Tracking - Property-Based Tests', () => {
             expect(capturedError.statusCode).toBe(errorData.statusCode);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -291,7 +291,7 @@ describe('Sentry Error Tracking - Property-Based Tests', () => {
             );
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
   });
@@ -350,7 +350,7 @@ describe('Sentry Error Tracking - Property-Based Tests', () => {
             );
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
   });

@@ -2,22 +2,23 @@ import React, { useState, useRef, useEffect } from 'react';
 import Header from '../components/Header';
 import Hero from '../components/Hero';
 import TheShift from '../components/TheShift';
-import Process from '../components/Process';
 import Method from '../components/Method';
+import Process from '../components/Process';
 import ClientProfile from '../components/ClientProfile';
 import FAQ from '../components/FAQ';
 import FinalCTA from '../components/FinalCTA';
 import Footer from '../components/Footer';
 import Modal from '../components/Modal';
-import DigitalBackground from '../components/DigitalBackground';
 import CookieConsent from '../components/CookieConsent';
+import Grain from '../components/Grain';
+import Marquee from '../components/Marquee';
 
 const HomePage: React.FC = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    
-    const methodRef = useRef<HTMLElement | null>(null);
-    const processRef = useRef<HTMLElement | null>(null);
-    const clientProfileRef = useRef<HTMLElement | null>(null);
+
+    const servicesRef = useRef<HTMLElement | null>(null);
+    const approachRef = useRef<HTMLElement | null>(null);
+    const industriesRef = useRef<HTMLElement | null>(null);
     const faqRef = useRef<HTMLElement | null>(null);
 
     useEffect(() => {
@@ -39,26 +40,30 @@ const HomePage: React.FC = () => {
     const handleCloseModal = () => setIsModalOpen(false);
 
     return (
-        <div className="bg-brand-bg text-brand-text font-sans antialiased">
-            <DigitalBackground />
-            <Header 
-                onMethodClick={() => handleScrollTo(methodRef)}
-                onClientsClick={() => handleScrollTo(clientProfileRef)}
+        <div className="relative bg-brand-bg text-brand-text font-sans antialiased overflow-x-hidden">
+            <Grain />
+            <Header
+                onMethodClick={() => handleScrollTo(servicesRef)}
+                onClientsClick={() => handleScrollTo(industriesRef)}
                 onContactClick={handleOpenModal}
             />
-            <main>
-                <Hero onScrollClick={() => handleScrollTo(methodRef)} />
+            <main className="relative z-[2]">
+                <Hero
+                    onScrollClick={() => handleScrollTo(servicesRef)}
+                    onContactClick={handleOpenModal}
+                />
+                <Marquee />
                 <TheShift />
-                <Process ref={processRef} />
-                <Method ref={methodRef} />
-                <ClientProfile ref={clientProfileRef} />
+                <Method ref={servicesRef} />
+                <Process ref={approachRef} />
+                <ClientProfile ref={industriesRef} />
                 <FAQ ref={faqRef} onCTAClick={handleOpenModal} />
                 <FinalCTA onCTAClick={handleOpenModal} />
             </main>
-            <Footer 
-                onPhilosophyClick={() => handleScrollTo(processRef)}
-                onMethodClick={() => handleScrollTo(methodRef)}
-                onClientsClick={() => handleScrollTo(clientProfileRef)}
+            <Footer
+                onPhilosophyClick={() => handleScrollTo(approachRef)}
+                onMethodClick={() => handleScrollTo(servicesRef)}
+                onClientsClick={() => handleScrollTo(industriesRef)}
                 onFAQClick={() => handleScrollTo(faqRef)}
                 onContactClick={handleOpenModal}
             />

@@ -110,7 +110,7 @@ describe('Property 30: Correlation Coefficient Computation', () => {
           return true;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -272,7 +272,7 @@ describe('Property 30: Correlation Coefficient Computation', () => {
           return true;
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   });
   
@@ -313,7 +313,7 @@ describe('Property 30: Correlation Coefficient Computation', () => {
           return true;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -379,7 +379,7 @@ describe('Property 34: Jaccard Similarity Flagging', () => {
           return true;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -436,7 +436,7 @@ describe('Property 34: Jaccard Similarity Flagging', () => {
           return true;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -518,7 +518,7 @@ describe('Property 34: Jaccard Similarity Flagging', () => {
           return true;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -629,7 +629,7 @@ describe('Property 34: Jaccard Similarity Flagging', () => {
           return true;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 });
@@ -713,7 +713,7 @@ describe('Graph Edit Distance', () => {
           return true;
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   });
 });

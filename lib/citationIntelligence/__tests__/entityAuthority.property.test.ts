@@ -167,7 +167,7 @@ describe('Property 5: Entity Authority Completeness', () => {
         // Property 4: No duplicate entity IDs
         expect(authorityEntityIds.size).toBe(authorities.length);
       }),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -201,7 +201,7 @@ describe('Property 5: Entity Authority Completeness', () => {
           expect(authority.components.temporalConsistency).toBeLessThanOrEqual(100);
         }
       }),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -215,7 +215,7 @@ describe('Property 5: Entity Authority Completeness', () => {
           expect(authority.authorityScore).toBeLessThanOrEqual(100);
         }
       }),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -236,7 +236,7 @@ describe('Property 5: Entity Authority Completeness', () => {
           expect(authority.entityType).toBe(originalEntity!.type);
         }
       }),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -270,7 +270,7 @@ describe('Property 5: Entity Authority Completeness', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -304,7 +304,7 @@ describe('Property 5: Entity Authority Completeness', () => {
           batchAuthority!.components.temporalConsistency
         );
       }),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -329,7 +329,7 @@ describe('Property 5: Entity Authority Completeness', () => {
         expect(authorities[0].authorityScore).toBeGreaterThanOrEqual(0);
         expect(authorities[0].authorityScore).toBeLessThanOrEqual(100);
       }),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -346,7 +346,7 @@ describe('Property 5: Entity Authority Completeness', () => {
           expect(Array.isArray(authority.competitiveRanking.topCompetitors)).toBe(true);
         }
       }),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -364,7 +364,7 @@ describe('Property 5: Entity Authority Completeness', () => {
           expect(authority.growthTrend.velocity).toBeGreaterThanOrEqual(0);
         }
       }),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 });

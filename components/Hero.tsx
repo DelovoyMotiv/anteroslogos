@@ -1,88 +1,123 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import AnimatedSection from './AnimatedSection';
-import GeoAnalysisForm from './GeoAnalysisForm';
-import AuditShowcaseCarousel from './AuditShowcaseCarousel';
+import { disciplinesByPhase, LIFECYCLE_ORDER } from '../data/services';
 
 interface HeroProps {
     onScrollClick: () => void;
+    onContactClick?: () => void;
 }
 
-const Hero: React.FC<HeroProps> = ({ onScrollClick }) => {
-    const navigate = useNavigate();
-    const [url, setUrl] = useState('');
-    
-    const handleAnalyze = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (url.trim()) {
-            // Navigate to GEO Audit page with URL as query parameter
-            const encodedUrl = encodeURIComponent(url.trim());
-            navigate(`/geo-audit?url=${encodedUrl}`);
-        }
-    };
-    
+const Hero: React.FC<HeroProps> = ({ onScrollClick, onContactClick }) => {
     return (
-    <section 
-        id="hero" 
-        aria-label="Hero section - Don't rank. Become the source"
-        className="relative min-h-screen flex items-center justify-center text-center overflow-hidden px-4 py-20 sm:px-6 sm:py-24 md:py-32"
+    <section
+        id="hero"
+        aria-label="Don't rank. Become the source."
+        className="relative min-h-screen flex items-center overflow-hidden px-6 sm:px-10 lg:px-16 pt-32 pb-24"
     >
-        {/* Decorative grid background */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.03)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,black,transparent)]"></div>
-        
-        {/* Floating orbs */}
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 bg-brand-accent/10 rounded-full blur-3xl animate-pulse-glow"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse-glow" style={{animationDelay: '1s'}}></div>
-        
-        <div className="relative z-10 w-full max-w-6xl mx-auto">
-            <AnimatedSection>
-                <h1
-                    className="font-display font-bold text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl leading-[1.05] mb-0 tracking-tight px-2"
-                    itemProp="headline"
-                >
-                    <span className="inline-block text-white">
-                        Don't rank.
-                    </span>
-                    <br />
-                    <span className="inline-block bg-gradient-to-r from-white via-brand-accent to-blue-400 bg-clip-text text-transparent">
-                        Become the source.
-                    </span>
-                </h1>
-            </AnimatedSection>
-            <AnimatedSection delay={200}>
-                <p 
-                    className="mt-6 sm:mt-8 text-base sm:text-lg md:text-xl lg:text-2xl text-white/80 max-w-4xl mx-auto leading-relaxed px-4"
-                    itemProp="description"
-                >
-                    Our audit shows if AI can find your website, mention your brand, and what to change to get more visibility and traffic.
-                </p>
-            </AnimatedSection>
-            <AnimatedSection delay={400}>
-                <div className="mt-10 sm:mt-12 md:mt-14 lg:mt-16 px-4">
-                    <GeoAnalysisForm
-                        url={url}
-                        onUrlChange={setUrl}
-                        onSubmit={handleAnalyze}
-                        isAnalyzing={false}
-                        compact={true}
-                    />
-                </div>
-            </AnimatedSection>
-            
-            {/* Audit Showcase Carousel */}
-            <AnimatedSection delay={600}>
-                <div className="mt-12 sm:mt-14 md:mt-16">
-                    <AuditShowcaseCarousel />
-                </div>
-            </AnimatedSection>
+        {/* Cool ambient depth + technical grid */}
+        <div className="absolute inset-0 z-0" aria-hidden="true">
+            <div className="absolute inset-0 tech-grid [mask-image:radial-gradient(ellipse_85%_75%_at_20%_35%,black,transparent_75%)] opacity-70"></div>
+            <div className="absolute -top-1/3 left-0 w-[55rem] h-[55rem] bg-[radial-gradient(circle,rgba(57,216,230,0.10),transparent_60%)] blur-2xl"></div>
+            <div className="absolute bottom-0 right-0 w-[40rem] h-[40rem] bg-[radial-gradient(circle,rgba(57,216,230,0.06),transparent_65%)] blur-2xl"></div>
         </div>
-        
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 sm:bottom-10 md:bottom-12 left-1/2 -translate-x-1/2 animate-bounce cursor-pointer" onClick={onScrollClick} role="button" aria-label="Scroll down to content" tabIndex={0}>
-             <div className="w-6 h-10 border-2 border-brand-accent/50 hover:border-brand-accent/70 rounded-full flex justify-center items-start pt-2 transition-colors duration-300">
-                <div className="w-1 h-2 rounded-full bg-brand-accent/70 animate-scroll-indicator"></div>
-             </div>
+
+        <div className="relative z-10 w-full max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center lg:items-stretch">
+                {/* Left: statement */}
+                <div className="lg:col-span-7">
+                    <AnimatedSection>
+                        <h1
+                            className="font-display font-bold text-6xl sm:text-7xl md:text-8xl lg:text-[6.5rem] xl:text-[7.5rem] leading-[0.92] tracking-[-0.045em]"
+                            itemProp="headline"
+                        >
+                            <span className="block text-brand-text">Don&rsquo;t rank.</span>
+                            <span className="block bg-gradient-to-r from-white via-brand-text to-brand-accent/80 bg-clip-text text-transparent">
+                                Become the source.
+                            </span>
+                        </h1>
+                    </AnimatedSection>
+
+                    <AnimatedSection delay={150}>
+                        <p
+                            className="mt-10 text-lg sm:text-xl text-brand-text/60 max-w-xl leading-relaxed font-light"
+                            itemProp="description"
+                        >
+                            A small senior team building high-load platforms and running
+                            search, generative-engine, and growth work for companies that
+                            intend to lead their category.
+                        </p>
+                    </AnimatedSection>
+
+                    <AnimatedSection delay={300}>
+                        <div className="mt-12 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                            <button
+                                onClick={onContactClick}
+                                className="group inline-flex items-center gap-3 bg-brand-text text-brand-bg font-semibold px-8 py-4 rounded-full transition-all duration-300 hover:bg-white hover:-translate-y-0.5 hover:shadow-[0_0_40px_-8px_rgba(57,216,230,0.5)]"
+                            >
+                                Start a project
+                                <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </button>
+                            <button
+                                onClick={onScrollClick}
+                                className="inline-flex items-center gap-3 text-brand-text/80 hover:text-brand-text font-medium px-6 py-4 rounded-full border border-white/10 hover:border-brand-accent/40 transition-all duration-300"
+                            >
+                                View our services
+                            </button>
+                        </div>
+                    </AnimatedSection>
+                </div>
+
+                {/* Right: technical readout module */}
+                <div className="lg:col-span-5 lg:flex">
+                    <AnimatedSection delay={200} className="w-full">
+                        <div className="relative flex h-full flex-col">
+                            <div className="flex flex-1 flex-col">
+                                {/* header */}
+                                <div className="flex items-baseline">
+                                    <span className="font-mono text-[0.7rem] tracking-[0.24em] uppercase text-brand-muted">What we do</span>
+                                </div>
+
+                                {/* Lifecycle groups: phase label sits as an editorial side note,
+                                    disciplines are listed cleanly with a restrained hover accent.
+                                    The list centers within the panel so its height harmonizes
+                                    with the left column. */}
+                                <div className="mt-10 flex flex-1 flex-col justify-center divide-y divide-white/[0.06]">
+                                    {LIFECYCLE_ORDER.map((phase) => (
+                                        <div key={phase} className="grid grid-cols-[3.25rem_1fr] gap-x-6 py-5 first:pt-0 last:pb-0">
+                                            <span className="pt-[0.35rem] font-mono text-[0.65rem] leading-none tracking-[0.2em] uppercase text-brand-muted/45 whitespace-nowrap">
+                                                {phase}
+                                            </span>
+                                            <div className="-my-1.5">
+                                                {disciplinesByPhase(phase).map((discipline) => (
+                                                    <div key={discipline.id} className="group flex items-center gap-4 py-1.5">
+                                                        <span className="text-[0.95rem] text-brand-text/80 transition-colors duration-300 group-hover:text-white">
+                                                            {discipline.title}
+                                                        </span>
+                                                        <span aria-hidden="true" className="h-px w-0 bg-brand-accent/60 transition-all duration-300 ease-out group-hover:w-6"></span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </AnimatedSection>
+                </div>
+            </div>
         </div>
+
+        {/* Scroll cue */}
+        <button
+            onClick={onScrollClick}
+            aria-label="Scroll to services"
+            className="absolute bottom-8 right-8 sm:right-16 hidden sm:flex items-center gap-3 text-brand-muted hover:text-brand-text transition-colors duration-300"
+        >
+            <span className="font-mono text-xs tracking-[0.25em] uppercase">Scroll</span>
+            <span className="h-px w-10 bg-current"></span>
+        </button>
     </section>
     );
 };

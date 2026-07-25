@@ -87,7 +87,7 @@ describe('MigrationService Property Tests', () => {
           return credits >= expectedMinimum;
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 

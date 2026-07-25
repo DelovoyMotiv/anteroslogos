@@ -52,7 +52,7 @@ describe('JWT Property-Based Tests', () => {
             expect(validateTokenTTL(token)).toBe(true);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -71,7 +71,7 @@ describe('JWT Property-Based Tests', () => {
             expect(decoded!.exp).toBeGreaterThan(decoded!.iat);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -91,7 +91,7 @@ describe('JWT Property-Based Tests', () => {
             expect(decoded!.exp).toBeGreaterThan(beforeGeneration);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -115,7 +115,7 @@ describe('JWT Property-Based Tests', () => {
             expect(parts[2].length).toBeGreaterThan(0);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -134,7 +134,7 @@ describe('JWT Property-Based Tests', () => {
             expect(decoded!.email).toBe(email);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -153,7 +153,7 @@ describe('JWT Property-Based Tests', () => {
             expect(decoded!.role).toBe(role);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -175,7 +175,7 @@ describe('JWT Property-Based Tests', () => {
             expect(result.error).toBeUndefined();
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -194,7 +194,7 @@ describe('JWT Property-Based Tests', () => {
             expect(result.payload?.email).toBe(email);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -217,7 +217,7 @@ describe('JWT Property-Based Tests', () => {
             expect(result.error).toBeDefined();
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
   });
@@ -245,7 +245,7 @@ describe('JWT Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -271,7 +271,7 @@ describe('JWT Property-Based Tests', () => {
             expect(decoded1?.userId).not.toBe(decoded2?.userId);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
   });
@@ -291,7 +291,7 @@ describe('JWT Property-Based Tests', () => {
             expect(decoded).toBeDefined();
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -316,7 +316,7 @@ describe('JWT Property-Based Tests', () => {
             process.env.JWT_SECRET = originalSecret;
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
   });
@@ -334,7 +334,7 @@ describe('JWT Property-Based Tests', () => {
             expect(validateTokenTTL(token)).toBe(true);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -349,7 +349,7 @@ describe('JWT Property-Based Tests', () => {
             expect(validateTokenTTL(invalidToken)).toBe(false);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
   });

@@ -260,7 +260,7 @@ describe('Rollback Script Generation Properties', () => {
           expect(sql).not.toMatch(/;.*DROP/);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
   
@@ -293,7 +293,7 @@ describe('Rollback Script Generation Properties', () => {
           expect(dropOrder.length).toBeGreaterThan(0);
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   });
 });

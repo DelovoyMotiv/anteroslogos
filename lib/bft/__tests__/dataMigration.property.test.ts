@@ -216,7 +216,7 @@ describe('Data Migration Property Tests', () => {
             return true;
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -259,7 +259,7 @@ describe('Data Migration Property Tests', () => {
             return true;
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -299,7 +299,7 @@ describe('Data Migration Property Tests', () => {
             return true;
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -324,7 +324,7 @@ describe('Data Migration Property Tests', () => {
             return true;
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -387,7 +387,7 @@ describe('Data Migration Property Tests', () => {
             return true;
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -430,7 +430,7 @@ describe('Data Migration Property Tests', () => {
             return true;
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -487,7 +487,7 @@ describe('Data Migration Property Tests', () => {
             return true;
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
   });

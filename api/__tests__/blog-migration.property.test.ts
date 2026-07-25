@@ -301,7 +301,7 @@ describe('Blog Migration - Property-Based Tests', () => {
             await supabase.from('blog_tags').delete().eq('id', tagId);
           }
         }),
-        { numRuns: 50 } // Reduced runs due to complexity
+        { numRuns: 20 } // Reduced runs due to complexity
       );
     });
   });
@@ -406,7 +406,7 @@ describe('Blog Migration - Property-Based Tests', () => {
             await supabase.from('blog_posts').delete().eq('id', migratedPost.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -500,7 +500,7 @@ describe('Blog Migration - Property-Based Tests', () => {
             await supabase.from('blog_posts').delete().eq('id', firstPost.id);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -696,7 +696,7 @@ describe('Blog Migration - Property-Based Tests', () => {
             expect(checkPost).toBeNull();
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });

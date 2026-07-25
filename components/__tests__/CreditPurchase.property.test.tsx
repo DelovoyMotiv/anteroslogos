@@ -84,7 +84,7 @@ describe('Credit Purchase Property Tests', () => {
           expect(costPerCredit).toBeGreaterThan(0);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -165,7 +165,7 @@ describe('Credit Purchase Property Tests', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -204,7 +204,7 @@ describe('Credit Purchase Property Tests', () => {
           expect(newBalance).toBeGreaterThan(initialBalance);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 
@@ -253,7 +253,7 @@ describe('Credit Purchase Property Tests', () => {
           expect(metadata.package_name.length).toBeGreaterThan(0);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   });
 });

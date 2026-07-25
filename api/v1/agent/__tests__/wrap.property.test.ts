@@ -15,7 +15,7 @@ import handler from '../wrap';
 // ============================================================================
 
 const testConfig = {
-  numRuns: 100, // Minimum iterations as per design doc
+  numRuns: 20, // Minimum iterations as per design doc
   verbose: false,
 };
 

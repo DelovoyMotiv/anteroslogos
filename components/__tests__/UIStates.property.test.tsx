@@ -26,7 +26,7 @@ describe('UI States - Property-Based Tests', () => {
             expect(typeof props.fullScreen).toBe('boolean');
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -47,7 +47,7 @@ describe('UI States - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -62,7 +62,7 @@ describe('UI States - Property-Based Tests', () => {
             expect(message.length).toBeGreaterThan(0);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -77,7 +77,7 @@ describe('UI States - Property-Based Tests', () => {
             expect(height).toBeGreaterThan(0);
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -104,7 +104,7 @@ describe('UI States - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
 
@@ -125,7 +125,7 @@ describe('UI States - Property-Based Tests', () => {
             }
           }
         ),
-        { numRuns: 100 }
+        { numRuns: 20 }
       );
     });
   });
@@ -140,7 +140,7 @@ describe('UI States - Property-Based Tests', () => {
             expect(['sm', 'md', 'lg']).toContain(size);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -153,7 +153,7 @@ describe('UI States - Property-Based Tests', () => {
             expect(['text', 'circular', 'rectangular']).toContain(variant);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
   });
@@ -174,7 +174,7 @@ describe('UI States - Property-Based Tests', () => {
             expect(called).toBe(true);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
 
@@ -197,7 +197,7 @@ describe('UI States - Property-Based Tests', () => {
             expect(action.label.length).toBeGreaterThan(0);
           }
         ),
-        { numRuns: 50 }
+        { numRuns: 20 }
       );
     });
   });

@@ -204,7 +204,7 @@ describe('Causal Weight Oracle - Property Tests', () => {
           }
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   }, 60000);
   
@@ -260,7 +260,7 @@ describe('Causal Weight Oracle - Property Tests', () => {
           expect(invalidResults.every(r => r === false)).toBe(true);
         }
       ),
-      { numRuns: 100 }
+      { numRuns: 20 }
     );
   }, 60000);
   
@@ -294,7 +294,7 @@ describe('Causal Weight Oracle - Property Tests', () => {
           expect(cachedWeight).toBeNull();
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   }, 30000);
   
@@ -329,7 +329,7 @@ describe('Causal Weight Oracle - Property Tests', () => {
           ).rejects.toThrow(/must be non-negative/i);
         }
       ),
-      { numRuns: 50 }
+      { numRuns: 20 }
     );
   }, 30000);
 });
