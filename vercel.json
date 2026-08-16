@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npm run build && node scripts/bundle-api.mjs",
+  "buildCommand": "npm run build && node scripts/prerender.mjs && node scripts/bundle-api.mjs",
   "outputDirectory": "dist",
   "framework": "vite",
   "functions": {
@@ -9,6 +9,8 @@
     }
   },
   "rewrites": [
+    { "source": "/agent-identity", "destination": "/agent-identity.html" },
+    { "source": "/agent-identity/", "destination": "/agent-identity.html" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "headers": [
