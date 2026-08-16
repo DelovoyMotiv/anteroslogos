@@ -33,7 +33,6 @@ api/ready.ts
 api/metrics.ts
 
 # Use api/auth.ts instead
-api/challenge.ts
 api/handshake.ts
 
 # Exclude wrap-openapi (use wrap-with-billing instead)

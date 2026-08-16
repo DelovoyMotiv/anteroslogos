@@ -80,6 +80,10 @@ lint-errors.txt
 !robots.txt
 !public/humans.txt
 !public/robots.txt
+!llms.txt
+!llms-full.txt
+!public/llms.txt
+!public/llms-full.txt
 
 # Migration reports and session logs
 MIGRATION_*.md

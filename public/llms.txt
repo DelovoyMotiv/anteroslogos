@@ -1,0 +1,66 @@
+# Anóteros Lógos
+
+> Anóteros Lógos is an enterprise AI knowledge infrastructure platform and a machine-first agent endpoint. It exposes GEO (Generative Engine Optimization) audits, knowledge-graph extraction, citation prediction, cryptographic agent identity (AIP, Ed25519), and USDC micropayments on Base L2. This site is designed to be consumed by autonomous agents (LLMs, LangChain, AutoGen, CrewAI) as well as humans.
+
+This file is a machine-readable index for AI agents and LLMs. The human-facing agent documentation lives at /agent-identity, but that page is client-rendered; agents that do not execute JavaScript should use this file and the linked machine files below, which are static and fully readable without JavaScript.
+
+Every endpoint referenced here resolves to a working handler. Design-stage subsystems and tools are labeled with an explicit Capability_Status so agents never call something that is not runnable in production.
+
+Supported standards: AIP v1.1 (Anóteros Identity Protocol), UAP v1.0 (Universal Agent Protocol), A2A v1.0 (Agent-to-Agent, JSON-RPC 2.0), MCP 2025-06-18 (Model Context Protocol), RFC 8615 (Well-Known URIs), RFC 9421 (HTTP Message Signatures).
+
+## Full specification
+
+- [Full agent specification (Markdown)](https://anoteroslogos.com/llms-full.txt): Complete protocol reference in plain text: discovery, AIP authentication, A2A, MCP, UAP, micropayments, subsystem status matrix, schemas, rate limits, and integration recipes.
+
+## Discovery (start here)
+
+- [Agent manifest (AIP v1.1)](https://anoteroslogos.com/.well-known/agent.json): Canonical machine descriptor. Source of truth for endpoints, capabilities, keys, pricing, and payment.
+- [Agent card (A2A v1.0)](https://anoteroslogos.com/.well-known/agent-card.json): Linux Foundation A2A discovery format with payment and verification extensions.
+- [AI usage policy](https://anoteroslogos.com/.well-known/ai.txt): Citation and attribution requirements for AI systems.
+- DNS discovery: TXT record at `_agent.anoteroslogos.com` (falls back to HTTPS well-known).
+
+## Capabilities and tools
+
+- [Merged capabilities (OpenAPI 3.1)](https://anoteroslogos.com/api/capabilities): All callable tools with parameter schemas.
+- [Capabilities snapshot](https://anoteroslogos.com/.well-known/capabilities.json): Static capabilities descriptor.
+- [MCP manifest](https://anoteroslogos.com/.well-known/mcp-manifest.json): Model Context Protocol server manifest.
+- [Tool search](https://anoteroslogos.com/api/tools/search): Search available tools by name/description.
+
+Callable MCP tools (Capability_Status: LIVE): `auditSite` (alias `anoteros_logos`), `getGraph`, `predictCitation`. All execute via the MCP transport at `/api/mcp`.
+
+Design-stage MCP tools (Capability_Status: DESIGN, NOT callable): `code_execution`, `synthesizeNode`, `causal_citation_trace`, `predictive_synthesis`, `federated_authority_boost`. These are specified but have no production-runnable implementation; invoking them returns a structured design-stage result rather than a computed answer.
+
+## Live endpoints (all resolve to working handlers)
+
+- A2A JSON-RPC 2.0: `POST https://anoteroslogos.com/api/a2a`
+- MCP transport: `https://anoteroslogos.com/api/mcp`
+- Merged capabilities (OpenAPI 3.1): `GET https://anoteroslogos.com/api/capabilities`
+- Tool search: `GET https://anoteroslogos.com/api/tools/search`
+- Independent verification (Ed25519 + UCPT watermark): `POST https://anoteroslogos.com/api/verify`
+- Canonical AIP identity service: `https://anoteroslogos.com/api/auth`
+
+## Identity (AIP, canonical)
+
+- Scheme: `aip://` (Anóteros Identity Protocol). Identities look like `aip://<domain>/<id>`.
+- Canonical identity endpoint: `https://anoteroslogos.com/api/auth`. Generate, challenge, and verify all resolve here.
+- Algorithm: Ed25519; keys are hex-encoded. HTTP message signatures follow RFC 9421.
+- Legacy AID transition aliases (delegate to `/api/auth`; NOT the canonical path): `/api/public-aid` (generate), `/api/challenge` (challenge). Prefer `aip://` and `/api/auth` for all new integrations.
+
+## Subsystem status matrix (Capability_Status)
+
+- Capability_Status mesh = DESIGN — DHT/libp2p peer mesh; requires a persistent host, not runnable on stateless serverless.
+- Capability_Status pbft = DESIGN — Byzantine consensus; needs multiple long-lived peers.
+- Capability_Status ccc = DESIGN — credit/penalty economy; no persistent shared ledger in production.
+- Capability_Status watermark = LIVE — deterministic UCPT watermark extraction/verification runs in-function via `/api/verify` and the `x-anoteros-watermark` header.
+
+## Human context
+
+- [Agent documentation (human)](https://anoteroslogos.com/agent-identity): Full narrative docs with interactive explorers and code samples.
+- [Home](https://anoteroslogos.com/): Studio overview. Slogan: "Don't rank. Become the source."
+- [Security contact](https://anoteroslogos.com/.well-known/security.txt): Vulnerability disclosure.
+
+## Notes
+
+- Attribution required when citing: "Source: Anóteros Lógos (anoteroslogos.com)".
+- Authentication uses AIP (`aip://`) identities with Ed25519 keys (hex). Payments settle in USDC on Base L2 (chainId 8453), pay-per-request.
+- When a value here disagrees with /.well-known/agent.json, treat agent.json as authoritative.

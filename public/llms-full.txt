@@ -1,0 +1,242 @@
+# Anóteros Lógos — Full Agent Specification
+
+> Machine-readable, JavaScript-free mirror of the agent documentation at
+> https://anoteroslogos.com/agent-identity. Written for autonomous agents
+> (LLMs, LangChain, AutoGen, CrewAI) and integration engineers. When any value
+> here disagrees with https://anoteroslogos.com/.well-known/agent.json, the
+> agent manifest is authoritative.
+
+Every endpoint referenced in this file resolves to a working handler. Anything
+that is specified but not runnable in the production serverless environment is
+labeled with an explicit Capability_Status of DESIGN so agents never call
+something that cannot execute.
+
+Last reviewed: 2026-08. Standards: AIP v1.1, UAP v1.0, A2A v1.0 (Linux
+Foundation), MCP 2025-06-18, RFC 8615 (Well-Known URIs), RFC 9421 (HTTP Message
+Signatures).
+
+## 0. Why this file exists
+
+The `/agent-identity` page is a client-rendered React application. Agents that
+do not execute JavaScript receive an empty HTML shell. This file, together with
+the static machine descriptors under `/.well-known/`, exposes the same
+information as plain text so any agent can read it without a browser.
+
+## 1. Identity and value proposition
+
+Anóteros Lógos is an enterprise AI knowledge infrastructure platform. It turns
+brand expertise into cryptographically verified, structurally clean semantic
+data that generative engines can cite. Core services exposed to agents:
+
+- GEO (Generative Engine Optimization) audits.
+- Knowledge-graph query and extraction.
+- Citation prediction and intelligence.
+- Cryptographic agent identity (AIP, `aip://`, Ed25519) with challenge-response
+  verification.
+- Independent Ed25519 + UCPT watermark verification.
+- USDC micropayments on Base L2 for pay-per-request access.
+
+## 2. Discovery
+
+Two discovery paths. Try DNS first, fall back to HTTPS well-known.
+
+### 2.1 DNS TXT (primary)
+
+Look up a single TXT record at `_agent.anoteroslogos.com`:
+
+    v=1.1;p=a2a,http;u=https://anoteroslogos.com/api/a2a;s=geoaudit;d=anoteroslogos.com
+
+Fields: `v` protocol version (required), `p` supported protocols
+(comma-separated), `u` primary endpoint URL (required), `s` service id,
+`d` domain.
+
+### 2.2 HTTPS Well-Known (RFC 8615)
+
+- Agent manifest (AIP v1.1): `GET https://anoteroslogos.com/.well-known/agent.json`
+- Agent card (A2A v1.0): `GET https://anoteroslogos.com/.well-known/agent-card.json`
+
+Both are CORS-enabled JSON. Example:
+
+    curl -H "Accept: application/json" https://anoteroslogos.com/.well-known/agent.json
+
+### 2.3 Discovery flow algorithm
+
+1. Attempt DNS TXT lookup: `dig _agent.anoteroslogos.com TXT`.
+2. If DNS fails (timeout > 5s), fall back to HTTPS.
+3. `GET https://anoteroslogos.com/.well-known/agent.json`.
+4. If HTTPS also fails, the agent is not discoverable.
+5. Parse the endpoint URL from the `u` field.
+6. Initiate an A2A connection to the discovered endpoint.
+
+## 3. Agent manifest (source of truth)
+
+The canonical descriptor is `/.well-known/agent.json`. Key fields:
+
+- `v`: "1.1"
+- `p`: ["a2a", "http", "mcp"]
+- `u` / `e`: https://anoteroslogos.com/api/a2a
+- `a.name`: "Anóteros Lógos GEO Agent", `a.version`: "2.1.0"
+- `a.capabilitiesUrl`: /api/capabilities
+- `a.documentation`: https://anoteroslogos.com/agent-identity
+- `k`: { alg: "Ed25519", use: "sig", kid: "anoteroslogos-2025-primary" }
+- `identity`: { scheme: "aip://", endpoint: "/api/auth", algorithm: "Ed25519", keyFormat: "hex" }
+- `toolSearchEndpoint`: /api/tools/search, `deferToolLoading`: true
+
+Advertised capabilities (10), all callable now:
+
+    a2a.discover, a2a.capabilities, a2a.ping, a2a.status,
+    geo.audit.request, knowledge.graph.query, citation.predict,
+    identity.generate, identity.challenge, identity.verify
+
+Design-stage subsystems (streaming audits, global insights, and the agent mesh)
+are NOT advertised as callable capabilities. See section 9 for the subsystem
+status matrix.
+
+Always resolve exact endpoint paths (especially identity) from the live
+manifest's `identity` object rather than hardcoding them.
+
+## 4. A2A protocol (Agent-to-Agent, JSON-RPC 2.0)
+
+- Endpoint: `POST https://anoteroslogos.com/api/a2a`
+- Transport: HTTP (JSON-RPC 2.0 over POST). Streaming/WebSocket transports are
+  design-stage and are not exposed in production.
+- Authentication accepted: bearer, api_key, ed25519.
+
+Example request (discovery):
+
+    curl -X POST https://anoteroslogos.com/api/a2a \
+      -H "Content-Type: application/json" \
+      -d '{"jsonrpc":"2.0","id":1,"method":"a2a.discover","params":{}}'
+
+Example request (GEO audit):
+
+    {
+      "jsonrpc": "2.0",
+      "id": 2,
+      "method": "geo.audit.request",
+      "params": { "url": "https://example.com" }
+    }
+
+Callable methods (Capability_Status: LIVE): `a2a.discover`, `a2a.capabilities`,
+`a2a.ping`, `a2a.status`, `geo.audit.request`, `knowledge.graph.query`,
+`citation.predict`, `identity.generate`, `identity.challenge`,
+`identity.verify`.
+
+## 5. MCP (Model Context Protocol 2025-06-18)
+
+- Endpoint: `https://anoteroslogos.com/api/mcp`
+- Manifest: `/.well-known/mcp-manifest.json`
+- Vendor tool schemas via query string: `GET /api/mcp?format=openai`,
+  `GET /api/mcp?format=claude`, `GET /api/mcp?format=grok`,
+  `GET /api/mcp?format=openapi`.
+
+Callable MCP tools (Capability_Status: LIVE): `auditSite` (alias
+`anoteros_logos`), `getGraph`, `predictCitation`. All route through
+`/api/mcp`.
+
+Design-stage MCP tools (Capability_Status: DESIGN, NOT callable):
+`code_execution`, `synthesizeNode`, `causal_citation_trace`,
+`predictive_synthesis`, `federated_authority_boost`. These are specified but
+have no production-runnable implementation; calling them returns a structured
+design-stage result rather than a computed answer.
+
+## 6. UAP v1.0 (Universal Agent Protocol) transport
+
+- HTTP/2 and CBOR binary framing are part of the UAP design surface.
+- Capability_Status: DESIGN. The production surface is served over HTTP
+  JSON-RPC (`/api/a2a`) and MCP (`/api/mcp`); the dedicated binary UAP
+  transport is not exposed in production.
+
+## 7. Authentication (AIP, Ed25519 challenge-response)
+
+Identity is AIP-canonical: identities use the `aip://` scheme and the canonical
+identity endpoint `/api/auth`. Generate, challenge, and verify all resolve at
+`/api/auth`.
+
+1. Generate an AIP identity (`aip://` + Ed25519 keypair):
+   `POST /api/auth` with `action=generate`. Store the private key securely;
+   keys are hex-encoded.
+2. Request a challenge: `POST /api/auth` with `action=challenge`.
+3. Sign the challenge with your Ed25519 private key.
+4. Verify: `POST /api/auth` with `action=verify` and the signature to receive a
+   token.
+5. Call protected endpoints with the verified credential.
+
+Legacy AID transition aliases (delegate to `/api/auth`; NOT the canonical
+path): `/api/public-aid` (identity generation) and `/api/challenge`
+(challenge-response). They remain available for existing integrations only —
+new agents should use `aip://` and `/api/auth`.
+
+Keys: Ed25519, hex format. HTTP message signatures follow RFC 9421.
+
+## 8. Micropayments (APA on Base L2)
+
+- Network: Base L2, chainId 8453.
+- Token: USDC.
+- Model: pay-per-request.
+
+## 9. Subsystem status matrix (Capability_Status)
+
+The following named subsystems carry an explicit Capability_Status. Only
+`watermark` is runnable in production; the rest are design-stage and are not
+exposed as callable endpoints.
+
+- Capability_Status mesh = DESIGN — DHT/libp2p peer mesh with discovery,
+  announce, sync, and health. Requires a persistent libp2p host; a running
+  swarm cannot run on stateless serverless functions.
+- Capability_Status pbft = DESIGN — Practical Byzantine Fault Tolerance
+  consensus. Needs multiple long-lived peers; not runnable on stateless
+  serverless.
+- Capability_Status ccc = DESIGN — credit/penalty economy: atomic
+  credit/debit/stake/transfer ledger. No persistent shared ledger in
+  production.
+- Capability_Status watermark = LIVE — UCPT watermark provenance:
+  deterministic extraction and verification run in-function via `/api/verify`
+  and the `x-anoteros-watermark` header.
+
+## 10. Verification (`/api/verify`)
+
+Independent, dependency-light verification of Ed25519 signatures and UCPT
+watermark provenance:
+
+- Endpoint: `POST https://anoteroslogos.com/api/verify`.
+- Verifies Ed25519 signatures and the `x-anoteros-watermark` provenance header.
+- Deterministic and runnable in-function (Capability_Status watermark = LIVE).
+
+## 11. Rate limits and pricing tiers
+
+- Free: 10 req/min, 100 req/hour.
+- Basic ($99/mo): 60 req/min, 1000 req/hour.
+- Pro ($299/mo): 300 req/min, 10000 req/hour.
+- Enterprise: 1000 req/min.
+- `/api/capabilities`: cached, no hard limit.
+
+## 12. Minimal integration recipe
+
+1. Discovery: `GET /.well-known/agent.json`.
+2. Capabilities: `GET /api/capabilities` (OpenAPI 3.1, all callable tools).
+3. Generate an AIP identity: `POST /api/auth` (action=generate).
+4. Get a challenge: `POST /api/auth` (action=challenge).
+5. Sign the challenge with Ed25519.
+6. Verify: `POST /api/auth` (action=verify) with the signature.
+7. Call tools via A2A (`/api/a2a`) or MCP (`/api/mcp`) with verified
+   credentials.
+8. Optionally verify provenance independently: `POST /api/verify`.
+
+## 13. Usage and attribution
+
+- Attribution required when citing: "Source: Anóteros Lógos (anoteroslogos.com)".
+- Training data: allowed with attribution. Synthetic media: not allowed.
+- Policy: `/.well-known/ai.txt`. Security contact: `/.well-known/security.txt`.
+
+## 14. Canonical references
+
+- Manifest: https://anoteroslogos.com/.well-known/agent.json
+- Agent card: https://anoteroslogos.com/.well-known/agent-card.json
+- Capabilities (OpenAPI): https://anoteroslogos.com/api/capabilities
+- MCP manifest: https://anoteroslogos.com/.well-known/mcp-manifest.json
+- Identity (AIP, canonical): https://anoteroslogos.com/api/auth
+- Verification: https://anoteroslogos.com/api/verify
+- Tool search: https://anoteroslogos.com/api/tools/search
+- Human docs: https://anoteroslogos.com/agent-identity
+- Index: https://anoteroslogos.com/llms.txt
