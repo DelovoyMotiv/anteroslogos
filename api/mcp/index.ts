@@ -17,14 +17,19 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+// IMPORTANT (Requirements 4.1, 4.2): This module MUST NOT perform any
+// module-load-time import of heavy/native dependencies. Doing so previously
+// caused every request to /api/mcp to 500 on Vercel's stateless serverless
+// runtime (the native `isolated-vm` binding via the programmatic route, and
+// the libp2p mesh via MeshNetworkRouter, were loaded at import time).
+//
+// Only dependency-light schema helpers and the capability registry are
+// imported at the top level. The audit/graph/citation implementations are
+// lazy-loaded via `await import()` inside the `tools/call` branch so that
+// GET /api/mcp, tools/list, resources/list, and prompts/list respond 200
+// without loading any native dependency.
 import { ALL_TOOLS, GRAPH_TOOLS, toClaudeTool, toOpenAIFunction } from '../../lib/mcp/schemas';
-import { createClient } from '@supabase/supabase-js';
-import { executeProgrammatic } from '../../app/api/mcp/programmatic/route';
-import { MeshNetworkRouter, type UCPTCascadeMessage } from '../../lib/mesh/network';
-import type { SerializedUCPT } from '../../lib/ucpt/types';
-import { performGeoAudit } from '../../utils/geoAuditEnhanced';
-import { KnowledgeGraphBuilder } from '../../utils/knowledgeGraph/builder';
-import { CitationPredictionEngine } from '../../utils/citationPrediction/engine';
+import { CAPABILITY_REGISTRY } from '../../lib/agentSurface/capabilityRegistry';
 import { withCors, withRateLimit, withJsonRpcValidation, compose } from '../../lib/validation/middleware';
 import {
   McpInitializeParamsSchema,
@@ -33,8 +38,6 @@ import {
   McpPromptsGetParamsSchema,
 } from '../../lib/validation/apiSchemas';
 import type { ValidatedApiHandler } from '../../types/api.types';
-import { isInitializableRouter } from '../../types/api.types';
-import type { JSONObject } from '../../types/common.types';
 
 // =====================================================
 // MCP PROTOCOL TYPES (2024-11-05 Spec)
@@ -67,6 +70,61 @@ const MCP_SERVER_INFO = {
 };
 
 // =====================================================
+// CAPABILITY STATUS (from the single-source-of-truth registry)
+// =====================================================
+
+/**
+ * Map of MCP tool method name -> { status, note } derived from the Capability
+ * Registry. This is what lets tools/list mark design-stage tools as
+ * `status: 'DESIGN'` and lets tools/call return a structured design-stage
+ * result for them instead of attempting to load unavailable infrastructure
+ * (Requirements 4.6).
+ */
+const MCP_TOOL_STATUS = new Map<string, { status: 'LIVE' | 'DESIGN'; note?: string }>();
+for (const entry of CAPABILITY_REGISTRY.capabilities) {
+  if (entry.id.startsWith('mcp.') && typeof entry.method === 'string') {
+    MCP_TOOL_STATUS.set(entry.method, { status: entry.status, note: entry.note });
+  }
+}
+
+/** Tools that are design-stage / not runnable in production serverless. */
+function isDesignTool(name: string): boolean {
+  return MCP_TOOL_STATUS.get(name)?.status === 'DESIGN';
+}
+
+/** Resolve the declared status for a tool; defaults to LIVE for local tools. */
+function toolStatus(name: string): 'LIVE' | 'DESIGN' {
+  return MCP_TOOL_STATUS.get(name)?.status ?? 'LIVE';
+}
+
+/**
+ * Build a structured, valid JSON-RPC tool result declaring the tool is
+ * design-stage. This is NOT an error and never attempts to load isolated-vm,
+ * a mesh, or any other unavailable infrastructure (Requirements 4.6).
+ */
+function designStageResult(name: string): { content: Array<{ type: string; text: string }> } {
+  const info = MCP_TOOL_STATUS.get(name);
+  return {
+    content: [
+      {
+        type: 'text',
+        text: JSON.stringify(
+          {
+            tool: name,
+            status: 'DESIGN',
+            runnable: false,
+            message: `Tool '${name}' is design-stage and is not runnable in the production serverless environment.`,
+            note: info?.note,
+          },
+          null,
+          2
+        ),
+      },
+    ],
+  };
+}
+
+// =====================================================
 // MCP TOOLS (from schemas)
 // =====================================================
 
@@ -75,6 +133,7 @@ function getMcpTools() {
     name: tool.name,
     title: tool.name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()), // MCP 2025-06-18: title field
     description: tool.description,
+    status: toolStatus(tool.name), // LIVE or DESIGN (Requirements 4.6)
     inputSchema: {
       type: 'object' as const,
       properties: Object.fromEntries(
@@ -185,65 +244,19 @@ const MCP_PROMPTS = [
 // TOOL EXECUTION
 // =====================================================
 
-// Mesh router instance for cascade broadcast
-let meshRouter: MeshNetworkRouter | null = null;
-
-function getMeshRouter(): MeshNetworkRouter {
-  if (!meshRouter) {
-    const localAip = process.env.AGENT_AIP || 'aip://anoteroslogos.com/geo-audit';
-    meshRouter = new MeshNetworkRouter(localAip, { useLibp2p: true });
-  }
-  return meshRouter;
-}
-
-/**
- * Broadcast UCPT token via Provenance Cascade if x-mesh-broadcast header is present
- */
-async function broadcastUCPTCascade(
-  ucpt: SerializedUCPT,
-  toolName: string,
-  sourceAip: string
-): Promise<void> {
-  const router = getMeshRouter();
-
-  // Ensure router is initialized
-  if (isInitializableRouter(router) && !router.initialized) {
-    try {
-      await router.initialize();
-    } catch (error) {
-      console.error('[ProvCascade] Failed to initialize mesh router:', error);
-      return; // Silently skip cascade on init failure
-    }
-  }
-  
-  const cascadeMsg: UCPTCascadeMessage = {
-    type: 'ucpt-cascade',
-    ucpt: ucpt.token,
-    sourceAip,
-    tool: toolName,
-    ttl: 7,
-    timestamp: Date.now(),
-  };
-  
-  try {
-    const { sent, failed } = await router.broadcast(cascadeMsg, {
-      maxHops: 7,
-      filter: 'ucpt-capable',
-    });
-    console.log(`[ProvCascade] ${toolName}: broadcast to ${sent} peers (${failed} failed)`);
-  } catch (error) {
-    console.error('[ProvCascade] Broadcast failed:', error);
-    // Don't throw - cascade is best-effort
-  }
-}
-
 async function executeToolCall(
   name: string,
   args: Record<string, unknown>,
-  request?: VercelRequest
+  _request?: VercelRequest
 ): Promise<{ content: Array<{ type: string; text: string }>; isError?: boolean }> {
-  const startTime = Date.now();
-  
+  // Design-stage tools (code_execution, synthesizeNode, causal_citation_trace,
+  // predictive_synthesis, federated_authority_boost) return a structured
+  // design-stage result rather than attempting to load unavailable
+  // infrastructure such as the native isolated-vm binding (Requirements 4.6).
+  if (isDesignTool(name)) {
+    return designStageResult(name);
+  }
+
   try {
     let result: unknown;
     
@@ -268,39 +281,24 @@ async function executeToolCall(
         break;
       }
 
-      case 'code_execution': {
-        const code = args.code as string;
-        const language = (args.language as string) || 'javascript';
-        const timeout = typeof args.timeout_ms === 'number' ? (args.timeout_ms as number) : undefined;
-        if (!code) throw new Error('Missing required parameter: code');
-        if (language !== 'javascript') throw new Error('Only javascript language is supported');
-        // Prepare Supabase client and tenant
-        const tenantId = String((args.tenant_id as string) || 'default');
-        if (!process.env.VITE_SUPABASE_URL || !process.env.VITE_SUPABASE_ANON_KEY) {
-          throw new Error('Supabase environment variables not configured');
-        }
-        const supabase = createClient(
-          process.env.VITE_SUPABASE_URL as string,
-          process.env.VITE_SUPABASE_ANON_KEY as string
-        );
-        const { result: programResult, ucpt, executionTime, logs } = await executeProgrammatic(
-          { code, language: 'javascript', timeout }, supabase, tenantId
-        );
-        result = { stdout: logs.join('\n'), result: programResult, ucpt, executionTimeMs: executionTime };
-        
-        // Provenance Cascade: broadcast UCPT if x-mesh-broadcast header is true
-        if (ucpt && request?.headers['x-mesh-broadcast'] === 'true') {
-          const sourceAip = process.env.AGENT_AIP || 'aip://anoteroslogos.com/geo-audit';
-          await broadcastUCPTCascade(ucpt, name, sourceAip);
-        }
-        break;
-      }
-
+      case 'auditSite':
       case 'anoteros_logos': {
         const url = args.url as string;
         const useAI = Boolean(args.useAI || false);
         if (!url) throw new Error('Missing required parameter: url');
-        
+
+        // Lazy-load the audit implementation. A failing dynamic import degrades
+        // this one tool to an error result rather than crashing the function
+        // (Requirements 4.3).
+        let performGeoAudit: typeof import('../../utils/geoAuditEnhanced')['performGeoAudit'];
+        try {
+          ({ performGeoAudit } = await import('../../utils/geoAuditEnhanced'));
+        } catch (importError) {
+          throw new Error(
+            `GEO audit implementation unavailable: ${importError instanceof Error ? importError.message : String(importError)}`
+          );
+        }
+
         // Production GEO audit
         const auditResult = await performGeoAudit(url, { useAI });
         result = {
@@ -318,7 +316,17 @@ async function executeToolCall(
       case 'getGraph': {
         const url = args.url as string;
         if (!url) throw new Error('Missing required parameter: url');
-        
+
+        // Lazy-load the knowledge graph builder (Requirements 4.3).
+        let KnowledgeGraphBuilder: typeof import('../../utils/knowledgeGraph/builder')['KnowledgeGraphBuilder'];
+        try {
+          ({ KnowledgeGraphBuilder } = await import('../../utils/knowledgeGraph/builder'));
+        } catch (importError) {
+          throw new Error(
+            `Knowledge graph implementation unavailable: ${importError instanceof Error ? importError.message : String(importError)}`
+          );
+        }
+
         // Production knowledge graph extraction
         const domain = new URL(url).hostname;
         const builder = new KnowledgeGraphBuilder(domain);
@@ -340,7 +348,19 @@ async function executeToolCall(
         const url = args.url as string;
         const platform = (args.platform as string) || 'all';
         if (!url) throw new Error('Missing required parameter: url');
-        
+
+        // Lazy-load the graph builder + citation engine (Requirements 4.3).
+        let KnowledgeGraphBuilder: typeof import('../../utils/knowledgeGraph/builder')['KnowledgeGraphBuilder'];
+        let CitationPredictionEngine: typeof import('../../utils/citationPrediction/engine')['CitationPredictionEngine'];
+        try {
+          ({ KnowledgeGraphBuilder } = await import('../../utils/knowledgeGraph/builder'));
+          ({ CitationPredictionEngine } = await import('../../utils/citationPrediction/engine'));
+        } catch (importError) {
+          throw new Error(
+            `Citation prediction implementation unavailable: ${importError instanceof Error ? importError.message : String(importError)}`
+          );
+        }
+
         // Production citation prediction
         // First, extract knowledge graph
         const domain = new URL(url).hostname;
@@ -377,28 +397,11 @@ async function executeToolCall(
         break;
       }
       
-      case 'synthesizeNode':
-      case 'causal_citation_trace':
-      case 'predictive_synthesis':
-      case 'federated_authority_boost': {
-        // Enforce allowed_callers policy: these heavy tools must be called from code_execution
-        const allowedFromCode = ['synthesizeNode', 'causal_citation_trace', 'predictive_synthesis', 'federated_authority_boost'];
-        if (allowedFromCode.includes(name)) {
-          const caller = (args.caller as JSONObject | undefined)?.type as string | undefined;
-          if (caller !== 'code_execution_20250825' && caller !== 'code_execution') {
-            throw new Error(`Tool ${name} must be invoked via Programmatic Tool Calling (caller=code_execution_20250825).`);
-          }
-        }
-        result = {
-          tool: name,
-          args,
-          status: 'executed',
-          executionTimeMs: Date.now() - startTime,
-          message: `Tool ${name} executed successfully`,
-        };
-        break;
-      }
-      
+      // Note: code_execution, synthesizeNode, causal_citation_trace,
+      // predictive_synthesis, and federated_authority_boost are design-stage
+      // and handled by the isDesignTool short-circuit at the top of this
+      // function (Requirements 4.6).
+
       default:
         throw new Error(`Unknown tool: ${name}`);
     }

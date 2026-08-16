@@ -126,6 +126,15 @@ const AgentIdentityPage = () => {
                 RFC 8615 Compliant
               </span>
             </div>
+
+            {/* Machine-readable, JavaScript-free mirror for agents */}
+            <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
+              <span className="font-mono uppercase tracking-wider text-zinc-500">Machine-readable:</span>
+              <a href="/llms.txt" className="font-mono text-brand-accent hover:text-blue-400 transition-colors">/llms.txt</a>
+              <a href="/llms-full.txt" className="font-mono text-brand-accent hover:text-blue-400 transition-colors">/llms-full.txt</a>
+              <a href="/.well-known/agent.json" className="font-mono text-brand-accent hover:text-blue-400 transition-colors">/.well-known/agent.json</a>
+              <a href="/api/capabilities" className="font-mono text-brand-accent hover:text-blue-400 transition-colors">/api/capabilities</a>
+            </div>
           </div>
 
           {/* Quick Navigation */}

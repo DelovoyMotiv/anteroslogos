@@ -10,18 +10,20 @@
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { ed25519 } from '@noble/curves/ed25519.js';
-import { randomBytes, createHash } from 'crypto';
 import { createClient } from '@supabase/supabase-js';
+import {
+  CHALLENGE_TTL_MS,
+  generateIdentity,
+  issueChallenge,
+  verifyAndIssueToken,
+} from '../lib/agentSurface/identity';
 
-// In-memory stores (production: use Redis/KV)
-const challengeStore = new Map<string, { challenge: string; expiresAt: number; publicKey?: string }>();
+// In-memory store (production: use Redis/KV). The challenge store lives in the
+// shared identity module so every identity surface shares one source of truth.
 const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
 
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const RATE_LIMIT_MAX = 30;
-const CHALLENGE_TTL_MS = 5 * 60 * 1000;
-const JWT_TTL_MS = 24 * 60 * 60 * 1000;
 
 function checkRateLimit(ip: string): { allowed: boolean; remaining: number } {
   const now = Date.now();
@@ -38,56 +40,6 @@ function checkRateLimit(ip: string): { allowed: boolean; remaining: number } {
   
   entry.count++;
   return { allowed: true, remaining: RATE_LIMIT_MAX - entry.count };
-}
-
-function generateChallenge(): string {
-  const timestamp = Date.now().toString(36);
-  const random = randomBytes(16).toString('hex');
-  const nonce = randomBytes(8).toString('hex');
-  return `anoteroslogos:${timestamp}:${random}:${nonce}`;
-}
-
-function verifySignature(challenge: string, publicKey: string, signature: string): boolean {
-  try {
-    const messageBytes = new TextEncoder().encode(challenge);
-    const publicKeyBytes = Buffer.from(publicKey, 'hex');
-    const signatureBytes = Buffer.from(signature, 'hex');
-    return ed25519.verify(signatureBytes, messageBytes, publicKeyBytes);
-  } catch {
-    return false;
-  }
-}
-
-function generateToken(aip: string, publicKey: string): { token: string; expiresAt: string } {
-  const expiresAt = new Date(Date.now() + JWT_TTL_MS);
-  const payload = {
-    aip,
-    publicKey,
-    iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(expiresAt.getTime() / 1000),
-    iss: 'anoteroslogos.com',
-  };
-  
-  const header = Buffer.from(JSON.stringify({ alg: 'EdDSA', typ: 'JWT' })).toString('base64url');
-  const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
-  const sig = createHash('sha256').update(`${header}.${body}`).digest('base64url');
-  
-  return { token: `${header}.${body}.${sig}`, expiresAt: expiresAt.toISOString() };
-}
-
-function generateKeyPair(): { publicKey: string; privateKey: string } {
-  const privateKeyBytes = randomBytes(32);
-  const publicKeyBytes = ed25519.getPublicKey(privateKeyBytes);
-  return {
-    privateKey: Buffer.from(privateKeyBytes).toString('hex'),
-    publicKey: Buffer.from(publicKeyBytes).toString('hex'),
-  };
-}
-
-function generateAipUri(name: string, publicKey: string): string {
-  const normalizedName = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').substring(0, 32) || 'agent';
-  const suffix = createHash('sha256').update(publicKey).digest('hex').substring(0, 12);
-  return `aip://${normalizedName}/${suffix}`;
 }
 
 async function handleUserRole(req: VercelRequest, res: VercelResponse) {
@@ -181,9 +133,7 @@ export default async function handler(
           return res.status(400).json({ error: 'Missing aip parameter' });
         }
         
-        const challenge = generateChallenge();
-        const expiresAt = Date.now() + CHALLENGE_TTL_MS;
-        challengeStore.set(aip, { challenge, expiresAt });
+        const { challenge, expiresAt } = issueChallenge(aip);
         
         return res.status(200).json({
           aip,
@@ -202,27 +152,22 @@ export default async function handler(
           return res.status(400).json({ error: 'Missing required fields' });
         }
         
-        const stored = challengeStore.get(aip);
-        if (!stored || stored.expiresAt < Date.now()) {
-          return res.status(401).json({ error: 'Challenge expired or not found' });
+        const result = verifyAndIssueToken(aip, challenge, publicKey, signature);
+        if (!result.verified) {
+          const message =
+            result.reason === 'challenge_not_found'
+              ? 'Challenge expired or not found'
+              : result.reason === 'challenge_mismatch'
+              ? 'Challenge mismatch'
+              : 'Invalid signature';
+          return res.status(401).json({ error: message });
         }
-        
-        if (stored.challenge !== challenge) {
-          return res.status(401).json({ error: 'Challenge mismatch' });
-        }
-        
-        if (!verifySignature(challenge, publicKey, signature)) {
-          return res.status(401).json({ error: 'Invalid signature' });
-        }
-        
-        challengeStore.delete(aip);
-        const { token, expiresAt } = generateToken(aip, publicKey);
         
         return res.status(200).json({
           verified: true,
-          aip,
-          jwt: token,
-          expiresAt,
+          aip: result.aip,
+          jwt: result.jwt,
+          expiresAt: result.expiresAt,
         });
       }
     } else {
@@ -246,32 +191,28 @@ export default async function handler(
 
       if (req.method === 'POST') {
         const { aip, publicKey, challenge, signature, name } = req.body || {};
-        const now = Date.now();
 
         // Case 1: Verify signature
         if (aip && publicKey && challenge && signature) {
-          const stored = challengeStore.get(aip);
-          if (!stored || stored.expiresAt < now || stored.challenge !== challenge) {
+          const result = verifyAndIssueToken(aip, challenge, publicKey, signature);
+          if (!result.verified) {
+            if (result.reason === 'invalid_signature') {
+              return res.status(401).json({ error: 'Invalid signature' });
+            }
             return res.status(401).json({ error: 'Challenge expired or invalid' });
           }
-          if (!verifySignature(challenge, publicKey, signature)) {
-            return res.status(401).json({ error: 'Invalid signature' });
-          }
-          challengeStore.delete(aip);
-          const { token, expiresAt } = generateToken(aip, publicKey);
           return res.status(200).json({ 
             status: 'authenticated', 
             aip, 
-            token, 
+            token: result.jwt, 
             tokenType: 'Bearer', 
-            expiresAt 
+            expiresAt: result.expiresAt 
           });
         }
 
         // Case 2: Get challenge for existing AIP
         if (aip && !signature) {
-          const ch = generateChallenge();
-          challengeStore.set(aip, { challenge: ch, expiresAt: now + CHALLENGE_TTL_MS });
+          const { challenge: ch } = issueChallenge(aip);
           return res.status(200).json({ 
             status: 'challenge_issued', 
             aip, 
@@ -282,17 +223,14 @@ export default async function handler(
         }
 
         // Case 3: Generate new identity
-        const { publicKey: pk, privateKey: sk } = generateKeyPair();
-        const newAip = generateAipUri(name || 'agent', pk);
-        const ch = generateChallenge();
-        challengeStore.set(newAip, { challenge: ch, expiresAt: now + CHALLENGE_TTL_MS });
+        const identity = generateIdentity(name);
 
         return res.status(201).json({
           status: 'identity_created',
-          aip: newAip,
-          publicKey: pk,
-          privateKey: sk,
-          challenge: ch,
+          aip: identity.aip,
+          publicKey: identity.publicKey,
+          privateKey: identity.privateKey,
+          challenge: identity.challenge,
           challengeExpiresIn: 300,
           algorithm: 'Ed25519',
           warning: 'Store private key securely. It is only returned once.'

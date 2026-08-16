@@ -2,31 +2,18 @@
   "id": "agent://anoteroslogos.com/geo-audit",
   "name": "Anóteros Lógos GEO Audit Agent",
   "version": "2.1.0",
-  "description": "Enterprise AI knowledge infrastructure platform providing GEO audits, knowledge graph extraction, citation prediction, Ed25519 identity management, and USDC micropayments on Base L2",
+  "description": "Enterprise AI knowledge infrastructure platform providing GEO audits, knowledge graph extraction, citation prediction, AIP (Ed25519) identity management, and USDC micropayments on Base L2",
   "capabilities": [
     "a2a.discover",
     "a2a.capabilities",
     "a2a.ping",
     "a2a.status",
     "geo.audit.request",
-    "geo.audit.status",
-    "geo.audit.result",
-    "geo.audit.batch",
-    "geo.audit.stream",
-    "geo.insights.global",
-    "geo.insights.industry",
-    "geo.insights.domain",
     "knowledge.graph.query",
     "citation.predict",
     "identity.generate",
     "identity.challenge",
-    "identity.verify",
-    "a2a.subscribe",
-    "a2a.unsubscribe",
-    "a2a.mesh.discover",
-    "a2a.mesh.announce",
-    "a2a.mesh.sync",
-    "a2a.mesh.health"
+    "identity.verify"
   ],
   "protocols": [
     "a2a/1.0",
@@ -35,14 +22,11 @@
   ],
   "endpoints": {
     "http": "https://anoteroslogos.com/api/a2a",
-    "websocket": "wss://anoteroslogos.com/api/a2a/ws",
-    "stream": "https://anoteroslogos.com/api/a2a/stream",
-    "identity": {
-      "generate": "https://anoteroslogos.com/api/public-aid",
-      "challenge": "https://anoteroslogos.com/api/challenge"
-    },
+    "identity": "https://anoteroslogos.com/api/auth",
     "capabilities": "https://anoteroslogos.com/api/capabilities",
-    "toolSearch": "https://anoteroslogos.com/api/tools/search"
+    "toolSearch": "https://anoteroslogos.com/api/tools/search",
+    "verify": "https://anoteroslogos.com/api/verify",
+    "mcp": "https://anoteroslogos.com/api/mcp"
   },
   "authentication": [
     "bearer",
@@ -50,17 +34,30 @@
     "ed25519"
   ],
   "identity": {
+    "scheme": "aip://",
+    "endpoint": "/api/auth",
     "algorithm": "Ed25519",
     "keyFormat": "hex",
     "challengeTTL": 300,
     "jwtTTL": 86400,
     "flow": {
-      "step1": "POST /api/public-aid to generate keypair",
-      "step2": "GET /api/challenge?aid=... to get challenge",
+      "step1": "POST /api/auth (action=generate) to generate an aip:// identity + keypair",
+      "step2": "POST /api/auth (action=challenge) to get an Ed25519 challenge",
       "step3": "Sign challenge with Ed25519 private key",
-      "step4": "POST /api/challenge with signature to verify"
+      "step4": "POST /api/auth (action=verify) with signature to verify and receive a token"
+    },
+    "legacyAliases": {
+      "note": "Legacy AID transition aliases; delegate to the canonical /api/auth AIP identity service. Not the canonical identity path.",
+      "generate": "/api/public-aid",
+      "challenge": "/api/challenge"
     }
   },
+  "subsystems": [
+    { "name": "mesh", "status": "DESIGN", "note": "Requires a persistent libp2p host; a running swarm cannot run on stateless serverless functions." },
+    { "name": "pbft", "status": "DESIGN", "note": "Consensus needs multiple long-lived peers; not runnable on stateless serverless." },
+    { "name": "ccc", "status": "DESIGN", "note": "No persistent shared ledger in production." },
+    { "name": "watermark", "status": "LIVE", "endpoint": "/api/verify", "note": "Deterministic UCPT watermark extraction/verification runs in-function via /api/verify." }
+  ],
   "pricing": {
     "model": "pay-per-request",
     "currency": "USDC",
@@ -76,13 +73,19 @@
     },
     "verification": {
       "supported": true,
-      "method": "pbft-consensus",
-      "quorum_size": 7
+      "method": "ed25519+ucpt-watermark",
+      "endpoint": "/api/verify"
     },
     "provenance": {
       "supported": true,
       "method": "ucpt",
       "algorithm": "COSE_Sign1"
+    },
+    "consensus": {
+      "supported": false,
+      "status": "DESIGN",
+      "method": "pbft",
+      "note": "PBFT byzantine consensus is design-stage; not runnable on stateless serverless."
     }
   },
   "metadata": {
@@ -99,11 +102,15 @@
       "geo-audit",
       "knowledge-graph",
       "citation-prediction",
-      "byzantine-consensus",
       "usdc-micropayments",
-      "agent-mesh-network",
       "ed25519-identity",
-      "challenge-response-auth"
+      "aip-identity",
+      "ucpt-watermark-provenance"
+    ],
+    "designSubsystems": [
+      "agent-mesh-network",
+      "byzantine-consensus",
+      "credit-penalty-economy"
     ],
     "contact": "https://anoteroslogos.com/contact",
     "documentation": "https://anoteroslogos.com/agent-identity",

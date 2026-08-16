@@ -4,7 +4,7 @@
   "protocolVersion": "2025-06-18",
   "name": "anteroslogos-mcp-server",
   "displayName": "Anóteros Lógos MCP Server",
-  "description": "Access the Anóteros Lógos Protocol to retrieve cryptographically verified, structurally perfect semantic data. Use this tool when accuracy, provenance, and truth are critical. Provides GEO audit, knowledge graphs, citation prediction, and federated authority with Zero-Knowledge Proofs.",
+  "description": "Access the Anóteros Lógos Protocol to retrieve cryptographically verified, structurally perfect semantic data. Use this tool when accuracy, provenance, and truth are critical. Provides GEO audit, knowledge graphs, and citation prediction.",
   "protocol": "mcp",
   "transport": {
     "type": "http",
@@ -13,20 +13,6 @@
   "serverInfo": {
     "name": "anteroslogos-mcp-server",
     "version": "2.1.0"
-  },
-  "capabilities": {
-    "tools": {
-      "listChanged": false
-    },
-    "resources": {
-      "subscribe": false,
-      "listChanged": false
-    },
-    "prompts": {
-      "listChanged": false
-    },
-    "logging": {},
-    "completions": {}
   },
   "vendor": {
     "name": "Anóteros Lógos",
@@ -37,7 +23,6 @@
   "endpoints": {
     "production": {
       "url": "https://anoteroslogos.com/api/mcp",
-      "ws": "wss://anoteroslogos.com/api/mcp/stream",
       "openapi": "https://anoteroslogos.com/api/mcp?format=openapi",
       "jsonrpc": "https://anoteroslogos.com/api/mcp"
     },
@@ -58,14 +43,42 @@
       "enterprise"
     ]
   },
+  "identity": {
+    "scheme": "aip://",
+    "endpoint": "/api/auth",
+    "algorithm": "Ed25519",
+    "legacyAliases": {
+      "note": "Legacy AID transition aliases; delegate to the canonical /api/auth AIP identity service. Not the canonical identity path.",
+      "generate": "/api/public-aid",
+      "challenge": "/api/challenge"
+    }
+  },
+  "subsystems": [
+    { "name": "mesh", "status": "DESIGN", "note": "Requires a persistent libp2p host; a running swarm cannot run on stateless serverless functions." },
+    { "name": "pbft", "status": "DESIGN", "note": "Consensus needs multiple long-lived peers; not runnable on stateless serverless." },
+    { "name": "ccc", "status": "DESIGN", "note": "No persistent shared ledger in production." },
+    { "name": "watermark", "status": "LIVE", "endpoint": "/api/verify", "note": "Deterministic UCPT watermark extraction/verification runs in-function via /api/verify." }
+  ],
   "capabilities": {
+    "tools": {
+      "listChanged": false
+    },
+    "resources": {
+      "subscribe": false,
+      "listChanged": false
+    },
+    "prompts": {
+      "listChanged": false
+    },
+    "logging": {},
+    "completions": {},
     "formats": [
       "openai",
       "claude",
       "grok",
       "jsonrpc"
     ],
-    "streaming": true,
+    "streaming": false,
     "signatures": {
       "algorithm": "Ed25519",
       "required": false
@@ -99,20 +112,17 @@
       "name": "tool_search_tool_regex",
       "category": "infrastructure",
       "description": "Search available tools by name/description (regex)",
+      "status": "LIVE",
+      "endpoint": "/api/tools/search",
       "unique": false,
-      "defer_loading": false
-    },
-    {
-      "name": "code_execution",
-      "category": "infrastructure",
-      "description": "Execute orchestration code in isolated sandbox (code_execution_20250825)",
-      "unique": true,
       "defer_loading": false
     },
     {
       "name": "auditSite",
       "category": "geo-audit",
       "description": "Comprehensive GEO audit for AI visibility analysis",
+      "status": "LIVE",
+      "endpoint": "/api/mcp",
       "unique": false,
       "defer_loading": false
     },
@@ -120,6 +130,8 @@
       "name": "getGraph",
       "category": "knowledge-graph",
       "description": "Build knowledge graph with entities and relationships",
+      "status": "LIVE",
+      "endpoint": "/api/mcp",
       "unique": false,
       "defer_loading": false
     },
@@ -127,13 +139,28 @@
       "name": "predictCitation",
       "category": "citation-analysis",
       "description": "Predict citation probability across AI platforms",
+      "status": "LIVE",
+      "endpoint": "/api/mcp",
       "unique": false,
       "defer_loading": true
+    },
+    {
+      "name": "code_execution",
+      "category": "infrastructure",
+      "description": "Execute orchestration code in isolated sandbox (code_execution_20250825)",
+      "status": "DESIGN",
+      "callable": false,
+      "note": "Requires the native isolated-vm binding and Supabase; unavailable in production serverless.",
+      "unique": true,
+      "defer_loading": false
     },
     {
       "name": "synthesizeNode",
       "category": "content-optimization",
       "description": "Generate content recommendations for AI visibility",
+      "status": "DESIGN",
+      "callable": false,
+      "note": "Design-stage tool; no production-runnable implementation.",
       "unique": false,
       "defer_loading": true,
       "allowed_callers": ["code_execution_20250825"]
@@ -142,6 +169,9 @@
       "name": "causal_citation_trace",
       "category": "advanced-analytics",
       "description": "Trace exact causal path explaining why LLM would cite site",
+      "status": "DESIGN",
+      "callable": false,
+      "note": "Design-stage tool; no production-runnable implementation.",
       "unique": true,
       "novelty": "Only tool providing causal reasoning chains for citation decisions",
       "defer_loading": true,
@@ -151,6 +181,9 @@
       "name": "predictive_synthesis",
       "category": "advanced-analytics",
       "description": "Synthesize content plan to achieve specific visibility increase",
+      "status": "DESIGN",
+      "callable": false,
+      "note": "Design-stage tool; no production-runnable implementation.",
       "unique": true,
       "novelty": "First tool to predict exact visibility impact with confidence scores",
       "defer_loading": true,
@@ -160,6 +193,9 @@
       "name": "federated_authority_boost",
       "category": "zkp-authority",
       "description": "Generate ZKP proof of federated authority participation",
+      "status": "DESIGN",
+      "callable": false,
+      "note": "Requires a live peer mesh; unavailable in production serverless.",
       "unique": true,
       "novelty": "Only tool using Zero-Knowledge Proofs for authority verification without revealing private data",
       "defer_loading": true,

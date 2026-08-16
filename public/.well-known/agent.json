@@ -5,7 +5,7 @@
   "s": "geoaudit",
   "a": {
     "name": "Anóteros Lógos GEO Agent",
-    "description": "Enterprise AI Knowledge Infrastructure Platform. Provides GEO audits, knowledge graph extraction, citation prediction, Ed25519 identity management, and USDC micropayments on Base L2.",
+    "description": "Enterprise AI Knowledge Infrastructure Platform. Provides GEO audits, knowledge graph extraction, citation prediction, AIP (Ed25519) identity management, and USDC micropayments on Base L2.",
     "version": "2.1.0",
     "capabilities": [
       "a2a.discover",
@@ -13,24 +13,18 @@
       "a2a.ping",
       "a2a.status",
       "geo.audit.request",
-      "geo.audit.batch",
-      "geo.audit.stream",
-      "geo.insights.global",
       "knowledge.graph.query",
       "citation.predict",
       "identity.generate",
       "identity.challenge",
-      "identity.verify",
-      "a2a.mesh.discover",
-      "a2a.mesh.announce",
-      "a2a.mesh.sync",
-      "a2a.mesh.health",
-      "a2a.mesh.cascade"
+      "identity.verify"
     ],
     "capabilitiesUrl": "/api/capabilities",
     "vendor": "Anóteros Lógos",
     "homepage": "https://anoteroslogos.com",
     "documentation": "https://anoteroslogos.com/agent-identity",
+    "llmsTxt": "https://anoteroslogos.com/llms.txt",
+    "llmsFullTxt": "https://anoteroslogos.com/llms-full.txt",
     "contact": "https://anoteroslogos.com/#contact"
   },
   "d": "anoteroslogos.com",
@@ -48,11 +42,25 @@
   "toolSearchEndpoint": "/api/tools/search",
   "deferToolLoading": true,
   "identity": {
-    "generateEndpoint": "/api/public-aid",
-    "challengeEndpoint": "/api/challenge",
+    "scheme": "aip://",
+    "endpoint": "/api/auth",
+    "generateEndpoint": "/api/auth",
+    "challengeEndpoint": "/api/auth",
+    "verifyEndpoint": "/api/auth",
     "algorithm": "Ed25519",
-    "keyFormat": "hex"
+    "keyFormat": "hex",
+    "legacyAliases": {
+      "note": "Legacy AID transition aliases; delegate to the canonical /api/auth AIP identity service. Not the canonical identity path.",
+      "generate": "/api/public-aid",
+      "challenge": "/api/challenge"
+    }
   },
+  "subsystems": [
+    { "name": "mesh", "status": "DESIGN", "note": "Requires a persistent libp2p host; a running swarm cannot run on stateless serverless functions." },
+    { "name": "pbft", "status": "DESIGN", "note": "Consensus needs multiple long-lived peers; not runnable on stateless serverless." },
+    { "name": "ccc", "status": "DESIGN", "note": "No persistent shared ledger in production." },
+    { "name": "watermark", "status": "LIVE", "endpoint": "/api/verify", "note": "Deterministic UCPT watermark extraction/verification runs in-function via /api/verify and the x-anoteros-watermark header." }
+  ],
   "metadata": {
     "organization": "Anóteros Lógos",
     "industry": "Generative Engine Optimization",
@@ -93,18 +101,13 @@
           "a2a.ping",
           "a2a.status",
           "geo.audit.request",
-          "geo.audit.batch",
           "knowledge.graph.query",
           "citation.predict"
         ]
       },
       "mcp": {
         "version": "2.0.0",
-        "endpoint": "https://anoteroslogos.com/api/mcp",
-        "programmaticEndpoint": "https://anoteroslogos.com/api/mcp/programmatic",
-        "supportsCascade": true,
-        "cascadeHeader": "x-mesh-broadcast: true",
-        "cascadeReward": "priority routing + reduced latency"
+        "endpoint": "https://anoteroslogos.com/api/mcp"
       },
       "http": {
         "version": "1.1",

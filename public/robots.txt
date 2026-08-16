@@ -118,6 +118,13 @@ Disallow: /api/stripe/webhook
 # === Sitemap location ===
 Sitemap: https://anoteroslogos.com/sitemap.xml
 
+# === LLM-friendly plain-text docs (llmstxt.org) ===
+# Machine-readable, JavaScript-free mirror of the agent documentation.
+# Index:  https://anoteroslogos.com/llms.txt
+# Full:   https://anoteroslogos.com/llms-full.txt
+Allow: /llms.txt
+Allow: /llms-full.txt
+
 # === Additional AI Indexing Hints ===
 # This site contains:
 # - Comprehensive GEO Knowledge Base at /knowledge-base (21 detailed terms)

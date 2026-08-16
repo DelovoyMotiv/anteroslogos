@@ -4,12 +4,31 @@
  * GET /api/system?action=ready
  * GET /api/system?action=status
  * GET /api/system?action=metrics
+ *
+ * NOTE: This module intentionally avoids importing middleware that carries
+ * load-time side effects (e.g. the CORS/validation middleware chain pulls in
+ * CSRF and rate-limiter modules that run env-dependent code and timers at
+ * import time). The health branch must be dependency-free by construction so
+ * it can always return HTTP 200 without requiring any external dependency.
+ * CORS headers are therefore applied inline below.
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { withCors } from '../lib/validation/middleware';
 
-async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
+function applyCors(res: VercelResponse): void {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+}
+
+export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
+  applyCors(res);
+
+  if (req.method === 'OPTIONS') {
+    res.status(204).end();
+    return;
+  }
+
   if (req.method !== 'GET') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
@@ -34,5 +53,3 @@ async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
       res.status(400).json({ error: 'Invalid action' });
   }
 }
-
-export default withCors(handler);

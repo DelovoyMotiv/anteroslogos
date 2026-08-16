@@ -2,43 +2,114 @@
   "version": "1.1.0",
   "protocol": "A2A v1.0",
   "advanced_tool_use": "2025-11-20",
+  "capabilitiesUrl": "/api/capabilities",
   "tools": [
     {
       "type": "function",
       "function": {
-        "name": "execute_code",
-        "description": "Execute JavaScript code in isolated sandbox with pre-bound tool functions. Supports async/await and parallel tool calls. Requires anthropic-beta: advanced-tool-use-2025-11-20 header.",
+        "name": "auditSite",
+        "description": "Run a comprehensive GEO/SEO site audit for AI visibility analysis. Alias: anoteros_logos. Executes via the MCP transport at /api/mcp.",
         "parameters": {
           "type": "object",
           "properties": {
-            "code": {
+            "url": {
               "type": "string",
-              "description": "JavaScript code to execute. Available bindings: call_tool(name, params), get_causal_path(query), get_ucpt_proof()"
-            },
-            "timeout": {
-              "type": "number",
-              "description": "Execution timeout in milliseconds (max 60000)"
+              "description": "The website URL to audit."
             }
           },
-          "required": ["code"]
-        },
-        "input_examples": [
-          {"code": "const result = await call_tool('auditSite', {url: 'https://example.com'}); return result.score;"},
-          {"code": "const [graph, citation] = await Promise.all([call_tool('getGraph', {url: 'https://site.com'}), call_tool('predictCitation', {url: 'https://site.com', platform: 'Claude'})]); return {graph, citation};"},
-          {"code": "const path = await get_causal_path('machine learning best practices'); const proof = await get_ucpt_proof(); return {path, proof};", "timeout": 45000}
-        ]
+          "required": ["url"]
+        }
       }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "getGraph",
+        "description": "Build a knowledge graph with entities and relationships from a page. Executes via the MCP transport at /api/mcp.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "The website URL to extract a knowledge graph from."
+            }
+          },
+          "required": ["url"]
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "predictCitation",
+        "description": "Predict citation probability across AI platforms for a page. Executes via the MCP transport at /api/mcp.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "The website URL to score."
+            },
+            "platform": {
+              "type": "string",
+              "description": "Target AI platform (e.g. Claude, ChatGPT, Perplexity)."
+            }
+          },
+          "required": ["url"]
+        }
+      }
+    }
+  ],
+  "designTools": [
+    {
+      "name": "code_execution",
+      "status": "DESIGN",
+      "note": "Sandboxed code execution (isolated-vm). Requires a native binding unavailable in production serverless; not callable."
+    },
+    {
+      "name": "synthesizeNode",
+      "status": "DESIGN",
+      "note": "Design-stage tool; no production-runnable implementation."
+    },
+    {
+      "name": "causal_citation_trace",
+      "status": "DESIGN",
+      "note": "Design-stage tool; no production-runnable implementation."
+    },
+    {
+      "name": "predictive_synthesis",
+      "status": "DESIGN",
+      "note": "Design-stage tool; no production-runnable implementation."
+    },
+    {
+      "name": "federated_authority_boost",
+      "status": "DESIGN",
+      "note": "Requires a live peer mesh; unavailable in production serverless."
     }
   ],
   "endpoints": {
     "toolSearch": "/api/tools/search",
-    "programmaticExecution": "/api/mcp/programmatic"
+    "mcp": "/api/mcp",
+    "capabilities": "/api/capabilities",
+    "verify": "/api/verify"
   },
+  "identity": {
+    "scheme": "aip://",
+    "endpoint": "/api/auth",
+    "legacyAliases": {
+      "note": "Legacy AID transition aliases; delegate to the canonical /api/auth AIP identity service. Not the canonical identity path.",
+      "generate": "/api/public-aid",
+      "challenge": "/api/challenge"
+    }
+  },
+  "subsystems": [
+    { "name": "mesh", "status": "DESIGN", "note": "Requires a persistent libp2p host; a running swarm cannot run on stateless serverless functions." },
+    { "name": "pbft", "status": "DESIGN", "note": "Consensus needs multiple long-lived peers; not runnable on stateless serverless." },
+    { "name": "ccc", "status": "DESIGN", "note": "No persistent shared ledger in production." },
+    { "name": "watermark", "status": "LIVE", "endpoint": "/api/verify", "note": "Deterministic UCPT watermark extraction/verification runs in-function via /api/verify." }
+  ],
   "features": {
     "deferToolLoading": true,
-    "betaCompatibility": ["advanced-tool-use-2025-11-20"],
-    "supportsCascade": true,
-    "cascadeHeader": "x-mesh-broadcast: true",
-    "cascadeReward": "priority routing + reduced latency"
+    "betaCompatibility": ["advanced-tool-use-2025-11-20"]
   }
 }
