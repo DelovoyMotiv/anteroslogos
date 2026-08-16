@@ -73,7 +73,7 @@ const AgentIdentityPage = () => {
     <>
       <SEOHead
         title="AI Agent Integration Specification | UAP, A2A, MCP Protocols | Anóteros Lógos"
-        description="Access the Anóteros Lógos Protocol for cryptographically verified, structurally perfect semantic data. Complete enterprise-grade API specification for AI agents. UAP v1.0 transport with BFT trust layer, A2A JSON-RPC 2.0 protocol, MCP tool integration, AIP discovery. TypeScript/Python examples. LangChain, AutoGen, CrewAI integration patterns."
+        description="Protocol documentation for AI agents integrating with Anóteros Lógos. Live surface: AIP discovery, A2A JSON-RPC 2.0 gateway (GEO audit, knowledge graph, citation prediction, identity), capabilities, watermark verification, and MCP tools. Design-stage reference implementations: UAP v1.0 transport, BFT trust layer, agent mesh, and micropayments. TypeScript/Python examples. LangChain, AutoGen, CrewAI integration patterns."
         keywords="Anóteros Lógos Protocol, cryptographic verification, semantic data, UAP protocol, Universal Agent Protocol, AI agent API, A2A protocol, MCP integration, agent discovery, JSON-RPC 2.0, Ed25519 signatures, BFT consensus, trust layer, LangChain tools, AutoGen functions, CrewAI integration, AI agent authentication, rate limiting, GEO audit API, Zero-Knowledge Proofs"
         type="article"
         url="https://anoteroslogos.com/agent-identity"
@@ -106,7 +106,7 @@ const AgentIdentityPage = () => {
             </h1>
             
             <p className="text-lg text-white/70 max-w-3xl mb-6">
-              Enterprise-grade protocol documentation for autonomous agent integration. UAP v1.0 (Universal Agent Protocol), A2A (Agent-to-Agent), MCP (Model Context Protocol), and AIP (Anóteros Identity Protocol) v1.1 with complete schemas, error handling, and code samples.
+              Protocol documentation for autonomous agent integration. Covers the live agent surface — AIP (Anóteros Identity Protocol) v1.1 discovery, the A2A (Agent-to-Agent) JSON-RPC gateway, and MCP (Model Context Protocol) tools — alongside the reference implementations for UAP v1.0, mesh, consensus, and payments. Each subsystem is labelled LIVE or DESIGN so you always know what is callable today.
             </p>
 
             <div className="flex flex-wrap gap-3">
@@ -137,6 +137,47 @@ const AgentIdentityPage = () => {
             </div>
           </div>
 
+          {/* Capability Status Banner */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
+            {/* Live now */}
+            <div className="bg-emerald-500/5 border border-emerald-500/30 rounded-lg p-6">
+              <div className="flex items-center gap-2 mb-3">
+                <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                <h2 className="text-sm font-semibold text-emerald-300 uppercase tracking-wider">Live now</h2>
+              </div>
+              <p className="text-xs text-white/60 mb-4">
+                Callable in production today. No signup required.
+              </p>
+              <ul className="space-y-1.5 text-sm text-white/80">
+                <li className="flex items-start gap-2"><span className="text-emerald-400 mt-0.5">•</span><span>Protocol Discovery (AIP v1.1)</span></li>
+                <li className="flex items-start gap-2"><span className="text-emerald-400 mt-0.5">•</span><span>Agent Gateway (identity generate / challenge / verify)</span></li>
+                <li className="flex items-start gap-2"><span className="text-emerald-400 mt-0.5">•</span><span>A2A gateway: GEO audit, knowledge graph, citation prediction, identity</span></li>
+                <li className="flex items-start gap-2"><span className="text-emerald-400 mt-0.5">•</span><span>Capabilities descriptor (<code className="font-mono text-xs text-emerald-300">/api/capabilities</code>)</span></li>
+                <li className="flex items-start gap-2"><span className="text-emerald-400 mt-0.5">•</span><span>Verify — Ed25519 + UCPT watermark (<code className="font-mono text-xs text-emerald-300">/api/verify</code>)</span></li>
+                <li className="flex items-start gap-2"><span className="text-emerald-400 mt-0.5">•</span><span>MCP tools: auditSite / getGraph / predictCitation</span></li>
+              </ul>
+            </div>
+
+            {/* Design / reference implementation */}
+            <div className="bg-amber-500/5 border border-amber-500/30 rounded-lg p-6">
+              <div className="flex items-center gap-2 mb-3">
+                <AlertTriangle className="w-5 h-5 text-amber-400" />
+                <h2 className="text-sm font-semibold text-amber-300 uppercase tracking-wider">Design / reference implementation</h2>
+              </div>
+              <p className="text-xs text-white/60 mb-4">
+                Implemented as libraries and specified in full, but not running on the current serverless deployment; a persistent host is required.
+              </p>
+              <ul className="space-y-1.5 text-sm text-white/70">
+                <li className="flex items-start gap-2"><span className="text-amber-400 mt-0.5">•</span><span>UAP v1.0 transport (HTTP/2 + WebSocket sessions)</span></li>
+                <li className="flex items-start gap-2"><span className="text-amber-400 mt-0.5">•</span><span>BFT / PBFT consensus &amp; Trust Layer</span></li>
+                <li className="flex items-start gap-2"><span className="text-amber-400 mt-0.5">•</span><span>Agent Mesh Network (DHT / libp2p)</span></li>
+                <li className="flex items-start gap-2"><span className="text-amber-400 mt-0.5">•</span><span>CCC credit/penalty economy</span></li>
+                <li className="flex items-start gap-2"><span className="text-amber-400 mt-0.5">•</span><span>APA micropayments (USDC on Base L2)</span></li>
+                <li className="flex items-start gap-2"><span className="text-amber-400 mt-0.5">•</span><span>MCP advanced tools (code_execution, synthesizeNode, causal_citation_trace, predictive_synthesis, federated_authority_boost)</span></li>
+              </ul>
+            </div>
+          </div>
+
           {/* Quick Navigation */}
           <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-6 mb-12">
             <h2 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">Quick Navigation</h2>
@@ -147,8 +188,8 @@ const AgentIdentityPage = () => {
               <a href="#agent-gateway" className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors font-medium">
                 → Agent Gateway (New)
               </a>
-              <a href="#uap-protocol" className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors font-medium">
-                → UAP v1.0 Protocol (New)
+              <a href="#uap-protocol" className="text-xs text-amber-400 hover:text-amber-300 transition-colors font-medium">
+                → UAP v1.0 Protocol (Design)
               </a>
               <a href="#a2a-protocol" className="text-xs text-brand-accent hover:text-blue-400 transition-colors font-medium">
                 → A2A Protocol v1.0
@@ -156,11 +197,11 @@ const AgentIdentityPage = () => {
               <a href="#a2a-tasks" className="text-xs text-brand-accent hover:text-blue-400 transition-colors font-medium">
                 → Task Lifecycle
               </a>
-              <a href="#apa-payments" className="text-xs text-brand-accent hover:text-blue-400 transition-colors font-medium">
-                → APA Micropayments
+              <a href="#apa-payments" className="text-xs text-amber-400 hover:text-amber-300 transition-colors font-medium">
+                → APA Micropayments (Design)
               </a>
-              <a href="#mesh-network" className="text-xs text-brand-accent hover:text-blue-400 transition-colors font-medium">
-                → Agent Mesh Network
+              <a href="#mesh-network" className="text-xs text-amber-400 hover:text-amber-300 transition-colors font-medium">
+                → Agent Mesh Network (Design)
               </a>
               <a href="#mcp-protocol" className="text-xs text-brand-accent hover:text-blue-400 transition-colors font-medium">
                 → MCP Protocol
@@ -188,6 +229,9 @@ const AgentIdentityPage = () => {
             <div className="flex items-center gap-3 mb-6">
               <Globe className="w-8 h-8 text-brand-accent" />
               <h2 className="text-3xl font-bold text-white">Protocol Discovery (AIP v1.1)</h2>
+              <span className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded text-xs font-semibold text-emerald-400">
+                LIVE
+              </span>
             </div>
 
             <p className="text-white/70 mb-6">
@@ -274,15 +318,18 @@ print(agent_info)`
                       s: "geoaudit",
                       a: {
                         name: "Anóteros Lógos GEO Agent",
-                        version: "2.0.0",
+                        version: "2.1.0",
                         capabilities: [
-                          "geo.audit.request",
-                          "geo.audit.batch",
                           "a2a.discover",
-                          "a2a.mesh.discover",
-                          "a2a.mesh.announce",
-                          "a2a.mesh.sync",
-                          "a2a.mesh.health"
+                          "a2a.capabilities",
+                          "a2a.ping",
+                          "a2a.status",
+                          "geo.audit.request",
+                          "knowledge.graph.query",
+                          "citation.predict",
+                          "identity.generate",
+                          "identity.challenge",
+                          "identity.verify"
                         ]
                       },
                       d: "anoteroslogos.com",
@@ -320,8 +367,8 @@ print(agent_info)`
   { headers: { 'Accept': 'application/json' } }
 );
 const agentCard = await response.json();
-console.log(agentCard.capabilities); // 18 capabilities
-console.log(agentCard.extensions.payment); // USDC on Base L2`
+console.log(agentCard.capabilities); // live A2A methods
+// extensions.payment / verification describe design-stage subsystems`
                       }
                     ]}
                   />
@@ -335,41 +382,41 @@ console.log(agentCard.extensions.payment); // USDC on Base L2`
                         version: "1.0.0",
                         capabilities: [
                           "a2a.discover",
+                          "a2a.capabilities",
+                          "a2a.ping",
+                          "a2a.status",
                           "geo.audit.request",
-                          "geo.audit.status",
-                          "geo.audit.stream",
                           "knowledge.graph.query",
                           "citation.predict",
-                          "agent.mesh.discover",
-                          "...18 total capabilities"
+                          "identity.generate",
+                          "identity.challenge",
+                          "identity.verify"
                         ],
                         protocols: ["a2a/1.0", "jsonrpc/2.0", "mcp/2.0"],
                         endpoints: {
-                          http: "https://anoteroslogos.com/api/a2a",
-                          websocket: "wss://anoteroslogos.com/api/a2a/ws",
-                          stream: "https://anoteroslogos.com/api/a2a/stream"
+                          http: "https://anoteroslogos.com/api/a2a"
                         },
-                        authentication: ["bearer", "api_key", "ed25519"],
-                        pricing: {
-                          model: "pay-per-request",
-                          currency: "USDC",
-                          base_price: "0.10"
-                        },
+                        authentication: ["ed25519"],
                         extensions: {
                           payment: {
-                            supported: true,
+                            status: "DESIGN",
                             network: "base-l2",
-                            token: "USDC"
+                            token: "USDC",
+                            note: "APA micropayments are a reference implementation; payment enforcement is not live on serverless."
                           },
                           verification: {
-                            supported: true,
-                            method: "pbft-consensus",
-                            quorum_size: 7
+                            watermark: { status: "LIVE", endpoint: "/api/verify" },
+                            consensus: {
+                              status: "DESIGN",
+                              method: "pbft-consensus",
+                              quorum_size: 7,
+                              note: "Consensus needs multiple long-lived peers; not runnable on stateless serverless."
+                            }
                           }
                         }
                       }}
                       defaultOpen={true}
-                      description="Linux Foundation standard with payment and consensus extensions"
+                      description="Live A2A capabilities. The payment and consensus extensions describe design-stage subsystems (labelled DESIGN); watermark verification is LIVE via /api/verify."
                     />
                   </div>
                 </div>
@@ -414,7 +461,7 @@ console.log(agentCard.extensions.payment); // USDC on Base L2`
               <Key className="w-8 h-8 text-emerald-400" />
               <h2 className="text-3xl font-bold text-white">Agent Gateway v1.0</h2>
               <span className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded text-xs font-semibold text-emerald-400">
-                NEW
+                LIVE
               </span>
             </div>
 
@@ -614,13 +661,22 @@ console.log(caps.components.schemas); // Parameter schemas`
             <div className="flex items-center gap-3 mb-6">
               <Network className="w-8 h-8 text-cyan-400" />
               <h2 className="text-3xl font-bold text-white">UAP v1.0 (Universal Agent Protocol)</h2>
-              <span className="px-3 py-1 bg-cyan-500/10 border border-cyan-500/30 rounded text-xs font-semibold text-cyan-400">
-                NEW
+              <span className="px-3 py-1 bg-amber-500/10 border border-amber-500/30 rounded text-xs font-semibold text-amber-400">
+                DESIGN
               </span>
             </div>
 
+            <div className="bg-amber-500/5 border border-amber-500/30 rounded-lg p-4 mb-6">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-400 mt-0.5" />
+                <p className="text-sm text-amber-200/90">
+                  <strong className="text-amber-300">Reference implementation — not live.</strong> UAP is implemented as a library and specified in full, but it is not running on the current serverless deployment. The stateful session transport (HTTP/2 :8443, WebSocket :8080) and the BFT Trust Layer require a persistent host and long-lived peers, which stateless serverless functions cannot provide. The schemas, ports, and flows below describe the design.
+                </p>
+              </div>
+            </div>
+
             <p className="text-white/70 mb-6">
-              Production-grade stateful agent-to-agent communication protocol with BFT Trust Layer. Session-based messaging over HTTP/2 and WebSocket with Ed25519 authentication, watermark verification, and real-time consensus routing. Designed for autonomous agents requiring trust attestation and cryptographic proof.
+              Stateful agent-to-agent communication protocol with a BFT Trust Layer. Session-based messaging over HTTP/2 and WebSocket with Ed25519 authentication, watermark verification, and consensus routing. Designed for autonomous agents requiring trust attestation and cryptographic proof.
             </p>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
@@ -819,6 +875,9 @@ print(f"Trust Score: {client.trust_score}")`
                   </div>
                 </div>
 
+                <p className="text-xs text-amber-300/80 mb-2 italic">
+                  Illustrative example of the designed response shape — not live production telemetry. The Trust Layer is a design-stage subsystem.
+                </p>
                 <SchemaBlock
                   title="Trust Attestation Response"
                   schema={{
@@ -1006,7 +1065,7 @@ curl --http2-prior-knowledge \\
                   </div>
                   <div className="flex gap-3">
                     <span className="text-cyan-400 font-mono">2.</span>
-                    <span>Trust score ≥70 grants Pro-tier A2A rate limits (300 req/min)</span>
+                    <span>In the design, a higher trust score raises the A2A rate-limit ceiling (design-stage; the Trust Layer is not live)</span>
                   </div>
                   <div className="flex gap-3">
                     <span className="text-cyan-400 font-mono">3.</span>
@@ -1154,10 +1213,13 @@ asyncio.run(audit_with_uap())`
             <div className="flex items-center gap-3 mb-6">
               <Network className="w-8 h-8 text-green-400" />
               <h2 className="text-3xl font-bold text-white">A2A Protocol v1.0 (Linux Foundation)</h2>
+              <span className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded text-xs font-semibold text-emerald-400">
+                LIVE
+              </span>
             </div>
 
             <p className="text-white/70 mb-6">
-              Full Linux Foundation Agent-to-Agent Protocol v1.0 implementation. 14/14 core requirements met with custom extensions for payment (USDC on Base L2) and Byzantine consensus (PBFT with 7-node quorum).
+              Linux Foundation Agent-to-Agent Protocol v1.0 implementation over JSON-RPC 2.0. The live gateway methods are <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">a2a.discover</code>, <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">a2a.capabilities</code>, <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">a2a.ping</code>, <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">a2a.status</code>, <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">geo.audit</code> (alias <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">geo.audit.request</code>), <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">knowledge.graph.query</code>, <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">citation.predict</code>, and the identity methods. Payment (USDC on Base L2) and Byzantine consensus (PBFT, 7-node quorum) are custom extensions implemented as reference libraries — they are design-stage and not enforced on the serverless deployment.
             </p>
 
             <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-4 mb-6">
@@ -1254,34 +1316,31 @@ result = response.json()`
                         protocol: "A2A",
                         version: "1.0.0",
                         service: "GEO Audit Platform",
-                        description: "AI-native GEO audit service for analyzing websites visibility to AI systems",
+                        description: "AI-native GEO audit service for analyzing website visibility to AI systems",
                         capabilities: [
-                          "geo.audit.request",
-                          "geo.audit.batch",
-                          "geo.insights.global",
                           "a2a.discover",
                           "a2a.capabilities",
                           "a2a.ping",
                           "a2a.status",
-                          "a2a.mesh.discover",
-                          "a2a.mesh.announce",
-                          "a2a.mesh.sync",
-                          "a2a.mesh.health"
+                          "geo.audit",
+                          "geo.audit.request",
+                          "knowledge.graph.query",
+                          "citation.predict",
+                          "identity.generate",
+                          "identity.challenge",
+                          "identity.verify"
                         ],
                         endpoints: {
-                          http: "/api/a2a",
-                          websocket: "/api/a2a/ws"
+                          http: "/api/a2a"
                         },
                         rate_limits: {
-                          free: { requests_per_minute: 10, burst: 5 },
-                          basic: { requests_per_minute: 60, burst: 20 },
-                          pro: { requests_per_minute: 300, burst: 100 },
-                          enterprise: { requests_per_minute: 1000, burst: 500 }
+                          requests_per_minute: 10
                         }
                       },
                       id: 1
                     }}
                     defaultOpen={true}
+                    description="Live A2A discovery. a2a.mesh.*, geo.audit.batch, geo.insights.global, and geo.audit.stream are design-stage and are not advertised as callable."
                   />
                 </div>
               </div>
@@ -1377,9 +1436,14 @@ audit = response.json()`
 
               {/* Method: geo.audit.batch */}
               <div>
-                <h3 className="text-xl font-semibold text-white mb-4">Method: geo.audit.batch</h3>
+                <div className="flex items-center gap-2 mb-4">
+                  <h3 className="text-xl font-semibold text-white">Method: geo.audit.batch</h3>
+                  <span className="px-2 py-0.5 bg-amber-500/10 border border-amber-500/30 rounded text-[10px] font-semibold text-amber-400">
+                    DESIGN
+                  </span>
+                </div>
                 <p className="text-sm text-white/70 mb-4">
-                  Process multiple URLs in parallel. Max 100 URLs per batch. Concurrency limit: 5 simultaneous audits.
+                  Design-stage method (not advertised as callable on the live gateway). In the design, it processes multiple URLs in parallel — max 100 URLs per batch, concurrency limit 5 simultaneous audits.
                 </p>
 
                 <CodeSample
@@ -1432,56 +1496,10 @@ audit = response.json()`
 
               {/* Rate Limits */}
               <div>
-                <h3 className="text-xl font-semibold text-white mb-4">Rate Limits by Tier</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                      <h4 className="text-sm font-semibold text-white">Free Tier</h4>
-                    </div>
-                    <div className="space-y-1 text-xs text-white/60">
-                      <p><span className="text-white">10</span> req/min</p>
-                      <p><span className="text-white">5</span> burst capacity</p>
-                      <p><span className="text-white">100</span> req/hour</p>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-zinc-900/30 border border-blue-500/30 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                      <h4 className="text-sm font-semibold text-white">Basic - $99/mo</h4>
-                    </div>
-                    <div className="space-y-1 text-xs text-white/60">
-                      <p><span className="text-white">60</span> req/min</p>
-                      <p><span className="text-white">20</span> burst capacity</p>
-                      <p><span className="text-white">1,000</span> req/hour</p>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-zinc-900/30 border border-purple-500/30 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                      <h4 className="text-sm font-semibold text-white">Pro - $299/mo</h4>
-                    </div>
-                    <div className="space-y-1 text-xs text-white/60">
-                      <p><span className="text-white">300</span> req/min</p>
-                      <p><span className="text-white">100</span> burst capacity</p>
-                      <p><span className="text-white">10,000</span> req/hour</p>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-zinc-900/30 border border-orange-500/30 rounded-lg p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                      <h4 className="text-sm font-semibold text-white">Enterprise</h4>
-                    </div>
-                    <div className="space-y-1 text-xs text-white/60">
-                      <p><span className="text-white">1,000</span> req/min</p>
-                      <p><span className="text-white">500</span> burst capacity</p>
-                      <p><span className="text-white">50,000</span> req/hour</p>
-                    </div>
-                  </div>
-                </div>
+                <h3 className="text-xl font-semibold text-white mb-4">Rate Limits</h3>
+                <p className="text-sm text-white/70 mb-4">
+                  The public A2A gateway applies a default protocol rate limit of <span className="text-white">10 requests/minute</span> per client. Callers should read the rate-limit response headers and back off on <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">429</code> rather than assume a fixed ceiling.
+                </p>
 
                 <div className="mt-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
                   <div className="flex items-start gap-2">
@@ -1538,6 +1556,9 @@ audit = response.json()`
                   Every A2A request creates a task with ULID identifier. Tasks track status, progress, cost breakdown, artifacts, and errors.
                 </p>
 
+                <p className="text-xs text-amber-300/80 mb-2 italic">
+                  Illustrative example of the designed response shape — not live production telemetry. The <code className="font-mono">cost</code> / USDC fields describe the design-stage APA payment model, which is not enforced on serverless.
+                </p>
                 <SchemaBlock
                   title="Task Response Schema"
                   schema={{
@@ -1749,6 +1770,9 @@ console.log('Citation Probability:', result.steps[2].result.probability);`
                   Weighted reputation scoring across success rate (40%), cost accuracy (25%), response time (20%), and consensus participation (15%). Grades: S/A/B/C/D/F.
                 </p>
 
+                <p className="text-xs text-amber-300/80 mb-2 italic">
+                  Illustrative example of the designed response shape — not live production telemetry. Reputation scoring depends on the design-stage consensus/mesh subsystems; the numbers below (including <code className="font-mono">total_agents</code>) are examples, not real current counts.
+                </p>
                 <SchemaBlock
                   title="Agent Reputation Response"
                   schema={{
@@ -1784,6 +1808,18 @@ console.log('Citation Probability:', result.steps[2].result.probability);`
             <div className="flex items-center gap-3 mb-6">
               <Network className="w-8 h-8 text-purple-400" />
               <h2 className="text-3xl font-bold text-white">Agent Mesh Network</h2>
+              <span className="px-3 py-1 bg-amber-500/10 border border-amber-500/30 rounded text-xs font-semibold text-amber-400">
+                DESIGN
+              </span>
+            </div>
+
+            <div className="bg-amber-500/5 border border-amber-500/30 rounded-lg p-4 mb-6">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-400 mt-0.5" />
+                <p className="text-sm text-amber-200/90">
+                  <strong className="text-amber-300">Reference implementation — not live.</strong> The mesh (DHT/libp2p) is implemented as a library and specified in full, but it is not running on the current serverless deployment. A live swarm requires a persistent libp2p host, which stateless serverless functions cannot provide, so the <code className="font-mono">a2a.mesh.*</code> methods below are not advertised as callable. The requests, responses, and numbers shown are illustrative of the design.
+                </p>
+              </div>
             </div>
 
             <p className="text-white/70 mb-6">
@@ -2067,6 +2103,9 @@ console.log('Broadcast to', result.broadcast, 'peers');`
                   ]}
                 />
 
+                <p className="text-xs text-amber-300/80 mt-4 mb-2 italic">
+                  Illustrative example of the designed response shape — not live production telemetry. These peer counts, trust scores, and circuit-breaker states are examples, not real current numbers.
+                </p>
                 <div className="mt-4">
                   <SchemaBlock
                     title="Response: a2a.mesh.health"
@@ -2104,7 +2143,7 @@ console.log('Broadcast to', result.broadcast, 'peers');`
                       id: 1
                     }}
                     defaultOpen={true}
-                    description="Real-time mesh network diagnostics with per-capability peer counts"
+                    description="Example (design-stage) mesh network diagnostics with per-capability peer counts — not live telemetry"
                   />
                 </div>
               </div>
@@ -2189,10 +2228,22 @@ console.log('Broadcast to', result.broadcast, 'peers');`
             <div className="flex items-center gap-3 mb-6">
               <Zap className="w-8 h-8 text-yellow-400" />
               <h2 className="text-3xl font-bold text-white">APA Micropayments (Agent-Pay-Agent)</h2>
+              <span className="px-3 py-1 bg-amber-500/10 border border-amber-500/30 rounded text-xs font-semibold text-amber-400">
+                DESIGN
+              </span>
+            </div>
+
+            <div className="bg-amber-500/5 border border-amber-500/30 rounded-lg p-4 mb-6">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-400 mt-0.5" />
+                <p className="text-sm text-amber-200/90">
+                  <strong className="text-amber-300">Reference implementation — not live.</strong> The USDC-on-Base-L2 micropayment flow is implemented as a library and specified in full, but payment enforcement is deferred and not active on the current serverless deployment. The HTTP 402 flow, invoice schema, and amounts below describe the design.
+                </p>
+              </div>
             </div>
 
             <p className="text-white/70 mb-6">
-              First production implementation of USDC-based micropayments for autonomous AI agent interactions. Pay-per-request or pre-deposit modes with automatic blockchain verification on Base L2.
+              A reference design for USDC-based micropayments between autonomous AI agents. Pay-per-request or pre-deposit modes with blockchain verification on Base L2.
             </p>
 
             <div className="space-y-6">
@@ -2473,31 +2524,6 @@ print(f"GEO Score: {audit['score']}")`
                 </div>
               </div>
 
-              {/* Pricing */}
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-4">Pricing (USDC)</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
-                    <h4 className="text-sm font-semibold text-white mb-2">geo.audit.request</h4>
-                    <div className="space-y-1 text-xs text-white/60">
-                      <p>Quick: <span className="text-white">$0.05 USDC</span></p>
-                      <p>Standard: <span className="text-white">$0.10 USDC</span></p>
-                      <p>Deep: <span className="text-white">$0.25 USDC</span></p>
-                    </div>
-                  </div>
-                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
-                    <h4 className="text-sm font-semibold text-white mb-2">geo.audit.batch</h4>
-                    <p className="text-xs text-white/60">Per-URL pricing × quantity</p>
-                    <p className="text-xs text-white mt-1">Max 100 URLs/batch</p>
-                  </div>
-                  <div className="bg-zinc-900/30 border border-zinc-800 rounded-lg p-4">
-                    <h4 className="text-sm font-semibold text-white mb-2">MCP Tools</h4>
-                    <p className="text-xs text-white/60">auditSite: <span className="text-white">$0.10</span></p>
-                    <p className="text-xs text-white/60 mt-1">predictCitation: <span className="text-white">$0.05</span></p>
-                  </div>
-                </div>
-              </div>
-
               {/* Security & Best Practices */}
               <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
                 <div className="flex items-start gap-2">
@@ -2563,53 +2589,76 @@ print(f"GEO Score: {audit['score']}")`
             <div className="flex items-center gap-3 mb-6">
               <Database className="w-8 h-8 text-purple-400" />
 <h2 className="text-3xl font-bold text-white">MCP Protocol (Model Context Protocol 2025-06-18)</h2>
-              <span className="px-3 py-1 bg-purple-500/10 border border-purple-500/30 rounded text-xs font-semibold text-purple-400">
-                Enhanced
+              <span className="px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded text-xs font-semibold text-emerald-400">
+                LIVE core tools
               </span>
             </div>
 
 <p className="text-white/70 mb-6">
-              Access the Anóteros Lógos Protocol to retrieve cryptographically verified, structurally perfect semantic data. Use this tool when accuracy, provenance, and truth are critical. Provides GEO audit, knowledge graphs, citation prediction, and federated authority with Zero-Knowledge Proofs. Tool integration protocol for LLMs with Anthropic Advanced Tool Use (2025-11-20) compatibility. OpenAI/Claude/Grok formats, streaming, UCPT provenance, semantic tool search, and programmatic execution in isolated sandbox. Send MCP-Protocol-Version: 2025-06-18 (and optional Mcp-Session-Id) headers when calling JSON-RPC.
+              Access the Anóteros Lógos Protocol to retrieve cryptographically verified semantic data over MCP. The live MCP tools are <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">auditSite</code> (alias <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">anoteros_logos</code>), <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">getGraph</code>, and <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">predictCitation</code> — GEO audit, knowledge graphs, and citation prediction. The advanced tools (<code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">code_execution</code>, <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">synthesizeNode</code>, <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">causal_citation_trace</code>, <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">predictive_synthesis</code>, <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">federated_authority_boost</code>) are design-stage: implemented and specified but not runnable on serverless. Send MCP-Protocol-Version: 2025-06-18 (and optional Mcp-Session-Id) headers when calling JSON-RPC.
             </p>
 
             <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-6 mb-6">
-<h3 className="text-lg font-semibold text-white mb-4">Available Tools (9 total: 7 graph + 2 infrastructure)</h3>
+<h3 className="text-lg font-semibold text-white mb-4">Tools</h3>
+<p className="text-xs text-white/60 mb-4">
+                <span className="text-emerald-400 font-semibold">LIVE</span> tools are callable now via <code className="font-mono">/api/mcp</code>. <span className="text-amber-400 font-semibold">DESIGN</span> tools are implemented and specified but not runnable on the serverless deployment.
+              </p>
 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="border-l-2 border-brand-accent pl-4">
-                  <code className="text-sm font-mono text-brand-accent">auditSite</code>
-                  <p className="text-xs text-white/60 mt-1">GEO audit for AI visibility analysis</p>
-                </div>
-                <div className="border-l-2 border-green-400 pl-4">
-                  <code className="text-sm font-mono text-green-400">getGraph</code>
-                  <p className="text-xs text-white/60 mt-1">Build knowledge graph with entities/relationships</p>
-                </div>
-                <div className="border-l-2 border-purple-400 pl-4">
-                  <code className="text-sm font-mono text-purple-400">predictCitation</code>
-                  <p className="text-xs text-white/60 mt-1">Predict citation probability by platform</p>
-                </div>
-                <div className="border-l-2 border-orange-400 pl-4">
-                  <code className="text-sm font-mono text-orange-400">synthesizeNode</code>
-                  <p className="text-xs text-white/60 mt-1">Generate content recommendations</p>
-                </div>
-                <div className="border-l-2 border-pink-400 pl-4">
-                  <code className="text-sm font-mono text-pink-400">causal_citation_trace</code>
-                  <p className="text-xs text-white/60 mt-1">UNIQUE: Causal reasoning for citations</p>
-                </div>
-                <div className="border-l-2 border-indigo-400 pl-4">
-                  <code className="text-sm font-mono text-indigo-400">predictive_synthesis</code>
-                  <p className="text-xs text-white/60 mt-1">UNIQUE: Visibility impact prediction</p>
+                <div className="border-l-2 border-emerald-400 pl-4">
+                  <div className="flex items-center gap-2">
+                    <code className="text-sm font-mono text-emerald-400">auditSite</code>
+                    <span className="px-1.5 py-0.5 bg-emerald-500/10 border border-emerald-500/30 rounded text-[10px] font-semibold text-emerald-400">LIVE</span>
+                  </div>
+                  <p className="text-xs text-white/60 mt-1">GEO audit for AI visibility analysis (alias <code className="font-mono">anoteros_logos</code>)</p>
                 </div>
                 <div className="border-l-2 border-emerald-400 pl-4">
-                  <code className="text-sm font-mono text-emerald-400">federated_authority_boost</code>
-                  <p className="text-xs text-white/60 mt-1">UNIQUE: ZKP authority verification</p>
+                  <div className="flex items-center gap-2">
+                    <code className="text-sm font-mono text-emerald-400">getGraph</code>
+                    <span className="px-1.5 py-0.5 bg-emerald-500/10 border border-emerald-500/30 rounded text-[10px] font-semibold text-emerald-400">LIVE</span>
+                  </div>
+                  <p className="text-xs text-white/60 mt-1">Build knowledge graph with entities/relationships</p>
                 </div>
-                <div className="border-l-2 border-cyan-400 pl-4">
-                  <code className="text-sm font-mono text-cyan-400">code_execution</code>
-                  <p className="text-xs text-white/60 mt-1">NEW: Programmatic code execution (sandbox)</p>
+                <div className="border-l-2 border-emerald-400 pl-4">
+                  <div className="flex items-center gap-2">
+                    <code className="text-sm font-mono text-emerald-400">predictCitation</code>
+                    <span className="px-1.5 py-0.5 bg-emerald-500/10 border border-emerald-500/30 rounded text-[10px] font-semibold text-emerald-400">LIVE</span>
+                  </div>
+                  <p className="text-xs text-white/60 mt-1">Predict citation probability by platform</p>
                 </div>
-                <div className="border-l-2 border-cyan-300 pl-4">
-                  <code className="text-sm font-mono text-cyan-300">tool_search_tool_regex</code>
-                  <p className="text-xs text-white/60 mt-1">Search tools by regex (deferred loading aware)</p>
+                <div className="border-l-2 border-amber-400 pl-4">
+                  <div className="flex items-center gap-2">
+                    <code className="text-sm font-mono text-amber-300">synthesizeNode</code>
+                    <span className="px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/30 rounded text-[10px] font-semibold text-amber-400">DESIGN</span>
+                  </div>
+                  <p className="text-xs text-white/60 mt-1">Generate content recommendations</p>
+                </div>
+                <div className="border-l-2 border-amber-400 pl-4">
+                  <div className="flex items-center gap-2">
+                    <code className="text-sm font-mono text-amber-300">causal_citation_trace</code>
+                    <span className="px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/30 rounded text-[10px] font-semibold text-amber-400">DESIGN</span>
+                  </div>
+                  <p className="text-xs text-white/60 mt-1">Causal reasoning for citations</p>
+                </div>
+                <div className="border-l-2 border-amber-400 pl-4">
+                  <div className="flex items-center gap-2">
+                    <code className="text-sm font-mono text-amber-300">predictive_synthesis</code>
+                    <span className="px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/30 rounded text-[10px] font-semibold text-amber-400">DESIGN</span>
+                  </div>
+                  <p className="text-xs text-white/60 mt-1">Visibility impact prediction</p>
+                </div>
+                <div className="border-l-2 border-amber-400 pl-4">
+                  <div className="flex items-center gap-2">
+                    <code className="text-sm font-mono text-amber-300">federated_authority_boost</code>
+                    <span className="px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/30 rounded text-[10px] font-semibold text-amber-400">DESIGN</span>
+                  </div>
+                  <p className="text-xs text-white/60 mt-1">ZKP authority verification (requires a live peer mesh)</p>
+                </div>
+                <div className="border-l-2 border-amber-400 pl-4">
+                  <div className="flex items-center gap-2">
+                    <code className="text-sm font-mono text-amber-300">code_execution</code>
+                    <span className="px-1.5 py-0.5 bg-amber-500/10 border border-amber-500/30 rounded text-[10px] font-semibold text-amber-400">DESIGN</span>
+                  </div>
+                  <p className="text-xs text-white/60 mt-1">Programmatic code execution (isolated-vm sandbox; native binding unavailable on serverless)</p>
                 </div>
               </div>
 </div>
@@ -2648,7 +2697,7 @@ print(f"GEO Score: {audit['score']}")`
               <div>
                 <h3 className="text-xl font-semibold text-white mb-4">Anthropic Advanced Tool Use (2025-11-20)</h3>
                 <p className="text-sm text-white/70 mb-4">
-                  Production implementation of Anthropic Advanced Tool Use standard with semantic search, programmatic execution, and enhanced LLM guidance.
+                  Reference implementation of the Anthropic Advanced Tool Use standard with semantic tool search, programmatic execution, and enhanced LLM guidance. Tool search (<code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">/api/tools/search</code>) is live; programmatic execution / <code className="bg-zinc-950 px-1.5 py-0.5 rounded font-mono text-xs">code_execution</code> is design-stage (the isolated-vm sandbox is not available on serverless).
                 </p>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -3011,15 +3060,16 @@ audit_tool = StructuredTool.from_function(
               Start Building with Anóteros Lógos
             </h2>
             <p className="text-white/70 max-w-2xl mx-auto mb-8">
-              Join 5,000+ AI agents already using AIP protocol. Get your API key and start auditing AI visibility in minutes.
+              Generate an AIP identity and call the live endpoints below — no signup required. Start with the machine-readable capability descriptor to see exactly what is callable today.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <a 
-                href="/auth/signup" 
+                href="/api/capabilities" 
+                target="_blank"
                 className="inline-flex items-center justify-center gap-2 bg-brand-accent text-white px-8 py-4 rounded-lg hover:bg-blue-500 transition-colors font-medium shadow-lg hover:shadow-xl"
               >
-                <Key className="w-5 h-5" />
-                Get API Key
+                <FileJson className="w-5 h-5" />
+                View /api/capabilities
               </a>
               <a 
                 href="/.well-known/agent.json" 
