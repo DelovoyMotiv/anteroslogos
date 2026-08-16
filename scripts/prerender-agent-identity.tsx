@@ -23,12 +23,30 @@ const jsdom = new JSDOM('<!doctype html><html><head></head><body></body></html>'
   url: 'https://anoteroslogos.com/agent-identity',
 });
 const g = globalThis as unknown as Record<string, unknown>;
-g.window = jsdom.window as unknown;
-g.document = jsdom.window.document;
-g.navigator = jsdom.window.navigator;
-g.HTMLElement = jsdom.window.HTMLElement;
-g.Node = jsdom.window.Node;
-g.customElements = jsdom.window.customElements;
+// Assign a global resiliently: some globals (e.g. `navigator` on Node 21+) are
+// read-only getters and a plain assignment throws. Fall back to
+// defineProperty, and if even that is not allowed, skip it (Node's built-in is
+// good enough — renderToString does not run effects/handlers anyway).
+function setGlobal(key: string, value: unknown) {
+  try {
+    g[key] = value;
+    return;
+  } catch {
+    /* read-only; try defineProperty */
+  }
+  try {
+    Object.defineProperty(globalThis, key, { value, configurable: true, writable: true });
+  } catch {
+    /* leave the runtime's built-in in place */
+  }
+}
+
+setGlobal('window', jsdom.window as unknown);
+setGlobal('document', jsdom.window.document);
+setGlobal('navigator', jsdom.window.navigator);
+setGlobal('HTMLElement', jsdom.window.HTMLElement);
+setGlobal('Node', jsdom.window.Node);
+setGlobal('customElements', jsdom.window.customElements);
 // AnimatedSection uses IntersectionObserver; provide a no-op shim.
 class IONoop {
   observe() {}
