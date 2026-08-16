@@ -35,7 +35,7 @@ import {
   getStatusCode,
 } from '../../../lib/engine/errors';
 import { logger, formatApiKey } from '../../../lib/a2a/logger';
-import { openApiSpec } from './wrap-openapi';
+import { openApiSpec } from '../../../lib/agentWrap/wrap-openapi';
 
 // ============================================================================
 // CONSTANTS

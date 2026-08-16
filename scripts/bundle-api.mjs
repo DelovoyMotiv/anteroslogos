@@ -35,8 +35,6 @@ function isExcluded(relPath) {
   if (p.includes('/__tests__/') || p.startsWith('__tests__/')) return true;
   if (p.includes('/_lib/') || p.startsWith('_lib/')) return true;
   if (p.endsWith('.d.ts') || p.endsWith('.test.ts') || p.endsWith('.spec.ts')) return true;
-  // Non-handler helper (OpenAPI spec object); excluded from deploy via .vercelignore.
-  if (p === 'v1/agent/wrap-openapi.ts') return true;
   return false;
 }
 

@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { openApiSpec } from '../wrap-openapi';
+import { openApiSpec } from '../../../../lib/agentWrap/wrap-openapi';
 
 describe('OpenAPI Documentation', () => {
   it('should have valid OpenAPI 3.0 structure', () => {

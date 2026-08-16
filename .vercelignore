@@ -34,6 +34,3 @@ api/metrics.ts
 
 # Use api/auth.ts instead
 api/handshake.ts
-
-# Exclude wrap-openapi (use wrap-with-billing instead)
-api/v1/agent/wrap-openapi.ts
