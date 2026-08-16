@@ -118,6 +118,35 @@ html = html.replace(
   /(<link\s+rel="canonical"\s+href=")[^"]*(">)/,
   `$1${CANONICAL}$2`
 );
+
+// Rewrite social / OpenGraph metadata so structured-data-first agents and LLM
+// crawlers see the AGENT page, not the homepage's boutique-studio framing.
+html = html.replace(/(<meta\s+property="og:title"\s+content=")[^"]*(">)/, `$1${TITLE}$2`);
+html = html.replace(/(<meta\s+property="og:description"\s+content=")[^"]*(">)/, `$1${DESCRIPTION}$2`);
+html = html.replace(/(<meta\s+property="og:url"\s+content=")[^"]*(">)/, `$1${CANONICAL}$2`);
+html = html.replace(/(<meta\s+name="twitter:title"\s+content=")[^"]*(">)/, `$1${TITLE}$2`);
+html = html.replace(/(<meta\s+name="twitter:description"\s+content=")[^"]*(">)/, `$1${DESCRIPTION}$2`);
+
+// Replace the homepage JSON-LD @graph (Organization/FAQPage/etc.) with an
+// agent-appropriate TechArticle so structured-data parsers describe this page
+// correctly. Only the first inline ld+json (the homepage @graph) is replaced.
+const AGENT_JSONLD = {
+  '@context': 'https://schema.org',
+  '@type': 'TechArticle',
+  headline: 'AI Agent Integration Specification',
+  name: 'Anóteros Lógos Agent API Specification',
+  url: CANONICAL,
+  description: DESCRIPTION,
+  inLanguage: 'en',
+  about: ['UAP v1.0', 'A2A Protocol', 'MCP', 'AIP', 'Ed25519', 'JSON-RPC 2.0'],
+  keywords:
+    'UAP, Universal Agent Protocol, A2A, MCP, AIP, Ed25519, agent API, JSON-RPC 2.0, agent discovery, autonomous agents',
+  isPartOf: { '@type': 'WebSite', name: 'Anóteros Lógos', url: 'https://anoteroslogos.com' },
+};
+html = html.replace(
+  /<script type="application\/ld\+json">[\s\S]*?<\/script>/,
+  `<script type="application/ld+json">${JSON.stringify(AGENT_JSONLD)}</script>`
+);
 // Inject the rendered content into the SPA mount point.
 if (!html.includes('<div id="root"></div>')) {
   console.error('[prerender] Could not find <div id="root"></div> in template.');
